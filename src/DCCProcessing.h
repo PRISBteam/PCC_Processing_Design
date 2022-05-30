@@ -1,7 +1,7 @@
 ﻿///================================ DCC Processing module =============================================================///
 ///=======================================================================================================================///
-/** The function in this library generate different quasi-random process for generation of the special elements on the    ///
-*   elements of the pre-constructed discrete sell complex (DCC) with the whole set of incidence and adjacency martices    **/
+/** The function in this library generate quasi-random process of changes in the elements of the pre-constructed          ///
+*   discrete sell complex (DCC) with the whole set of incidence and adjacency martices                                   **/
 ///=======================================================================================================================///
 
 /// Standard (STL) C++ libraries:
@@ -93,16 +93,16 @@ void HAGBsProbability3D(char* AN, char* AE, char* AF, char* AG, char* MEN, char*
     OutRWFLfile.close();
 
     ofstream OutTJsFile; // Output stream for variables related with special 1-Cells in DCC
-    OutTJsFile.open(odir + "TJsTypes.txt"s, ios::trunc);
+    OutTJsFile.open(odir + "TJsLab_TJsTypes.txt"s, ios::trunc);
     OutTJsFile << "Junctions [1-Cells] of different types" << endl;
-    OutTJsFile << "J0:\t" << "\t J1:\t" << "\t J2:\t" << "\t J3:\t" << endl;
+    OutTJsFile << "Strain\t\t" <<"J0:\t" << "\t J1:\t" << "\t J2:\t" << "\t J3:\t" << endl;
 
     ofstream OutSFile;// Output stream for configurational entropy related with 1-Cells
-    OutSFile.open(odir + "ConTJsEntropy.txt"s, ios::trunc);
-    OutSFile << "\t Configurational [1-Cells] Entropy \t" << endl;
+    OutSFile.open(odir + "TJsLab_ConTJsEntropy.txt"s, ios::trunc);
+    OutSFile << "Strain\t" <<"\t Configurational [1-Cells] Entropy \t" << endl;
 
 ////////////////////////////////////// KINETIC PROCESS ///////////////////////////////////////////////
-    if (stype == 'R') { //       Random generation case
+    if (stype == 'R') { //  Random generation case
 
 /// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen ///
         std:vector<int> configuration = confCout(config, configuration);
@@ -122,9 +122,9 @@ void HAGBsProbability3D(char* AN, char* AE, char* AF, char* AG, char* MEN, char*
         /// Numerates newly created Faces during the random generation process
         long unsigned int numerator = 0;
         /// Maximal fraction for simulation loop max_sFaces_fraction = [0,1]
-        double max_sFaces_fraction = 0.5;
+        double max_sFaces_fraction = 0.8;
         /// Step for output (structural analysis and data output will be performed after each output_step calculation steps (= number of newly converted elements))
-        int output_step = 300;
+        int output_step = 700;
 ///=============================================================================================================================================////
 /// ================= Loop over all possible fractions of special cells [0,1] =======================>
 
@@ -220,7 +220,7 @@ void HAGBsProbability3D(char* AN, char* AE, char* AF, char* AG, char* MEN, char*
                     //#include "QPsLab.h"
                 }
                 if (configuration.at(2)) { /// Edges types statistics, indices and configuration entropy
-                    EdgesStat(CellNumbs, numerator, SAM_FacesGraph, FES, odir);
+                    EdgesStat(CellNumbs, numerator, SpecialCellMap, FES, odir, special_faces_fraction);
                 }
                 if (configuration.at(3)) { // Faces types statistics and structural indices
                     //#include "FacesLab.h"
@@ -265,12 +265,234 @@ void HAGBsProbability3D(char* AN, char* AE, char* AF, char* AG, char* MEN, char*
 
     } ///End of 'R' type simulations
 
-    else if (stype == 'S') {
+///=============================================================================================================================================////
+///=============================================================================================================================================////
+/// ====================================================>  Maximum entropy production process   <========================================================////
+///=============================================================================================================================================////
+    else if (stype == 'S') { // Maximum entropy production
+/// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen ///
+        vector<int> configuration = confCout(config, configuration);
+        int number_of_types = configuration.at(0);
 
-    }
+        std::vector<bool> SpecialCells(CellNumbs.at(2), 0), OrdinaryCells(CellNumbs.at(2),1); // New vectors initialised with 0 for SpecialCells and 1 for OrdinaryCells
+        map<unsigned int,unsigned int> SpecialCellMap; // Mapping [k]->[l] from the set of all 2-Cells in the initial DCC to the set of newly generated special cells
+        map<unsigned int, unsigned int>::iterator sit; // Special iterator for this map
+        double ordinary_faces_fraction = 1.0, special_faces_fraction = 0.0;
+        std::vector<unsigned int> SpecialCellNumbs(CellNumbs.at(2), 0); // Vector of the size equal to the total number of faces in DCC initialised with '0's
+        for (unsigned int lit = 0; lit < SpecialCellNumbs.size(); lit++) SpecialCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces
+
+        /// Numerates newly created Faces during the random generation process
+        long unsigned int numerator = 0;
+
+/// The function initialize random seed from the computer time (MUST BE BEFORE THE FOR LOOP!)
+        srand (time(NULL));
+
+/// At first, random generation of small amounts about 0.05 of special seeds
+
+/////////////////////////////////  Maximum Entropy Production ///////////////////////////////////
+        do { // do{ ... }while(output_step) loop for seed points
+            int New2CellNumb = 0, NewFaceType = 1; // Only one possible Face type (binary model)
+
+            New2CellNumb = rand() % (SpecialCellNumbs.size()-1); // Random generation of the boundary number in the range from 0 to SpecialCellNumbs.size()-1
+            if (number_of_types > 1) NewFaceType = rand() % number_of_types; // Random chose for the chosen boundary to be assigned over all special types
+            OrdinaryCells.at(SpecialCellNumbs.at(New2CellNumb)) = 0; // Replace the chosen element with 0 instead of 1 in the Original Faces vector
+
+            SpecialCellMap[SpecialCellNumbs.at(New2CellNumb)] = numerator++; // Assign new elements to the map and increase numerator
+            long unsigned int sit = SpecialCellMap[SpecialCellNumbs.at(New2CellNumb)]; // Just a useful variable for the number of newly converted Face (= numerator--)
+
+            /// It is a key tricky point for the fast Random generation process: vector decreases after each turn from an ordinary to special face BUT we chose all the boundary one by one because their initial numeration stored in the SpecialCellNumbs[] vector !
+            SpecialCellNumbs.erase(SpecialCellNumbs.begin() + New2CellNumb); // !!! Delete its element from the vector decreasing its size BUT
+
+            // Special and Ordinary Faces fraction calculation
+            unsigned int OCellAmount = std::count(OrdinaryCells.begin(), OrdinaryCells.end(), 1);
+            ordinary_faces_fraction = OCellAmount / (double) CellNumbs.at(2);
+            special_faces_fraction = 1.0 - ordinary_faces_fraction;
+
+        }while(ordinary_faces_fraction > 0.95); /// End of the Random generation process
+/////////////////////////////////////////////////////////////////////////////////////////////
+        /// Maximal fraction for simulation loop max_sFaces_fraction = [0,1]
+        double max_sFaces_fraction = 0.3;
+        /// Step for output (structural analysis and data output will be performed after each output_step calculation steps (= number of newly converted elements))
+        int output_step = 70;
+///=============================================================================================================================================////
+/// ================= Loop over all possible fractions of special cells [0,1] =======================>
+        /// Creation of the sparse adjacency (SAM_FacesGraph) matrix for special Faces /// Sparse adjacency matrix from the corresponding triplet list of special faces
+        SpMat Id(numerator, numerator), SAM_FacesGraph(numerator, numerator), Face_Laplacian(numerator, numerator), Sym_Face_Laplacian(numerator, numerator), RW_Face_Laplacian(numerator, numerator);
+        SAM_FacesGraph.setFromTriplets(SFaces_Triplet_list.begin(), SFaces_Triplet_list.end());
+
+        do { // do{ ... }while(output_step) loop starting point
+            int New2CellNumb = 0, NewFaceType = 1; // Only one possible Face type (binary model)
+
+            vector<int> TJsTypes(CellNumbs.at(1)+1,0);
+            vector<double> EntropyIncreaseList(CellNumbs.at(2));
+
+            double J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
+            double Configurational_Face_Entropy = 0;
+            for(int i = 1; i < numerator; i++)
+                for(int j = 1; j < numerator; j++)
+                    if( i != j && SAM_FacesGraph.coeff(i,j) == 1) for(int k = 1; k < CellNumbs.at(1); k++) if( FES.coeff(j,k) == 1) TJsTypes.at(k)++;
+
+            J1 = std::count(TJsTypes.begin(), TJsTypes.end(), 1);
+            J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2);
+            J3 = std::count(TJsTypes.begin(), TJsTypes.end(), 3);
+            J0 = CellNumbs.at(1) - J1 - J2 - J3;
+            Jall = CellNumbs.at(1);
+// Conversion from numbers to fractions
+// (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
+            j0 = J0/Jall; j1 = J1/Jall; j2 = J2/Jall; j3 = J3/Jall;
+
+            /// Configurational Entropy related with Faces
+            Configurational_Face_Entropy = - (j0* log2(j0) + j1* log2(j1) + j2* log2(j2) + j3* log2(j3));
+
+            double J00 = 0, J0N = 0, J10 = 0, J1N = 0, J20 = 0, J2N = 0, J30 = 0, J3N = 0, CFace_EntropyIncrease = 0;
+            for (unsigned int k = 0; k < CellNumbs.at(2); k++) { //loop over all the Faces in DCC
+
+                // Loop over each element neighbours
+                TJsTypes.clear(); J00 = 0; J10 = 0; J20 = 0; J30 = 0;  J0N = 0; J1N = 0; J2N = 0; J3N = 0;
+                for(int j = 1; j < numerator; j++) // For each element loop over all his neighbours
+                        if( i != j && SAM_FacesGraph.coeff(i,j) == 1) for(int k = 1; k < CellNumbs.at(1); k++) if( FES.coeff(j,k) == 1) TJsTypes.at(k)++;
+                J00 = std::count(TJsTypes.begin(), TJsTypes.end(), 0);
+                J10 = std::count(TJsTypes.begin(), TJsTypes.end(), 1);
+                J20 = std::count(TJsTypes.begin(), TJsTypes.end(), 2);
+                J30 = std::count(TJsTypes.begin(), TJsTypes.end(), 3);
+                J0N = J00 + 1; J1N =  J10 + 1; J2N = J20 + 1; J3N = J30 + 1;
+                // The entropy increase calculation for a given Face
+                CFace_EntropyIncrease = (J0-J00+J0N) * log2(J0-J00+J0N) + (J1-J10+J1N) * log2(J1-J10+J1N) + (J2-J20+J2N) * log2(J2-J20+J2N) + (J3-J30+J3N) * log2(J3-J30+J3N);
+                EntropyIncreaseList.push_back(CFace_EntropyIncrease);
+            }
+            // Number of element giving the maximum increase in configurational entropy at its conversion
+            double CFace_max =
+            New2CellNumb = (int) *max_element(std::begin(EntropyIncreaseList), std::end(EntropyIncreaseList)); //'*' because this fuction return a pointer to the element, not the element itself
+
+            // Then all the corresponding maps chan
+            OrdinaryCells.at(SpecialCellNumbs.at(New2CellNumb)) = 0; // Replace the chosen element with 0 instead of 1 in the Original Faces vector
+            SpecialCellMap[SpecialCellNumbs.at(New2CellNumb)] = numerator++; // Assign new elements to the map and increase numerator
+            long unsigned int sit = SpecialCellMap[SpecialCellNumbs.at(New2CellNumb)]; // Just a useful variable for the number of newly converted Face (= numerator--)
+
+            /// Creation of a triplet list SFaces_Triplet_list for the sparse matrix of special faces
+            for(unsigned int j = 0; j < CellNumbs.at(2); j++) //  Loop over all the Faces in the DCC
+                if(j != sit && AFS.coeff(sit,j) == 1 && (SpecialCellMap.find(j) != SpecialCellMap.end())) // if (1) not the same element (2) we find an adjacent element (neighbour) (3)! this element already added in the special faces map (= was randomly chosen)
+                    SFaces_Triplet_list.push_back(Tr(sit,SpecialCellMap[j],1)); // then we add this element to the new Special Faces Matrix with the number {numerator, new number of the neighbour}
+
+            // Special and Ordinary Faces fraction calculation
+            unsigned int OCellAmount = std::count(OrdinaryCells.begin(), OrdinaryCells.end(), 1);
+            ordinary_faces_fraction = OCellAmount / (double) CellNumbs.at(2);
+            special_faces_fraction = 1.0 - ordinary_faces_fraction;
+
+            ///=============================================================================================================================================////
+            ///=================================== Characterisation module =============================///
+            if( OCellAmount % output_step == 0 && ordinary_faces_fraction > 0.05) { // Periodicity of characterisation output
+
+                /// Creation of the sparse adjacency (SAM_FacesGraph) matrix for special Faces /// Sparse adjacency matrix from the corresponding triplet list of special faces
+                SpMat Id(numerator, numerator), SAM_FacesGraph(numerator, numerator), Face_Laplacian(numerator, numerator), Sym_Face_Laplacian(numerator, numerator), RW_Face_Laplacian(numerator, numerator);
+                SAM_FacesGraph.setFromTriplets(SFaces_Triplet_list.begin(), SFaces_Triplet_list.end());
+
+                /// Degree vector and matrix
+                vector<unsigned int> SFace_degrees;
+                for (unsigned int i = 0; i < numerator; i++) { //columns
+                    unsigned int degree_Fcounter = 0;
+                    for (unsigned int j = 0; j < numerator; j++) { // rows
+                        if (SAM_FacesGraph.coeff(j, i) == 1 && i != j)
+                            degree_Fcounter++;
+                    }
+                    SFace_degrees.push_back(degree_Fcounter);
+                }
+                //Creation of the S-Face degree matrix
+                SpMat SFDegree(SFace_degrees.size(), SFace_degrees.size());
+                SFDegree.setIdentity();
+                unsigned int numerator_degree = 0;
+                for (double num: SFace_degrees) {
+                    SFDegree.coeffRef(numerator_degree,numerator_degree) = SFace_degrees.at(numerator_degree);
+                    numerator_degree++;
+                }
+                /// Identity matrix
+                Id.setIdentity();
+                /// Special Faces Laplacian matrix
+                Face_Laplacian = SFDegree - SAM_FacesGraph;
+                // Symmetric S-Faces Laplacian [D^-1/2 L ]
+                /// Left Random-Walk normalized Laplacian matrix
+                RW_Face_Laplacian = Id - SFDegree.cwiseInverse() * SAM_FacesGraph;
+
+                /// Output to file Special Faces Laplacian matrix
+                OutFaceFile.open(odir + "FaceAdjacency.txt"s, ios::trunc);
+                OutFaceFile<< "Adjacency Matrix of all Special Faces" << endl;
+                OutFaceFile << endl << "Special Faces fraction is equal to\t " << special_faces_fraction  << endl << endl;                 // Output of special_faces_fraction to files
+                OutFaceFile << SAM_FacesGraph << endl;
+                //  Dense matrix output:      OutFaceFile << MatrixXd(SAM_FacesGraph) << endl;
+                OutFaceFile.close();
+
+                OutFLfile.open(odir + "FaceLaplacian.txt"s, ios::trunc);
+                OutFLfile<< "Laplacian Matrix of all Special Faces" << endl;
+                OutFLfile << endl << "Special Faces fraction is equal to\t " << special_faces_fraction  << endl << endl;
+                OutFLfile << Face_Laplacian << endl;
+                // Dense matrix output:        OutFLfile << MatrixXd(Face_Laplacian) << endl;
+                OutFLfile.close();
+
+                OutRWFLfile.open(odir + "RWFaceLaplacian"s, ios::trunc);
+                OutRWFLfile<< "Random Walker Laplacian Matrix of all Special Faces" << endl;
+                OutRWFLfile << endl << "Special Faces fraction is equal to\t " << special_faces_fraction  << endl << endl;
+                OutRWFLfile <<RW_Face_Laplacian << endl;
+                // Dense matrix output:         OutRWFLfile << MatrixXd(RW_Face_Laplacian) << endl;
+                OutRWFLfile.close();
+
+                /// Creation of the sparse incidence matrix (FES_Graph) for special Faces sparse FES matrices
+                //  SpMat FES_Graph(CellNumbs.at(2) + 1,CellNumbs.at(1) + 1);
+                // SpMat FES_Graph;
+                // FES_Graph*FES_Graph.transpose()
+
+                if (configuration.at(1)) { // Nodes types statistics, indices and configuration entropy
+                    //#include "QPsLab.h"
+                }
+                if (configuration.at(2)) { /// Edges types statistics, indices and configuration entropy
+                    EdgesStat(CellNumbs, numerator, SpecialCellMap, FES, odir, special_faces_fraction);
+                }
+                if (configuration.at(3)) { // Faces types statistics and structural indices
+                    //#include "FacesLab.h"
+                }
+                if (configuration.at(4)) { // Grains types statistics, indices and configuration entropy
+                    //#include "GrainsLab.h"
+                }
+                if (configuration.at(5)) { // Nodes Laplacian with its spectrum for the nodes network
+                    //#include"NodeLaplacians.h"
+                }
+                if (configuration.at(6)) { // Edges Laplacian with its spectrum for the edges network
+                    //#include"EdgeLaplacians.h"
+                }
+                if (configuration.at(7)) { // Face Laplacian with its spectrum for the special faces network
+                }
+                if (configuration.at(8)) { // Betti numbers (FB0, FB1 and FB2) of the special faces network
+                    //#include"BettiNumbers.h"
+                }
+                if (configuration.at(9)) { // Grain Laplacian with its spectrum for the grain network
+                    //#include"GrainLaplacians.h"
+                }
+                if (configuration.at(10)) { // Tutte polynomial for the special faces network
+                    //#include"FaceTutte.h"
+                }
+                if (configuration.at(11)) { // Statistical physics module
+                    //#include"DCCStatistical.h"
+                }
+
+                cout << "Fraction of special faces:" << 1.0 - ordinary_faces_fraction << ";\t Size of S-Face Adjacency matrix \t" << SAM_FacesGraph.nonZeros() << endl;
+            } // End of analysis and output iterator ( IF: iterator % X == 0 )
+        }while(ordinary_faces_fraction > (1.0 - max_sFaces_fraction)); /// End of the Random generation process
+
+/// Closing and deleting
+        OutFaceFile.close(); // 2-Cells related matrices
+        OutTJsFile.close(); // 1-Cells statistics output
+        OutSFile.close(); // 1-Cells Configurational Entropy output
+        //Remove all elements anf free the memory from the probe SpecialCells and vector
+        SpecialCells.clear();
+        OrdinaryCells.clear();
+        SpecialCells.shrink_to_fit();
+        OrdinaryCells.shrink_to_fit();
+
+    } ///End of 'S' type simulations
+
     else if (stype == 'I') {
 
     }
+
     else if (stype == 'E') {
 
     }

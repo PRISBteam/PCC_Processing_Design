@@ -9,14 +9,16 @@
 
 using namespace std; ///Standard namespace
 
-void EdgesStat(std::vector<unsigned int> const& CellNumbs, unsigned long numerator, Eigen::SparseMatrix<double> const& FacesGraph, Eigen::SparseMatrix<double> const& FES, char* output_dir)
+void EdgesStat(std::vector<unsigned int> const& CellNumbs, unsigned long numerator, map<unsigned int,unsigned int> SpecialCellMap, Eigen::SparseMatrix<double> const& FES, char* output_dir, double special_faces_fraction)
 {
     vector<int> TJsTypes(CellNumbs.at(1)+1,0);
+    map<unsigned int, unsigned int>::iterator sit; // Special iterator for this map
     double J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
     double Configurational_Face_Entropy = 0;
-    for(int i = 1; i < numerator; i++)
-        for(int j = 1; j < numerator; j++)
-            if( i != j && FacesGraph.coeff(i,j) == 1) for(int k = 1; k < CellNumbs.at(1); k++) if( FES.coeff(j,k) == 1) TJsTypes.at(k)++;
+
+    for (auto sit : SpecialCellMap)
+        for(int k = 1; k < CellNumbs.at(1); k++) // Loop ovel all the
+            if( FES.coeff(sit.first,k) == 1) TJsTypes.at(k)++;
 
     J1 = std::count(TJsTypes.begin(), TJsTypes.end(), 1);
     J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2);
@@ -31,15 +33,15 @@ void EdgesStat(std::vector<unsigned int> const& CellNumbs, unsigned long numerat
 
     /// Data output
     /// Opening of the output streams
-    string TJs_output_filename = "TJsTypes.txt"s, Entropy_output_filename = "ConTJsEntropy.txt"s,
+    string TJs_output_filename = "TJsLab_TJsTypes.txt"s, Entropy_output_filename = "TJsLab_ConTJsEntropy.txt"s,
             output_TJs_dir = output_dir + TJs_output_filename, output_Entropy_dir = output_dir + Entropy_output_filename;
     char* cTJs_dir = const_cast<char*>(output_TJs_dir.c_str()); char* cEntropy_dir = const_cast<char*>(output_Entropy_dir.c_str()); // From string to char for the passing folder path to a function
 
     ofstream OutTJsFile; OutTJsFile.open(cTJs_dir, ios::app);
     ofstream OutSFile; OutSFile.open(cEntropy_dir, ios::app);
 
-    OutTJsFile << j0 << "\t\t" << j1 << "\t" << j2 << "\t" << j3 << endl;
-    OutSFile << Configurational_Face_Entropy << endl;
+    OutTJsFile << special_faces_fraction << "\t\t" << j0 << "\t\t" << j1 << "\t" << j2 << "\t" << j3 << endl;
+    OutSFile << special_faces_fraction << "\t\t" << Configurational_Face_Entropy << endl;
 
     OutTJsFile.close();
     OutSFile.close();
