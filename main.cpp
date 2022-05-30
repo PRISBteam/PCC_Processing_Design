@@ -14,7 +14,8 @@
 
 /// Attached user defined C++ libraries:
 ///-------------------------------------
-#include "src/DCCProcessing.h"
+#include "src/DCCProcessing.h" // Change element types of the DCC itself
+#include "src/DCCKinetic.h" // Generate a process on the elements of the DCC without any changes in the complex
 
 ///*.....................................................................    Main    .............................................*///
 int main() {
@@ -35,7 +36,7 @@ int main() {
     }while (dim != 2 && dim != 3); **/
 
 /// Please, input below the correct source directory and simulation type:
-    char simulation_type = 'R'; // 'E', 'R', 'S' or 'I' :: This char define the process type: 'E' for experimental data obtained by EBSD, 'R' for Random, 'S' for maximum configuration entropy production, 'I' for the Ising-like model ///
+    char simulation_type = 'R'; // 'R', 'S', 'F' or 'I', 'E' :: This char define the process type: 'R' for Random, 'S' for maximum configuration Entropy production, 'F' for the 3D one-layer film, 'I' for the Ising-like model, 'E' for experimental data obtained by EBSD ///
     /**
      do { ///Manual user input of the simulation type
           cout << " Please, input the symbol of particular simulation type of the problem: E (experiment), R (rndom), S (entropy maximisation) or I (Ising model):"s << endl;
@@ -47,6 +48,7 @@ int main() {
 
 /// Here the names of the directories with the source files "srcdir" and output files "outdir" must be defined
     string srcdir = "/Users/user/Dropbox/OFFICE/NEPER/resultsApril2022/"s, problem_folder_path = "1k3cells/"s;
+    if (simulation_type == 'F') string srcdir = "/Users/user/Dropbox/OFFICE/NEPER/resultsApril2022/2D_film_seeds/"s, problem_folder_path = "2D_10k/"s;
 /**    /// Manual user input of the DCC files folder path
         cout << " Please, input the name of the folder where the DCC source files are (like 1k3cells/ ):"s << endl;
         cin >> problem_folder_path;
@@ -55,6 +57,7 @@ int main() {
     cout << srcdir << endl;
 
     string outdir = "/Users/user/Dropbox/OFFICE/CProjects/Voro3D/"s, results_output_folder_path = "test/"s;
+    if (simulation_type == 'R') string outdir = "/Users/user/Dropbox/OFFICE/CProjects/Voro3D_film/"s, results_output_folder_path = "test/"s;
     if (dim == 2) string outdir = "/Users/user/Dropbox/OFFICE/CProjects/Voro2D/", results_output_folder_path = "test/"s;
 /**    /// Manual user input of the simulation results output folder path
         cout << " Please, input the simulation results output folder path (like test/ ):"s << endl;
@@ -76,7 +79,10 @@ int main() {
     string  config = srcdir + "config.txt"s; char* configuration = const_cast<char*>(config.c_str());
 
     if (dim == 3)
-        HAGBsProbability3D(sd0, sd1, sd2, sd3, sd4, sd5, sd6, number_of_cells, configuration, output_folder, simulation_type);
+        if (simulation_type == 'F')
+            HAGBsKinetic3D(sd0, sd1, sd2, sd3, sd4, sd5, sd6, number_of_cells, configuration, output_folder, simulation_type);
+        else
+            HAGBsProbability3D(sd0, sd1, sd2, sd3, sd4, sd5, sd6, number_of_cells, configuration, output_folder, simulation_type);
     else if (dim == 2)
         HAGBsProbability2D(sd0, sd1, sd2, sd4, sd5, number_of_cells, configuration, output_folder, simulation_type);
 
