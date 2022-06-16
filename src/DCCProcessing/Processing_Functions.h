@@ -88,8 +88,8 @@ int Processing_maxEntropy(std::vector<unsigned int>  &S_Vector, std::vector<unsi
     double Configuration_Face_Entropy = 0, Face_Entropy_Median = 0, Face_Entropy_Skrew = 0;
 
     // Obtaining Faces (coloumns) - Edges (rows) incidence matrix from file (paths.at(5))
-    SpMat FES(CellNumbs.at(2),CellNumbs.at(1));
-    FES = SMatrixReader(paths.at(5), CellNumbs.at(2), CellNumbs.at(1)); // Edges-Faces
+    SpMat FES(CellNumbs.at(1),CellNumbs.at(2));
+    FES = SMatrixReader(paths.at(5), CellNumbs.at(1), CellNumbs.at(2)); // Edges-Faces
 
     /// Numerates newly created Faces during the generation process
     long unsigned int numerator = 0;

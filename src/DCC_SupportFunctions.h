@@ -89,8 +89,8 @@ std::vector<double> dVectorReader(char* FilePath) {
 vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> const& FES, vector<int> TJsTypes) {
     vector<double> res(10,0); // Up to 100 types of possible TJs types
 
-    for (int l = 0; l < FES.cols(); l++) // Loop over all Edges
-        if (FES.coeff(face_number, l) == 1) res[TJsTypes.at(l)]++;
+    for (int l = 0; l < FES.rows(); l++) // Loop over all Edges
+        if (FES.coeff(l,face_number) == 1) res[TJsTypes.at(l)]++;
 
     return res;
 }
@@ -100,7 +100,7 @@ vector<int> EdgesTypesCalc(std::vector<unsigned int> const& CellNumbs, vector<un
     vector<int> TJsTypes(CellNumbs.at(1)+1,0);
     for (auto vit: s_faces_sequence) // Loop over all Special Faces
         for(int k = 1; k < CellNumbs.at(1); k++) // Loop over all the
-            if (FES.coeff(vit, k) == 1) TJsTypes.at(k)++;
+            if (FES.coeff(k, vit) == 1) TJsTypes.at(k)++;
 
     return TJsTypes;
 }

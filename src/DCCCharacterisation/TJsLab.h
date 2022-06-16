@@ -19,7 +19,7 @@ map<unsigned int, unsigned int> EdgesStat(std::vector<unsigned int> const& CellN
 
     for (auto sit : SpecialCellMap)
         for(int k = 1; k < CellNumbs.at(1); k++) // Loop ovel all the
-            if( FES.coeff(sit.first,k) == 1) TJsTypes.at(k)++;
+            if( FES.coeff(k,sit.first) == 1) TJsTypes.at(k)++;
 
     J1 = std::count(TJsTypes.begin(), TJsTypes.end(), 1);
     J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2);

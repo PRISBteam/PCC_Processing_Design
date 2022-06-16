@@ -37,12 +37,13 @@ typedef SparseMatrix<double> SpMat; // <Eigen library class> Declares a column-m
 
 #include "src/DCC_SupportFunctions.h"
 #include "src/DCCProcessing/DCCProcessing.h" // Change element types of the DCC itself
-//#include "src/DCCKinetic.h" // Generate a process on the elements of the DCC without any changes in the complex
+// #include "src/DCCKinetic.h" // Generate a process on the elements of the DCC without any changes in the complex
 #include "src/DCCCharacterisation/StructureCharacterisation.h" // Characterisation of special substructures in the DCC
 
 /// Declaration of FUNCTIONS, see the function bodies at the end of file.
 std::vector<double> confCount(char* config, char* type, string& input_folder, string& output_folder); // Read and output the initial configuration
 bool ProcessingON(char* config); // Check the Processing Module Status
+bool CharacterisationON(char* config); // Check the Structure Characterisation Module Status
 std::string get_working_path(); // Get the current working directory (containing Main.cpp)
 void eraseSubStr(std::string & mainStr, const std::string & toErase); //Erase First Occurrence of given  substring from main string
 
@@ -99,9 +100,10 @@ int main() {
     } // if(ProcessingON(confpath))
 
 /// II: DCC_Characterisation module
-    // if(i % 100 == 0) int output_step = 1; // Step for output (structural analysis and data output will be performed after each output_step calculation steps (= number of newly converted elements))
-    // DCC_StructureCharacterisation(State_Vector, special_faces_sequence, ConfigVector, CellNumbs, paths, odir);
-
+    if (CharacterisationON(confpath)) {
+        // if(i % 100 == 0) int output_step = 1; // Step for output (structural analysis and data output will be performed after each output_step calculation steps (= number of newly converted elements))
+        DCC_StructureCharacterisation(State_Vector, special_faces_sequence, ConfigVector, CellNumbs, paths, odir);
+    }// if(CharacterisationON(confpath))
 /// III: DCC_Kinetic module
 //   CC_Kinetic_Plasticity(i, -- -, --);
 //    if (simulation_type == 'F') HAGBsKinetic3D(paths, number_of_cells, ConfigVector, output_folder, simulation_type);
@@ -137,6 +139,25 @@ bool ProcessingON(char* config) {
 
     cout << "DCC_Processing SWITCHED OFF"s << endl;
     return isProcessingON;
+}
+
+bool CharacterisationON(char* config) {
+    std::string line;
+    ifstream inConf(config);
+    bool isCharacterisationON = 0;
+
+    if (inConf) { //If the file was successfully open, then
+        while(getline(inConf, line, '\n'))
+//            cout << line << endl;
+            if (!line.compare("DCC_Characterisation SWITCHED ON"s)) {
+                isCharacterisationON = 1;
+                cout << "DCC_StructureCharacterisation SWITCHED ON"s << endl;
+                return isCharacterisationON;
+            }
+    } else cout << "isCharacterisationON() error: The file " << config << " cannot be read" << endl; // If something goes wrong
+
+    cout << "DCC_StructureCharacterisation SWITCHED OFF"s << endl;
+    return isCharacterisationON;
 }
 
 /// Reading and Output of the configuration file
