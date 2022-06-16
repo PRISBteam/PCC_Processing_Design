@@ -20,22 +20,22 @@ DCC_Processing SWITCHED ON
 -------------------------------------------------------------------------------------------------------------------------------------
 D	| Calculation type ('R', 'RW', 'S', 'F', 'I' or 'E')			| & |	1
 -------------------------------------------------------------------------------------------------------------------------------------
-1 	| The number of special Face (2-cells) types				| ! |	2	
+1 	| The number of special Face (2-cells) types				| ! |	2
 -------------------------------------------------------------------------------------------------------------------------------------
 0.9 	| MAX fraction of Faces (calculation limit)				| ? | 	3
 -------------------------------------------------------------------------------------------------------------------------------------
-300 	| The output step (number of new special steps) between the outputs		| ^ |	4	
+300 	| The output step (number of new special steps) between the outputs		| ^ |	4
 -------------------------------------------------------------------------------------------------------------------------------------
-/Users/user/Dropbox/OFFICE/NEPER/resultsJune2022/8cells/  | Input folder		| ~ |	5
+/Users/user/Dropbox/OFFICE/NEPER/8cells/                    | Input folder		| ~ |	5
 -------------------------------------------------------------------------------------------------------------------------------------
-/Users/user/Dropbox/OFFICE/CProjects/Voro3D/test/ 	 	   | Output folder	| $ |	6
+/Users/user/Dropbox/OFFICE/NEPER/resultsJune2022/8cells/ 	 	   | Output folder	| $ |	6
 -------------------------------------------------------------------------------------------------------------------------------------
 
 =====================================================================================================================================
 ================================	Initial parameters for DCC_Kinetic Tool	 ========================================================
 =====================================================================================================================================
 
-DCC_Kinetic SWITCHED OFF		| Switch on/off the whole DCC_Kinetic tool from the calculation. 
+DCC_Kinetic SWITCHED OFF		| Switch on/off the whole DCC_Kinetic tool from the calculation.
 				| Only "DCC_Kinetic SWITCHED XX" is allowed here.
 
 ++++++++++++++++++++++++++++++++++++++++++++++
@@ -48,7 +48,7 @@ DCC_Kinetic SWITCHED OFF		| Switch on/off the whole DCC_Kinetic tool from the ca
 ================================	Analysis tools (hash - on, percent - off) ==================================================================
 =====================================================================================================================================
 +++++++++++++++++++++++++++++++++++++++++++++++
-| On/Off | Description | Index | Library name | 
+| On/Off | Description | Index | Library name |
 +++++++++++++++++++++++++++++++++++++++++++++++
 -------------------------------------------------------------------------------------------------------------------------------------
 % 	| Nodes types statistics, indices and configuration entropy				7	QPsLab.h
@@ -59,16 +59,16 @@ DCC_Kinetic SWITCHED OFF		| Switch on/off the whole DCC_Kinetic tool from the ca
 -------------------------------------------------------------------------------------------------------------------------------------
 % 	| Grain types statistics, indices and configuration entropy				10	GrainsLab.h
 -------------------------------------------------------------------------------------------------------------------------------------
-% 	| Nodes Laplacian with its spectrum for the nodes network, 
+% 	| Nodes Laplacian with its spectrum for the nodes network,
 		Betti numbers (NB0, NB1 and NB2) of the special nodes network		11	NodeLaplacians.h
 -------------------------------------------------------------------------------------------------------------------------------------
 % 	| Edges Laplacian with its spectrum for the nodes network,
 		Betti numbers (EB0, EB1 and EB2) of the special nodes network		12	EdgeLaplacians.h
 -------------------------------------------------------------------------------------------------------------------------------------
-% 	| Faces Laplacian with its spectrum for the nodes network, 
+% 	| Faces Laplacian with its spectrum for the nodes network,
 		Betti numbers (FB0, FB1 and FB2) of the special nodes network		13	FaceLaplacians.h
 -------------------------------------------------------------------------------------------------------------------------------------
-% 	| Grain Laplacian with its spectrum for the edges network, 
+% 	| Grain Laplacian with its spectrum for the edges network,
 		Betti numbers (GB0, GB1 and GB2) of the special grains network		14	GrainLaplacians.h
 -------------------------------------------------------------------------------------------------------------------------------------
 % 	| Tutte polynomial for the special network 		            			15	FaceTutte.h
@@ -77,4 +77,3 @@ DCC_Kinetic SWITCHED OFF		| Switch on/off the whole DCC_Kinetic tool from the ca
 * ===================================================================================================================================
 * ================================	End of file	==========================================================================
 * ===================================================================================================================================
-

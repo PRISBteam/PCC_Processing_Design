@@ -11,12 +11,12 @@
 #include "Processing_Functions.h"
 ///-------------------------------------
 
-/// Function defenitions
-std::vector<unsigned int> VectorReader(char* FilePath);
-
 using namespace std;
 using namespace Eigen;
 //using namespace Spectra;
+
+/// Function defenitions
+std::vector<unsigned int> VectorReader(char* FilePath);
 
 int DCC_Processing3D(std::vector<unsigned int> &State_Vector, std::vector<unsigned int>  &special_faces_sequence, char stype, double max_sFaces_fraction, int number_of_types, std::vector<unsigned int> &CellNumbs, std::vector<char*> const paths) {
 // State_Vector in the form : [Element number] - > [Type]

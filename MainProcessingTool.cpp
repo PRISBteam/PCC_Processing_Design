@@ -53,27 +53,30 @@ int main() {
 
     cout << "=============================================" << endl << "Start of the DCC Processing" << endl << "-------------------------------------------------------------" << endl;
 /// File path to the configuration profile
-using std::__fs::filesystem::current_path; //to obtain current working directory
-string MainPath = current_path();
-eraseSubStr(MainPath, "cmake-build-debug"s);
-string  config = MainPath + "config.txt"s; char* confpath = const_cast<char*>(config.c_str());
+    using std::__fs::filesystem::current_path; //to obtain current working directory
+    string MainPath = current_path();
+    eraseSubStr(MainPath, "cmake-build-debug"s);
+    string  config = MainPath + "config.txt"s; char* confpath = const_cast<char*>(config.c_str());
 
 /// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen
 // The source directory and simulation type from file config.txt
-char simulation_type; // 'R', 'S', 'W', 'F' or 'I', 'E' :: This char define the process type: 'R' for Random, 'S' for maximum configuration Entropy production, 'F' for the 3D one-layer film, 'I' for the Ising-like model, 'E' for experimental data obtained by EBSD
-string input_folder, output_folder; // input and output folders from file config
-vector<bool> SChar_config; // Characterisation module clonfiguration
-std:vector<double> ConfigVector = confCount(confpath, &simulation_type, input_folder, output_folder);
-int dim = ConfigVector.at(0); // Space dimension of the problem (dim);
+    char simulation_type; // 'R', 'S', 'W', 'F' or 'I', 'E' :: This char define the process type: 'R' for Random, 'S' for maximum configuration Entropy production, 'F' for the 3D one-layer film, 'I' for the Ising-like model, 'E' for experimental data obtained by EBSD
+    string input_folder, output_folder; // input and output folders from file config
+    vector<bool> SChar_config; // Characterisation module clonfiguration
+    std:vector<double> ConfigVector = confCount(confpath, &simulation_type, input_folder, output_folder);
+    int dim = ConfigVector.at(0); // Space dimension of the problem (dim);
 
 /// Below the file names with the sparse DCC matrices must be defined
-string ssd0 = input_folder + "A0.txt"s, ssd1 = input_folder + "A1.txt"s, ssd2 = input_folder + "A2.txt"s, ssd3 = input_folder + "A3.txt"s, ssd4 = input_folder + "B1.txt"s, ssd5 = input_folder + "B2.txt"s, ssd6 = input_folder + "B3.txt"s;
+    string ssd0 = input_folder + "A0.txt"s, ssd1 = input_folder + "A1.txt"s, ssd2 = input_folder + "A2.txt"s, ssd3 = input_folder + "A3.txt"s, ssd4 = input_folder + "B1.txt"s, ssd5 = input_folder + "B2.txt"s, ssd6 = input_folder + "B3.txt"s,
+            seeds = input_folder + "seeds.txt"s, NewSeeds = input_folder + "NewSeeds/NewSeeds.txt"s;
 //The next line just a technical procedure string to char arrays transformation needed to use them as the function arguments
-vector<char*> paths; char* odir = const_cast<char*>(output_folder.c_str());
-paths.push_back(const_cast<char*>(ssd0.c_str())); paths.push_back(const_cast<char*>(ssd1.c_str())); paths.push_back(const_cast<char*>(ssd2.c_str())); paths.push_back(const_cast<char*>(ssd3.c_str()));
-paths.push_back(const_cast<char*>(ssd4.c_str())); paths.push_back(const_cast<char*>(ssd5.c_str())); paths.push_back(const_cast<char*>(ssd6.c_str()));
+    vector<char*> paths;
+    char* odir = const_cast<char*>(output_folder.c_str());
+    paths.push_back(const_cast<char*>(ssd0.c_str())); paths.push_back(const_cast<char*>(ssd1.c_str())); paths.push_back(const_cast<char*>(ssd2.c_str())); paths.push_back(const_cast<char*>(ssd3.c_str()));
+    paths.push_back(const_cast<char*>(ssd4.c_str())); paths.push_back(const_cast<char*>(ssd5.c_str())); paths.push_back(const_cast<char*>(ssd6.c_str()));
+    paths.push_back(const_cast<char*>(seeds.c_str())); paths.push_back(const_cast<char*>(NewSeeds.c_str()));
 // File path with the amounts of the different cells  (1st line for Nodes, 2nd line for Edges, 3rd line for Faces and (in 3D) 4th line for grains)
-string  ncells = input_folder + "number_of_cells.txt"s; char* number_of_cells = const_cast<char*>(ncells.c_str());
+    string  ncells = input_folder + "number_of_cells.txt"s; char* number_of_cells = const_cast<char*>(ncells.c_str());
 
 /// Principal variables
 ///_____________________________________________________________________________________
@@ -97,20 +100,20 @@ string  ncells = input_folder + "number_of_cells.txt"s; char* number_of_cells = 
 
 /// II: DCC_Characterisation module
     // if(i % 100 == 0) int output_step = 1; // Step for output (structural analysis and data output will be performed after each output_step calculation steps (= number of newly converted elements))
-       // DCC_StructureCharacterisation(State_Vector, special_faces_sequence, ConfigVector, CellNumbs, paths, odir);
+    // DCC_StructureCharacterisation(State_Vector, special_faces_sequence, ConfigVector, CellNumbs, paths, odir);
 
 /// III: DCC_Kinetic module
 //   CC_Kinetic_Plasticity(i, -- -, --);
 //    if (simulation_type == 'F') HAGBsKinetic3D(paths, number_of_cells, ConfigVector, output_folder, simulation_type);
 
 /// Elapsing time
-unsigned int end_time = clock();
-double fulltime = (double) end_time/ 1000.0;
-cout << "HAGBsProbability " << dim << "D " << "runtime is equal to  " << fulltime <<  "  seconds" << endl;
+    unsigned int end_time = clock();
+    double fulltime = (double) end_time/ 1000.0;
+    cout << "HAGBsProbability " << dim << "D " << "runtime is equal to  " << fulltime <<  "  seconds" << endl;
 
-cout << "-------------------------------------------------------------" << endl << "The end of the VoroCAnalyser program" << endl << "=============================================" << endl ;
+    cout << "-------------------------------------------------------------" << endl << "The end of the VoroCAnalyser program" << endl << "=============================================" << endl ;
 
-return 0;
+    return 0;
 } /// The end of Main function
 
 
@@ -155,31 +158,31 @@ std::vector<double> confCount(char* config, char* type, string &input_folder, st
                 else if (it == '~')  { stringstream line3_stream(line); line3_stream >> input_folder; } // input folder path input_folder = const_cast<char*>(input.c_str());
                 else if (it == '$')  { stringstream line4_stream(line); line4_stream >> output_folder; } // output folder path input_folder = const_cast<char*>(input.c_str());
 
-             //        if(line.at(1) == '#') res.push_back(1); // 1 and # means accept - the parameter will be calculated
-             //        if(line.at(1) == '%') res.push_back(0); // 0 and % means ignore - the parameter will not be calculated
-            else if (it == '#')  res.push_back(1); // 1 and # means accept - the parameter will be calculated
-            else if (it == '%')  res.push_back(0); // 0 and % means ignore - the parameter will not be calculated
+                    //        if(line.at(1) == '#') res.push_back(1); // 1 and # means accept - the parameter will be calculated
+                    //        if(line.at(1) == '%') res.push_back(0); // 0 and % means ignore - the parameter will not be calculated
+                else if (it == '#')  res.push_back(1); // 1 and # means accept - the parameter will be calculated
+                else if (it == '%')  res.push_back(0); // 0 and % means ignore - the parameter will not be calculated
         }
     } else cout << "The file " << config << " cannot be read" << endl; // If something goes wrong
     res.size();
-        cout << "The problem dimension that is the maximum dimension k_max of k-Cells:\t | "s << res.at(0) << endl;
-        cout << "Calculation type ('R', 'W', 'S', 'F', 'I' or 'E'):\t\t\t\t\t\t | "s << *type << endl;
-        cout << "The number of special Face (2-cells) types:\t\t\t\t\t\t\t\t | " << res.at(1) << endl;
-        cout << "MAX fraction of Faces (calculation limit): \t\t\t\t\t\t\t\t | " << res.at(2) << endl;
-        cout << "A number of new special Faces converted between the outputs: \t\t\t | " << res.at(3) << endl;
-        cout << endl;
-        cout << "Input folder:\t" << input_folder << endl;
-        cout << "Output folder:\t" << output_folder << endl;
-        cout << endl;
-        cout << "Nodes types statistics, indices and configuration entropy:     "; if (res.at(4) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Edges types statistics, indices and configuration entropy:     "; if (res.at(5) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Faces types statistics and structural indices:                 "; if (res.at(6) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Grain types statistics, indices and configuration entropy:     "; if (res.at(7) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Nodes Laplacian with its spectrum for the nodes network:       "; if (res.at(8) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Edges Laplacian with its spectrum for the nodes network:       "; if (res.at(9) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Face  Laplacian with its spectrum for the nodes network:       "; if (res.at(10) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Grain Laplacian with its spectrum for the nodes network:       "; if (res.at(11) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Tutte polynomial for the special network:                      "; if (res.at(12) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "The problem dimension that is the maximum dimension k_max of k-Cells:\t | "s << res.at(0) << endl;
+    cout << "Calculation type ('R', 'W', 'S', 'F', 'I' or 'E'):\t\t\t\t\t\t | "s << *type << endl;
+    cout << "The number of special Face (2-cells) types:\t\t\t\t\t\t\t\t | " << res.at(1) << endl;
+    cout << "MAX fraction of Faces (calculation limit): \t\t\t\t\t\t\t\t | " << res.at(2) << endl;
+    cout << "A number of new special Faces converted between the outputs: \t\t\t | " << res.at(3) << endl;
+    cout << endl;
+    cout << "Input folder:\t" << input_folder << endl;
+    cout << "Output folder:\t" << output_folder << endl;
+    cout << endl;
+    cout << "Nodes types statistics, indices and configuration entropy:     "; if (res.at(4) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "Edges types statistics, indices and configuration entropy:     "; if (res.at(5) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "Faces types statistics and structural indices:                 "; if (res.at(6) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "Grain types statistics, indices and configuration entropy:     "; if (res.at(7) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "Nodes Laplacian with its spectrum for the nodes network:       "; if (res.at(8) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "Edges Laplacian with its spectrum for the nodes network:       "; if (res.at(9) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "Face  Laplacian with its spectrum for the nodes network:       "; if (res.at(10) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "Grain Laplacian with its spectrum for the nodes network:       "; if (res.at(11) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "Tutte polynomial for the special network:                      "; if (res.at(12) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
 
     return res;
 }
@@ -210,13 +213,13 @@ void eraseSubStr(std::string & mainStr, const std::string & toErase)
     cout <<"The simulation type is\t"<< simulation_type << endl;
     if (simulation_type != 'E' && simulation_type != 'R' && simulation_type != 'S' && simulation_type != 'I') cout << "Input Error: Please retype 'E', 'R', 'S' or 'I' for the specific simulation type" << endl;
     }while (simulation_type != 'E' && simulation_type != 'R' && simulation_type != 'S' && simulation_type != 'I');  */
-    /* /// Manual user input of the DCC files folder path
-        cout << " Please, input the name of the folder where the DCC source files are (like 1k3cells/ ):"s << endl;
-        cin >> problem_folder_path; */
-    /* /// Manual user input of the simulation results output folder path
-        cout << " Please, input the simulation results output folder path (like test/ ):"s << endl;
-        cin >> results_output_folder_path;
-    return;
+/* /// Manual user input of the DCC files folder path
+    cout << " Please, input the name of the folder where the DCC source files are (like 1k3cells/ ):"s << endl;
+    cin >> problem_folder_path; */
+/* /// Manual user input of the simulation results output folder path
+    cout << " Please, input the simulation results output folder path (like test/ ):"s << endl;
+    cin >> results_output_folder_path;
+return;
 } */
 
 

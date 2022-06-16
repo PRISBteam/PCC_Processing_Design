@@ -52,8 +52,8 @@ int Processing_Random( std::vector<unsigned int> &S_Vector,  std::vector<unsigne
         OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + New2CellNumb); // !!! Delete its element from the vector decreasing its size BUT
 
         // Special and Ordinary Faces fraction calculation
-         ordinary_faces_fraction = OrdinaryCellNumbs.size() / (double) CellNumbs.at(2);
-         special_faces_fraction = 1.0 - ordinary_faces_fraction;
+        ordinary_faces_fraction = OrdinaryCellNumbs.size() / (double) CellNumbs.at(2);
+        special_faces_fraction = 1.0 - ordinary_faces_fraction;
 
     }while(ordinary_faces_fraction > (1.0 - max_sFaces_fraction)); /// End of the Random generation process
 
@@ -98,7 +98,7 @@ int Processing_maxEntropy(std::vector<unsigned int>  &S_Vector, std::vector<unsi
     double ordinary_faces_fraction = 1.0 - special_faces_fraction;
     if (special_faces_fraction >= max_sFaces_fraction) { cout << "(!) Early exit: Fraction of special faces is already >= MAX values from config.txt" << endl; return 0; }
     else if (special_faces_fraction < 0.05) {
-    /// ================> Initial Face seeds (initial state for the MAX entropy production algorithm)
+        /// ================> Initial Face seeds (initial state for the MAX entropy production algorithm)
         Processing_Random(S_Vector, s_faces_sequence, 0.05, number_of_types, CellNumbs);
     }
 
@@ -143,9 +143,9 @@ int Processing_maxEntropy(std::vector<unsigned int>  &S_Vector, std::vector<unsi
                 J00 = 0, J0N = 0, J10 = 0, J1N = 0, J20 = 0, J2N = 0, J30 = 0, J3N = 0, CFace_EntropyIncrease = 0;
                 /// GBIndex calculation :: gives a vector with the number of Edges of each type
                 vector<double> j_types_neigh_fractions = GBIndex(k, FES, TJsTypes); //Types (up to 100 kinds) of the edges incident to the considered Face
-            //REPAIR    for(auto kl : j_types_neigh_fractions) cout << " " <<kl ; cout << endl;
+                //REPAIR    for(auto kl : j_types_neigh_fractions) cout << " " <<kl ; cout << endl;
 
-            // Values before conversion
+                // Values before conversion
                 J00 = j_types_neigh_fractions.at(0);
                 J10 = j_types_neigh_fractions.at(1);
                 J20 = j_types_neigh_fractions.at(2); // cout << " J00= " << J00<< " J10= " << J10 << " J20= " << J20 << endl;
@@ -181,7 +181,7 @@ int Processing_maxEntropy(std::vector<unsigned int>  &S_Vector, std::vector<unsi
         if(find(s_faces_sequence.begin(),s_faces_sequence.end(),New2CellNumb) == s_faces_sequence.end())
             s_faces_sequence.push_back(New2CellNumb);
         //REPAIRS/////////
- //       for(auto kl :s_faces_sequence) cout << " " <<kl ; cout << endl; //exit(10);
+        //       for(auto kl :s_faces_sequence) cout << " " <<kl ; cout << endl; //exit(10);
 
 
         // Special and Ordinary Faces fraction calculation
@@ -194,7 +194,7 @@ int Processing_maxEntropy(std::vector<unsigned int>  &S_Vector, std::vector<unsi
 /// Closing and deleting
     //Remove all elements anf free the memory from the probe SpecialCells and vector
 //    SpecialCellMap.clear();
- //   SpecialCellMap.shrink_to_fit();
+    //   SpecialCellMap.shrink_to_fit();
 
     return 0;
 } // end of S_max
@@ -210,7 +210,7 @@ int Processing_DDRX(std::vector<unsigned int>  &State_Vector, std::vector<unsign
     tuple<double, double, double> find_aGBseed(unsigned int Facenumb, std::vector<char*> const paths, std::vector<unsigned int> & CellNumbs, vector<tuple<double, double, double>> & AllSeeds_coordinates);
     /// Streams
     ofstream NewSeedsStream;
-    NewSeedsStream.open("/Users/user/Dropbox/OFFICE/NEPER/resultsJune2022/8cells/NewSeeds/NewSeeds.txt"s, ios::trunc);
+    NewSeedsStream.open(paths.at(8), ios::trunc);
     NewSeedsStream << "New generated seeds\t" << endl;
     NewSeedsStream.close();
 
@@ -220,13 +220,12 @@ int Processing_DDRX(std::vector<unsigned int>  &State_Vector, std::vector<unsign
     tuple<double, double, double> NewSeed_coordinates = make_tuple(0, 0, 0);
 
     /// Face Seeds reading from file Seeds.txt
-    AllSeeds_coordinates = TuplesReader("/Users/user/Dropbox/OFFICE/NEPER/resultsJune2022/8cells/seeds.txt");
+    AllSeeds_coordinates = TuplesReader(paths.at(7));
 
 /// ============== Constants and model parameters ===================
     double kb = 1.23* pow(10,-23);
     double GSav = 200.0*pow(10,-9), Temp = 300, Stress = 4.0*pow(10.0,6), Rcr = 0.5*GSav/10.0,
             Q_energy = 213.0*pow(10,1), R_const = 8.31;
-
 /// Conversion probability
     double prob_seed = exp(-Q_energy/(R_const*Temp));
     //    double prob_seed = exp(- Stress*(13.0*pow(Rcr,3)/3.0)/(kb*Temp));
@@ -234,12 +233,12 @@ int Processing_DDRX(std::vector<unsigned int>  &State_Vector, std::vector<unsign
 
     srand((unsigned) time(NULL)); // seed for random
     // Output stream opening
-    NewSeedsStream.open("/Users/user/Dropbox/OFFICE/NEPER/resultsJune2022/8cells/NewSeeds/NewSeeds.txt"s, ios::app);
+    NewSeedsStream.open(paths.at(8), ios::app);
 
     for(unsigned int fnumber = 0; fnumber < CellNumbs.at(2); ++fnumber) {
         double rv = (rand() / (RAND_MAX + 1.0));
- //   cout << rv << "\t" << prob_seed << endl;
-     if (rv <= prob_seed) {
+        //   cout << rv << "\t" << prob_seed << endl;
+        if (rv <= prob_seed) {
             NewSeed_coordinates = find_aGBseed(fnumber, paths, CellNumbs, AllSeeds_coordinates);
             NewSeedsStream << fnumber << "\t" << get<0>(NewSeed_coordinates) << "\t" << get<1>(NewSeed_coordinates) << "\t" << get<2>(NewSeed_coordinates) << endl;
         }
