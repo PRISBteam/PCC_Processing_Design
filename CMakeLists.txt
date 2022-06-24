@@ -3,4 +3,4 @@ project(DCC_Processing_Tool)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(DCC_Processing_Tool MainProcessingTool.cpp src/DCC_SupportFunctions.h)
+add_executable(DCC_Processing_Tool MainProcessingTool.cpp src/DCCProcessing/DCCProcessing.h src/DCCProcessing/Processing_Functions.h src/DCCKinetic/DCCKinetic.h src/DCCKinetic/Kinetic_Functions.h src/DCCCharacterisation/StructureCharacterisation.h src/DCCCharacterisation/TJsLab.h src/DCC_SupportFunctions.h)

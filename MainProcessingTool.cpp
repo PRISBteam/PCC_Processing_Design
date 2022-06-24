@@ -35,15 +35,17 @@ using namespace Spectra;
 typedef Triplet<double> Tr; // <Eigen library class> Declares a triplet's type name - Tr
 typedef SparseMatrix<double> SpMat; // <Eigen library class> Declares a column-major sparse matrix type of doubles name - SpMat
 
-#include "src/DCC_SupportFunctions.h"
+#include "src/DCC_SupportFunctions.h" // Various useful functions
 #include "src/DCCProcessing/DCCProcessing.h" // Change element types of the DCC itself
-// #include "src/DCCKinetic.h" // Generate a process on the elements of the DCC without any changes in the complex
+#include "src/DCCKinetic/DCCKinetic.h" // Generate a process on the elements of the DCC without any changes in the complex
 #include "src/DCCCharacterisation/StructureCharacterisation.h" // Characterisation of special substructures in the DCC
 
 /// Declaration of FUNCTIONS, see the function bodies at the end of file.
-std::vector<double> confCount(char* config, char* type, string& input_folder, string& output_folder); // Read and output the initial configuration
+std::vector<double> confCount(char* config, char* type, char* Kinetic_type, string& input_folder, string& output_folder); // Read and output the initial configuration
 bool ProcessingON(char* config); // Check the Processing Module Status
 bool CharacterisationON(char* config); // Check the Structure Characterisation Module Status
+bool KineticON(char* config); // Check the Kinetic Module Status
+bool SIMULATION_MODE(char* config); // Check the SIMULATION MODE
 std::string get_working_path(); // Get the current working directory (containing Main.cpp)
 void eraseSubStr(std::string & mainStr, const std::string & toErase); //Erase First Occurrence of given  substring from main string
 
@@ -62,9 +64,10 @@ int main() {
 /// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen
 // The source directory and simulation type from file config.txt
     char simulation_type; // 'R', 'S', 'W', 'F' or 'I', 'E' :: This char define the process type: 'R' for Random, 'S' for maximum configuration Entropy production, 'F' for the 3D one-layer film, 'I' for the Ising-like model, 'E' for experimental data obtained by EBSD
+    char Kinetic_type; // 'W' or 'I' :: This char define the Kinetic process type: 'W' for Wear, 'I' for Ising
     string input_folder, output_folder; // input and output folders from file config
     vector<bool> SChar_config; // Characterisation module clonfiguration
-    std:vector<double> ConfigVector = confCount(confpath, &simulation_type, input_folder, output_folder);
+    std:vector<double> ConfigVector = confCount(confpath, &simulation_type, &Kinetic_type, input_folder, output_folder);
     int dim = ConfigVector.at(0); // Space dimension of the problem (dim);
 
 /// Below the file names with the sparse DCC matrices must be defined
@@ -73,6 +76,7 @@ int main() {
 //The next line just a technical procedure string to char arrays transformation needed to use them as the function arguments
     vector<char*> paths;
     char* odir = const_cast<char*>(output_folder.c_str());
+    char* indir = const_cast<char*>(input_folder.c_str());
     paths.push_back(const_cast<char*>(ssd0.c_str())); paths.push_back(const_cast<char*>(ssd1.c_str())); paths.push_back(const_cast<char*>(ssd2.c_str())); paths.push_back(const_cast<char*>(ssd3.c_str()));
     paths.push_back(const_cast<char*>(ssd4.c_str())); paths.push_back(const_cast<char*>(ssd5.c_str())); paths.push_back(const_cast<char*>(ssd6.c_str()));
     paths.push_back(const_cast<char*>(seeds.c_str())); paths.push_back(const_cast<char*>(NewSeeds.c_str()));
@@ -85,30 +89,82 @@ int main() {
     // :: vector components: [0] - Nodes number, [1] - Edges number, [2] - Faces number, [3] - Grains number
     std::vector<unsigned int> CellNumbs = VectorReader(number_of_cells);
     // State vector | Special faces IDs
-    std::vector <unsigned int> State_Vector(CellNumbs.at(2), 0);
+    std::vector <unsigned int> State_Vector(CellNumbs.at(2), 0), current_State_Vector(CellNumbs.at(2), 0);
     // Order of newly generated special faces | Process time
-    std::vector <unsigned int> special_faces_sequence; // Sequence (in order of their generation time) of special Faces
+    std::vector <unsigned int> special_faces_sequence, current_sfaces_sequence; // Sequence (in order of their generation time) of special Faces
     // The number of special Face (2-cells) types
     int number_of_types = ConfigVector.at(1);
     // MAX fraction of Faces | Calculation limit
-    double max_sFaces_fraction = ConfigVector.at(2);
+    double max_sFaces_fraction = ConfigVector.at(3);
+/// ===========================================================================================================================================
+/// ========================================== SCIENTIFIC MODE STARTS HERE ===================================================================
+/// ===========================================================================================================================================
+    if (SIMULATION_MODE(confpath)) {
 
+        /// ====== Processing ========>
+        if (ProcessingON(confpath))
+            DCC_Processing3D(State_Vector, special_faces_sequence, simulation_type, max_sFaces_fraction, number_of_types, CellNumbs, paths);
+        //for (auto sfe : special_faces_sequence) cout << sfe << "\t"; cout << endl;
+        //   CC_Kinetic_Plasticity(i, -- -, --);
+        //Output streams
+        string TJs_output_filename = "TJsLab_TJsTypes.txt"s, Entropy_output_filename = "TJsLab_ConTJsEntropy.txt"s,
+                output_TJs_dir = odir + TJs_output_filename, output_Entropy_dir = odir + Entropy_output_filename;
+        char* cTJs_dir = const_cast<char*>(output_TJs_dir.c_str()); char* cEntropy_dir = const_cast<char*>(output_Entropy_dir.c_str()); // From string to char for the passing folder path to a function
+
+        ofstream OutTJsFile; OutTJsFile.open(cTJs_dir, ios::trunc); OutTJsFile.close();
+        ofstream OutSFile; OutSFile.open(cEntropy_dir, ios::trunc); OutSFile.close();
+
+    /// Loop over special_faces_sequence with the step = Face_fraction/ number_of_steps
+    double Face_fraction = 0;
+    long number_of_steps = 10;
+     for(long i = 0; i < number_of_steps; ++i) {
+        double df = max_sFaces_fraction/ (double) number_of_steps;
+         Face_fraction += df;
+         unsigned int special_Faces_numb = Face_fraction * CellNumbs.at(2);
+
+         unsigned int itu = 0;
+         current_sfaces_sequence.clear();
+             for (unsigned int sfe : special_faces_sequence) {
+                     if (itu <= special_Faces_numb) current_sfaces_sequence.push_back(sfe);
+                     ++itu;
+                 } // for (auto sfe : current_sfaces_sequence) cout << sfe << "\t"; cout << endl;
+
+             unsigned int itr = 0;
+             fill(current_State_Vector.begin(), current_State_Vector.end(), 0);
+             for(auto sv : State_Vector) {
+                 if (sv != 0 && find(current_sfaces_sequence.begin(),current_sfaces_sequence.end(),itr) != current_sfaces_sequence.end())
+                 current_State_Vector.at(itr) = sv;
+                 itr++;
+             } //  for (auto sfe : current_State_Vector) cout << sfe ; cout << endl;
+
+         /// ====== Structure Characterisation module ========>
+         DCC_StructureCharacterisation(current_State_Vector, current_sfaces_sequence, ConfigVector, CellNumbs, paths, odir);
+        }// for (number_of_steps)
+
+    }// SIMULATION MODE if
+
+/// ==========================================================================================================================================
+/// ================================================= LIST MODE STARTS HERE ===================================================================
+/// ===========================================================================================================================================
+    else {
 /// I: DCC_Processing module
-    if (ProcessingON(confpath)) { // if DCC_Processing is SWITCH ON in the config.txt file
-        DCC_Processing3D(State_Vector, special_faces_sequence, simulation_type, max_sFaces_fraction, number_of_types, CellNumbs, paths);
-        //cout << "new:" <<endl; for (auto itd : special_faces_sequence) cout << itd << endl;
-    } // if(ProcessingON(confpath))
+        if (ProcessingON(confpath)) { // if DCC_Processing is SWITCH ON in the config.txt file
+            DCC_Processing3D(State_Vector, special_faces_sequence, simulation_type, max_sFaces_fraction, number_of_types, CellNumbs, paths);
+            //cout << "new:" <<endl; for (auto itd : special_faces_sequence) cout << itd << endl;
+        } // if(ProcessingON(confpath))
 
-/// II: DCC_Characterisation module
-    if (CharacterisationON(confpath)) {
-        // if(i % 100 == 0) int output_step = 1; // Step for output (structural analysis and data output will be performed after each output_step calculation steps (= number of newly converted elements))
-        DCC_StructureCharacterisation(State_Vector, special_faces_sequence, ConfigVector, CellNumbs, paths, odir);
-    }// if(CharacterisationON(confpath))
 /// III: DCC_Kinetic module
-//   CC_Kinetic_Plasticity(i, -- -, --);
-//    if (simulation_type == 'F') HAGBsKinetic3D(paths, number_of_cells, ConfigVector, output_folder, simulation_type);
+        if (KineticON(confpath)) { // if DCC_Kinetic is SWITCH ON in the config.txt file
+            DCC_Kinetic(Kinetic_type, paths, indir, odir);
+            }// if(KineticON(confpath))
+/// II: DCC_Characterisation module
+        if (CharacterisationON(confpath)) {
+            cout << "START of DCC Structure Characterisation Module" << endl;
+            DCC_StructureCharacterisation(State_Vector, special_faces_sequence, ConfigVector, CellNumbs, paths, odir);
+        }// if(CharacterisationON(confpath))
+    }// SIMULATION MODE else
 
-/// Elapsing time
+/// ===== Elapsing time ================>
     unsigned int end_time = clock();
     double fulltime = (double) end_time/ 1000.0;
     cout << "HAGBsProbability " << dim << "D " << "runtime is equal to  " << fulltime <<  "  seconds" << endl;
@@ -141,6 +197,25 @@ bool ProcessingON(char* config) {
     return isProcessingON;
 }
 
+bool KineticON(char* config) {
+    std::string line;
+    ifstream inConf(config);
+    bool isKineticON = 0;
+
+    if (inConf) { //If the file was successfully open, then
+        while(getline(inConf, line, '\n'))
+//            cout << line << endl;
+            if (!line.compare("DCC_Kinetic SWITCHED ON"s)) {
+                isKineticON = 1;
+                cout << "DCC_Kinetic SWITCHED ON"s << endl;
+                return isKineticON;
+            }
+    } else cout << "KineticON() error: The file " << config << " cannot be read" << endl; // If something goes wrong
+
+    cout << "DCC_Kinetic SWITCHED OFF"s << endl;
+    return isKineticON;
+}
+
 bool CharacterisationON(char* config) {
     std::string line;
     ifstream inConf(config);
@@ -160,8 +235,28 @@ bool CharacterisationON(char* config) {
     return isCharacterisationON;
 }
 
+bool SIMULATION_MODE(char* config) {
+    std::string line;
+    ifstream inConf(config);
+    bool isCharacterisationON = 0;
+
+    if (inConf) { //If the file was successfully open, then
+        while(getline(inConf, line, '\n'))
+//            cout << line << endl;
+            if (!line.compare("SIMULATION MODE: #LOOP"s)) {
+                isCharacterisationON = 1;
+                cout << "LOOP SIMULATION MODE"s << endl;
+                return isCharacterisationON;
+            }
+    } else cout << "SIMULATION_MODE() error: The file " << config << " cannot be read" << endl; // If something goes wrong
+
+    cout << "LIST SIMULATION MODE"s << endl;
+    return isCharacterisationON;
+}
+
+
 /// Reading and Output of the configuration file
-std::vector<double> confCount(char* config, char* type, string &input_folder, string &output_folder) {
+std::vector<double> confCount(char* config, char* type, char* Kinetic_type, string &input_folder, string &output_folder) {
     std::string line, input;
     double p_max = 0, output_step = 0;
     vector<double> res;
@@ -173,6 +268,7 @@ std::vector<double> confCount(char* config, char* type, string &input_folder, st
             for (auto it: line)
                 if (it == '@')  res.push_back(line.at(0)-'0'); // dimension
                 else if (it == '&') *type = line.at(0); // simulation type
+                else if (it =='`') *Kinetic_type = line.at(0); // simulation Kinetic type
                 else if (it == '!')  res.push_back(line.at(0)-'0'); // number of special Face types
                 else if (it == '?')  { stringstream line1_stream(line); line1_stream >> p_max; res.push_back(p_max);} // MAX fraction of Faces (calculation limit)
                 else if (it == '^')  { stringstream line2_stream(line); line2_stream >> output_step; res.push_back(output_step);} // the output step (number of new special steps) between the outputs
@@ -188,6 +284,7 @@ std::vector<double> confCount(char* config, char* type, string &input_folder, st
     res.size();
     cout << "The problem dimension that is the maximum dimension k_max of k-Cells:\t | "s << res.at(0) << endl;
     cout << "Calculation type ('R', 'W', 'S', 'F', 'I' or 'E'):\t\t\t\t\t\t | "s << *type << endl;
+    cout << "Kinetic type ('W' or 'I'):\t\t\t\t\t\t\t\t\t\t\t\t | "s << *Kinetic_type << endl;
     cout << "The number of special Face (2-cells) types:\t\t\t\t\t\t\t\t | " << res.at(1) << endl;
     cout << "MAX fraction of Faces (calculation limit): \t\t\t\t\t\t\t\t | " << res.at(2) << endl;
     cout << "A number of new special Faces converted between the outputs: \t\t\t | " << res.at(3) << endl;

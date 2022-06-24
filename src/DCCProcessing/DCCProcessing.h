@@ -30,7 +30,6 @@ int DCC_Processing3D(std::vector<unsigned int> &State_Vector, std::vector<unsign
 
     if (stype == 'R') { //  Random generation case
         Processing_Random(State_Vector, special_faces_sequence, max_sFaces_fraction, number_of_types, CellNumbs);
-
     } ///End of 'R' type simulations
 
     else if (stype == 'S') { // Maximum entropy production

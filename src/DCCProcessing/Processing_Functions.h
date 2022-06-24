@@ -3,11 +3,9 @@
 /** The library contains random and non-random functions for choice and generation of new identifications for k-Cells               *
  *  in the DCC Processing module. It makes them "special" and takes out of the set of "ordinary" k-Cells.                            **/
 ///================================================================================================================================///
-//#include "../DCC_SupportFunctions.h"
+
 /// (1) Totally random choice of element with # New2CellNumb from the list of numbers {0 to SCellsNumb}
 unsigned int NewCellNumb_R(unsigned int OCellsNumb){ // Random generation of a 2-Cell number
-    using namespace std;
-
     unsigned int New2CellNumb;
     New2CellNumb = rand() % (OCellsNumb-1); // Random generation of the boundary number in the range from 0 to OrdinaryCellNumbs.size()-1
     return New2CellNumb;
@@ -54,8 +52,9 @@ int Processing_Random( std::vector<unsigned int> &S_Vector,  std::vector<unsigne
         // Special and Ordinary Faces fraction calculation
         ordinary_faces_fraction = OrdinaryCellNumbs.size() / (double) CellNumbs.at(2);
         special_faces_fraction = 1.0 - ordinary_faces_fraction;
-
-    }while(ordinary_faces_fraction > (1.0 - max_sFaces_fraction)); /// End of the Random generation process
+// REPAIR        for (auto sfe : s_faces_sequence) cout << sfe << "\t"; cout << endl;
+//        cout << special_faces_fraction << "\t" << max_sFaces_fraction << endl;
+    }while(special_faces_fraction < max_sFaces_fraction); /// End of the Random generation process
 
 /// Closing and deleting
     //Remove all elements anf free the memory from the probe OrdinaryCellNumbs vector
@@ -156,9 +155,13 @@ int Processing_maxEntropy(std::vector<unsigned int>  &S_Vector, std::vector<unsi
                 J2N = J10;
                 J3N = J20;
                 // The entropy increase calculation for a given Face
-                CFace_EntropyIncrease =
+//                CFace_EntropyIncrease =
                         abs(J0 - J00) * log2(abs(J0 - J00)+pow(10,-10)) + abs(J1 - J10 + J1N) * log2(abs(J1 - J10 + J1N)+pow(10,-10)) +
                         abs(J2 - J20 + J2N) * log2(abs(J2 - J20 + J2N)+pow(10,-10)) + abs(J3 + J3N) * log2(abs(J3 + J3N)+pow(10,-10)); //  cout  << "\t\t" <<  CFace_EntropyIncrease << "\t\t" << endl;
+                CFace_EntropyIncrease =
+                        (J0 - J00) * log2((J0 - J00)+pow(10,-10)) + (J1 - J10 + J1N) * log2((J1 - J10 + J1N)+pow(10,-10)) +
+                        (J2 - J20 + J2N) * log2((J2 - J20 + J2N)+pow(10,-10)) + (J3 + J3N) * log2((J3 + J3N)+pow(10,-10)); //  cout  << "\t\t" <<  CFace_EntropyIncrease << "\t\t" << endl;
+
 //Oldie//                CFace_EntropyIncrease = (J0 - J00 + J0N) * log2(J0 - J00 + J0N) + (J1 - J10 + J1N) * log2(J1 - J10 + J1N) + (J2 - J20 + J2N) * log2(J2 - J20 + J2N); //  cout  << "\t\t" <<  CFace_EntropyIncrease << "\t\t" << endl;
 
                 // The result of the one iteration
@@ -188,6 +191,7 @@ int Processing_maxEntropy(std::vector<unsigned int>  &S_Vector, std::vector<unsi
         special_faces_fraction = s_faces_sequence.size() / (double) CellNumbs.at(2);
         ordinary_faces_fraction = 1.0 - special_faces_fraction;
 
+        if ((int) special_faces_fraction*CellNumbs.at(2) % (int) 0.01*max_sFaces_fraction*CellNumbs.at(2) == 1) cout << special_faces_fraction << endl;
     }while(special_faces_fraction < max_sFaces_fraction); /// End of the Random generation process
 
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;

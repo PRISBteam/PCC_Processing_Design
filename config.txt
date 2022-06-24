@@ -5,50 +5,55 @@
 * ===================================================================================================================================
 * ===================================================================================================================================
 
+SIMULATION MODE: #LIST
+                    | _LIST - mode which gives all modulus in a list;
+                    | _LOOP - mode which gives all modulus in a taylor-made loop (requiring working directly with the Main.cpp).
 =====================================================================================================================================
-================================	Initial parameters for DCC_Processing Tool	 ========================================================
+================================	Initial parameters for DCC_Processing Tool	 ====================================================
 =====================================================================================================================================
 
-DCC_Processing SWITCHED ON
+DCC_Processing SWITCHED OFF
 			| Switch on/off the whole DCC_Processing tool from the calculation. Only "DCC_Processing SWITCH XX" is allowed here.
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 | Value | Description | Special sign | Index in the Configuration vector |
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 -------------------------------------------------------------------------------------------------------------------------------------
-3	| The problem dimension that is the maximum dimension k_max of k-Cells	| @ | 	0
+3	    | The problem dimension that is the maximum dimension k_max of k-Cells	| @ | 	0
 -------------------------------------------------------------------------------------------------------------------------------------
-S	| Calculation type ('R', 'RW', 'S', 'F', 'I' or 'E')			| & |	1
+R	    | Calculation type ('R', 'RW', 'S', 'F', 'I' or 'E')			| & |	1
 -------------------------------------------------------------------------------------------------------------------------------------
-1 	| The number of special Face (2-cells) types				| ! |	2
+1         | The number of special Face (2-cells) types				| ! |	2
 -------------------------------------------------------------------------------------------------------------------------------------
-0.9 	| MAX fraction of Faces (calculation limit)				| ? | 	3
+0.6 	| MAX fraction of Faces (calculation limit)				| ? | 	3
 -------------------------------------------------------------------------------------------------------------------------------------
 300 	| The output step (number of new special steps) between the outputs		| ^ |	4
 -------------------------------------------------------------------------------------------------------------------------------------
-/Users/user/Dropbox/OFFICE/NEPER/8cells/                    | Input folder		| ~ |	5
+/Users/user/Dropbox/OFFICE/NEPER/resultsJune2022/2D_film_seeds/DCCFilm_10k/                    | Input folder		| ~ |	5
 -------------------------------------------------------------------------------------------------------------------------------------
-/Users/user/Dropbox/OFFICE/NEPER/resultsJune2022/8cells/ 	 	   | Output folder	| $ |	6
+/Users/user/Dropbox/OFFICE/NEPER/resultsJune2022/2D_film_seeds/DCCFilm_10k/ 	 	   | Output folder	| $ |	6
 -------------------------------------------------------------------------------------------------------------------------------------
 
 =====================================================================================================================================
 ================================	Initial parameters for DCC_Kinetic Tool	 ========================================================
 =====================================================================================================================================
 
-DCC_Kinetic SWITCHED OFF		| Switch on/off the whole DCC_Kinetic tool from the calculation.
+DCC_Kinetic SWITCHED ON
+            | Switch on/off the whole DCC_Kinetic tool from the calculation.
 			| Only "DCC_Kinetic SWITCHED XX" is allowed here.
 
-++++++++++++++++++++++++++++++++++++++++++++++
-| Value | Description | Special sign | Index |
-++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++
+| Value | Description | Special sign |
+++++++++++++++++++++++++++++++++++++++
 -------------------------------------------------------------------------------------------------------------------------------------
-
+W	    | Kinetic simulation type ('W', 'P' or 'F')			| ` |
+-------------------------------------------------------------------------------------------------------------------------------------
 
 =====================================================================================================================================
 ===============================n=	Analysis tools (hash - on, percent - off) ==================================================================
 =====================================================================================================================================
 
-DCC_Characterisation SWITCHED ON
+DCC_Characterisation SWITCHED OFF
                | Switch on/off the whole DCC_StructureCharacterisation tool from the calculation. Only "DCC_Characterisation SWITCH XX" is allowed here.
 +++++++++++++++++++++++++++++++++++++++++++++++
 | On/Off | Description | Index | Library name |

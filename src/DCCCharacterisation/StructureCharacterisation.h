@@ -1,14 +1,15 @@
 /// Attached user defined C++ libraries:
 ///-------------------------------------
 ///-------------------------------------
-//#include "TJsLab.h"
+#include "TJsLab.h"
 //#include "FaceLaplacians.h"
 ///-------------------------------------
 
 ///Structure characterisation tool
 //unsigned int DCC_StructureCharacterisation(std::vector<unsigned int> const& S_Vector, std::vector<unsigned int> const& s_faces_sequence, std::vector<double> const& configuration, std::vector<unsigned int> const& CellNumbs, std::vector<char*> const paths, char* odir) {
 int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence, std::vector<double> configuration, std::vector<unsigned int> &CellNumbs, std::vector<char*> const paths, char* odir) {
-    cout << "START of DCC Structure Characterisation Module" << endl;
+
+// cout << "START of DCC Structure Characterisation Module" << endl;
 
     SpMat SpAM_SpecFaces(s_faces_sequence.size(), s_faces_sequence.size()), SFace_Laplacian(s_faces_sequence.size(),
                                                                                             s_faces_sequence.size()),
@@ -35,8 +36,7 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
     AGS = SMatrixReader(paths.at(3), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Volumes
     AGS = 0.5 * (AGS + SparseMatrix<double>(AGS.transpose())); // Full matrix instead of triagonal
 /// Incidence sparse matrix for Edges and Nodes /// Incidence sparse matrix for Faces and Edges /// Incidence sparse matrix for Grains and Faces
-    SpMat ENS(CellNumbs.at(0), CellNumbs.at(1)), FES(CellNumbs.at(1), CellNumbs.at(2)), GFS(CellNumbs.at(2),
-                                                                                            CellNumbs.at(3));
+    SpMat ENS(CellNumbs.at(0), CellNumbs.at(1)), FES(CellNumbs.at(1), CellNumbs.at(2)), GFS(CellNumbs.at(2), CellNumbs.at(3));
     ENS = SMatrixReader(paths.at(4), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Nodes-Edges
     FES = SMatrixReader(paths.at(5), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
     GFS = SMatrixReader(paths.at(6), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
@@ -135,12 +135,13 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
     OutRWFLfile.close();
     } else cout << "Error: No such a directory for\t" << odir + "SpecialGrainBoundaries.txt"s << endl;
 
+/// =========== Analysis tools ==============>
 if (configuration.at(1)) { // Nodes types statistics, indices and configuration entropy
 //#include "QPsLab.h"
 }
 if (configuration.at(2)) { /// Edges types statistics, indices and configuration entropy
-//map<unsigned int, unsigned int> Edges_Types_Map; // Map: [Edge number] --> [Enge type]
-//Edges_Types_Map = EdgesStat(CellNumbs, numerator, SpecialCellMap, FES, odir, special_faces_fraction);
+    map<unsigned int, unsigned int> Edges_Types_Map; // Map: [Edge number] --> [Enge type]
+    EdgesStat(S_Vector, s_faces_sequence, CellNumbs, FES, odir);
 }
 if (configuration.at(3)) { // Faces types statistics and structural indices
 //#include "FacesLab.h"
@@ -168,6 +169,12 @@ if (configuration.at(10)) { // Tutte polynomial for the special faces network
 if (configuration.at(11)) { // Statistical physics module
 //#include"DCCStatistical.h"
 }
+    /// Vectors deletion
+    SFaces_Triplet_list.clear();
+    SFaces_Triplet_list.shrink_to_fit();
+    SFace_degrees.clear();
+    SFace_degrees.shrink_to_fit();
+    columns.clear(); columns.shrink_to_fit();
 
 return SpAM_SpecFaces.nonZeros();
 } /// End of the Structure_Characterisation function
