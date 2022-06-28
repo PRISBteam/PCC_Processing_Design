@@ -36,13 +36,13 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
     /// Iteration over ShearStresses :: Input parameters
     double ShearStress = 0.0;
     double ShearStress_min = 1.0*pow(10,6), ShearStress_max = 1.0*pow(10,9);
-    int simulation_steps = 1000, dSS = 0;
+    int simulation_steps = 100000, dSS = 0;
     /// Iteration over Temperature :: Input parameters
     double Temperature = 300.0;
     /// Other parameters
-    double s = 1.0; // nano-slip value
-    double E0 = 1.0, // ground energy
-             alpha = 0.0; // model coefficient alpha*s^2
+    double s = 0.1; // nano-slip value
+    double lambda = 0.0*46.0*pow(10,9), //Shear modulus
+             alpha = 7.0*pow(10,7); // model coefficient alpha*s^2
 
     ShearStress = ShearStress_min;
     dSS = (ShearStress_max - ShearStress_min)/ (double) simulation_steps;
@@ -51,22 +51,25 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
         /// METROPOLIS algorithm
         State_Vector.clear();
         /// Iteration number for Metropolis algorithm
-        long iteration_number = 5.0 * CellNumbs.at(2);
-        State_Vector = Metropolis(ShearStress, Temperature, CellNumbs, iteration_number, s, E0, alpha); // Metropolis() is defined below
+        long iteration_number = 3.0 * CellNumbs.at(2);
+
+        /// =========== Metropolis algorithm ============>>>
+        State_Vector = Metropolis(ShearStress, Temperature, CellNumbs, iteration_number, s, alpha, lambda); // Metropolis() is defined below
 
     /// Analysis
-    double slip_fraction = std::count(State_Vector.begin(), State_Vector.end(), 1)/ CellNumbs.at(2);
+    double slip_fraction = std::count(State_Vector.begin(), State_Vector.end(), 1)/ (double) CellNumbs.at(2);
     fraction_stress_temperature.push_back(make_tuple(slip_fraction, ShearStress, Temperature));
     } // end of for (< calculation_steps)
 
     return fraction_stress_temperature;
 }
 
-vector<unsigned int> Metropolis(double &ShearStress, double &Temperature, std::vector<unsigned int> &CellNumbs, long iteration_number, double s, double E0, double alpha){
+vector<unsigned int> Metropolis(double &ShearStress, double &Temperature, std::vector<unsigned int> &CellNumbs, long iteration_number, double s, double alpha, double lambda){
     /// I. Constant initial state initialisation
     //zero vectors required for Processing_Random() input
     std::vector <unsigned int> SlipState_Vector(CellNumbs.at(2),0), s_faces_sequence(CellNumbs.at(2),0);
     double Rc = 8.31; //gas constant
+
     // ================> Initial p = 0.5 Face seeds
     Processing_Random(SlipState_Vector, s_faces_sequence, 0.5, 1, CellNumbs);
 
@@ -82,15 +85,18 @@ vector<unsigned int> Metropolis(double &ShearStress, double &Temperature, std::v
         } //if
      // 4. Else if dH > 0 consider the acceptance probability
         else if (SlipState_Vector.at(NewSlipNumber) == 0) {
-            double P_ac = exp(- (E0 - ShearStress * s + alpha*pow(s,2.0))/(Rc * Temperature));
+            //double slips_number = std::count(SlipState_Vector.begin(), SlipState_Vector.end(), 1);
+            double P_ac = exp(- (alpha * pow(s,2.0) - ShearStress * s - lambda*s)/(Rc * Temperature));
+            if (P_ac > 1) P_ac = 1.0;
+                //cout << "P_ac =\t" << alpha*pow(s,2.0) - ShearStress*s << "\trandom number\t" << (alpha*pow(s,2.0) - ShearStress*s - lambda*s)/(Rc * Temperature) << endl;
+
             double rv = (rand() / (RAND_MAX + 1.0)); // Generate random value in the range [0,1]
                 if (rv <= P_ac) {
+                //     if (P_ac > 0) cout << "P_ac =\t" << (alpha*pow(s,2.0) - ShearStress*s - lambda*s)/(Rc * Temperature) << "\trandom number\t" << rv << endl;
                     SlipState_Vector.at(NewSlipNumber) = 1;
                 } else continue;
-        } // else if SlipState_Vector == 0
+        }
 
-    /// Slip State Vector changes
-    SlipState_Vector.at(NewSlipNumber) = 1;
     } // for loop (i < iteration_number)
 
     return SlipState_Vector;
