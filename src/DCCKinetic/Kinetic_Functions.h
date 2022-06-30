@@ -53,7 +53,7 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
 
     /// Iteration over ShearStresses :: Input parameters
     double ShearStress = 0.0;
-    double ShearStress_min = 0.1*pow(10,9), ShearStress_max = 10.0*pow(10,9);
+    double ShearStress_min = 0.1*pow(10,9), ShearStress_max = 20.0*pow(10,9);
     int simulation_steps = 10000, dSS = 0;
     /// Iteration over Temperature :: Input parameters
     double Temperature = 293.0;
@@ -71,7 +71,7 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
     double lambda = 0.0*pow(10,-9)*46.0*pow(10,9), //Shear modulus
              alpha = 1.0*pow(10,-3)*ShMod; ///////
                      //pow(10,-3)*ShMod; /// model coefficient alpha*s^2
-    double D_size = 12.0*a_lattice; /// Complex size ///
+    double D_size = 11.0*a_lattice; /// Complex size ///
     vector<double> external_normal = {0.0, 0.0, 1.0}; /// normal to the external face
     /// From unit areas to the real ones [m^2]
     for(auto slareas : SAreas) SAreas_m2.push_back(slareas*pow(a_lattice,2));
