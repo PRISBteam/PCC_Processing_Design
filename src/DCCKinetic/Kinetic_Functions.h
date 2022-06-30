@@ -99,21 +99,22 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
         /// =========== Metropolis algorithm ============>>>
         State_Vector = Metropolis(stress_tensor, norms_vector, tang_vector, Temperature, CellNumbs, iteration_number, slip_vector, alpha, lambda); // Metropolis() is defined below
 
-    /// Analysis :: slip_fraction and fraction_stress_temperature
-        double slip_fraction = std::count(State_Vector.begin(), State_Vector.end(), 1)/ (double) State_Vector.size();
-        fraction_stress_temperature.push_back(make_tuple(slip_fraction, ShearStress, Temperature));
-
-    /// Plastic strain
+        /// Plastic strain
         double Plastic_Strain = 0.0; unsigned int state_it = 0;
         for(auto state : State_Vector) {
             if (state == 1) {
-               Plastic_Strain += SAreas_m2.at(state_it) * Burgv * abs(tang_vector.at(state_it)[0]*external_normal[0] + tang_vector.at(state_it)[1]*external_normal[1] + tang_vector.at(state_it)[2]*external_normal[2])/ pow(D_size, 3);
+                Plastic_Strain += SAreas_m2.at(state_it) * Burgv * abs(tang_vector.at(state_it)[0]*external_normal[0] + tang_vector.at(state_it)[1]*external_normal[1] + tang_vector.at(state_it)[2]*external_normal[2])/ pow(D_size, 3);
 //                        inner_product(tang_vector.at(state_it).begin(), tang_vector.at(state_it).end(), external_normal.begin(), 0);
-                          //  cout << "0:\t" << tang_vector.at(state_it)[0]*external_normal[0] << "\t1:\t" << tang_vector.at(state_it)[1]*external_normal[1] <<"\t2:\t" << tang_vector.at(state_it)[2]*external_normal[2] << endl;
-            }
-           ++state_it;
-        }
-        /// Output and stop!
+                //  cout << "0:\t" << tang_vector.at(state_it)[0]*external_normal[0] << "\t1:\t" << tang_vector.at(state_it)[1]*external_normal[1] <<"\t2:\t" << tang_vector.at(state_it)[2]*external_normal[2] << endl;
+            } // end if
+            ++state_it;
+        } // end of for(state : State_Vector)
+
+        /// Analysis :: slip_fraction and fraction_stress_temperature
+        double slip_fraction = std::count(State_Vector.begin(), State_Vector.end(), 1)/ (double) State_Vector.size();
+        fraction_stress_temperature.push_back(make_tuple(Plastic_Strain, ShearStress, Temperature));
+
+     /// Output and stop!
         if (Plastic_Strain >= 0.002) { cout << "Plastic strain =\t" << Plastic_Strain << "\tYield strength [GPa] =\t" << ShearStress/pow(10,9) << endl; return fraction_stress_temperature;}
       //  cout << "\tSlip fraction =\t" << slip_fraction << "\tPlastic strain =\t" << Plastic_Strain << "\tYield strength [GPa] =\t" << ShearStress/pow(10,9) << endl;
 

@@ -104,9 +104,9 @@ int DCC_Kinetic(char stype, std::vector<char*> paths, char* input_folder, char* 
         ofstream FSTStream;
         FSTStream.open(odir + "fraction_stress_temperature.txt"s, ios::trunc);
         if (FSTStream) {
-            FSTStream << "(1) Nano-slips fraction (2) Yield strength (3) Temperature)" << endl;
+            FSTStream << "(1) Plastic strain [%] (2) Yield strength [MPa] (3) Temperature [K])" << endl;
             for (auto go : fraction_stress_temperature)
-                FSTStream << get<0>(go) << " \t" << get<1>(go)/pow(10,6) << " \t" << get<2>(go) << endl;
+                FSTStream << get<0>(go) * 100.0 << " \t" << get<1>(go)/pow(10,6) << " \t" << get<2>(go) << endl;
             FSTStream.close();
 
         } else cout << "Error: No such a directory for\t" << odir + "fraction_stress_temperature.txt"s << endl;
