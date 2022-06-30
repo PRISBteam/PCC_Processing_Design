@@ -54,7 +54,7 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
     /// Iteration over ShearStresses :: Input parameters
     double ShearStress = 0.0;
     double ShearStress_min = 0.1*pow(10,9), ShearStress_max = 20.0*pow(10,9);
-    int simulation_steps = 10000, dSS = 0;
+    int simulation_steps = 1000000, dSS = 0;
     /// Iteration over Temperature :: Input parameters
     double Temperature = 293.0;
     /// Material parameters
@@ -69,16 +69,16 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
     /// Model parameters
     double Burgv = BurgvCu, ShMod = ShearModCu, a_lattice = a_latticeCu;
     double lambda = 0.0*pow(10,-9)*46.0*pow(10,9), //Shear modulus
-             alpha = 1.0*pow(10,-3)*ShMod; ///////
+             alpha = 1.0*pow(10,-1)*ShMod; ///////
                      //pow(10,-3)*ShMod; /// model coefficient alpha*s^2
     double D_size = 11.0*a_lattice; /// Complex size ///
-    vector<double> external_normal = {0.0, 0.0, 1.0}; /// normal to the external face
+    vector<double> external_normal = { 0.0, 0.0, 1.0 }; /// normal to the external face
     /// From unit areas to the real ones [m^2]
     for(auto slareas : SAreas) SAreas_m2.push_back(slareas*pow(a_lattice,2));
 
     ShearStress = ShearStress_min;
     dSS = (ShearStress_max - ShearStress_min)/ (double) simulation_steps;
-   // cout << "Stress calculation step =\t" << dSS/pow(10,6) << endl;
+    cout << "Stress calculation step =\t" << dSS/pow(10,6) << endl;
 
     for (long i = 0; i < simulation_steps; ++i) {
         ShearStress += dSS;
@@ -95,22 +95,26 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
 
         /// METROPOLIS algorithm ///
         /// Iteration number for METROPOLIS algorithm
-        long iteration_number = 3.0 * SAreas.size();
+        long iteration_number = 6.0 * SAreas.size();
 
         /// =========== Metropolis algorithm ============>>>
-        State_Vector.clear();
-        State_Vector = Metropolis(stress_tensor, norms_vector, tang_vector, Temperature, CellNumbs, iteration_number, slip_vector, alpha, lambda); // Metropolis() is defined below
+        vector<double> smax = *max_element(begin(stress_tensor), end(stress_tensor));
+        double s_min = *max_element(begin(smax), end(smax));
 
+        std::fill(State_Vector.begin(), State_Vector.end(), 0);
+        if (alpha - s_min < -100.0) std::fill(State_Vector.begin(), State_Vector.end(), 1);
+        else if (alpha - s_min > -100.0 && alpha - s_min < 100.0) State_Vector = Metropolis(stress_tensor, norms_vector, tang_vector, Temperature, CellNumbs, iteration_number, slip_vector, alpha, lambda); // Metropolis() function is defined below
        // for(auto state : State_Vector) cout << state << "\t";
        // cout << "End" << endl;
+        //cout << "alpha - s_min  =\t" << alpha - s_min << endl;
 
         /// Plastic strain
         double Plastic_Strain = 0.0; unsigned int state_it = 0;
         for(auto state : State_Vector) {
+            //cout << count(begin(State_Vector), end(State_Vector),1) << SAreas_m2.at(state_it) * Burgv * abs(tang_vector.at(state_it)[0]*external_normal[0] + tang_vector.at(state_it)[1]*external_normal[1] + tang_vector.at(state_it)[2]*external_normal[2])/ pow(D_size, 3) << endl;
             if (state == 1) {
                 Plastic_Strain += SAreas_m2.at(state_it) * Burgv * abs(tang_vector.at(state_it)[0]*external_normal[0] + tang_vector.at(state_it)[1]*external_normal[1] + tang_vector.at(state_it)[2]*external_normal[2])/ pow(D_size, 3);
-//                        inner_product(tang_vector.at(state_it).begin(), tang_vector.at(state_it).end(), external_normal.begin(), 0);
-                //  cout << "0:\t" << tang_vector.at(state_it)[0]*external_normal[0] << "\t1:\t" << tang_vector.at(state_it)[1]*external_normal[1] <<"\t2:\t" << tang_vector.at(state_it)[2]*external_normal[2] << endl;
+
             } // end if
             ++state_it;
         } // end of for(state : State_Vector)
@@ -119,7 +123,7 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
         double slip_fraction = std::count(State_Vector.begin(), State_Vector.end(), 1)/ (double) State_Vector.size();
         fraction_stress_temperature.push_back(make_tuple(Plastic_Strain, ShearStress, Temperature));
 
-       // cout << "Stress  =\t" << ShearStress << "\tPlastic strain\t" << Plastic_Strain << endl;
+        //cout << "Stress  =\t" << ShearStress << "\tPlastic strain\t" << Plastic_Strain << endl;
         /// Output and stop!
         if (Plastic_Strain >= 0.002) { cout << "Plastic strain =\t" << Plastic_Strain << "\tYield strength [GPa] =\t" << ShearStress/pow(10,9) << endl; return fraction_stress_temperature;}
       //  cout << "\tSlip fraction =\t" << slip_fraction << "\tPlastic strain =\t" << Plastic_Strain << "\tYield strength [GPa] =\t" << ShearStress/pow(10,9) << endl;
