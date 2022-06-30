@@ -5,14 +5,13 @@ Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsig
     typedef Eigen::Triplet<double> Tr; // Eigen library class
     std::vector<Tr> tripletList; // Probe vector of triplets
 
-    double i = 0, j = 0, value = 0;
+    double i = 0.0, j = 0.0, value = 0.0;
     ifstream inAN(SMpath);
     if (inAN.is_open()) { //If the file was successfully open, then
         while(!inAN.eof()) {
             inAN >> i >> j >> value;
-            if (i!=0 && j!=0) {
-                tripletList.push_back(Tr((i - 1), (j - 1), value));
-            } else {cout << "Warring! Zero element in SMatrixReader"; exit(12);}
+                tripletList.push_back(Tr((i), (j), value));
+               // cout << i << "\t" << j << "\t" << value << endl;
         }
     } else cout << "The file " << SMpath << " cannot be read" << endl; //If something goes wrong
 //Sparse AB matrix
@@ -48,7 +47,7 @@ vector<tuple<double, double, double>> TuplesReader(char* SMpath) {
     typedef tuple<double, double, double> Tup; // Eigen library class
     std::vector<Tup> tripletList; // Probe vector of triplets
 
-    double i = 0, j = 0, value = 0, t_length = 0;
+    double i = 0.0, j = 0.0, value = 0.0, t_length = 0;
     ifstream inAN(SMpath);
     if (inAN.is_open()) { //If the file was successfully open, then
         while(!inAN.eof()) {
@@ -76,7 +75,7 @@ std::vector<unsigned int> VectorReader(char* FilePath) {
 /// Creation double std::Vector from file
 std::vector<double> dVectorReader(char* FilePath) {
     std::vector<double> res;
-    unsigned int i=0;
+    double i = 0.0;
     ifstream inCellNumbers(FilePath);
     if (inCellNumbers.is_open()) { //If the file was successfully open, then
         while(inCellNumbers >> i) res.push_back(i);

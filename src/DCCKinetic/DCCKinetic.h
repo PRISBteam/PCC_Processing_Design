@@ -92,10 +92,11 @@ int DCC_Kinetic(char stype, std::vector<char*> paths, char* input_folder, char* 
         } else cout << "Error: No such a directory for\t" << odir + "GrainOrientations.txt"s << endl;
 
     } ///End of 'Wear' type simulations
+
     else if (stype == 'P') { // Plasticity
         vector<Tup> fraction_stress_temperature;
-        double Burgv = 2.56*pow(10,-10); // dislocation Burgers vector
-        double DCC_size = 10.0*Burgv; /// Complex size //////////////////// --> Set out of here!
+
+        /// ========= DCC_Kinetic main function call ==========>>
 
         fraction_stress_temperature = DCC_Kinetic_Plasticity(FES, CellNumbs, input_folder, odir);
 
@@ -107,8 +108,8 @@ int DCC_Kinetic(char stype, std::vector<char*> paths, char* input_folder, char* 
             for (auto go : fraction_stress_temperature)
                 FSTStream << get<0>(go) << " \t" << get<1>(go)/pow(10,6) << " \t" << get<2>(go) << endl;
             FSTStream.close();
-        } else cout << "Error: No such a directory for\t" << odir + "fraction_stress_temperature.txt"s << endl;
 
+        } else cout << "Error: No such a directory for\t" << odir + "fraction_stress_temperature.txt"s << endl;
 //        for (auto lk : fraction_stress_temperature) if (get<0>(lk)*CellNumbs.at(2)*Burgv/DCC_size > 0.002) { cout << "Nano-slips fraction\t" << get<0>(lk) << "\tYield strength\t" << get<1>(lk) << "\tTemperature\t" << get<2>(lk) << endl;              break; }
 
     } ///End of 'Plasticity' type simulations

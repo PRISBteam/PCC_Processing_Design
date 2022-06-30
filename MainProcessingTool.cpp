@@ -15,6 +15,7 @@
 #include <ctime>
 #include <vector>
 #include <tuple>
+#include<numeric>
 #include <string>
 #include <map>
 #include <algorithm>
