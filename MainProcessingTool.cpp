@@ -60,6 +60,7 @@ int main() {
     using std::__fs::filesystem::current_path; //to obtain current working directory
     string MainPath = current_path();
     eraseSubStr(MainPath, "cmake-build-debug"s);
+
     string  config = MainPath + "config.txt"s; char* confpath = const_cast<char*>(config.c_str());
 
 /// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen

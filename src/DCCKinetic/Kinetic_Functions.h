@@ -53,10 +53,10 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
 
     /// Iteration over ShearStresses :: Input parameters
     double ShearStress = 0.0;
-    double ShearStress_min = 0.1*pow(10,9), ShearStress_max = 20.0*pow(10,9);
+    double ShearStress_min = 0.1*pow(10,9), ShearStress_max = 10.0*pow(10,9);
     int simulation_steps = 10000, dSS = 0;
     /// Iteration over Temperature :: Input parameters
-    double Temperature = 300.0;
+    double Temperature = 293.0;
     /// Material parameters
     double a_latticeCu = 3.628*pow(10,-10); // lattice parameter for bulk COPPER
     double BurgvCu = 2.56*pow(10,-10); // dislocation Burgers vector for COPPER
@@ -68,15 +68,18 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
 
     /// Model parameters
     double Burgv = BurgvCu, ShMod = ShearModCu, a_lattice = a_latticeCu;
-    double lambda = 0.0*46.0*pow(10,9), //Shear modulus
-             alpha = 0.5*ShMod; /// model coefficient alpha*s^2
-    double D_size = 3.0*3.0*a_latticeCu; /// Complex size ///
+    double lambda = 0.0*pow(10,-9)*46.0*pow(10,9), //Shear modulus
+             alpha = 1.0*pow(10,-3)*ShMod; ///////
+                     //pow(10,-3)*ShMod; /// model coefficient alpha*s^2
+    double D_size = 12.0*a_lattice; /// Complex size ///
     vector<double> external_normal = {0.0, 0.0, 1.0}; /// normal to the external face
     /// From unit areas to the real ones [m^2]
     for(auto slareas : SAreas) SAreas_m2.push_back(slareas*pow(a_lattice,2));
 
     ShearStress = ShearStress_min;
     dSS = (ShearStress_max - ShearStress_min)/ (double) simulation_steps;
+   // cout << "Stress calculation step =\t" << dSS/pow(10,6) << endl;
+
     for (long i = 0; i < simulation_steps; ++i) {
         ShearStress += dSS;
         /// Stress tensor definition
@@ -90,14 +93,16 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
         for(auto sa : SAreas_m2) slip_vector.push_back(Burgv * sqrt(M_PI/sa)); // nano-slip value s = b * Sqrt(Pi/As)
             //for (auto p : slip_vector) cout << "slip_vector" << SAreas_m2.size() << endl;
 
-        /// METROPOLIS algorithm
-        State_Vector.clear();
-
+        /// METROPOLIS algorithm ///
         /// Iteration number for METROPOLIS algorithm
-        long iteration_number = 4.0 * SAreas.size();
+        long iteration_number = 3.0 * SAreas.size();
 
         /// =========== Metropolis algorithm ============>>>
+        State_Vector.clear();
         State_Vector = Metropolis(stress_tensor, norms_vector, tang_vector, Temperature, CellNumbs, iteration_number, slip_vector, alpha, lambda); // Metropolis() is defined below
+
+       // for(auto state : State_Vector) cout << state << "\t";
+       // cout << "End" << endl;
 
         /// Plastic strain
         double Plastic_Strain = 0.0; unsigned int state_it = 0;
@@ -114,12 +119,14 @@ vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::
         double slip_fraction = std::count(State_Vector.begin(), State_Vector.end(), 1)/ (double) State_Vector.size();
         fraction_stress_temperature.push_back(make_tuple(Plastic_Strain, ShearStress, Temperature));
 
-     /// Output and stop!
+       // cout << "Stress  =\t" << ShearStress << "\tPlastic strain\t" << Plastic_Strain << endl;
+        /// Output and stop!
         if (Plastic_Strain >= 0.002) { cout << "Plastic strain =\t" << Plastic_Strain << "\tYield strength [GPa] =\t" << ShearStress/pow(10,9) << endl; return fraction_stress_temperature;}
       //  cout << "\tSlip fraction =\t" << slip_fraction << "\tPlastic strain =\t" << Plastic_Strain << "\tYield strength [GPa] =\t" << ShearStress/pow(10,9) << endl;
 
     } // end of for (< calculation_steps)
 
+    cout << "Stress is not in the range!" << endl;
     return fraction_stress_temperature;
 }
 
@@ -137,7 +144,7 @@ vector<unsigned int> Metropolis(vector<vector<double>> &stress_tensor, vector<ve
 
     for (long i = 0; i < iteration_number; ++i) {
     // 2. Random choice of a new Face
-    long NewSlipNumber = rand() % (CellNumbs.at(2)-2) ; // Random generation of the boundary number in the range from 0 to CellNumbs.at(2)
+    long NewSlipNumber = rand() % (CellNumbs.at(2) -2); // Random generation of the boundary number in the range from 0 to CellNumbs.at(2)
 
     // 3. If dH < 0 energetically favourable -> Accept trial and change the type
         if (SlipState_Vector.at(NewSlipNumber) == 1) {
@@ -147,30 +154,33 @@ vector<unsigned int> Metropolis(vector<vector<double>> &stress_tensor, vector<ve
         else if (SlipState_Vector.at(NewSlipNumber) == 0) {
     // Model variables
             double Snt = 0.0, s2 = 0.0;
-            vector<vector<double>> sik{{0,0,0},{0,0,0},{0,0,0}};
-
+            vector<vector<double>> sik{ {0,0,0}, {0,0,0}, {0,0,0} };
 //            cout << NewSlipNumber << "\t" << slip_vector.at(NewSlipNumber) << endl;
             //exit(457);
-
-            for (int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i) {
                 for (int j = 0; j < 3; ++j) {
                     sik[i][j] = 0.5 * slip_vector.at(NewSlipNumber) * (norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j] +
                                                 norms_vector.at(NewSlipNumber)[j] * tang_vector.at(NewSlipNumber)[i]);
                     Snt += stress_tensor[i][j] * sik[i][j];
-                     s2 += 0.5 * pow(slip_vector.at(NewSlipNumber),2) * (norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j]*norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j] +
+
+                    s2 += 0.5 * pow(slip_vector.at(NewSlipNumber),2) * (norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j]*norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j] +
                             norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j]*norms_vector.at(NewSlipNumber)[j] * tang_vector.at(NewSlipNumber)[i]);
                 }
-
+            }
             /// New ACCEPTANCE PROBABILITY
-            double P_ac = exp(- (alpha * s2 - Snt - lambda * slip_vector.at(NewSlipNumber))/(Rc * Temperature));
-            if (P_ac > 1) P_ac = 1.0;
-                //cout << "P_ac =\t" << alpha * s2 - Snt - lambda * slip_vector.at(NewSlipNumber) << "\trandom number\t" << (alpha * s2 - Snt - lambda * slip_vector.at(NewSlipNumber))/(Rc * Temperature) << endl;
+            double P_ac = 0.0;
+            if (s2 != 0) {
+                double P_ac = exp(-(alpha * pow(slip_vector.at(NewSlipNumber),2) - Snt - lambda * slip_vector.at(NewSlipNumber)) / (Rc * Temperature));
+                if (P_ac > 1) P_ac = 1.0;
+            } else P_ac = 0;
+           // cout << "Alpha\t" << alpha * pow(slip_vector.at(NewSlipNumber),2) - Snt  << "\t SNT\t" << Snt << "\tProb\t" << exp(-(alpha * s2 - Snt - lambda * slip_vector.at(NewSlipNumber)) / (Rc * Temperature)) << endl;
 
             double rv = (rand() / (RAND_MAX + 1.0)); // Generate random value in the range [0,1]
                 if (rv <= P_ac) {
-                //     if (P_ac > 0) cout << "P_ac =\t" << (alpha*pow(s,2.0) - ShearStress * slip_vector.at(NewSlipNumber) - lambda * slip_vector.at(NewSlipNumber))/(Rc * Temperature) << "\trandom number\t" << rv << endl;
+    //   if (P_ac > 0) cout << "P_ac =\t" << P_ac << "\trandom number\t" << rv << endl;
                     SlipState_Vector.at(NewSlipNumber) = 1;
-                } else continue;
+                } else SlipState_Vector.at(NewSlipNumber) = 0;
+
         } // end of  else if (SlipState_Vector.at(NewSlipNumber) == 0)
 
     } // for loop (i < iteration_number)
