@@ -10,7 +10,6 @@
 int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence, std::vector<double> configuration, std::vector<unsigned int> &CellNumbs, std::vector<char*> const paths, char* odir) {
 
 // cout << "START of DCC Structure Characterisation Module" << endl;
-
     SpMat SpAM_SpecFaces(s_faces_sequence.size(), s_faces_sequence.size()), SFace_Laplacian(s_faces_sequence.size(),
                                                                                             s_faces_sequence.size()),
             Sym_SFace_Laplacian(s_faces_sequence.size(), s_faces_sequence.size()), RW_SFace_Laplacian(
@@ -35,6 +34,7 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
     AFS = 0.5 * (AFS + SparseMatrix<double>(AFS.transpose())); // Full matrix instead of triagonal
     AGS = SMatrixReader(paths.at(3), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Volumes
     AGS = 0.5 * (AGS + SparseMatrix<double>(AGS.transpose())); // Full matrix instead of triagonal
+
 /// Incidence sparse matrix for Edges and Nodes /// Incidence sparse matrix for Faces and Edges /// Incidence sparse matrix for Grains and Faces
     SpMat ENS(CellNumbs.at(0), CellNumbs.at(1)), FES(CellNumbs.at(1), CellNumbs.at(2)), GFS(CellNumbs.at(2), CellNumbs.at(3));
     ENS = SMatrixReader(paths.at(4), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Nodes-Edges
@@ -42,6 +42,7 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
     GFS = SMatrixReader(paths.at(6), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
 /// Set simulation configuration from configuration file :: the number of special face types and calculating parameters.
     int number_of_types = (int) configuration.at(0);
+
 /// ===== Creation of the Special Faces triplet list =====>
 // Another key point: creation of a triplet list SFaces_Triplet_list for the sparse matrix of special Faces
     vector<Tr> SFaces_Triplet_list;
@@ -63,7 +64,6 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
     } // for(s_faces_sequence) | then we add this element to the new Special Faces Matrix with the number {numerator, new number of the neighbour}
     // Sparse Face adjacency matrix
     SpAM_SpecFaces.setFromTriplets(SFaces_Triplet_list.begin(), SFaces_Triplet_list.end());
-
     SpAM_SpecFaces = 0.5 * (SpAM_SpecFaces +
                             SparseMatrix<double>(SpAM_SpecFaces.transpose())); // Full matrix instead of triagonal
     SFaces_Triplet_list.clear();
@@ -78,6 +78,7 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
         }
         SFace_degrees.push_back(degree_Fcounter);
     }
+
 //Creation of the S-Face degree matrix
     SpMat SFDegree(SFace_degrees.size(), SFace_degrees.size());
     SFDegree.setIdentity();
@@ -91,9 +92,10 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
     Id.setIdentity();
 /// Special Faces Laplacian matrix
     SFace_Laplacian = SFDegree - SpAM_SpecFaces; // L = D - A
+
 // Symmetric S-Faces Laplacian
 /// Left Random-Walk normalized Laplacian matrix
-    RW_SFace_Laplacian = Id - SFDegree.cwiseInverse() * SpAM_SpecFaces; // Ls = D^-1/2 L
+//RW_SFace_Laplacian = Id - SFDegree.cwiseInverse() * SpAM_SpecFaces; // Ls = D^-1/2 L
 
 /// Generation of the output streams
     ofstream OutFaceFile; // Output stream for variables related with special 2-Cells in DCC
@@ -109,8 +111,8 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
         OutFaceFile << "Adjacency Matrix of all Special Faces" << endl;
         OutFaceFile << endl << "max Special Faces fraction is equal to\t " << MAX_sfaces_fraction << endl
                     << endl;                 // Output of special_faces_fraction to files
-//OutFaceFile << SAM_FacesGraph << endl; //  Sparse matrix output
-        OutFaceFile << MatrixXd(SpAM_SpecFaces) << endl; //  Dense matrix output
+        OutFaceFile << SpAM_SpecFaces << endl; //  Sparse matrix output
+        //OutFaceFile << MatrixXd(SpAM_SpecFaces) << endl; //  Dense matrix output
         OutFaceFile.close();
     } else cout << "Error: No such a directory for\t" << odir + "FaceAdjacency.txt"s << endl;
 
@@ -119,8 +121,8 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
     if (OutFLfile) {
         OutFLfile << "Laplacian Matrix of all Special Faces" << endl;
         OutFLfile << endl << "Special Faces fraction is equal to\t " << MAX_sfaces_fraction << endl << endl;
-//                OutFLfile << Face_Laplacian << endl; //  Sparse matrix output
-        OutFLfile << MatrixXd(SFace_Laplacian) << endl; // Dense matrix output
+                OutFLfile << SFace_Laplacian << endl; //  Sparse matrix output
+//        OutFLfile << MatrixXd(SFace_Laplacian) << endl; // Dense matrix output
         OutFLfile.close();
     } else cout << "Error: No such a directory for\t" << odir + "FaceLaplacian.txt"s << endl;
 
@@ -140,7 +142,7 @@ if (configuration.at(1)) { // Nodes types statistics, indices and configuration 
 //#include "QPsLab.h"
 }
 if (configuration.at(2)) { /// Edges types statistics, indices and configuration entropy
-    map<unsigned int, unsigned int> Edges_Types_Map; // Map: [Edge number] --> [Enge type]
+    //map<unsigned int, unsigned int> Edges_Types_Map; // Map: [Edge number] --> [Enge type]
     EdgesStat(S_Vector, s_faces_sequence, CellNumbs, FES, odir);
 }
 if (configuration.at(3)) { // Faces types statistics and structural indices
@@ -173,10 +175,18 @@ if (configuration.at(11)) { // Statistical physics module
     SFaces_Triplet_list.clear();
     SFaces_Triplet_list.shrink_to_fit();
     SFace_degrees.clear();
-    SFace_degrees.shrink_to_fit();
-    columns.clear(); columns.shrink_to_fit();
 
-return SpAM_SpecFaces.nonZeros();
+    SFace_degrees.shrink_to_fit();
+    columns.clear();
+    columns.shrink_to_fit();
+    //SpAM_SpecFaces.makeCompressed();
+    SFace_Laplacian.makeCompressed();
+    Sym_SFace_Laplacian.makeCompressed();
+    RW_SFace_Laplacian.makeCompressed();
+    Id.makeCompressed();
+
+
+    return SpAM_SpecFaces.nonZeros();
 } /// End of the Structure_Characterisation function
 
 

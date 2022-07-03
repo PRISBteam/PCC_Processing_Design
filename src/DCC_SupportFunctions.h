@@ -1,7 +1,7 @@
 /// Creation Eigen::Sparse_Matrix from file
 Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsigned int Cols) {
 
-    Eigen::SparseMatrix<double> res(Rows,Cols);
+    Eigen::SparseMatrix<double> res(Rows, Cols);
     typedef Eigen::Triplet<double> Tr; // Eigen library class
     std::vector<Tr> tripletList; // Probe vector of triplets
 
@@ -10,7 +10,7 @@ Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsig
     if (inAN.is_open()) { //If the file was successfully open, then
         while(!inAN.eof()) {
             inAN >> i >> j >> value;
-                tripletList.push_back(Tr((i), (j), value));
+                tripletList.push_back(Tr(i, j, value));
                // cout << i << "\t" << j << "\t" << value << endl;
         }
     } else cout << "The file " << SMpath << " cannot be read" << endl; //If something goes wrong

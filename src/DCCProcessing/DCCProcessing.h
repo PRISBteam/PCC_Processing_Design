@@ -38,7 +38,7 @@ int DCC_Processing3D(std::vector<unsigned int> &State_Vector, std::vector<unsign
 
     else if (stype == 'D') { // DDRX recrystalisation process
         Processing_DDRX(State_Vector, special_faces_sequence, max_sFaces_fraction, paths, number_of_types, CellNumbs);
-        } ///End of 'D' type simulations
+    } ///End of 'D' type simulations
 
     else if (stype == 'I') {
 

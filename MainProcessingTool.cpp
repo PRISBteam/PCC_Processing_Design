@@ -109,17 +109,20 @@ int main() {
         //for (auto sfe : special_faces_sequence) cout << sfe << "\t"; cout << endl;
         //   CC_Kinetic_Plasticity(i, -- -, --);
         //Output streams
-        string TJs_output_filename = "TJsLab_TJsTypes.txt"s, Entropy_output_filename = "TJsLab_ConTJsEntropy.txt"s,
-                output_TJs_dir = odir + TJs_output_filename, output_Entropy_dir = odir + Entropy_output_filename;
+
+        //string TJs_output_filename = "TJsLab_TJsTypes.txt"s, Entropy_output_filename = "TJsLab_ConTJsEntropy.txt"s;
+        //string output_TJs_dir = output_folder + TJs_output_filename, output_Entropy_dir = output_folder + Entropy_output_filename;
+        string output_TJs_dir = output_folder + "TJsLab_TJsTypes.txt"s, output_Entropy_dir = output_folder + "TJsLab_ConTJsEntropy.txt"s;
         char* cTJs_dir = const_cast<char*>(output_TJs_dir.c_str()); char* cEntropy_dir = const_cast<char*>(output_Entropy_dir.c_str()); // From string to char for the passing folder path to a function
 
         ofstream OutTJsFile; OutTJsFile.open(cTJs_dir, ios::trunc); OutTJsFile.close();
         ofstream OutSFile; OutSFile.open(cEntropy_dir, ios::trunc); OutSFile.close();
 
-    /// Loop over special_faces_sequence with the step = Face_fraction/ number_of_steps
+        /// Loop over special_faces_sequence with the step = Face_fraction/ number_of_steps
     double Face_fraction = 0;
     long number_of_steps = 10;
-     for(long i = 0; i < number_of_steps; ++i) {
+
+        for(long i = 0; i < number_of_steps; ++i) {
         double df = max_sFaces_fraction/ (double) number_of_steps;
          Face_fraction += df;
          unsigned int special_Faces_numb = Face_fraction * CellNumbs.at(2);
