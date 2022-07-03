@@ -14,7 +14,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a17747ef-6353-45ba-9926-21154b67c7b8" name="Changes" comment="Plasticity with plastic strain output">
+    <list default="true" id="a17747ef-6353-45ba-9926-21154b67c7b8" name="Changes" comment="StrEntropy works almost properly in loop">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MainProcessingTool.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MainProcessingTool.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/.ninja_deps" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/.ninja_deps" afterDir="false" />
@@ -24,7 +24,7 @@
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config.txt" beforeDir="false" afterPath="$PROJECT_DIR$/config.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCCCharacterisation/StructureCharacterisation.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCCharacterisation/StructureCharacterisation.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DCCProcessing/DCCProcessing.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCProcessing/DCCProcessing.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DCCCharacterisation/TJsLab.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCCharacterisation/TJsLab.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCCProcessing/Processing_Functions.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCProcessing/Processing_Functions.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCC_SupportFunctions.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCC_SupportFunctions.h" afterDir="false" />
     </list>
@@ -39,6 +39,14 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -88,7 +96,11 @@
       <workItem from="1656591547589" duration="7396000" />
       <workItem from="1656609660465" duration="30329000" />
       <workItem from="1656807290494" duration="1232000" />
-      <workItem from="1656808530200" duration="493000" />
+      <workItem from="1656808530200" duration="1413000" />
+      <workItem from="1656839697553" duration="1162000" />
+      <workItem from="1656878674824" duration="2451000" />
+      <workItem from="1656882928405" duration="679000" />
+      <workItem from="1656883612971" duration="511000" />
     </task>
     <task id="LOCAL-00001" summary="First Kinetic modules">
       <created>1656080713607</created>
@@ -153,7 +165,14 @@
       <option name="project" value="LOCAL" />
       <updated>1656633395438</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="StrEntropy works almost properly in loop">
+      <created>1656809096486</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1656809096486</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -174,6 +193,7 @@
     <MESSAGE value="First Kinetic modules" />
     <MESSAGE value="Plasticity woks now: version 1" />
     <MESSAGE value="Plasticity with plastic strain output" />
-    <option name="LAST_COMMIT_MESSAGE" value="Plasticity with plastic strain output" />
+    <MESSAGE value="StrEntropy works almost properly in loop" />
+    <option name="LAST_COMMIT_MESSAGE" value="StrEntropy works almost properly in loop" />
   </component>
 </project>

@@ -143,7 +143,8 @@ int main() {
              } //  for (auto sfe : current_State_Vector) cout << sfe ; cout << endl;
 
          /// ====== Structure Characterisation module ========>
-         DCC_StructureCharacterisation(current_State_Vector, current_sfaces_sequence, ConfigVector, CellNumbs, paths, odir);
+            if (Face_fraction == df) cout << "START of DCC Structure Characterisation Module" << endl;
+            DCC_StructureCharacterisation(current_State_Vector, current_sfaces_sequence, ConfigVector, CellNumbs, paths, odir);
         }// for (number_of_steps)
 
     }// SIMULATION MODE if

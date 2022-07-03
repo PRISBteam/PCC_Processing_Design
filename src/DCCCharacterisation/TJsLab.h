@@ -25,14 +25,16 @@ map<unsigned int, unsigned int> EdgesStat(std::vector<unsigned int> &S_Vector, s
     j0 = J0/Jall; j1 = J1/Jall; j2 = J2/Jall; j3 = J3/Jall;
     double j0s = j0, j1s = j1, j2s = j2, j3s = j3;
     /// using values with pow(10,-10) instead of 0s!
-    if (j0s == 0) j0s = pow(10,-10); if (j1s == 0) j1s = pow(10,-10); if (j2s == 0) j2s = pow(10,-10); if (j3s == 0) j3s = pow(10,-10); //Gives 0 in entropy!
+    if (j0s == 0) j0s = pow(10,-30); if (j1s == 0) j1s = pow(10,-30); if (j2s == 0) j2s = pow(10,-30); if (j3s == 0) j3s = pow(10,-30); //Gives 0 in entropy!
+
     /// Configuration Entropy related with Faces
     Configurational_Face_Entropy = - (j0s* log2(j0s) + j1s* log2(j1s) + j2s* log2(j2s) + j3s* log2(j3s));
 
-    // Median part in the entropy decomposition
+    /// Median part in the entropy decomposition
     vector<double> j_types_fractions = {j0s, j1s, j2s, j3s}; /// using values with pow(10,-10) instead of 0s!
     Face_Entropy_Median = -(1.0/j_types_fractions.size())*log2(j0s*j1s*j2s*j3s);
-    // Skrew part (divergence from the uniform distribution -> S_max) in the entropy decomposition
+
+    /// Skrew part (divergence from the uniform distribution -> S_max) in the entropy decomposition
     for (int j = 0; j < j_types_fractions.size(); j++)
         for (int i = 0; i < j; i++)
             Face_Entropy_Skrew += -(1.0/j_types_fractions.size())*(j_types_fractions[i]-j_types_fractions[j])*log2(j_types_fractions[i]/j_types_fractions[j]);

@@ -96,9 +96,9 @@ vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> con
 
 vector<int> EdgesTypesCalc(std::vector<unsigned int> const& CellNumbs, vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const& FES)
 {
-    vector<int> TJsTypes(CellNumbs.at(1)+1,0);
+    vector<int> TJsTypes(CellNumbs.at(1),0);
     for (auto vit: s_faces_sequence) // Loop over all Special Faces
-        for(int k = 1; k < CellNumbs.at(1); k++) // Loop over all the
+        for(int k = 0; k < CellNumbs.at(1); k++) // Loop over all the
             if (FES.coeff(k, vit) == 1) TJsTypes.at(k)++;
 
     return TJsTypes;
