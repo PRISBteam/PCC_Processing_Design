@@ -102,6 +102,8 @@ int main() {
 /// ========================================== SCIENTIFIC MODE STARTS HERE ===================================================================
 /// ===========================================================================================================================================
     if (SIMULATION_MODE(confpath)) {
+        ///  ====== Analytical solutions ========>
+        TJsAnalytics(100, odir); // A function from TJsLab.h
 
         /// ====== Processing ========>
         if (ProcessingON(confpath))
@@ -121,9 +123,9 @@ int main() {
         /// Loop over special_faces_sequence with the step = Face_fraction/ number_of_steps
     double Face_fraction = 0;
     long number_of_steps = 10;
+    double df = 0;
 
-        for(long i = 0; i < number_of_steps; ++i) {
-        double df = max_sFaces_fraction/ (double) number_of_steps;
+        for(long i = 0; i < number_of_steps; ++i) { // loop over all Face_fraction be
          Face_fraction += df;
          unsigned int special_Faces_numb = Face_fraction * CellNumbs.at(2);
 
@@ -143,8 +145,10 @@ int main() {
              } //  for (auto sfe : current_State_Vector) cout << sfe ; cout << endl;
 
          /// ====== Structure Characterisation module ========>
-            if (Face_fraction == df) cout << "START of DCC Structure Characterisation Module" << endl;
+            if (Face_fraction == 0) cout << "START of DCC Structure Characterisation Module" << endl;
             DCC_StructureCharacterisation(current_State_Vector, current_sfaces_sequence, ConfigVector, CellNumbs, paths, odir);
+
+         df = max_sFaces_fraction/ (double) number_of_steps; // Face fraction increment
         }// for (number_of_steps)
 
     }// SIMULATION MODE if

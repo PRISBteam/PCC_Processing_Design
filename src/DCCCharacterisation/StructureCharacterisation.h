@@ -2,7 +2,7 @@
 ///-------------------------------------
 ///-------------------------------------
 #include "TJsLab.h"
-//#include "FaceLaplacians.h"
+#include "FaceLaplacians.h"
 ///-------------------------------------
 
 ///Structure characterisation tool
@@ -144,6 +144,7 @@ if (configuration.at(1)) { // Nodes types statistics, indices and configuration 
 }
 if (configuration.at(2)) { /// Edges types statistics, indices and configuration entropy
     //map<unsigned int, unsigned int> Edges_Types_Map; // Map: [Edge number] --> [Enge type]
+    /// Statistics of Edges
     EdgesStat(S_Vector, s_faces_sequence, CellNumbs, FES, odir);
 }
 if (configuration.at(3)) { // Faces types statistics and structural indices

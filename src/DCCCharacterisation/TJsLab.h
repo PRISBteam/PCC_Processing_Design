@@ -25,19 +25,25 @@ map<unsigned int, unsigned int> EdgesStat(std::vector<unsigned int> &S_Vector, s
     j0 = J0/Jall; j1 = J1/Jall; j2 = J2/Jall; j3 = J3/Jall;
     double j0s = j0, j1s = j1, j2s = j2, j3s = j3;
     /// using values with pow(10,-10) instead of 0s!
-    if (j0s == 0) j0s = pow(10,-30); if (j1s == 0) j1s = pow(10,-30); if (j2s == 0) j2s = pow(10,-30); if (j3s == 0) j3s = pow(10,-30); //Gives 0 in entropy!
-
+//    if (j0s == 0) j0s = pow(10,-30); if (j1s == 0) j1s = pow(10,-30); if (j2s == 0) j2s = pow(10,-30); if (j3s == 0) j3s = pow(10,-30); //Gives 0 in entropy!
+    if (j0s != 0) j0s = j0* log2(j0); if (j1s != 0) j1s = j1* log2(j1); if (j2s != 0) j2s = j2* log2(j2); if (j3s != 0) j3s = j3* log2(j3); //Gives 0 in entropy!
     /// Configuration Entropy related with Faces
-    Configurational_Face_Entropy = - (j0s* log2(j0s) + j1s* log2(j1s) + j2s* log2(j2s) + j3s* log2(j3s));
-
+//    Configurational_Face_Entropy = - (j0s* log2(j0s) + j1s* log2(j1s) + j2s* log2(j2s) + j3s* log2(j3s));
+    Configurational_Face_Entropy = - (j0s + j1s + j2s + j3s);
     /// Median part in the entropy decomposition
-    vector<double> j_types_fractions = {j0s, j1s, j2s, j3s}; /// using values with pow(10,-10) instead of 0s!
-    Face_Entropy_Median = -(1.0/j_types_fractions.size())*log2(j0s*j1s*j2s*j3s);
+    vector<double> j_types_fractions = {j0, j1, j2, j3}; /// using values with pow(10,-10) instead of 0s!
+    if (j0s!=0 && j1s!=0 && j2s!=0 && j3s!=0) {
+        Face_Entropy_Median = -(1.0 / j_types_fractions.size()) * log2(j0 * j1 * j2 * j3);
+    } else Face_Entropy_Median = 0.0;
 
-    /// Skrew part (divergence from the uniform distribution -> S_max) in the entropy decomposition
+    /// Screw part (divergence from the uniform distribution -> S_max) in the entropy decomposition
     for (int j = 0; j < j_types_fractions.size(); j++)
         for (int i = 0; i < j; i++)
-            Face_Entropy_Skrew += -(1.0/j_types_fractions.size())*(j_types_fractions[i]-j_types_fractions[j])*log2(j_types_fractions[i]/j_types_fractions[j]);
+            if (j_types_fractions[i]!=0 && j_types_fractions[j]!=0) {
+                Face_Entropy_Skrew +=
+                        -(1.0 / j_types_fractions.size()) * (j_types_fractions[i] - j_types_fractions[j]) *
+                        log2(j_types_fractions[i] / j_types_fractions[j]);
+            } else Face_Entropy_Skrew += 0.0;
 
     /// Data output
     /// Opening of the output streams
@@ -50,8 +56,8 @@ map<unsigned int, unsigned int> EdgesStat(std::vector<unsigned int> &S_Vector, s
     double special_faces_fraction =(double) s_faces_sequence.size()/ CellNumbs.at(2);
 //    cout << Configurational_Face_Entropy << "\t" << Face_Entropy_Median << "\t"<< Face_Entropy_Median << endl;
 
-    OutTJsFile << special_faces_fraction << "\t\t" << j0 << "\t\t" << j1 << "\t" << j2 << "\t" << j3 << endl;
-    OutSFile << special_faces_fraction << "\t\t" << Configurational_Face_Entropy << "\t\t" << Face_Entropy_Median << "\t\t" << Face_Entropy_Skrew << endl;
+    OutTJsFile << special_faces_fraction << "\t" << j0 << "\t" << j1 << "\t" << j2 << "\t" << j3 << endl;
+    OutSFile << special_faces_fraction << "\t" << Configurational_Face_Entropy << "\t" << Face_Entropy_Median << "\t\t" << Face_Entropy_Skrew << endl;
 
     OutTJsFile.close();
     OutSFile.close();
@@ -61,3 +67,170 @@ map<unsigned int, unsigned int> EdgesStat(std::vector<unsigned int> &S_Vector, s
 
     return res;
 }
+
+int TJsAnalytics(long HGBnumber, char* output_dir) {
+    // HGBnumber - Number of points on a graph
+    unsigned int HGBnumb = HGBnumber; // Number of points on a graph
+    double P00=0, P11=0, P22=0, P10=0, P20=0, P21=0, p=0, q=0, J0=0, J1=0, J2=0, J3=0;
+
+    ofstream OutJFile;
+    ofstream OutJ2File;
+    OutJFile.open(output_dir + "TJp_random_theory.txt"s, ios::trunc);
+    //OutJFile <<"p" << "    "<< "   J0" << "         "<< " J1" << "          " << "J2" << "          " << "J3" << endl;
+    OutJ2File.open(output_dir + "TJp_crystalline_theory.txt"s, ios::trunc);
+    //OutJ2File <<"p" << "    "<< "   J0" << "         "<< " J1" << "          " << "J2" << "          " << "J3" << endl;
+    OutJFile.close();
+    OutJ2File.close();
+    OutJFile.open(output_dir + "TJp_random_theory.txt"s, ios::app);
+    OutJ2File.open(output_dir + "TJp_crystalline_theory.txt"s, ios::app);
+
+
+    double dp = 1.0/ (double) HGBnumb;
+    for (unsigned int k = 0; k < HGBnumb; ++k) {
+// REPAIR        cout << p << endl;
+
+        //1 случай: случайное распределение без учета кристаллографии
+        P00 = p; P11 = p; P22 = p; P10 = p; P20 = p; P21 = p; P22 = p;
+
+        J0 = (1.0 - P00) * (1.0 - P10) * (1.0 - P20);
+        J1 = P00 * (1.0 - P11) * (1.0 - P21) + (1.0 - P00) * P10 * (1.0 - P21) + (1.0 - P00) * (1.0 - P10) * P20;
+        J2 = P00 * P11 * (1.0 - P22) + P00 * (1.0 - P11) * P21 + (1.0 - P00) * P10 * P21;
+        J3 = P00 * P11 * P22;
+
+        OutJFile << p << "    " << J0 << "    " << J1 << "    " << J2 << "    " << J3 << endl;
+
+        //2 случай: с учетом ограничений кристаллографии
+        q = 1.0 - p;
+
+        P00 = p;
+        if (p <= 0.75) {
+            P10 = (1.0 - 6.0 * pow(q, (1.0 / 2.0)) + 15.0 * q - 10.0 * pow(q, (3.0 / 2.0))) / (3.0 * q);
+            P20 = (2.0 - 12.0 * pow(q, (1.0 / 2.0)) + 24.0 * q - 14.0 * pow(q, (3.0 / 2.0))) /
+                  (-1.0 + 6.0 * pow(q, (1.0 / 2.0)) - 12.0 * q + 10.0 * pow(q, (3.0 / 2.0)));
+            P11 = (2.0 + 8.0 * pow(q, (1.0 / 2.0)) - 10.0 * q) / (3.0 + 3.0 * pow(q, (1.0 / 2.0)));
+            P21 = (1.0 - 5.0 * pow(q, (1.0 / 2.0)) + 4.0 * q) / (-1.0 + 5.0 * pow(q, (1.0 / 2.0)) - 10.0 * q);
+            P22 = (3.0 + 6.0 * pow(q, (1.0 / 2.0))) / (2.0 + 10.0 * pow(q, (1.0 / 2.0)));
+        }
+        if (p > 0.75) {
+            P10 = (3.0 - 2.0 * pow(q, (1.0 / 2.0))) / 3.0;
+            P20 = 1.0;
+            P11 = (3.0 - 6.0 * q + 2.0 * pow(q, (3.0 / 2.0))) / (3.0 - 3.0 * q);
+            P21 = (3.0 - 4.0 * pow(q, (1.0 / 2.0))) / (3.0 - 2.0 * pow(q, (1.0 / 2.0)));
+            P22 = (3.0 - 9.0 * q + 6.0 * pow(q, (3.0 / 2.0))) / (3.0 - 6.0 * q + 2.0 * pow(q, (3.0 / 2.0)));
+        }
+
+        J0 = (1.0 - P00) * (1.0 - P10) * (1.0 - P20);
+        J1 = P00 * (1.0 - P11) * (1.0 - P21) + (1.0 - P00) * P10 * (1.0 - P21) + (1.0 - P00) * (1.0 - P10) * P20;
+        J2 = P00 * P11 * (1.0 - P22) + P00 * (1.0 - P11) * P21 + (1.0 - P00) * P10 * P21;
+        J3 = P00 * P11 * P22;
+
+        OutJ2File << p << "    " << J0 << "    " << J1 << "    " << J2 << "    " << J3 << endl;
+
+        /// Increment of p fraction
+        p += dp;
+
+    } // end of for ( k < HGBnumb )
+
+    // Closing of the ofstreams
+    OutJ2File.close();
+    OutJFile.close();
+
+
+    return 0;
+}
+
+
+/*
+ * ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////// Обработка матриц соседей: начльная статистика связей и матрицы смежности /////////////////////////////////////////////////////
+	long lt=0; knn=1;
+// Для каждой грани мы строим матрицу JEdgeNeigh[i][j] где на первом месте ее собственный J-тип а дальше список J-типов ее соседей
+long knumb=0, J0Ncount=0, J00Ncount=0; 	knn=0;
+	int **JEdgeNeigh;
+	JEdgeNeigh = new int* [Edgenumb];
+	for (int i = 0; i < Edgenumb; i++) JEdgeNeigh[i] = new int [100];	//снова закладываем до 100 гипотетических соседей
+	int **JFaceNeigh;
+	JFaceNeigh = new int* [Facenumb];
+	for (int i = 0; i < Facenumb; i++) JFaceNeigh[i] = new int [100];	//снова закладываем до 100 гипотетических соседей
+
+		for (int i = 0; i < Edgenumb; i++)
+			for (int j = 0; j < 100; j++)
+				JEdgeNeigh[i][j] = -6;
+		for (int i = 0; i < Facenumb; i++)
+			for (int j = 0; j < 100; j++)
+				JFaceNeigh[i][j] = -1; //Все LAGBs!!!
+
+//Сначала мы выясняем тип самой грани
+for(int i = 0; i < Edgenumb; i++)	{
+	for (int lk = 0; lk < Facenumb; lk++) if(MFE1[lk][i] == 1) J00Ncount++; //then ==2
+		JEdgeNeigh[i][0] = J00Ncount;
+			J00Ncount=0;
+	lt=0; knn=1;
+
+
+//Затем проходим всех ее соседей
+	do{
+		if(EdgeNeighbours[i][lt]>=0) knumb = EdgeNeighbours[i][lt]; else knumb=-1;
+//------------------------------------------------------
+
+		if(knumb>=0) for (int lk = 0; lk < Facenumb; lk++) if(MFE1[lk][knumb] == 1) J0Ncount++;  //then ==2
+
+//-----------------------------------------------------		//cout <<i<< "   "<< knn << "   "<< JEdgeNeigh[0][1] << endl;
+		JEdgeNeigh[i][knn++] = J0Ncount;
+
+		J0Ncount=0;	lt++;
+	}while(knumb>=0);
+}
+
+//Вывод в файл JEdgeNeigh.txt
+			JEdgeN.open("C:\\Users\\v94623eb\\Dropbox\\Projects\\Current simmulation\\Voronois\\Voronois\\VAnRes\\(HAGBs)JEdgeNeigh.txt", ios::trunc);
+			for (int i = 0; i < Edgenumb; i++) {
+				for (int j = 0; j < 100; j++) {
+					if(JEdgeNeigh[i][j]>=0) JEdgeN << JEdgeNeigh[i][j] << "\t";
+				}
+			JEdgeN <<"Edge number="<<i<<"\n";
+		}
+        JEdgeN.close();
+
+//***cout<<"initial (HAGBs)JEdgeNeigh.txt has been created"<<endl;
+
+//Чистка файла под мощности тройных стыков с учетом соседей
+	JEdgeN.open("C:\\Users\\v94623eb\\Dropbox\\Projects\\Current simmulation\\Voronois\\Voronois\\VAnRes\\(HAGBs)TJspow.txt", ios::trunc);
+	JEdgeN.close();
+
+
+	int **JEN;
+	JEN = new int* [30];
+	for (int i = 0; i < 30; i++) JEN[i] = new int [30];
+			for (int i = 0; i < 5; i++)
+				for (int j = 0; j < 5; j++)
+					JEN[i][j] = -10;
+
+//Анализ матрицы JEdgeNeigh[i][j]
+for (int i = 0; i < Edgenumb; i++) //для каждой грани
+	for (int l = 0; l < 5; l++) //мы перебираем все варианты какой она может быть (с запасом до 30, хотя реально до 4-5 видов)
+		if(JEdgeNeigh[i][0] == l) for (int j = 1; j < 100; j++) //и если она оказалась определенного типа, то мы перебираем всех ее соседей
+										for (int k = 0; k < 5; k++)
+											if(JEdgeNeigh[i][j] == k) JEN[l][k]++; //так что если сосед оказывается также определенного типа, то мы заносим их связь в матрицу JEN
+//очевидно, что при таком алгоритме диагональные элементы учитываются дважды, то есть
+for (int l = 0; l < 5; l++)
+	for (int k = 0; k < 5; k++)
+		if(k == l)  JEN[l][k]= 0.5*JEN[l][k];
+
+//Вывод в файл начального распределения узлов по количеству соседей разного типа JEN.txt
+//(сколько 1-узлов соединено с 1-узлами, 2 - узлами..., сколько 3-узлов соединено с 0 - узлами, 1 - узлами и тд)
+			JENStream.open("C:\\Users\\v94623eb\\Dropbox\\Projects\\Current simmulation\\Voronois\\Voronois\\VAnRes\\(HAGBs)JEN00.txt", ios::trunc);
+			for (int i = 0; i < 5; i++) {
+				for (int j = 0; j < 5; j++) {
+					if(JEN[i][j]>=0) JENStream << JEN[i][j] << "\t";
+//					if(JEN[i][j]>=0) JENStream << JEN[i][j]/Edgenumb << "\t"; //В долях /Edgenumb
+				}
+				JENStream <<"\n";
+		}
+        JENStream.close();
+
+		JENStream.open("C:\\Users\\v94623eb\\Dropbox\\Projects\\Current simmulation\\Voronois\\Voronois\\VAnRes\\(HAGBs)Jlk.txt", ios::trunc);  //			 JENStream << JEN[0][0] + JEN[1][1] + JEN[2][2] + JEN[3][3]<<"\t"<< JEN[0][1] + JEN[1][0] + JEN[0][2] + JEN[2][0] + JEN[0][3] + JEN[3][0] + JEN[1][2] + JEN[2][1] + JEN[1][3] + JEN[3][1] + JEN[2][3] + JEN[3][2]<< "\t"<< JEN[0][1] + JEN[1][0]<< "\t"<< JEN[0][2] + JEN[2][0]<< "\t"<< JEN[0][3] + JEN[0][3]<< "\t"<< JEN[1][2] + JEN[2][1]<< "\t"<< JEN[1][3] + JEN[3][1]<< "\t"<< JEN[2][3] + JEN[3][2];
+		JENStream.close();
+
+ *
+ */
