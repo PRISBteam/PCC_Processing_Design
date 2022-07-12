@@ -4,13 +4,14 @@
 ///==============================================================================================================================///
 
 using namespace std; ///Standard namespace
-map<unsigned int, unsigned int> EdgesStat(std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> const& CellNumbs, Eigen::SparseMatrix<double> const& FES, char* output_dir)
+map<unsigned int, unsigned int> EdgesStat( std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> const& CellNumbs, Eigen::SparseMatrix<double> const& FES, char* output_dir, double &Face_Entropy_Median, double &Face_Entropy_Skrew, double &informativeness)
 {
     vector<int> TJsTypes(CellNumbs.at(1),0);
     map<unsigned int, unsigned int> res; // Here 100 is an arbitrary number of Edge types
     map<unsigned int, unsigned int>::iterator sit; // Special iterator for this map
     double J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
-    double Configurational_Face_Entropy = 0, Face_Entropy_Median = 0 , Face_Entropy_Skrew = 0;
+    double Configurational_Face_Entropy = 0;
+    Face_Entropy_Median = 0; Face_Entropy_Skrew = 0;
 
     TJsTypes = EdgesTypesCalc(CellNumbs, s_faces_sequence, FES);
 //    for (auto sfe : TJsTypes) cout << sfe << "\t" ; cout << endl;
@@ -45,7 +46,32 @@ map<unsigned int, unsigned int> EdgesStat(std::vector<unsigned int> &S_Vector, s
                         log2(j_types_fractions[i] / j_types_fractions[j]);
             } else Face_Entropy_Skrew += 0.0;
 
-    /// Data output
+    /// Complexity/ Informativeness
+    // Srand and Smax reading from files
+    string input_filename_SstrRand = "Random_Entropy_100.txt"s, input_filename_SstrMAX = "Maximum_Entropy_100.txt"s;
+    string input_RandomEntropy_dir = output_dir + input_filename_SstrRand, input_MAXEntropy_dir = output_dir + input_filename_SstrMAX;
+    char* RandomEntropy_dir = const_cast<char*>(input_RandomEntropy_dir.c_str()); char* MAXEntropy_dir = const_cast<char*>(input_MAXEntropy_dir.c_str()); // From string to char for the passing folder path to a function
+    // Format of the elements:: special Face fraction _ Conf entropy value _ Mean entropy value (log(p1*p2*..*pn))
+    vector<vector<double>>  RandomEntropy = VectorVectors4Reader(RandomEntropy_dir);
+    vector<vector<double>>  MAXEntropy = VectorVectors4Reader(MAXEntropy_dir);
+    //for ( auto tpl : MAXEntropy) cout << tpl[0] << " " << tpl[1] << " " << tpl[2] << endl;
+
+    /// Index of complexity:
+    double RandomEntropy_p = 0, MAXEntropy_p = 0;
+    vector<double> Delta_MAX;
+    double sff =(double) s_faces_sequence.size()/ CellNumbs.at(2); // special face fraction
+    for ( auto tpl : MAXEntropy)  Delta_MAX.push_back(abs(sff - tpl.at(0)));
+    auto numb_Smax = std::min_element(std::begin(Delta_MAX), std::end(Delta_MAX)) - std::begin(Delta_MAX); // gives index of the max element
+    Delta_MAX.clear();
+    for ( auto tpl : RandomEntropy)  Delta_MAX.push_back(abs(sff - tpl.at(0)));
+    auto numb_Srand = std::min_element(std::begin(Delta_MAX), std::end(Delta_MAX)) - std::begin(Delta_MAX); // gives index of the max element
+    Delta_MAX.clear();
+    /// Informativeness parameter
+//REPAIR    cout << numb_Smax << " " << numb_Srand << endl;
+//REPAIR    cout << Configurational_Face_Entropy << " " << RandomEntropy[numb_Srand][1] << " " << MAXEntropy[numb_Smax][1] << endl;
+    informativeness =  ( Configurational_Face_Entropy - RandomEntropy[numb_Srand][1])/ ( MAXEntropy[numb_Smax][1] - RandomEntropy[numb_Srand][1]);
+    if (informativeness > 1) informativeness = 1;
+    /// ====== Data output =====================>
     /// Opening of the output streams
     string TJs_output_filename = "TJsLab_TJsTypes.txt"s, Entropy_output_filename = "TJsLab_ConTJsEntropy.txt"s,
             output_TJs_dir = output_dir + TJs_output_filename, output_Entropy_dir = output_dir + Entropy_output_filename;
@@ -71,18 +97,29 @@ map<unsigned int, unsigned int> EdgesStat(std::vector<unsigned int> &S_Vector, s
 int TJsAnalytics(long HGBnumber, char* output_dir) {
     // HGBnumber - Number of points on a graph
     unsigned int HGBnumb = HGBnumber; // Number of points on a graph
-    double P00=0, P11=0, P22=0, P10=0, P20=0, P21=0, p=0, q=0, J0=0, J1=0, J2=0, J3=0;
+    double P00=0, P11=0, P22=0, P10=0, P20=0, P21=0, p=0, q=0, J0=0, J1=0, J2=0, J3=0, Jall=0;
 
     ofstream OutJFile;
     ofstream OutJ2File;
+    ofstream OutSFile;
+    ofstream OutS2File;
     OutJFile.open(output_dir + "TJp_random_theory.txt"s, ios::trunc);
     //OutJFile <<"p" << "    "<< "   J0" << "         "<< " J1" << "          " << "J2" << "          " << "J3" << endl;
     OutJ2File.open(output_dir + "TJp_crystalline_theory.txt"s, ios::trunc);
     //OutJ2File <<"p" << "    "<< "   J0" << "         "<< " J1" << "          " << "J2" << "          " << "J3" << endl;
+    OutJFile.open(output_dir + "Sp_random_theory.txt"s, ios::trunc);
+    //OutJFile <<"p" << "    "<< "   J0" << "         "<< " J1" << "          " << "J2" << "          " << "J3" << endl;
+    OutJ2File.open(output_dir + "Sp_crystalline_theory.txt"s, ios::trunc);
+    //OutJ2File <<"p" << "    "<< "   J0" << "         "<< " J1" << "          " << "J2" << "          " << "J3" << endl;
+
     OutJFile.close();
     OutJ2File.close();
     OutJFile.open(output_dir + "TJp_random_theory.txt"s, ios::app);
     OutJ2File.open(output_dir + "TJp_crystalline_theory.txt"s, ios::app);
+    OutSFile.close();
+    OutS2File.close();
+    OutSFile.open(output_dir + "Sp_random_theory.txt"s, ios::app);
+    OutS2File.open(output_dir + "Sp_crystalline_theory.txt"s, ios::app);
 
 
     double dp = 1.0/ (double) HGBnumb;
@@ -96,7 +133,33 @@ int TJsAnalytics(long HGBnumber, char* output_dir) {
         J1 = P00 * (1.0 - P11) * (1.0 - P21) + (1.0 - P00) * P10 * (1.0 - P21) + (1.0 - P00) * (1.0 - P10) * P20;
         J2 = P00 * P11 * (1.0 - P22) + P00 * (1.0 - P11) * P21 + (1.0 - P00) * P10 * P21;
         J3 = P00 * P11 * P22;
+        Jall = J0 + J1 + J2 + J3;
 
+    // Conversion from numbers to fractions
+    double  jj0 = J0/Jall, jj1 = J1/Jall, jj2 = J2/Jall, jj3 = J3/Jall, j0s = jj0, j1s = jj1, j2s = jj2, j3s = jj3;
+    double Configurational_Face_Entropy = 0.0;
+        if (j0s != 0) j0s = jj0* log2(jj0); if (j1s != 0) j1s = jj1* log2(jj1); if (j2s != 0) j2s = jj2* log2(jj2); if (j3s != 0) j3s = jj3* log2(jj3); //Gives 0 in entropy!
+        /// Configuration Entropy related with Faces
+         Configurational_Face_Entropy = - (j0s + j1s + j2s + j3s);
+
+        /// Median part in the entropy decomposition
+        double Face_Entropy_Median = 0.0, Face_Entropy_Skrew = 0.0;
+
+        vector<double> j_types_fractions = {jj0, jj1, jj2, jj3}; /// using values with pow(10,-10) instead of 0s!
+        if (j0s!=0 && j1s!=0 && j2s!=0 && j3s!=0) {
+            Face_Entropy_Median = -(1.0 / j_types_fractions.size()) * log2(jj0 * jj1 * jj2 * jj3);
+        } else Face_Entropy_Median = 0.0;
+
+        /// Screw part (divergence from the uniform distribution -> S_max) in the entropy decomposition
+        for (int j = 0; j < j_types_fractions.size(); j++)
+            for (int i = 0; i < j; i++)
+                if (j_types_fractions[i]!=0 && j_types_fractions[j]!=0) {
+                    Face_Entropy_Skrew +=
+                            -(1.0 / j_types_fractions.size()) * (j_types_fractions[i] - j_types_fractions[j]) *
+                            log2(j_types_fractions[i] / j_types_fractions[j]);
+                } else Face_Entropy_Skrew += 0.0;
+
+        OutSFile << p << "    " << Configurational_Face_Entropy << "    " << Face_Entropy_Median << "    " << Face_Entropy_Skrew << endl;
         OutJFile << p << "    " << J0 << "    " << J1 << "    " << J2 << "    " << J3 << endl;
 
         //2 случай: с учетом ограничений кристаллографии
@@ -123,7 +186,32 @@ int TJsAnalytics(long HGBnumber, char* output_dir) {
         J1 = P00 * (1.0 - P11) * (1.0 - P21) + (1.0 - P00) * P10 * (1.0 - P21) + (1.0 - P00) * (1.0 - P10) * P20;
         J2 = P00 * P11 * (1.0 - P22) + P00 * (1.0 - P11) * P21 + (1.0 - P00) * P10 * P21;
         J3 = P00 * P11 * P22;
+        Jall = J0 + J1 + J2 + J3;
+// Conversion from numbers to fractions
+        jj0 = J0/Jall, jj1 = J1/Jall, jj2 = J2/Jall, jj3 = J3/Jall, j0s = jj0, j1s = jj1, j2s = jj2, j3s = jj3;
+        Configurational_Face_Entropy = 0.0;
+        if (j0s != 0) j0s = jj0* log2(jj0); if (j1s != 0) j1s = jj1* log2(jj1); if (j2s != 0) j2s = jj2* log2(jj2); if (j3s != 0) j3s = jj3* log2(jj3); //Gives 0 in entropy!
+        /// Configuration Entropy related with Faces
+        Configurational_Face_Entropy = - (j0s + j1s + j2s + j3s);
 
+        /// Median part in the entropy decomposition
+        Face_Entropy_Median = 0.0, Face_Entropy_Skrew = 0.0;
+
+        j_types_fractions = {jj0, jj1, jj2, jj3}; /// using values with pow(10,-10) instead of 0s!
+        if (j0s!=0 && j1s!=0 && j2s!=0 && j3s!=0) {
+            Face_Entropy_Median = -(1.0 / j_types_fractions.size()) * log2(jj0 * jj1 * jj2 * jj3);
+        } else Face_Entropy_Median = 0.0;
+
+        /// Screw part (divergence from the uniform distribution -> S_max) in the entropy decomposition
+        for (int j = 0; j < j_types_fractions.size(); j++)
+            for (int i = 0; i < j; i++)
+                if (j_types_fractions[i]!=0 && j_types_fractions[j]!=0) {
+                    Face_Entropy_Skrew +=
+                            -(1.0 / j_types_fractions.size()) * (j_types_fractions[i] - j_types_fractions[j]) *
+                            log2(j_types_fractions[i] / j_types_fractions[j]);
+                } else Face_Entropy_Skrew += 0.0;
+
+        OutS2File << p << "    " << Configurational_Face_Entropy << "    " << Face_Entropy_Median << "    " << Face_Entropy_Skrew << endl;
         OutJ2File << p << "    " << J0 << "    " << J1 << "    " << J2 << "    " << J3 << endl;
 
         /// Increment of p fraction
@@ -134,7 +222,8 @@ int TJsAnalytics(long HGBnumber, char* output_dir) {
     // Closing of the ofstreams
     OutJ2File.close();
     OutJFile.close();
-
+    OutSFile.close();
+    OutS2File.close();
 
     return 0;
 }

@@ -18,7 +18,9 @@ typedef pair<double, double> Pr; // Eigen library class
 #include "Kinetic_Functions.h"
 ///-------------------------------------
 
-int DCC_Kinetic(char stype, std::vector<char*> paths, char* input_folder, char* odir) {
+std::vector <unsigned int> DCC_Kinetic(char stype, std::vector<unsigned int> &s_faces_sequence, std::vector<char*> paths, char* input_folder, char* odir) {
+    /// Specific functions
+    std::vector <unsigned int> face_sequence;
 
 /// Declaration of FUNCTIONS, see the function bodies at the end of file.
     Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsigned int Cols); // The function read any matrices from lists of triplets and create corresponding sparse matrices
@@ -48,22 +50,23 @@ int DCC_Kinetic(char stype, std::vector<char*> paths, char* input_folder, char* 
 // MFE - Faces - Edges (2-Cells to 1-Cells) sparse incidence matrix  in the form of three column {i, j, value}, where i and j are the indices of elements with non-zero values
 // MGF - Grains - Faces (3-Cells to 2-Cells) sparse incidence matrix  in the form of three column {i, j, value}, where i and j are the indices of elements with non-zero values // odir - source path
     /// Adjacency sparse matrix for nodes /// Adjacency sparse matrix for edges /// Adjacency sparse matrix for faces /// Adjacency sparse matrix for grains
-    SpMat ANS(CellNumbs.at(0), CellNumbs.at(0)), AES(CellNumbs.at(1), CellNumbs.at(1)),
-            AFS(CellNumbs.at(2), CellNumbs.at(2)), AGS(CellNumbs.at(3), CellNumbs.at(3));
-    ANS = SMatrixReader(paths.at(0), (CellNumbs.at(0)), (CellNumbs.at(0))); //all Nodes
-    ANS = 0.5 * (ANS + SparseMatrix<double>(ANS.transpose())); // Full matrix instead of triagonal
-    AES = SMatrixReader(paths.at(1), (CellNumbs.at(1)), (CellNumbs.at(1))); //all Edges
-    AES = 0.5 * (AES + SparseMatrix<double>(AES.transpose())); // Full matrix instead of triagonal
+//    SpMat ANS(CellNumbs.at(0), CellNumbs.at(0)), AES(CellNumbs.at(1), CellNumbs.at(1)),
+//            AFS(CellNumbs.at(2), CellNumbs.at(2)), AGS(CellNumbs.at(3), CellNumbs.at(3));
+SpMat AFS(CellNumbs.at(2), CellNumbs.at(2));
+//    ANS = SMatrixReader(paths.at(0), (CellNumbs.at(0)), (CellNumbs.at(0))); //all Nodes
+//    ANS = 0.5 * (ANS + SparseMatrix<double>(ANS.transpose())); // Full matrix instead of triagonal
+//    AES = SMatrixReader(paths.at(1), (CellNumbs.at(1)), (CellNumbs.at(1))); //all Edges
+//    AES = 0.5 * (AES + SparseMatrix<double>(AES.transpose())); // Full matrix instead of triagonal
     AFS = SMatrixReader(paths.at(2), (CellNumbs.at(2)), (CellNumbs.at(2))); //all Faces
     AFS = 0.5 * (AFS + SparseMatrix<double>(AFS.transpose())); // Full matrix instead of triagonal
-    AGS = SMatrixReader(paths.at(3), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Volumes
-    AGS = 0.5 * (AGS + SparseMatrix<double>(AGS.transpose())); // Full matrix instead of triagonal
+//   AGS = SMatrixReader(paths.at(3), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Volumes
+//    AGS = 0.5 * (AGS + SparseMatrix<double>(AGS.transpose())); // Full matrix instead of triagonal
 /// Incidence sparse matrix for Edges and Nodes /// Incidence sparse matrix for Faces and Edges /// Incidence sparse matrix for Grains and Faces
-    SpMat ENS(CellNumbs.at(0), CellNumbs.at(1)), FES(CellNumbs.at(1), CellNumbs.at(2)),
-            GFS(CellNumbs.at(2),CellNumbs.at(3));
-    ENS = SMatrixReader(paths.at(4), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Nodes-Edges
-    FES = SMatrixReader(paths.at(5), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
-    GFS = SMatrixReader(paths.at(6), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
+//    SpMat ENS(CellNumbs.at(0), CellNumbs.at(1)), FES(CellNumbs.at(1), CellNumbs.at(2)),
+//            GFS(CellNumbs.at(2),CellNumbs.at(3));
+//    ENS = SMatrixReader(paths.at(4), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Nodes-Edges
+SpMat   FES = SMatrixReader(paths.at(5), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
+//    GFS = SMatrixReader(paths.at(6), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
 
 ////////////////////////////////////// KINETIC PROCESSES ///////////////////////////////////////////////
     if (stype == 'W') { // Wear
@@ -114,13 +117,15 @@ int DCC_Kinetic(char stype, std::vector<char*> paths, char* input_folder, char* 
 
     } ///End of 'Plasticity' type simulations
     else if (stype == 'F') { // Fracture
+        face_sequence = DCC_Kinetic_cracking(s_faces_sequence, CellNumbs, AFS, FES, paths, input_folder, odir);
 
     } ///End of 'Fracture' type simulations
-    else { cout << "ERROR [DCC_Kinetic] : unknown simulation type - please replace with 'W or P' " << endl; return 0;}
+    else { cout << "ERROR [DCC_Kinetic] : unknown simulation type - please replace with 'W or P' " << endl; return face_sequence;}
+    //Output streams
 
 /// Closing and deleting
 
-    return 1;
+    return face_sequence;
 } /// The end of DCC_Kinetic()
 
 /// ================================== Related functions ==================================///

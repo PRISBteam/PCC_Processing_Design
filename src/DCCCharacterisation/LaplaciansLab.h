@@ -3,40 +3,43 @@
 /** This subfile calculates the combinatorial Laplacian of the special Faces graph with its spectrum **/
 ///=======================================================================================================================///
 
-/*
- * foo() {
-SpMat Laplacian_SFaces(numerator,numerator);
-//temp
-SFDegree.setIdentity();
-Laplacian_SFaces = SAM_FacesGraph + 2.0*SFDegree;
+
+vector<double> FaceLaplacian(Eigen::SparseMatrix<double> const& LSF, std::vector<unsigned int> &CellNumbs) {
+//REPAIR    cout << LSF.rows() - 2 << endl;
+    std::vector<double> Lface_spectrum;
+    Eigen::VectorXcd eigval;
+    //Eigen::MatrixXcd eigvec;
+
 /// Eigenvalues of the S-Faces laplacian
-//AFS(CellNumbs.at(2) + 1,CellNumbs.at(2) + 1);
-//                   EigenVals(AFS, Laplacian_SFaces); /// Important solver method
-Eigen::VectorXcd eigval;
-Eigen::MatrixXcd eigvec;
-//SpMat eigvec;
-//vector<vector<double>>
-Eigen::SparseMatrix<double> Asym = 0.5*(SAM_FacesGraph+Eigen::SparseMatrix<double>(SAM_FacesGraph.transpose()));
-
 // Construct matrix operation object using the wrapper class SparseGenMatProd
-SparseGenMatProd<double> op(SAM_FacesGraph);
-// Construct eigen solver object, requesting the largest three eigenvalues
-GenEigsSolver<SparseGenMatProd<double>> eigs(op, numerator-2, numerator);
+    SparseGenMatProd<double> op(LSF);
+// Construct eigen solver object, requesting all the eigenvalues
+    GenEigsSolver<SparseGenMatProd<double>> eigs(op, LSF.rows() - 2, LSF.rows());
+    //nev	Number of eigenvalues requested. This should satisfy 1≤𝑛𝑒𝑣≤𝑛−2, where 𝑛 is the size of matrix.
+    //ncv	Parameter that controls the convergence speed of the algorithm. Typically a larger ncv means faster convergence, but it may also result in greater memory use and more matrix operations in each iteration. This parameter must satisfy 𝑛𝑒𝑣+2≤𝑛𝑐𝑣≤𝑛, and is advised to take 𝑛𝑐𝑣≥2⋅𝑛𝑒𝑣+1.
 // Initialize and compute
-eigs.init();
-int nconv = eigs.compute(SortRule::LargestMagn);
-// Retrieve results
-if(eigs.info() == CompInfo::Successful){
-eigval = eigs.eigenvalues();
-eigvec = eigs.eigenvectors();
-}
+    eigs.init();
+//    unsigned int nconv = LSF
+    eigs.compute(SortRule::LargestMagn);
 
-//ordinary_edges_fraction = std::count(OrdinaryCells.begin(), OrdinaryCells.end(), 1)
-//   std::cout << "Eigenvalues found:\n" << eigval << std::endl;
-std::cout << "\n Eigenvectors nonZeros :\n" << eigvec.nonZeros() << "\n Eigenvectors size :\n" << eigvec.size() << std::endl;
-//                        cout << Laplacian_specialFaces << endl;
-* return ;
- */
+// Retrieve results
+//cout << MatrixXd(LSF) << endl;
+    if (eigs.info() == CompInfo::Successful) {
+        eigval = eigs.eigenvalues();
+//        eigvec = eigs.eigenvectors();
+    }
+
+//for (unsigned int cs = 0; cs < (LSF.rows() - 2); ++cs) Lface_spectrum.at(cs) =  eigval.coeffRef(cs,0);
+   for (unsigned int i = 0; i < LSF.rows() - 2; ++i) if(real(eigval(i,0)) >= pow(10,-5)) Lface_spectrum.push_back(real(eigval(i,0)));
+    for (unsigned int i = 0; i < LSF.rows() - 2; ++i) if(real(eigval(i,0)) < pow(10,-5)) Lface_spectrum.push_back(0.0);
+
+   //cout << Lface_spectrum.size() / (LSF.rows() - 3);
+    //Matrix<complex<double>, -1, 1> eigval //    std::cout << "\n Eigenvectors nonZeros :\n" << eigvec.nonZeros() << "\n Eigenvectors size :\n" << eigvec.size()  << std::endl; //                        cout << Laplacian_specialFaces << endl;
+
+    return Lface_spectrum;
+} /// End of FaceLaplacian(Laplacian_SFaces)
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

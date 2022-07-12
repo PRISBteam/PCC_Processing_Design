@@ -43,6 +43,20 @@ vector<Triplet<double>> TripletsReader(char* SMpath) {
 }
 
 /// Function for reading tuples list from file
+vector<vector<double>> VectorVectors4Reader(char* SMpath) {
+    vector<vector<double>> res;
+    ifstream inAN(SMpath);
+    if (inAN.is_open()) { //If the file was successfully open, then
+        while(!inAN.eof()) {
+            double i = 0.0, j = 0.0, k = 0.0, l = 0;
+            inAN >> i >> j >> k >> l;
+            res.push_back({i,j,k,l});
+        }
+    } else cout << "The file " << SMpath << " cannot be read" << endl; //If something goes wrong
+
+    return res;
+}
+
 vector<tuple<double, double, double>> TuplesReader(char* SMpath) {
     typedef tuple<double, double, double> Tup; // Eigen library class
     std::vector<Tup> tripletList; // Probe vector of triplets

@@ -80,7 +80,7 @@ int Processing_Random( std::vector<unsigned int> &S_Vector,  std::vector<unsigne
  * @param CellNumbs
  * @param paths
  */
-int Processing_maxEntropy(std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence, double max_sFaces_fraction, int number_of_types, std::vector<unsigned int> &CellNumbs, std::vector<char*> const paths) {
+int Processing_maxEntropy(std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence, double max_sFaces_fraction, int number_of_types, std::vector<unsigned int> &CellNumbs, std::vector<char*> paths) {
 ///=============================================================================================================================================////
 ///========================================================================= 'S' =================================================================////
 /// ====================================================>  Maximum entropy production process   <========================================================////
@@ -143,15 +143,13 @@ int Processing_maxEntropy(std::vector<unsigned int> &S_Vector, std::vector<unsig
 
         if (S_Vector.at(k) == 0) { // Loop over each still ORDINARY element neighbours
             J00 = 0, J0N = 0, J10 = 0, J1N = 0, J20 = 0, J2N = 0, J30 = 0, J3N = 0, CFace_EntropyIncrease = 0;
-            vector<double> j_types_neigh_fractions = GBIndex(k, FES,
-                                                             TJsTypes); //Types (up to 100 kinds) of the edges incident to the considered Face
+            vector<double> j_types_neigh_fractions = GBIndex(k, FES, TJsTypes); //Types (up to 100 kinds) of the edges incident to the considered Face
             //REPAIR   for(auto kl : j_types_neigh_fractions) cout << " " <<kl ; cout << endl;
 
             // Values before conversion
             J00 = j_types_neigh_fractions.at(0);
             J10 = j_types_neigh_fractions.at(1);
-            J20 = j_types_neigh_fractions.at(
-                    2); // cout << " J00= " << J00<< " J10= " << J10 << " J20= " << J20 << endl;
+            J20 = j_types_neigh_fractions.at(2); // cout << " J00= " << J00<< " J10= " << J10 << " J20= " << J20 << endl;
 
             // Values after conversion
 //Oldie//                J0N = J10;

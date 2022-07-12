@@ -10,7 +10,7 @@
 ///------------------------------
 #include <iostream>
 #include <fstream>
-#include <sstream>
+#include <complex>
 #include <string>
 #include <ctime>
 #include <vector>
@@ -94,39 +94,55 @@ int main() {
     std::vector <unsigned int> State_Vector(CellNumbs.at(2), 0), current_State_Vector(CellNumbs.at(2), 0);
     // Order of newly generated special faces | Process time
     std::vector <unsigned int> special_faces_sequence, current_sfaces_sequence; // Sequence (in order of their generation time) of special Faces
+    std::vector <unsigned int> crack_faces_sequence, crack_current_sequence;
     // The number of special Face (2-cells) types
     int number_of_types = ConfigVector.at(1);
     // MAX fraction of Faces | Calculation limit
     double max_sFaces_fraction = ConfigVector.at(3);
+
 /// ===========================================================================================================================================
 /// ========================================== SCIENTIFIC MODE STARTS HERE ===================================================================
 /// ===========================================================================================================================================
     if (SIMULATION_MODE(confpath)) {
         ///  ====== Analytical solutions ========>
-        TJsAnalytics(100, odir); // A function from TJsLab.h
-
+       // TJsAnalytics(1000, odir); // A function from TJsLab.h
         /// ====== Processing ========>
+        cout << "START of DCC Processing Module" << endl;
         if (ProcessingON(confpath))
             DCC_Processing3D(State_Vector, special_faces_sequence, simulation_type, max_sFaces_fraction, number_of_types, CellNumbs, paths);
         //for (auto sfe : special_faces_sequence) cout << sfe << "\t"; cout << endl;
-        //   CC_Kinetic_Plasticity(i, -- -, --);
-        //Output streams
+//        special_faces_sequence = VectorReader("/Users/user/Dropbox/OFFICE/NEPER/resultsJune2022/1kCells/I/SpecialGrainBoundaries.txt"); //all Faces
 
         //string TJs_output_filename = "TJsLab_TJsTypes.txt"s, Entropy_output_filename = "TJsLab_ConTJsEntropy.txt"s;
         //string output_TJs_dir = output_folder + TJs_output_filename, output_Entropy_dir = output_folder + Entropy_output_filename;
         string output_TJs_dir = output_folder + "TJsLab_TJsTypes.txt"s, output_Entropy_dir = output_folder + "TJsLab_ConTJsEntropy.txt"s;
         char* cTJs_dir = const_cast<char*>(output_TJs_dir.c_str()); char* cEntropy_dir = const_cast<char*>(output_Entropy_dir.c_str()); // From string to char for the passing folder path to a function
 
+        /// Creation of the two files with TJs fraction and Configuration entropies output
         ofstream OutTJsFile; OutTJsFile.open(cTJs_dir, ios::trunc); OutTJsFile.close();
         ofstream OutSFile; OutSFile.open(cEntropy_dir, ios::trunc); OutSFile.close();
 
         /// Loop over special_faces_sequence with the step = Face_fraction/ number_of_steps
-    double Face_fraction = 0;
-    long number_of_steps = 10;
-    double df = 0;
+    double Face_fraction = 0.05, Crack_fraction = 0.005; //initial fraction
+    long number_of_steps = 10, number_of_csteps = 10;
+    double dp = 0, df = 0, max_cFaces_fraction = 0.3; //increments (dp - special Faces fraction, df - cracked faces fraction) and max fraction of fractured (cracked) faces
 
-        for(long i = 0; i < number_of_steps; ++i) { // loop over all Face_fraction be
-         Face_fraction += df;
+        /// Output to file Special Face Laplacian eigenvalues
+        // Special Face Laplacian
+        ofstream OutElCondfile; OutElCondfile.open(odir + "Face_Conductivity.txt"s, ios::trunc);
+        OutElCondfile << "\tFraction of special Faces\t" << " " << "\tFraction of cracks\t" << " " << "\tSpecial Face conductivity\t" << " " << "\tNumber of Special Face components\t"
+                      << " " << "\tSpecial Face median entropy\t" << " " << "\tSpecial Face skrew entropy\t" << " " << "\tSpecial Face informativeness\t" << " " << "\tCracked Face conductivity\t" << " " << "\tNumber of Cracked Face components\t" << " " << "\tCracked Face median entropy\t" << " " << "\tSpecial Face skrew entropy\t" << " " << "\tCracked Face informativeness\t" << endl;
+        OutElCondfile.close();
+        ofstream OutFLfile; OutFLfile.open(odir + "FaceLaplacian.txt"s, ios::trunc);
+        OutFLfile << "Laplacian Matrix of all Special Faces" << endl;
+        OutFLfile.close();
+
+        OutElCondfile.open(odir + "Face_Conductivity.txt"s, ios::app);
+        OutFLfile.open(odir + "FaceLaplacian.txt"s, ios::app);
+
+        /// The first loop over all Face_fraction with the step dp
+        for(long i = 0; i < number_of_steps; ++i) { // loop over all Face_fraction
+         Face_fraction += dp;
          unsigned int special_Faces_numb = Face_fraction * CellNumbs.at(2);
 
          unsigned int itu = 0;
@@ -144,12 +160,42 @@ int main() {
                  itr++;
              } //  for (auto sfe : current_State_Vector) cout << sfe ; cout << endl;
 
-         /// ====== Structure Characterisation module ========>
-            if (Face_fraction == 0) cout << "START of DCC Structure Characterisation Module" << endl;
-            DCC_StructureCharacterisation(current_State_Vector, current_sfaces_sequence, ConfigVector, CellNumbs, paths, odir);
+            /// ====== Fracture Kinetic ========>
+            //cout << "START of DCC Kinetic Module" << endl;
+            if (KineticON(confpath))
+                crack_faces_sequence = DCC_Kinetic(Kinetic_type, current_sfaces_sequence, paths, indir, odir);
+//REPAIR        for (auto cn : crack_sequence)  cout << cn << "\t"; cout << endl; //        exit(19);
 
-         df = max_sFaces_fraction/ (double) number_of_steps; // Face fraction increment
-        }// for (number_of_steps)
+            /// The second loop over all crack_Faces_numb
+            for(long y = 0; y < number_of_csteps; ++y) { // loop over all Face_crcks
+                Crack_fraction += df;
+
+                unsigned int crack_Faces_numb = Crack_fraction * CellNumbs.at(2);
+                unsigned int itc = 0;
+                crack_current_sequence.clear();
+                for (unsigned int sfe : crack_faces_sequence) {
+                    if (itc <= crack_Faces_numb) crack_current_sequence.push_back(sfe);
+                    ++itc;
+                }
+// REPAIR       for (auto sfe : crack_current_sequence) cout << sfe << "\t"; cout << endl;
+
+                /// ====== Structure Characterisation module ========>
+//                if (Face_fraction == 0) cout << "START of DCC Structure Characterisation Module" << endl;
+                if (CharacterisationON(confpath)) {
+                    DCC_StructureCharacterisation(current_State_Vector, current_sfaces_sequence, crack_current_sequence,
+                                                  ConfigVector, CellNumbs, paths, odir, OutFLfile, OutElCondfile);
+                } else break;
+            /// Increment of crack fraction
+                df = max_cFaces_fraction / (double) number_of_csteps; /// Crack fraction increment - 0.95 is an arbitrary limit close to 1 !!!
+            } // for (number_of_csteps)
+            Crack_fraction = 0; // Start each dp iteration with Zero crack fraction
+
+            /// Increment of special faces fraction
+            dp = max_sFaces_fraction / (double) number_of_steps; // Face fraction increment
+        } // for (number_of_steps)
+
+        OutFLfile.close();
+        OutElCondfile.close();
 
     }// SIMULATION MODE if
 
@@ -165,18 +211,19 @@ int main() {
 
 /// III: DCC_Kinetic module
         if (KineticON(confpath)) { // if DCC_Kinetic is SWITCH ON in the config.txt file
-            DCC_Kinetic(Kinetic_type, paths, indir, odir);
+            DCC_Kinetic(Kinetic_type, special_faces_sequence, paths, indir, odir);
             }// if(KineticON(confpath))
 /// II: DCC_Characterisation module
         if (CharacterisationON(confpath)) {
             cout << "START of DCC Structure Characterisation Module" << endl;
-            DCC_StructureCharacterisation(State_Vector, special_faces_sequence, ConfigVector, CellNumbs, paths, odir);
+            ofstream OutFLfile; ofstream OutElCondfile;
+            DCC_StructureCharacterisation(State_Vector, special_faces_sequence, crack_faces_sequence, ConfigVector, CellNumbs, paths, odir, OutFLfile, OutElCondfile);
         }// if(CharacterisationON(confpath))
     }// SIMULATION MODE else
 
 /// ===== Elapsing time ================>
     unsigned int end_time = clock();
-    double fulltime = (double) end_time/ 1000.0;
+    double fulltime = (double) end_time/ 60000.0;
     cout << "HAGBsProbability " << dim << "D " << "runtime is equal to  " << fulltime <<  "  seconds" << endl;
 
     cout << "-------------------------------------------------------------" << endl << "The end of the VoroCAnalyser program" << endl << "=============================================" << endl ;
@@ -236,7 +283,7 @@ bool CharacterisationON(char* config) {
 //            cout << line << endl;
             if (!line.compare("DCC_Characterisation SWITCHED ON"s)) {
                 isCharacterisationON = 1;
-                cout << "DCC_StructureCharacterisation SWITCHED ON"s << endl;
+      //          cout << "DCC_StructureCharacterisation SWITCHED ON"s << endl;
                 return isCharacterisationON;
             }
     } else cout << "isCharacterisationON() error: The file " << config << " cannot be read" << endl; // If something goes wrong
@@ -306,10 +353,10 @@ std::vector<double> confCount(char* config, char* type, char* Kinetic_type, stri
     cout << "Edges types statistics, indices and configuration entropy:     "; if (res.at(5) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
     cout << "Faces types statistics and structural indices:                 "; if (res.at(6) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
     cout << "Grain types statistics, indices and configuration entropy:     "; if (res.at(7) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-    cout << "Nodes Laplacian with its spectrum for the nodes network:       "; if (res.at(8) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-    cout << "Edges Laplacian with its spectrum for the nodes network:       "; if (res.at(9) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-    cout << "Face  Laplacian with its spectrum for the nodes network:       "; if (res.at(10) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-    cout << "Grain Laplacian with its spectrum for the nodes network:       "; if (res.at(11) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "Node Laplacian with its spectrum for the Nodes network:       "; if (res.at(8) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "Edge Laplacian with its spectrum for the Edges network:       "; if (res.at(9) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "Face  Laplacian with its spectrum for the Faces network:       "; if (res.at(10) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
+    cout << "Grain Laplacian with its spectrum for the Grains network:      "; if (res.at(11) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
     cout << "Tutte polynomial for the special network:                      "; if (res.at(12) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
 
     return res;
