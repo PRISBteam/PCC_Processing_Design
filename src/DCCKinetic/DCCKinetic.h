@@ -3,6 +3,8 @@
 /** The function in this library generate different quasi-random finetic processeson the elements of the pre-constructed ///
 *   discrete sell complex (DCC)                                                                                         **/
 ///=====================================================================================================================///
+/// 'W' for the 3D one-layer film, 'P' for the Ising-like model of Plasticity, 'F' for the Ising-like model of Fracture
+
 // Triplets in the form T = T(i,j,value), where i and j element's indices in the corresponding dense matrix
 typedef Triplet<double> Tr; // <Eigen library class> Declares a triplet's type name - Tr
 typedef SparseMatrix<double> SpMat; // <Eigen library class> Declares a column-major sparse matrix type of doubles name - SpMat
@@ -18,7 +20,7 @@ typedef pair<double, double> Pr; // Eigen library class
 #include "Kinetic_Functions.h"
 ///-------------------------------------
 
-std::vector <unsigned int> DCC_Kinetic(char stype, std::vector<unsigned int> &s_faces_sequence, std::vector<char*> paths, char* input_folder, char* odir) {
+std::vector <unsigned int> DCC_Kinetic(char* stype, std::vector<unsigned int> &s_faces_sequence, std::vector<char*> paths, char* input_folder, char* odir) {
     /// Specific functions
     std::vector <unsigned int> face_sequence;
 
@@ -69,7 +71,7 @@ SpMat   FES = SMatrixReader(paths.at(5), (CellNumbs.at(1)), (CellNumbs.at(2))); 
 //    GFS = SMatrixReader(paths.at(6), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
 
 ////////////////////////////////////// KINETIC PROCESSES ///////////////////////////////////////////////
-    if (stype == 'W') { // Wear
+    if (*stype == 'W') { // Wear
         double  ShearStress = 3.0*pow(10,8);
         /// Creation/Reading of grain orientations
         double Ori_angle = 0;
@@ -96,7 +98,7 @@ SpMat   FES = SMatrixReader(paths.at(5), (CellNumbs.at(1)), (CellNumbs.at(2))); 
 
     } ///End of 'Wear' type simulations
 
-    else if (stype == 'P') { // Plasticity
+    else if (*stype == 'P') { // Plasticity
         vector<Tup> fraction_stress_temperature;
 
         /// ========= DCC_Kinetic main function call ==========>>
@@ -116,7 +118,7 @@ SpMat   FES = SMatrixReader(paths.at(5), (CellNumbs.at(1)), (CellNumbs.at(2))); 
 //        for (auto lk : fraction_stress_temperature) if (get<0>(lk)*CellNumbs.at(2)*Burgv/DCC_size > 0.002) { cout << "Nano-slips fraction\t" << get<0>(lk) << "\tYield strength\t" << get<1>(lk) << "\tTemperature\t" << get<2>(lk) << endl;              break; }
 
     } ///End of 'Plasticity' type simulations
-    else if (stype == 'F') { // Fracture
+    else if (*stype == 'F') { // Fracture
         face_sequence = DCC_Kinetic_cracking(s_faces_sequence, CellNumbs, AFS, FES, paths, input_folder, odir);
 
     } ///End of 'Fracture' type simulations

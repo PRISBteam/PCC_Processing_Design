@@ -14,7 +14,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a17747ef-6353-45ba-9926-21154b67c7b8" name="Changes" comment="StrEntropy works almost properly in loop">
+    <list default="true" id="a17747ef-6353-45ba-9926-21154b67c7b8" name="Changes" comment="Face Laplacian calculation added&#10;Fracture mode was added&#10;informativeness added">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MainProcessingTool.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MainProcessingTool.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/.ninja_deps" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/.ninja_deps" afterDir="false" />
@@ -23,11 +23,10 @@
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/DCC_Processing_Tool" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/DCC_Processing_Tool" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config.txt" beforeDir="false" afterPath="$PROJECT_DIR$/config.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DCCCharacterisation/FaceLaplacians.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCCharacterisation/LaplaciansLab.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCCCharacterisation/StructureCharacterisation.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCCharacterisation/StructureCharacterisation.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCCCharacterisation/TJsLab.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCCharacterisation/TJsLab.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCCKinetic/DCCKinetic.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCKinetic/DCCKinetic.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DCCKinetic/Kinetic_Functions.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCKinetic/Kinetic_Functions.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DCCProcessing/DCCProcessing.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCProcessing/DCCProcessing.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCCProcessing/Processing_Functions.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCProcessing/Processing_Functions.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCC_SupportFunctions.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCC_SupportFunctions.h" afterDir="false" />
     </list>
@@ -77,14 +76,10 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="settings.editor.selected.configurable" value="build.tools" />
+    <property name="structure.view.defaults.are.configured" value="true" />
   </component>
   <component name="RunManager">
     <configuration name="DCC_Processing_Tool" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="DCC_Processing_Tool" TARGET_NAME="DCC_Processing_Tool" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="DCC_Processing_Tool" RUN_TARGET_NAME="DCC_Processing_Tool">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -110,7 +105,8 @@
       <workItem from="1656882928405" duration="679000" />
       <workItem from="1656883612971" duration="2419000" />
       <workItem from="1656938113973" duration="9879000" />
-      <workItem from="1656973878995" duration="64924000" />
+      <workItem from="1656973878995" duration="102926000" />
+      <workItem from="1657985775976" duration="5000" />
     </task>
     <task id="LOCAL-00001" summary="First Kinetic modules">
       <created>1656080713607</created>
@@ -196,7 +192,14 @@
       <option name="project" value="LOCAL" />
       <updated>1656947935056</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Face Laplacian calculation added&#10;Fracture mode was added&#10;informativeness added">
+      <created>1657621925885</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1657621925886</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -218,6 +221,7 @@
     <MESSAGE value="Plasticity woks now: version 1" />
     <MESSAGE value="Plasticity with plastic strain output" />
     <MESSAGE value="StrEntropy works almost properly in loop" />
-    <option name="LAST_COMMIT_MESSAGE" value="StrEntropy works almost properly in loop" />
+    <MESSAGE value="Face Laplacian calculation added&#10;Fracture mode was added&#10;informativeness added" />
+    <option name="LAST_COMMIT_MESSAGE" value="Face Laplacian calculation added&#10;Fracture mode was added&#10;informativeness added" />
   </component>
 </project>

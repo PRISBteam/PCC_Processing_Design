@@ -7,9 +7,12 @@
 
 ///Structure characterisation tool
 //unsigned int DCC_StructureCharacterisation(std::vector<unsigned int> const& S_Vector, std::vector<unsigned int> const& s_faces_sequence, std::vector<double> const& configuration, std::vector<unsigned int> const& CellNumbs, std::vector<char*> const paths, char* odir) {
-int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> &c_faces_sequence, std::vector<double> configuration, std::vector<unsigned int> &CellNumbs, std::vector<char*> const paths, char* odir, std::ofstream& OutFLfile, std::ofstream& OutElCondfile) {
+int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> &c_faces_sequence, std::vector<double> configuration, std::vector<unsigned int> &CellNumbs, std::vector<char*> const paths, char* odir, std::ofstream& OutFLfile, std::ofstream& OutElCondfile, std::ofstream&  OutSFile)
+{
+    vector<double> jcF_types_fractions, jF_types_fractions;
     double SFace_Entropy_Median = 0, SFace_Entropy_Skrew = 0, cFace_Entropy_Median = 0, cFace_Entropy_Skrew = 0;
     double SFinformativeness = 0, CFinformativeness = 0;
+    double Svn = 0.0, Cvn = 0.0; // Von-Neumann entropy for Special Faces (Svn) and Cracked Faces (Cvn)
 // cout << "START of DCC Structure Characterisation Module" << endl;
     SpMat SpAM_SpecFaces(s_faces_sequence.size(), s_faces_sequence.size()), SFace_Laplacian(s_faces_sequence.size(), s_faces_sequence.size()),
           SpAM_CrackFaces(c_faces_sequence.size(), c_faces_sequence.size()), CFace_Laplacian(c_faces_sequence.size(),c_faces_sequence.size()),
@@ -118,7 +121,25 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
 /// Special Faces Laplacian matrix
         SFace_Laplacian = SFDegree - SpAM_SpecFaces; // L = D - A
 
-        // Symmetric S-Faces Laplacian
+/// === Density matrix of states =======>
+/*
+double a_sum = 0.0;
+for (unsigned int k = 0; k < SpAM_SpecFaces.rows(); ++k)
+    for (unsigned int l = 0; l < SpAM_SpecFaces.cols(); ++l)
+        a_sum += SpAM_SpecFaces.coeff(k,l);
+
+    SpMat Face_Rho = SFace_Laplacian/ a_sum;
+    /// Von-Neumann entropy for Special Faces (cracked) Laplacian
+    MatrixXd Face_Rho_Dense;
+        Face_Rho_Dense = MatrixXd(Face_Rho);
+        Face_Rho_Dense = Face_Rho_Dense*Face_Rho_Dense.array().log().matrix();
+// REPAIR       cout << "Face_Rho_Dense after == " << Face_Rho_Dense.nonZeros() << endl;
+
+        Svn = Face_Rho_Dense.diagonal().sum();
+        Face_Rho_Dense.resize(0,0);
+*/
+Svn = 0; ////////////////-
+// Symmetric S-Faces Laplacian
 /// Left Random-Walk normalized Laplacian matrix
 //RW_SFace_Laplacian = Id - SFDegree.cwiseInverse() * SpAM_SpecFaces; // Ls = D^-1/2 L
         SFace_degrees.clear();
@@ -176,6 +197,25 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
 /// Special Faces Laplacian matrix
         CFace_Laplacian = SFCDegree - SpAM_CrackFaces; // L = D - A
 
+        /// === Density matrix of Cracked Faces states =======>
+/*
+        double ac_sum = 0.0;
+        for (unsigned int k = 0; k < SpAM_CrackFaces.rows(); ++k)
+            for (unsigned int l = 0; l < SpAM_CrackFaces.cols(); ++l)
+                ac_sum += SpAM_CrackFaces.coeff(k,l);
+
+        SpMat Face_cRho = CFace_Laplacian/ ac_sum;
+        /// Von-Neumann entropy for Special Faces (cracked) Laplacian
+        MatrixXd Face_Rho_cDense;
+        Face_Rho_cDense = MatrixXd(Face_cRho);
+        Face_Rho_cDense = Face_Rho_cDense*Face_Rho_cDense.array().log().matrix();
+
+        Cvn = Face_Rho_cDense.diagonal().sum();
+        Face_Rho_cDense.resize(0,0);
+        */
+Cvn = 0; ////////////////-
+
+
         // Symmetric S-Faces Laplacian
 /// Left Random-Walk normalized Laplacian matrix
 // Identity matrix
@@ -217,27 +257,30 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
     } else cout << "Error: No such a directory for\t" << odir + "SpecialGrainBoundaries.txt"s << endl;
 
 /// =========== Analysis tools ==============>
-if (configuration.at(1)) { // Nodes types statistics, indices and configuration entropy
+if (configuration.at(4)) { // Nodes types statistics, indices and configuration entropy
 //#include "QPsLab.h"
 }
-if (configuration.at(2)) { /// Edges types statistics, indices and configuration entropy
+if (configuration.at(5)) { /// Edges types statistics, indices and configuration entropy
     //map<unsigned int, unsigned int> Edges_Types_Map; // Map: [Edge number] --> [Enge type]
     /// Statistics of Edges
     // Special
-    EdgesStat( s_faces_sequence, CellNumbs, FES, odir, SFace_Entropy_Median, SFace_Entropy_Skrew, SFinformativeness);
+    EdgesStat( s_faces_sequence, CellNumbs, FES, odir, SFace_Entropy_Median, SFace_Entropy_Skrew, SFinformativeness, jF_types_fractions);
     // Crack
-    EdgesStat( c_faces_sequence, CellNumbs, FES, odir, cFace_Entropy_Median, cFace_Entropy_Skrew, CFinformativeness);
+    EdgesStat( c_faces_sequence, CellNumbs, FES, odir, cFace_Entropy_Median, cFace_Entropy_Skrew, CFinformativeness,jcF_types_fractions);
+
+    OutSFile << s_faces_sequence.size() / (double) CellNumbs.at(2) << " " << c_faces_sequence.size() / (double) CellNumbs.at(2) << " " << Svn << " " << jF_types_fractions.at(0) << " " << jF_types_fractions.at(1) << " " << jF_types_fractions.at(2) << " " << jF_types_fractions.at(3) << " " << ( jF_types_fractions.at(1) + 2.0*jF_types_fractions.at(2) + 3.0*jF_types_fractions.at(3))/ 3.0 << " " << SFace_Entropy_Median + SFace_Entropy_Skrew << " " << SFace_Entropy_Median << " " << SFace_Entropy_Skrew << " " << SFinformativeness << " "
+                << " " << Cvn << " " << jcF_types_fractions.at(0)<< " " << jcF_types_fractions.at(1)<< " " << jcF_types_fractions.at(2)<< " " << jcF_types_fractions.at(3) << " " << ( jcF_types_fractions.at(1) + 2.0*jcF_types_fractions.at(2) + 3.0*jcF_types_fractions.at(3))/ 3.0 << " " << cFace_Entropy_Median + cFace_Entropy_Skrew << " " << cFace_Entropy_Median << " " << cFace_Entropy_Skrew << " " << CFinformativeness << endl;
 }
-if (configuration.at(3)) { // Faces types statistics and structural indices
+if (configuration.at(6)) { // Faces types statistics and structural indices
 //#include "FacesLab.h"
 }
-if (configuration.at(4)) { // Grains types statistics, indices and configuration entropy
+if (configuration.at(7)) { // Grains types statistics, indices and configuration entropy
 //#include "GrainsLab.h"
 }
-if (configuration.at(5)) { // Nodes Laplacian with its spectrum for the nodes network
+if (configuration.at(8)) { // Nodes Laplacian with its spectrum for the nodes network
 //#include"NodeLaplacians.h"
 }
-if (configuration.at(6)) { // Edges Laplacian with its spectrum for the edges network
+if (configuration.at(9)) { // Edges Laplacian with its spectrum for the edges network
 //#include"EdgeLaplacians.h"
 }
 if (configuration.at(10)) { // Face Laplacian with its spectrum for the special faces network
@@ -259,7 +302,7 @@ if (configuration.at(10)) { // Face Laplacian with its spectrum for the special 
                 for (unsigned int i = 0; i < Lface_spectrum.size(); ++i) if ( Lface_spectrum.at(i) >= pow(10,-5)) inverse_Lface_spectrum.at(i) = 1.0 / Lface_spectrum.at(i);
 
                 cout << "Laplacian size :: " << SFace_Laplacian.cols() << "\tNumber of Faces\t" << CellNumbs.at(2) << endl;
-                system("pause");
+                //system("pause");
 
                 /// Output to file Special Face Laplacian eigenvalues
                 if (OutFLfile) {
@@ -269,20 +312,14 @@ if (configuration.at(10)) { // Face Laplacian with its spectrum for the special 
 
                 } else cout << "Error: No such a directory for\t" << odir + "FaceLaplacian.txt"s << endl;
         } // if (SFace_Laplacian.rows()
-    //            OutElCondfile << s_faces_sequence.size() / (double) CellNumbs.at(2) << " " << c_faces_sequence.size() / (double) CellNumbs.at(2) << " " << 1.0 / ( Lface_spectrum.size() * std::accumulate(inverse_Lface_spectrum.begin(), inverse_Lface_spectrum.end(), 0) ) << " " << std::count(Lface_spectrum.begin(), Lface_spectrum.end(), 0.0) << endl;
-    OutElCondfile << s_faces_sequence.size() / (double) CellNumbs.at(2) << " " << c_faces_sequence.size() / (double) CellNumbs.at(2) << " " << 1.0 / ( Lface_spectrum.size() * std::accumulate(inverse_Lface_spectrum.begin(), inverse_Lface_spectrum.end(), 0) ) << " " << std::count(Lface_spectrum.begin(), Lface_spectrum.end(), 0.0)
-                  << " " << SFace_Entropy_Median << " " << SFace_Entropy_Skrew << " " << SFinformativeness << " " << 1.0 / ( Cface_spectrum.size() * std::accumulate(inverse_Cface_spectrum.begin(), inverse_Cface_spectrum.end(), 0) ) << " " << std::count(Cface_spectrum.begin(), Cface_spectrum.end(), 0.0) << " " << cFace_Entropy_Median << " " << cFace_Entropy_Skrew << " " << CFinformativeness << endl;
+
+    OutElCondfile << s_faces_sequence.size() / (double) CellNumbs.at(2) << " " << c_faces_sequence.size() / (double) CellNumbs.at(2) << " " << std::accumulate(inverse_Lface_spectrum.begin(), inverse_Lface_spectrum.end(), 0) << " " << 1.0 / ( Lface_spectrum.size() * std::accumulate(inverse_Lface_spectrum.begin(), inverse_Lface_spectrum.end(), 0) ) << " " << std::count(Lface_spectrum.begin(), Lface_spectrum.end(), 0.0) << " " << SFinformativeness << " "
+                    << std::accumulate(inverse_Cface_spectrum.begin(), inverse_Cface_spectrum.end(), 0) << " " << 1.0 / ( Cface_spectrum.size() * std::accumulate(inverse_Cface_spectrum.begin(), inverse_Cface_spectrum.end(), 0) ) << " " << std::count(Cface_spectrum.begin(), Cface_spectrum.end(), 0.0) << " " << CFinformativeness << endl;
 } /// if (configuration.at(10))
-if (configuration.at(8)) { // Betti numbers (FB0, FB1 and FB2) of the special faces network
-//#include"BettiNumbers.h"
-}
-if (configuration.at(9)) { // Grain Laplacian with its spectrum for the grain network
+if (configuration.at(11)) { // Grain Laplacian with its spectrum for the grain network
 //#include"GrainLaplacians.h"
 }
-if (configuration.at(10)) { // Tutte polynomial for the special faces network
-//#include"FaceTutte.h"
-}
-if (configuration.at(11)) { // Statistical physics module
+if (configuration.at(12)) { // Statistical physics module
 //#include"DCCStatistical.h"
 }
     /// Vectors deletion
@@ -297,124 +334,4 @@ if (configuration.at(11)) { // Statistical physics module
     return SpAM_SpecFaces.nonZeros();
 } /// End of the Structure_Characterisation function
 
-
-
-
 /// Archive
-/*
-/// Declaration of FUNCTIONS, see the function bodies at the end of file.
-Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsigned int Cols); // The function read any matrices from lists of triplets and create corresponding sparse matrices
-std::vector<unsigned int> VectorReader(char* FilePath); // The function read any matrices from lists of triplets and create corresponding sparse matrices
-//std::vector<double> confCount(char* config); // Configuration's of the problem output read from file "config"
-//vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> const& FES, map<unsigned int, unsigned int> Edges_TypesMap);
-unsigned int NewCellNumb_R(unsigned int SCellsNumb); // Random generation of a 2-Cell number
-//    unsigned int Structure_Characterisation(unsigned long const& numerator, vector<unsigned int> const& CellNumbs, vector<Eigen::Triplet<double>> const& SFaces_Triplet_list, map<unsigned int, unsigned int> const& SpecialCellMap, vector<unsigned int> const& special_faces_sequence, Eigen::SparseMatrix<double> const& FES, char* odir, double special_faces_fraction, vector<double> const& configuration); // The whole characterisation module with the program output
-
-//////////////////////=============== Matrices initialisation part =============== //////////////////////
-// Triplets in the form T = T(i,j,value), where i and j element's indices in the corresponding dense matrix
-typedef Triplet<double> Tr; // <Eigen library class> Declares a triplet's type name - Tr
-typedef SparseMatrix<double> SpMat; // <Eigen library class> Declares a column-major sparse matrix type of doubles name - SpMat
-std::vector<Tr> SFaces_Triplet_list; // Probe vector of triplets
-
-long unsigned int i = 0, t_length = 0;
-std::vector<unsigned int> CellNumbs;
-
-////////==================== Reading from files of all the adjacency matrices of the DCC ===================////
-
-/// Reading vector from the file "number_of_cells" the numbers of cells od different types ///
-/// ::      vector components: [0] - Nodes, [1] - Edges, [2] - Faces, [3] - Grains ::     ///
-CellNumbs = VectorReader(CNumbs);
-
-//Screen output for the numbers of cells in the DCC
-cout << "The number of different k-cells in the DCC:" << endl;
-for (int j : CellNumbs) cout << t_length++ << "-cells #\t" << j << endl;
-
-
-cout << "The number of different k-cells in the DCC:" << endl;
-
-
-
-
-
-/// Generation of the output streams
-ofstream OutFaceFile; // Output stream for variables related with special 2-Cells in DCC
-ofstream OutFLfile; // Special Face Laplacian
-ofstream OutRWFLfile; // Random Walker Special Face Laplacian
-
-OutFaceFile.open(odir + "FaceAdjacency.txt"s, ios::trunc);
-OutFaceFile<< "Adjacency Matrix of all Special Faces" << endl;
-OutFaceFile.close();
-OutFLfile.open(odir + "FaceLaplacian.txt"s, ios::trunc);
-OutFLfile<< "Laplacian Matrix of all Special Faces" << endl;
-OutFLfile.close();
-OutRWFLfile.open(odir + "FaceLaplacian.txt"s, ios::trunc);
-OutRWFLfile<< "Random Walker Laplacian Matrix of all Special Faces" << endl;
-OutRWFLfile.close();
-
-ofstream OutTJsFile; // Output stream for variables related with special 1-Cells in DCC
-OutTJsFile.open(odir + "TJsLab_TJsTypes.txt"s, ios::trunc);
-OutTJsFile << "Junctions [1-Cells] of different types" << endl;
-OutTJsFile << "Strain\t\t" <<"J0:\t" << "\t J1:\t" << "\t J2:\t" << "\t J3:\t" << endl;
-
-ofstream OutSFile;// Output stream for configurational entropy related with 1-Cells
-OutSFile.open(odir + "TJsLab_ConTJsEntropy.txt"s, ios::trunc);
-OutSFile << "Strain\t" <<"\t Configurational [1-Cells] Entropy \t" <<"\t Median Face Entropy \t" <<"\t Skrew Face Entropy \t" << endl;
-
-/// Another key point: creation of a triplet list SFaces_Triplet_list for the sparse matrix of special faces
-for(unsigned int j = 0; j < CellNumbs.at(2); j++) //  Loop over all the Faces in the DCC
-if(j != sit && AFS.coeff(sit,j) == 1 && (SpecialCellMap.find(j) != SpecialCellMap.end())) // if (1) not the same element (2) we find an adjacent element (neighbour) (3)! this element already added in the special faces map (= was randomly chosen)
-{ SFaces_Triplet_list.push_back(Tr(sit,SpecialCellMap[j],1)); } // then we add this element to the new Special Faces Matrix with the number {numerator, new number of the neighbour}
-//         { SFaces_Triplet_list.push_back(Tr(sit,SpecialCellMap[j],1)); SFaces_Triplet_list.push_back(Tr(SpecialCellMap[j], sit,1));} // then we add this element to the new Special Faces Matrix with the number {numerator, new number of the neighbour}
-
-
-
-
- //// After fracture
-
-
-    vector<unsigned int> crackFaces;
-    for (auto cit: c_faces_sequence) {
-        //crackFaces.push_back(cit);
-        for (unsigned int k = 0; k < CellNumbs.at(2); ++k) {//  Loop over all the Faces in the DCC
-            if (k != cit && AFS.coeff(cit, k) == 1) { // if (1) not the same element and (2) k is one of its neighbours
-                crackFaces.push_back(k); // for all the Face neighbours
-
-            } // end for ( k < CellNumbs.at(2))
-        } // end of for ( k < CellNumbs.at(2))
-
-        if (crackFaces.size() > 1) {
-            unsigned int itr1 = std::find(s_faces_sequence.begin(), s_faces_sequence.end(), crackFaces.at(1)) -
-                                s_faces_sequence.begin();
-            unsigned int itr2 = std::find(s_faces_sequence.begin(), s_faces_sequence.end(), crackFaces.at(2)) -
-                                s_faces_sequence.begin();
-            // Clear the triplet
-            if (itr1 != s_faces_sequence.size() && itr2 != s_faces_sequence.size()) {
-            //    Tr val = {itr1, itr2, 1};
-            //std::vector<Tr>::iterator trit = std::find(SFaces_Triplet_list.begin(), SFaces_Triplet_list.end(), val);
-            //SFaces_Triplet_list.erase(trit);
-
-            pair<unsigned int, unsigned int> val = {itr1, itr2};
-            //std::vector<Tr>::iterator
-            unsigned int trit = std::distance(SFaces_Triplet_list_pair.begin(), std::find(SFaces_Triplet_list_pair.begin(), SFaces_Triplet_list_pair.end(), val));
-            SFaces_Triplet_list_pair.at(trit) = {0,0};
-
-        // if (crackFaces.size() > 1)
-                 //unsigned int trit_counter = 0;
-//                 for (auto trit : SFaces_Triplet_list) {
-//                        if ((trit.row() == itr1 && trit.col() == itr2) || (trit.row() == itr2 && trit.col() == itr1)) {
-//                         cout << "itr1 =\t" << itr1 << "\titr2 =\t" << itr2 << endl;
-//                         cout << "trit.row =\t" << trit.row() << "\ttrit.col =\t" << trit.col() << endl;
-//                         SFaces_Triplet_list.erase(SFaces_Triplet_list.begin() + trit_counter);
-//                         }
-                     //++trit_counter;  } // end for (auto trit : SFaces_Triplet_list)
-            } // end if
-         } // end if
-
-        crackFaces.clear();
-    } // for (auto cit: c_faces_sequence)
-
-    for (auto sit: SFaces_Triplet_list_pair)
-        SFaces_Triplet_list.push_back(Tr(get<0>(sit), get<1>(sit), 1));
-
-
-*/

@@ -15,10 +15,10 @@ using namespace std;
 using namespace Eigen;
 //using namespace Spectra;
 
-/// Function defenitions
+/// Function definitions
 std::vector<unsigned int> VectorReader(char* FilePath);
+int DCC_Processing3D(std::vector<unsigned int> &State_Vector, std::vector<unsigned int>  &special_faces_sequence, char* stype, double max_sFaces_fraction, int number_of_types, std::vector<unsigned int> &CellNumbs, std::vector<char*> const paths) {
 
-int DCC_Processing3D(std::vector<unsigned int> &State_Vector, std::vector<unsigned int>  &special_faces_sequence, char stype, double max_sFaces_fraction, int number_of_types, std::vector<unsigned int> &CellNumbs, std::vector<char*> const paths) {
 // State_Vector in the form : [Element number] - > [Type]
 // CellNumbs :: vector components: [0] - Nodes number, [1] - Edges number, [2] - Faces number, [3] - Grains number
 // Maximal fraction (max_sFaces_fraction) for simulation loop max_sFaces_fraction = [0,1]
@@ -28,23 +28,23 @@ int DCC_Processing3D(std::vector<unsigned int> &State_Vector, std::vector<unsign
 //    vector<map<unsigned int, unsigned int>> Vector_SCellMaps(number_of_types);
 //    vector<unsigned int>::iterator vit;// Special iterator for such vector
 
-    if (stype == 'R') { //  Random generation case
+    if (*stype == 'R') { //  Random generation case
         Processing_Random(State_Vector, special_faces_sequence, max_sFaces_fraction, number_of_types, CellNumbs);
     } ///End of 'R' type simulations
 
-    else if (stype == 'S') { // Maximum entropy production
+    else if (*stype == 'S') { // Maximum entropy production
          Processing_maxEntropy(State_Vector, special_faces_sequence, max_sFaces_fraction, number_of_types, CellNumbs, paths);
     } ///End of 'S' type simulations
 
-    else if (stype == 'D') { // DDRX recrystalisation process
+    else if (*stype == 'D') { // DDRX recrystalisation process
         Processing_DDRX(State_Vector, special_faces_sequence, max_sFaces_fraction, paths, number_of_types, CellNumbs);
     } ///End of 'D' type simulations
 
-    else if (stype == 'I') {
+    else if (*stype == 'I') {
 
     }
 
-    else if (stype == 'E') {
+    else if (*stype == 'E') {
 
     }
     else { cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'S' or 'I'..!" << endl; return 888;}

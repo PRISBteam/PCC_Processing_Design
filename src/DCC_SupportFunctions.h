@@ -81,7 +81,7 @@ std::vector<unsigned int> VectorReader(char* FilePath) {
     ifstream inCellNumbers(FilePath);
     if (inCellNumbers.is_open()) { //If the file was successfully open, then
         while(inCellNumbers >> i) res.push_back(i);
-    } else std:cout << "The file " << FilePath << " cannot be read" << endl; //If something goes wrong
+    } else std:cout << "The file " << FilePath << " cannot be read !" << endl; //If something goes wrong
 
     return res;
 }

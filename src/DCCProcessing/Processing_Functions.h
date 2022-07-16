@@ -279,8 +279,8 @@ int Processing_maxEntropy(std::vector<unsigned int> &S_Vector, std::vector<unsig
     new_neigh_TJs.shrink_to_fit();
     new_neigh_Faces.clear();
     new_neigh_Faces.shrink_to_fit();
-//    FES.makeCompressed();
-//    AFS.makeCompressed();
+    FES.makeCompressed();
+    AFS.makeCompressed();
 
     return 0;
 } // end of S_max

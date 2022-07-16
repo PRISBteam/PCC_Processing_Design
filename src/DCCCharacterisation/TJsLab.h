@@ -4,7 +4,7 @@
 ///==============================================================================================================================///
 
 using namespace std; ///Standard namespace
-map<unsigned int, unsigned int> EdgesStat( std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> const& CellNumbs, Eigen::SparseMatrix<double> const& FES, char* output_dir, double &Face_Entropy_Median, double &Face_Entropy_Skrew, double &informativeness)
+map<unsigned int, unsigned int> EdgesStat( std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> const& CellNumbs, Eigen::SparseMatrix<double> const& FES, char* output_dir, double &Face_Entropy_Median, double &Face_Entropy_Skrew, double &informativeness, vector<double> &j_types_fractions)
 {
     vector<int> TJsTypes(CellNumbs.at(1),0);
     map<unsigned int, unsigned int> res; // Here 100 is an arbitrary number of Edge types
@@ -31,8 +31,9 @@ map<unsigned int, unsigned int> EdgesStat( std::vector<unsigned int> &s_faces_se
     /// Configuration Entropy related with Faces
 //    Configurational_Face_Entropy = - (j0s* log2(j0s) + j1s* log2(j1s) + j2s* log2(j2s) + j3s* log2(j3s));
     Configurational_Face_Entropy = - (j0s + j1s + j2s + j3s);
+
     /// Median part in the entropy decomposition
-    vector<double> j_types_fractions = {j0, j1, j2, j3}; /// using values with pow(10,-10) instead of 0s!
+    j_types_fractions = {j0, j1, j2, j3}; /// using values with pow(10,-10) instead of 0s!
     if (j0s!=0 && j1s!=0 && j2s!=0 && j3s!=0) {
         Face_Entropy_Median = -(1.0 / j_types_fractions.size()) * log2(j0 * j1 * j2 * j3);
     } else Face_Entropy_Median = 0.0;
@@ -78,15 +79,11 @@ map<unsigned int, unsigned int> EdgesStat( std::vector<unsigned int> &s_faces_se
     char* cTJs_dir = const_cast<char*>(output_TJs_dir.c_str()); char* cEntropy_dir = const_cast<char*>(output_Entropy_dir.c_str()); // From string to char for the passing folder path to a function
 
     ofstream OutTJsFile; OutTJsFile.open(cTJs_dir, ios::app);
-    ofstream OutSFile; OutSFile.open(cEntropy_dir, ios::app);
     double special_faces_fraction =(double) s_faces_sequence.size()/ CellNumbs.at(2);
 //    cout << Configurational_Face_Entropy << "\t" << Face_Entropy_Median << "\t"<< Face_Entropy_Median << endl;
 
-    OutTJsFile << special_faces_fraction << "\t" << j0 << "\t" << j1 << "\t" << j2 << "\t" << j3 << endl;
-    OutSFile << special_faces_fraction << "\t" << Configurational_Face_Entropy << "\t" << Face_Entropy_Median << "\t\t" << Face_Entropy_Skrew << endl;
-
+    OutTJsFile << special_faces_fraction << "\t" << j0 << "\t" << j1 << "\t" << j2 << "\t" << j3 << Configurational_Face_Entropy << "\t" << Face_Entropy_Median << "\t\t" << Face_Entropy_Skrew << endl;
     OutTJsFile.close();
-    OutSFile.close();
 
     int b = 0;
     for (unsigned int it : TJsTypes) res[b++] = it;
