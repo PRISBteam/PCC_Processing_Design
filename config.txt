@@ -5,9 +5,11 @@
 * ===================================================================================================================================
 * ===================================================================================================================================
 
-SIMULATION MODE(LOOP)
+SIMULATION MODE(FRACTURE_LOOP)
                     | (LIST) - mode which gives all modulus in a list;
-                    | (LOOP) - mode which gives all modulus in a taylor-made loop (requiring working directly with the Main.cpp).
+                    | (FRACTURE_LOOP) - mode which gives all modulus in a taylor-made loop (requiring working directly with the Main.cpp);
+                    | (ISING_LOOP) - mode which gives all modulus in a taylor-made loop (requiring working directly with the Main.cpp).
+
 =====================================================================================================================================
 ================================	Initial parameters for DCC_Processing Tool	 ====================================================
 =====================================================================================================================================
@@ -21,19 +23,23 @@ DCC_Processing SWITCHED ON
 -------------------------------------------------------------------------------------------------------------------------------------
 3	    | The problem dimension that is the maximum dimension k_max of k-Cells	| @ | 	0
 -------------------------------------------------------------------------------------------------------------------------------------
-R	    | Calculation type ('R', 'RW', 'S', 'F', 'I' or 'E')		| & |
+S	    | Calculation type ('R', 'RW', 'S', 'F', 'I' or 'X')		| & |
 -------------------------------------------------------------------------------------------------------------------------------------
 1         | The number of special Face (2-cells) types				| ! |	1
 -------------------------------------------------------------------------------------------------------------------------------------
-0.95 	| MAX fraction of Faces (calculation limit)				| ? | 	2
+0.91 	| MAX fraction of Faces (calculation limit)				| ? | 	2
 -------------------------------------------------------------------------------------------------------------------------------------
-0.005 	| MAX fraction of Cracks (calculation limit)		     | ^ |	3
+0.91 	| MAX fraction of Cracks (calculation limit)		     | ^ |	3
 -------------------------------------------------------------------------------------------------------------------------------------
-/Users/user/Dropbox/OFFICE/NEPER/1kCells/                    | Input folder		| ~ |
+/Users/user/Dropbox/OFFICE/NEPER/1kCells/                   | Input folder		| ~ |
 -------------------------------------------------------------------------------------------------------------------------------------
-/Users/user/Dropbox/OFFICE/NEPER/resultsJuly2022/1kCells/I/ 	 	   | Output folder	| $ |
+/Users/user/Dropbox/OFFICE/NEPER/resultsJuly2022/1kCells/res/ 	 	   | Output folder	| $ |
 -------------------------------------------------------------------------------------------------------------------------------------
 
+/Users/user/Dropbox/OFFICE/NEPER/resultsJuly2022/2D_5k/
+/Users/user/Dropbox/OFFICE/NEPER/resultsJuly2022/2D_5k/res/
+/Users/user/Dropbox/OFFICE/NEPER/1kCells/
+/Users/user/Dropbox/OFFICE/NEPER/resultsJuly2022/1kCells/res/
 =====================================================================================================================================
 ================================	Initial parameters for DCC_Kinetic Tool	 ========================================================
 =====================================================================================================================================
@@ -50,7 +56,7 @@ F	    | Kinetic simulation type ('W', 'P' or 'F')			| ` | Wear, Plasticity and F
 -------------------------------------------------------------------------------------------------------------------------------------
 
 =====================================================================================================================================
-===============================n=	Analysis tools (hash - on, percent - off) ==================================================================
+=================================	Analysis tools (hash - on, percent - off) ==================================================================
 =====================================================================================================================================
 
 DCC_Characterisation SWITCHED ON
@@ -73,7 +79,7 @@ DCC_Characterisation SWITCHED ON
 %	| Edges Laplacian with its spectrum for the nodes network,
 		Betti numbers (EB0, EB1 and EB2) of the special nodes network		9	EdgeLaplacians.h
 -------------------------------------------------------------------------------------------------------------------------------------
-# 	| Faces Laplacian with its spectrum for the nodes network,
+% 	| Faces Laplacian with its spectrum for the nodes network,
 		Betti numbers (FB0, FB1 and FB2) of the special nodes network		10	FaceLaplacians.h
 -------------------------------------------------------------------------------------------------------------------------------------
 % 	| Grain Laplacian with its spectrum for the edges network,

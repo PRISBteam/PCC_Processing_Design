@@ -26,6 +26,7 @@
       <change beforePath="$PROJECT_DIR$/src/DCCCharacterisation/StructureCharacterisation.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCCharacterisation/StructureCharacterisation.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCCCharacterisation/TJsLab.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCCharacterisation/TJsLab.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCCKinetic/DCCKinetic.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCKinetic/DCCKinetic.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DCCKinetic/Kinetic_Functions.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCKinetic/Kinetic_Functions.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCCProcessing/DCCProcessing.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCProcessing/DCCProcessing.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCCProcessing/Processing_Functions.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCCProcessing/Processing_Functions.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/DCC_SupportFunctions.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DCC_SupportFunctions.h" afterDir="false" />
@@ -106,7 +107,11 @@
       <workItem from="1656883612971" duration="2419000" />
       <workItem from="1656938113973" duration="9879000" />
       <workItem from="1656973878995" duration="102926000" />
-      <workItem from="1657985775976" duration="5000" />
+      <workItem from="1657985775976" duration="217000" />
+      <workItem from="1657990866671" duration="8086000" />
+      <workItem from="1658270227296" duration="24928000" />
+      <workItem from="1658423285554" duration="7474000" />
+      <workItem from="1658693284028" duration="11528000" />
     </task>
     <task id="LOCAL-00001" summary="First Kinetic modules">
       <created>1656080713607</created>
@@ -199,7 +204,14 @@
       <option name="project" value="LOCAL" />
       <updated>1657621925886</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Face Laplacian calculation added&#10;Fracture mode was added&#10;informativeness added">
+      <created>1657985840728</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1657985840728</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

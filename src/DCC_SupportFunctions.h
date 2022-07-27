@@ -18,6 +18,7 @@ Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsig
     res.setFromTriplets(tripletList.begin(), tripletList.end());
 
 //Remove all elements and free the memory from the probe vector
+    inAN.close();
     tripletList.clear();
     tripletList.shrink_to_fit();
 
@@ -100,7 +101,7 @@ std::vector<double> dVectorReader(char* FilePath) {
 
 /// Calculation Face-Edge index:: The function count the number of Edges with types J0, J1, J2, J3 and J4 for every junction
 vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> const& FES, vector<int> TJsTypes) {
-    vector<double> res(10,0); // Up to 100 types of possible TJs types
+    vector<double> res(100,0); /// Up to 100 types of possible TJs types
 
     for (int l = 0; l < FES.rows(); l++) // Loop over all Edges
         if (FES.coeff(l,face_number) == 1) res[TJsTypes.at(l)]++;
@@ -108,11 +109,11 @@ vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> con
     return res;
 }
 
-vector<int> EdgesTypesCalc(std::vector<unsigned int> const& CellNumbs, vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const& FES)
+vector<int> EdgesTypesCalc(std::vector<unsigned int> const &CellNumbs, vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const &FES)
 {
     vector<int> TJsTypes(CellNumbs.at(1),0);
-    for (auto vit: s_faces_sequence) // Loop over all Special Faces
-        for(int k = 0; k < CellNumbs.at(1); k++) // Loop over all the
+    for (auto vit: s_faces_sequence) // loop over all Special Faces
+        for(int k = 0; k < CellNumbs.at(1); k++) // loop over all Edges
             if (FES.coeff(k, vit) == 1) TJsTypes.at(k)++;
 
     return TJsTypes;

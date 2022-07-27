@@ -4,7 +4,7 @@
 ///==============================================================================================================================///
 
 using namespace std; ///Standard namespace
-map<unsigned int, unsigned int> EdgesStat( std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> const& CellNumbs, Eigen::SparseMatrix<double> const& FES, char* output_dir, double &Face_Entropy_Median, double &Face_Entropy_Skrew, double &informativeness, vector<double> &j_types_fractions)
+vector<int> EdgesStat( std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> const& CellNumbs, Eigen::SparseMatrix<double> const& FES, char* output_dir, double &Face_Entropy_Median, double &Face_Entropy_Skrew, double &informativeness, vector<double> &j_types_fractions)
 {
     vector<int> TJsTypes(CellNumbs.at(1),0);
     map<unsigned int, unsigned int> res; // Here 100 is an arbitrary number of Edge types
@@ -85,10 +85,10 @@ map<unsigned int, unsigned int> EdgesStat( std::vector<unsigned int> &s_faces_se
     OutTJsFile << special_faces_fraction << "\t" << j0 << "\t" << j1 << "\t" << j2 << "\t" << j3 << Configurational_Face_Entropy << "\t" << Face_Entropy_Median << "\t\t" << Face_Entropy_Skrew << endl;
     OutTJsFile.close();
 
-    int b = 0;
-    for (unsigned int it : TJsTypes) res[b++] = it;
+//    int b = 0;
+//    for (unsigned int it : TJsTypes) res[b++] = it;
 
-    return res;
+    return TJsTypes;
 }
 
 int TJsAnalytics(long HGBnumber, char* output_dir) {

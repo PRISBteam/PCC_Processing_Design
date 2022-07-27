@@ -4,7 +4,13 @@
  *  in the DCC Kinetic module. It makes them "special" and takes out of the set of "ordinary" k-Cells.                            **/
 ///================================================================================================================================///
 
-int DCC_Kinetic_Wear(double ShearStress, vector<Tup> &Grain_Orientations, Eigen::SparseMatrix<double> const& FES, std::vector<unsigned int> &CellNumbs, char* input_folder, char* output_dir) {
+//int DCC_Kinetic_Wear(double ShearStress, vector<Tup> &Grain_Orientations, Eigen::SparseMatrix<double> const& FES, std::vector<unsigned int> &CellNumbs, char* input_folder, char* output_dir) {
+int DCC_Kinetic_Wear(double ShearStress, vector<Tup> &Grain_Orientations, Eigen::SparseMatrix<double> const& FES) {
+
+    /// Input and output directories
+    char* odir = const_cast<char*>(output_folder.c_str()); // const_cast for output directory
+    char* indir = const_cast<char*>(input_folder.c_str()); // const_cast for output directory
+
 /// Vectors
     /// Normals - reading from file
     string Norm_path = input_folder + "Normal.txt"s;
@@ -25,7 +31,9 @@ int DCC_Kinetic_Wear(double ShearStress, vector<Tup> &Grain_Orientations, Eigen:
 ///*============================================================================================*///
 ///*============================== DCC_Kinetic_Plasticity function =============================*///
 
-vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::vector<unsigned int> &CellNumbs, char* input_folder, char* output_dir)  {
+//vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::vector<unsigned int> &CellNumbs, char* input_folder, char* output_dir)  {
+vector<Tup> DCC_Kinetic_Plasticity( Eigen::SparseMatrix<double> const& FES)  {
+
     //resultant tuple
     vector<Tup> fraction_stress_temperature;
 /// Functions
@@ -141,7 +149,7 @@ vector<unsigned int> Metropolis(vector<vector<double>> &stress_tensor, vector<ve
     double Rc = 8.31; //gas constant
 
     // ================> Initial p = 0.5 Face seeds
-    Processing_Random(SlipState_Vector, s_faces_sequence, 0.5, 1, CellNumbs);
+    Processing_Random( SlipState_Vector, s_faces_sequence, 0.5);
 
     // 1. Loop over all the Faces
     srand((unsigned) time(NULL)); // The function initialize random seed from the computer time (MUST BE BEFORE THE FOR LOOP!)
@@ -232,7 +240,9 @@ vector<vector<double>> lt_vector(vector<vector<double>> &stress_tensor, vector<v
     return lt;
 } /// end of lt_vector() function
 
-std::vector <unsigned int> DCC_Kinetic_cracking(std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> &CellNumbs, Eigen::SparseMatrix<double> const& AFS, Eigen::SparseMatrix<double> const& FES, std::vector<char*> paths, char* input_folder, char* output_dir) {
+//std::vector <unsigned int> DCC_Kinetic_cracking(std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> &CellNumbs, Eigen::SparseMatrix<double> const& AFS, Eigen::SparseMatrix<double> const& FES, std::vector<char*> paths, char* input_folder, char* output_dir) {
+std::vector <unsigned int> DCC_Kinetic_cracking(std::vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const& AFS, Eigen::SparseMatrix<double> const& FES) {
+
     std::vector <unsigned int> crack_faces_sequence, S_crackVector(CellNumbs.at(2), 0); // sequence of the cracked Faces
     vector<int> TJsTypes(CellNumbs.at(1), 0), TJsCrackTypes(CellNumbs.at(1), 0);
     vector<double> newCrack_neigh_TJs, newCrack_neigh_Faces; // only for neighbouring faces

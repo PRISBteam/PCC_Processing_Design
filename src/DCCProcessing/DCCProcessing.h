@@ -17,77 +17,86 @@ using namespace Eigen;
 
 /// Function definitions
 std::vector<unsigned int> VectorReader(char* FilePath);
-int DCC_Processing3D(std::vector<unsigned int> &State_Vector, std::vector<unsigned int>  &special_faces_sequence, char* stype, double max_sFaces_fraction, int number_of_types, std::vector<unsigned int> &CellNumbs, std::vector<char*> const paths) {
 
-// State_Vector in the form : [Element number] - > [Type]
+/// =============== PROCESSING MODULE ============= ///
+int DCC_Processing3D(std::vector<unsigned int> &State_sVector, std::vector<unsigned int>  &special_faces_sequence, string P_type) {
+
+// State_Vector in the form : [Element index] - > [Type]
 // CellNumbs :: vector components: [0] - Nodes number, [1] - Edges number, [2] - Faces number, [3] - Grains number
 // Maximal fraction (max_sFaces_fraction) for simulation loop max_sFaces_fraction = [0,1]
 
-//    double ordinary_faces_fraction = 1.0, special_faces_fraction = 0.0;
-//    std::vector<int> SpecialCells(CellNumbs->at(2), 0), OrdinaryCells(CellNumbs->at(2),1); // New vectors initialised with 0 for SpecialCells and 1 for OrdinaryCells
-//    vector<map<unsigned int, unsigned int>> Vector_SCellMaps(number_of_types);
-//    vector<unsigned int>::iterator vit;// Special iterator for such vector
+/// Type of the Processing tool from config.txt
+// const_cast for processing type
+char* stype = const_cast<char*>(P_type.c_str());
+// const_cast for output directory
+char* odir = const_cast<char*>(output_folder.c_str());
+
+/// Cases for Processing types
 
     if (*stype == 'R') { //  Random generation case
-        Processing_Random(State_Vector, special_faces_sequence, max_sFaces_fraction, number_of_types, CellNumbs);
+//        Processing_Random(State_Vector, special_faces_sequence, max_sFaces_fraction);
+        Processing_Random(State_sVector, special_faces_sequence, max_sFaces_fraction);
     } ///End of 'R' type simulations
 
     else if (*stype == 'S') { // Maximum entropy production
-         Processing_maxEntropy(State_Vector, special_faces_sequence, max_sFaces_fraction, number_of_types, CellNumbs, paths);
+//         Processing_maxEntropy(State_sVector, special_faces_sequence, max_sFaces_fraction, number_of_types, CellNumbs, paths);
+            Processing_maxEntropy(State_sVector, special_faces_sequence);
     } ///End of 'S' type simulations
 
     else if (*stype == 'D') { // DDRX recrystalisation process
-        Processing_DDRX(State_Vector, special_faces_sequence, max_sFaces_fraction, paths, number_of_types, CellNumbs);
-    } ///End of 'D' type simulations
+        Processing_DDRX(State_sVector, special_faces_sequence);
+    } /// End of 'D' type simulations
 
-    else if (*stype == 'I') {
+    else if (*stype == 'X') { // structural index-based calculation
+        /// Loop over all the index values
+        enum index_types { Smin = 0, ip_ind, p_star, labda_ind};
+        /// Actual value of the index !!! (move after to config.txt!)
+        int index_type = Smin;
+
+        int ip_stepsnumb = 1;
+        double ip_index = 1.0, dip = 1.0;
+        /// Informativeness
+        if (index_type == ip_ind) {
+            int ip_stepsnumb = 100;
+            double ip_index = -1, dip = 2.0 / ip_stepsnumb; // ip index can changes from -1 to 1
+        }
+
+        for (int index = 0; index < ip_stepsnumb; ++index) {
+             Processing_ipIndex(State_sVector, special_faces_sequence, index_type, ip_index);
+
+            ip_index += dip; // index requested value increasing
+        } // end for ( index < ip_stepnumb)
+    } /// End of 'X' (ip index) type of simulations
+/*
+ * else if (*stype == 'E') { // Experimental data
+        Processing_ExperimentalData(State_Vector, special_faces_sequence, max_sFaces_fraction, number_of_types, CellNumbs, paths);
+
+        /// ====== Reading from file instead of DCC_Processing3D ( ) if it is off ============>
+        string SFS_path = in + "Smax/SpecialGrainBoundaries.txt"s;
+        cout << "-----------------------------------------------------------------------------------------------------------------------------"s << endl;
+        cout << "Warning!!: special_faces_sequence successfully loaded from file:\t"s << SFS_path << " because the Processing is OFF"s << endl;
+        cout << "------------------------------------------------------------------------------------------------------------------------------"s << endl;
+        char* SFS_dir = const_cast<char*>(SFS_path.c_str());
+        special_faces_sequence = VectorReader(SFS_dir); //all Faces
+        for (auto itr: special_faces_sequence) State_Vector.at(itr) = 1;
+
 
     }
-
-    else if (*stype == 'E') {
-
-    }
+*/
     else { cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'S' or 'I'..!" << endl; return 888;}
 
-// Creation of the sparse adjacency (SAM_FacesGraph) matrix for special Faces /// Sparse adjacency matrix from the corresponding triplet list of special faces
-//        SpMat Id(numerator, numerator), SAM_FacesGraph(numerator, numerator), Face_Laplacian(numerator, numerator), Sym_Face_Laplacian(numerator, numerator), RW_Face_Laplacian(numerator, numerator);
-//        SAM_FacesGraph.setFromTriplets(SFaces_Triplet_list.begin(), SFaces_Triplet_list.end());
-
-//*  /// Key point: creation of a triplet list SFaces_Triplet_list for the sparse matrix of special faces
-//*            for(unsigned int j = 0; j < CellNumbs.at(2); j++) //  Loop over all the Faces in the DCC
-//*                if(j != sit && AFS.coeff(sit,j) == 1 && (SpecialCellMap.find(j) != SpecialCellMap.end())) // if (1) not the same element (2) we find an adjacent element (neighbour) (3)! this element already added in the special faces map (= was randomly chosen)
-//*                    SFaces_Triplet_list.push_back(Tr(sit,SpecialCellMap[j],1)); // then we add this element to the new Special Faces Matrix with the number {numerator, new number of the neighbour}
-
-/*            long unsigned int sit = SpecialCellMap[New2CellNumb]; // Just a useful variable for the number of newly converted Face (= numerator--)
-            /// Creation of a triplet list SFaces_Triplet_list for the sparse matrix of special faces
-            for(unsigned int j = 0; j < CellNumbs.at(2); j++) //  Loop over all the Faces in the DCC
-                if(j != sit && AFS.coeff(sit,j) == 1 && (SpecialCellMap.find(j) != SpecialCellMap.end())) // if (1) not the same element (2) we find an adjacent element (neighbour) (3)! this element already added in the special faces map (= was randomly chosen)
-                    SFaces_Triplet_list.push_back(Tr(sit,SpecialCellMap[j],1)); // then we add this element to the new Special Faces Matrix with the number {numerator, new number of the neighbour}
-*/
-/*
-              ///=============================================================================================================================================////
-            ///=================================== Characterisation module =============================>>
-            if( OCellAmount % output_step == 0 && ordinary_faces_fraction > 0.05) { // Periodicity of characterisation output
-                unsigned int SAM_size = Structure_Characterisation(numerator, CellNumbs, SFaces_Triplet_list, SpecialCellMap, special_faces_sequence, FES, odir, special_faces_fraction, configuration);
-
-                cout << "Fraction of special faces:" << 1.0 - ordinary_faces_fraction << ";\t Size of S-Face Adjacency matrix \t" << SAM_size << endl;
-            } // End of analysis and output iterator ( IF: iterator % X == 0 )
- */
+    /// output special_Face_sequence to file
+    ofstream OutSGBfile; // Special Faces sequence output
+/// Output to file Special Faces order :: tess - means "numeration of Faces start with 1 instead of 0 like in the NEPER output"
+    OutSGBfile.open(odir + "SpecialGrainBoundaries.txt"s, ios::trunc);
+    if (OutSGBfile) {
+//        OutSGBfile << "Global numbers (in DCC) of special grain boundaries with the fraction " << special_faces_sequence.size()/ CellNumbs.at(2) << endl;
+        for (auto vit: special_faces_sequence) OutSGBfile << vit << endl; /// vit + 1 !!! for compatibility with the Neper output
+        OutSGBfile.close();
+    } else cout << "Error: No such a directory for\t" << odir + "SpecialGrainBoundaries.txt"s << endl;
 
     return 0;
 } /// The end of HAGBsProbability3D()
-
-/// 2D version (DCC with max 2-Cells without 3-Cells and higher dimensions) of the code
-void HAGBsProbability2D(char* AN, char* AE, char* AF, char* MEN, char* MFE, char* CNumbs, char* config, char* odir, char stype) {
-// AN - Nodes (Vertices or 0-Cells) sparse adjacency matrix  in the form of three column {i, j, value}, where i and j are the indices of elements with non-zero values
-// AE - Edges (Triple Junctions or 1-Cells) sparse adjacency matrix  in the form of three column {i, j, value}, where i and j are the indices of elements with non-zero values
-// AF - Faces (Grain Boundaries or 2-Cells) sparse adjacency matrix  in the form of three column {i, j, value}, where i and j are the indices of elements with non-zero values
-// MEN - Edges - Nodes (1-Cells to 0-Cells) sparse incidence matrix  in the form of three column {i, j, value}, where i and j are the indices of elements with non-zero values
-// MFE - Faces - Edges (2-Cells to 1-Cells) sparse incidence matrix  in the form of three column {i, j, value}, where i and j are the indices of elements with non-zero values
-// odir - source path
-// stype - simulation type ('R', 'S', 'I',....)
-} /// The end of HAGBsProbability2D()
-
 
 /// ================================== Related functions ==================================///
 
