@@ -173,8 +173,8 @@ cout << "=======================================================================
         } // end of else
 
         /// Loop over special_faces_sequence with the step = Face_fraction/ number_of_fsteps
-    long number_of_fsteps = 3, number_of_csteps = 3; /// NUMBER OF STEPS for loops over the fractions of special Faces and Cracks
-    double Face_fraction = 0.05, Crack_fraction = 0.05; /// INITIAL fractions of special Faces and Cracks
+    long number_of_fsteps = 30, number_of_csteps = 30; /// NUMBER OF STEPS for loops over the fractions of special Faces and Cracks
+    double Face_fraction = 0.01, Crack_fraction = 0.01; /// INITIAL fractions of special Faces and Cracks
     double dp = 0, df = 0; //increments (dp - special Faces fraction, df - cracked faces fraction)
 
    /// Writer on the screen
@@ -241,7 +241,7 @@ cout << "=======================================================================
 
             /// ====== Fracture Kinetic module ========>
             if (KineticON(confpath, time_step_one) && max_cFaces_fraction > 0)
-                crack_faces_sequence = DCC_Kinetic(special_faces_sequence, K_type);
+                crack_faces_sequence = DCC_Kinetic(current_sfaces_sequence, K_type);
 // REPAIR        for (auto cn : crack_sequence)  cout << cn << "\t"; cout << endl; //        exit(19);
 
             /// ================== The second loop over all crack_Faces_numb ===================================>>>

@@ -251,7 +251,7 @@ std::vector <unsigned int> DCC_Kinetic_cracking(std::vector<unsigned int> &s_fac
     std::vector <double> Face_energy(CellNumbs.at(2),0), Face_current_energy(CellNumbs.at(2),0); // energies for all GBs
     double crack_fraction = 0.0;
     double sface_energy_rGO = 0.5*pow(10,-3), sface_energy_matrix = 1.0*pow(10,-3);
-    double  lsc_rGO = 2.0*sface_energy_rGO, lsc_crack = 4.0*sface_energy_rGO; // energy values related with the stress concentrators
+    double  lsc_rGO = 4.0*sface_energy_rGO, lsc_crack = 2.0*sface_energy_rGO; // energy values related with the stress concentrators
     double kB = 1.3807*pow(10,-23); // Boltzmann constant
 
     /// Initial energies
@@ -296,7 +296,7 @@ std::vector <unsigned int> DCC_Kinetic_cracking(std::vector<unsigned int> &s_fac
         // Current surface energy
         for (unsigned int l = 0; l < CellNumbs.at(2); ++l) Face_current_energy.at(l) = Face_energy.at(l) - lsc_crack_energy.at(l);
 
-        /// Number of element giving the maximum increase in configuration entropy at its conversion
+        /// Number of element
         NewCrackNumb = std::min_element(std::begin(Face_energy), std::end(Face_energy)) - std::begin(Face_energy); // gives index of the max element
         if (find(crack_faces_sequence.begin(), crack_faces_sequence.end(), NewCrackNumb) == crack_faces_sequence.end()) {
             crack_faces_sequence.push_back(NewCrackNumb); // if the element is not in the sequence - add

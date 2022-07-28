@@ -10,16 +10,18 @@ int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vect
 
     /// Output directory
     char* odir = const_cast<char*>(output_folder.c_str()); // const_cast for output directory
+    //  vector<double> tjs1_sequence, tjs2_sequence, tjs3_sequence, ctj1_sequence, ctj2_sequence, ctj3_sequence;
 
+    /// TJs types for special and cracked GBs
     vector<double> jcF_types_fractions, jF_types_fractions;
-    vector<double> tjs1_sequence, tjs2_sequence, tjs3_sequence, ctj1_sequence, ctj2_sequence, ctj3_sequence;
+
     double SFace_Entropy_Median = 0, SFace_Entropy_Skrew = 0, cFace_Entropy_Median = 0, cFace_Entropy_Skrew = 0;
     double SFinformativeness = 0, CFinformativeness = 0;
     double Svn = 0.0, Cvn = 0.0; // Von-Neumann entropy for Special Faces (Svn) and Cracked Faces (Cvn)
 
     // Function creating face laplacian from the sequence
     SpMat Make_EdgeLaplacian(std::vector<double> &tjs_sequence, SpMat &AES, std::vector<unsigned int> &CellNumbs);
-    SpMat Ltj1, Ltj2, Ltj3, Ltjc1, Ltjc2, Ltjc3;
+ //   SpMat Ltj1, Ltj2, Ltj3, Ltjc1, Ltjc2, Ltjc3;
 // cout << "START of DCC Structure Characterisation Module" << endl;
     SpMat SpAM_SpecFaces(s_faces_sequence.size(), s_faces_sequence.size()), SFace_Laplacian(s_faces_sequence.size(), s_faces_sequence.size()),
           SpAM_CrackFaces(c_faces_sequence.size(), c_faces_sequence.size()), CFace_Laplacian(c_faces_sequence.size(),c_faces_sequence.size()),
