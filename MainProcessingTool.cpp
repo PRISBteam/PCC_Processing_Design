@@ -154,8 +154,9 @@ cout << "=======================================================================
         ///  ====== Analytical solutions ========>
         // The function from TJsLab.h giving the analytical solution in Random and quasi-random (with crystallographical restrictions) cases for HAGBs fractions
        // TJsAnalytics(1000, odir);
+//         TJsAnalytics_indices(2.0, 1.5, 1.7); exit(51);
 
-        /// ====== Processing ========>
+            /// ====== Processing ========>
         if (ProcessingON(confpath, time_step_one)) {
             cout << "START of DCC Processing Module" << endl;
 //            DCC_Processing3D(State_Vector, special_faces_sequence, Processing_type, max_sFaces_fraction, number_of_types, CellNumbs, paths, odir, ip_index); // a function from Processing_Functions.h
