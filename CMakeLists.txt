@@ -3,4 +3,4 @@ project(DCC_Processing_Tool)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(DCC_Processing_Tool main_StrDesign.cpp src/DCCProcessing/DCCProcessing.h src/DCCProcessing/Processing_Functions.h src/DCCKinetic/DCCKinetic.h src/DCCKinetic/Kinetic_Functions.h src/DCCCharacterisation/StructureCharacterisation.h src/DCCCharacterisation/TJsLab.h src/DCC_SupportFunctions.h src/DCCCharacterisation/QPsLab.h src/DCCCharacterisation/DislocationsLab.h)
+add_executable(DCC_Processing_Tool main_StrDesign.cpp src/DCC_Processing/DCC_Processing.h src/DCC_Processing/Processing_Functions.h src/DCC_Kinetic/DCCKinetic.h src/DCC_Kinetic/Kinetic_Functions.h src/DCC_Characterisation/StructureCharacterisation.h src/DCC_Characterisation/TJsLab.h src/DCC_SupportFunctions.h src/DCC_Characterisation/QPsLab.h src/DCC_Characterisation/DislocationsLab.h)

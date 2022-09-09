@@ -49,7 +49,7 @@ ofstream OutFLfile, OutElCondfile, OutSFile; // ofstreams for data output
 #include "src/DCC_SupportFunctions.h"
 /* Processing module assigned new id's for the various DCC elements (Faces, Edges,...) */
 /* As its output module generates sequences of element's id's and the State vector of Faces                  */
-#include "src/DCCProcessing/DCCProcessing.h"
+#include "src/DCCProcessing/DCC_Processing.h"
 /* Kinetic module assign some values for the scalar or vector variables defined on the DCC elements (Faces, Edges,...) */
 /* As its output module generates one or several sequences of element's id's and the State vector of Faces                  */
 #include "src/DCCKinetic/DCCKinetic.h"
