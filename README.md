@@ -1,6 +1,6 @@
-* ===================================================================================================================================
-* =========================	 DCC Structural Design tool	 ====================================================================
-* ===================================================================================================================================
+* =====================================================================
+* =============	 DCC Structural Design tool	 ======================
+* =====================================================================
 
 Version: 1.0
 Author: Dr Elijah Borodin (Research Fellow in Materials Physics at the University of Manchester; Mechanics and Physics of Solids research group)
@@ -17,7 +17,7 @@ The code is written and tested in C++17. It works well with CMake 3.23 (cmake.or
 Acknowledgements:
 This code has been written as a part of the EPSRC-funded project EP/V022687/1 "Patterns recognition inside shear bands: tailoring microstructure against localisation" (PRISB).
 
-*  =========================================================== < < * > > ===========================================================
+* =============	 < < * > >  ======================
 
 The principal files, modules and concepts of the project:
 
@@ -42,7 +42,7 @@ The .txt file containing only the matrix of indices in the form
 * 1 X X X X *
 * 2 X X X X *
 * 3 X X X X *
-* ***
+* *
 * ==============================
 where each *X* can may contain any value between 0 and 1, and # are the numbers numerating different designs. 
 (!) It is important that each design is applied to the whole process, which is the changing of the fraction of special faces *p* from 0 to 1.
@@ -72,8 +72,6 @@ Writer:
 Practical tutorial:
 *** to be continued..
 
-* =================================================================================================================================== *
-* ================================	End of file	============================================================================= *
-* =================================================================================================================================== *
-
+* =====================================================================
+The END
 	
