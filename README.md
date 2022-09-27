@@ -3,11 +3,11 @@
 Version: 1.0.0
 Release date: 21/09/2022
 
-<p> DSD code is a <i> Materials Design tool</i> intended to design defect microstructure evolution during material processing. The code provides an effective tool for the studies and design of both material microstructures and an effect of the specific material processing routes. It’s key feature is the usage of cell polyhedral complexes, which  provide a discrete space for design the realistic material  defect structures of different dimensions and types. 
-This module serves as a simple tool of obtaining the defect chains of different dimensions (line defects, surface defects, different volumetric phases) defined on a specific discrete space, normally corresponding to the real material’s topology, and predefined set of topological characteristics.
-It appeared to be very useful for simultaneous optimisation of several physical and mechanical properties, depending on the multidimensional microstructure. The model example is the Voronoi 3D tessellation imitating the polycrystalline material   with different phases in grains or pores, various types of grain boundaries and their junctions and precipitates as the point defects. 
+<p> DSD code is a <i> Materials Design tool</i> intended to design defect microstructure evolution during material processing. The code provides an effective tool for the studies and design of both material microstructures and the effect of the specific material processing routes. Its key feature is the usage of polyhedral cell complexes, which provide a discrete space for designing realistic material defect structures of different dimensions and types. 
+This module serves as a simple tool for obtaining the defect chains of different dimensions (line defects, surface defects, different volumetric phases) defined on a specific discrete space, normally corresponding to the real material’s topology and predefined set of topological characteristics.
+It appeared to be very useful for simultaneous optimisation of several physical and mechanical properties, depending on the multidimensional microstructure. The model example is the Voronoi 3D tessellation imitating the polycrystalline material with different phases in grains or pores, various types of grain boundaries and their junctions and precipitates as the point defects. 
 
-The two following introductory sections discuss the basics of the DCCs theory needed for understanding the code input and output, and the practical ways to obtain different DCCs as the sets of sparse matrices of their operators. </p>
+The two following introductory sections discuss the basics of the DCCs theory needed for understanding the code input and output and the practical ways to obtain different DCCs as the sets of sparse matrices of their operators. </p>
 
 
 <h2> Polyhedral cell complex, its skeletons and chains </h2>
@@ -17,17 +17,15 @@ An excellent simple introduction to the DCC with their various applications is g
 The combinatorial cell complex…
 
 
-Skeleton, by its definition is..
+Skeleton, by its definition, is..
 
-An arbitrary set of k-cells set the chain as the part of the corresponding k-skeleton in the complex set the <i> k-chain </i>.  Essentially, the ultimate goal of the code is to create a list of k-chains (or k-sequences) in the order of appearance new elements during the considered process. 
+An arbitrary set of k-cells sets the chain as the part of the corresponding k-skeleton in the complex set of the <i> k-chain </i>. Essentially, the ultimate goal of the code is to create a list of k-chains (or k-sequences) in the order of appearance of new elements during the consideration process. 
 
 
 <h2> Where to take a complex? </h2>
 
 
-Discrete cell complex is a pretty well-known object originated from the  field of algebraic topology, so it can be obtained by many various ways. Below just a concise review of a couple of flexible tools developed in Mechanics and Physics of Solids research group in the University of Manchester providing DCCs on the basis of  Voronoi and a few others tessellation of space by convex polygons. 
-
-
+The discrete cell complex is a pretty well-known object that originated from the field of algebraic topology, so it can be obtained in many various ways Below is just a concise review of a couple of flexible tools developed in the Mechanics and Physics of Solids research group in the University of Manchester providing DCCs based on Voronoi and a few others tessellations of space by convex polygons. 
 
 <h3> Tessellations of space provided by Neper software </h3>
 
@@ -38,22 +36,16 @@ Please, see more <a href="https://neper.info/doc/neper_t.html#examples" target="
 
 <h3> DCC Generator Tool </h3>
 
-Based on the Poisson-Voronoi tessellation of space provided by the <a href="https://neper.info" target=”_blank”> Neper </a> software the code creates discrete (combinatorial) cell complex (DCC) as the set of sparse matrices. Such complexes arise from Voronoi tessellations of spatial domains around arbitrary sets of points, which ensure that each 1-cell is in the boundary of exactly three 2-cells and three 3-cells, and each 0-cell is in the boundary of exactly four 1-cells, six 2-cells and four 3-cells. This description is very close to real material microstructures and is widely used in molecular dynamics and other types of simulations.
+Based on the Poisson-Voronoi tessellation of space provided by the <a href="https://neper.info" target=”_blank”> Neper </a> software the code creates discrete (combinatorial) cell complex (DCC) as the set of sparse matrices. The  DCC Generator Tool generates a sparse representation of matrices: for any matrix element _a_(_i_, _j_) = _c_, the files of the matrices contain the list of triplets in the form (_i_, _j_, _c_). The enumeration of indices starts from 0, and, for instance, the line "5, 7, 1" in the adjacency matrix A<sub>k</sub> means that the _k_-cell #6 is the neighbour of the _k_-cell #8. For any incidence matrices B<sub>k</sub>,  the same triplet "5, 7, 1" means that the (_k_-1)-cell #6 is on the boundary of the _k_-cell #8, and their orientations coincide (_c_ = -1 for the opposite orientations). 
 
-The code generates a sparse representation of matrices: for any matrix element _a_(_i_, _j_) = _c_, the files of the matrices contain the list of triplets in the form (_i_, _j_, _c_). The numeration of indices starts from 0, and, for instance, the line "5, 7, 1" in the adjacency matrix A<sub>k</sub> means that the _k_-cell #6 is the neighbour of the _k_-cell #8. For any incidence matrices B<sub>k</sub>,  the same triplet "5, 7, 1" means that the (_k_-1)-cell #6 is on the boundary of the _k_-cell #8, and their orientations coincide (_c_ = -1 for the opposite orientations). 
-
-All the other information on the GitHub page of the project https://github.com/PRISBteam/Voronoi_DCC_Analyser/blob/main/README.md
-
-The latest release of the code can be downloaded from 
-https://github.com/PRISBteam/Voronoi_DCC_Analyser/tags
+All the other information on the GitHub page of the <a href="https://github.com/PRISBteam/Voronoi_DCC_Analyser/blob/main/README.md" target=”_blank”> project </a>
+The latest release of the code can be downloaded from the <a href="[https://github.com/PRISBteam/Voronoi_DCC_Analyser/blob/main/README.md](https://github.com/PRISBteam/Voronoi_DCC_Analyser/tags)" target=”_blank”> DCGT </a> project page.
 
 
 <h3> FCC and BCC primal slip planes </h3>
 
 The package DCC_Structure contains Python modules to build a discrete cell complex (DCC) based on the slip planes of crystal nanostructures (simple cubic, FCC, BCC; HCP not yet available). The script execute.py is a summarised execution of the whole package. It takes as input:
 …
-
-
 
 <h2> DSD code Tutorial </h2>
 
@@ -62,7 +54,7 @@ The package DCC_Structure contains Python modules to build a discrete cell compl
 
 All the input files must be in a single folder specified as the ‘input’ directory in the ‘config.txt’ file.
 
-The several sets of combinatorial and topological parameters can be set directly in the file ‘design_request.txt’. Using Monte-Carlo type of stochastic simulations (Ising-like model), the code creates the chains of special cells arranged to fit all the parameters as close to the requested ones as it is possible in their average. 
+The several sets of combinatorial and topological parameters can be set directly in the file ‘design_request.txt’. Using the Monte-Carlo type of stochastic simulations (Ising-like model), the code creates the chains of special cells arranged to fit all the parameters as close to the requested ones as it is possible in their average. 
 
 DCC itself as the set of sparse matrices..
 
@@ -74,29 +66,19 @@ DCC itself as the set of sparse matrices..
 <li>   the precision of the Monte-Carlo algorithm,
 and other parameters necessary for the code</li>
 
-‘design_requests.txt’ file  containing only the matrix of indices in the form
-==============================
-# i(S) i(Sd) i(chi) i(sigma) ...
-1 X X X X ...
-2 X X X X ...
-3 X X X X ...
-......
-==============================
-where each *X* can may contain any value between 0 and 1, and # are the numbers numerating different designs. 
-
-(!) It is important to mention that each design is applied to the whole process, which is the changing of the fraction of special faces *p* from 0 to 1.
-
+‘design_requests.txt’ file containing only the matrix of indices in the form {Nd i(S) i(Sd) i(chi) i(sigma)} where each term can contain any value between 0 and 1, and Nd are the numbers numerating different designs. 
 Each of the *index* for any variable *A* is equal to
 i(A) = A - A_min / A_max - A_min,
-
 where *A* is the current value of the variable, A_min is its minimal possible value, and A_max is its maximum possible value. So, for any variable it’s index evenly distributed between 0 < i(A) < 1. The requirement of a minimum value corresponds to the i(A) = 0, while the maximum - i(A) = 1 instead of *X* in the request.txt file. 
+  
+It is important to mention that each design is applied to the whole process, which is the changing of the fraction of special faces *p* from 0 to 1.
 
 Sparse matrices of the DCC and their names
 
 <h3> 2. Compilation </h3>
 
 What needs to be installed..
-Command line commands for compilation the code..
+Command line commands for compilation of the code..
 
 The code is written and tested in C++17. It works well with CMake 3.23 (cmake.org), g++ compiler (gcc.gnu.org) and CLion IDE (jetbrains.com/clion).
 
@@ -109,7 +91,6 @@ Command line commands to execute the code..
 <h3> 4. Calculation process </h3>
 
 What is happening during the calculation process.. 
-
 
 <h3> 5. Output files </h3>
 
@@ -128,14 +109,14 @@ and three libraries (or modules) with related functions:
 <li>  DCC_Writer </li>
 </ol>
 
-These libraries are the part of the larger software development and contain a large set of functions only small part of which (such as DCCprocessing.h, DCCcharacterisation.h, DCCwriter.h) is using in the DSD code.
+These libraries are part of the larger software development and contain a large set of functions, only a small part of which (such as DCCprocessing.h, DCCcharacterisation.h, DCCwriter.h) is used in the DSD code.
 
 
 <h3>1. Processing module </h3>
 
 For the whole process of changing the fraction of special faces *p* from 0 to 1
 1. Analyses the *request* matrix,
-2. Using the Monte-Carlo-like random optimisation algorithm calculates *s2c_sequences* and saves them in the corresponding matrices,
+2. Using the Monte-Carlo-like random optimisation algorithm, calculates *s2c_sequences* and saves them in the corresponding matrices,
 3. Calculates the purely “random” *s2c_sequence* as the reference.
 
 
@@ -153,10 +134,9 @@ For the whole process of changing the fraction of special faces *p* from 0 to 1
 <h2> After the Structural Design tool </h2>
 
 
-The DSD tool normally is just a basic tool of obtaining specific defect configuration on a given DCC. The next two obvious steps are _characterisation_ (which  means combinatorial and topological analysis) of the defect structure and simulations of various physical and mechanical processes in the materials possessed with this microstructure.
+The DSD tool is typically just a basic tool for obtaining specific defect configurations on a given DCC. The next two obvious steps are _characterisation_ (which means combinatorial and topological analysis) of the defect structure and simulations of various physical and mechanical processes in the materials possessed with this microstructure.
 
-As it was already mentioned, the design of the processing routes leading to a given microstructure development are on special interest here. Such a tool provide a unique opportunity for detailed studies of the physical processes supplementing the microstructure evolution.
-
+As it was already mentioned, the design of the processing routes leading to a given microstructure development is of particular interest here. Such a tool provides a unique opportunity for detailed studies of the physical processes supplementing the microstructure evolution.
 
 <h2> Applications of DSD tool </h2>
 
@@ -164,10 +144,9 @@ As it was already mentioned, the design of the processing routes leading to a gi
 <li> E.N. Borodin, A.P. Jivkov, A.G. Sheinerman, M.Yu. Gutkin, 2021. Optimisation of rGO-enriched nanoceramics by combinatorial analysis. Materials & Design 212, 110191. [doi: 10.1016/j.matdes.2021.110191.](https://doi.org/10.1016/j.matdes.2021.110191) </li>
 </ol>
 
-
 <h2> Acknowledgements </h2>
 
-This code has been created as a part of the EPSRC funded projects EP/V022687/1 _“Patterns recognition inside shear bands: tailoring microstructure against localisation”_ (PRISB) and EP/N026136/1 _"Geometric Mechanics of Solids: new analysis of modern engineering materials"_ (GEMS).
+This code has been created as a part of the EPSRC funded projects EP/V022687/1 _“Patterns recognition inside shear bands: tailoring microstructure against localisation”_ (PRISB) and EP/N026136/1 _"Geometric Mechanics of Solids: a new analysis of modern engineering materials"_ (GEMS).
 
 
 <h2> License </h2>
@@ -176,10 +155,9 @@ Distributed under the GNU General Public License v3.0. See LICENSE.txt for more 
 
 
 <h2> Contacts </h2>
-
-<i> Author</I>:Dr Elijah Borodin (Research Fellow in Materials Physics at the University of Manchester; Mechanics and Physics of Solids research group)
+Dr Elijah Borodin (Research Fellow in Materials Physics at the University of Manchester; Mechanics and Physics of Solids research group)
 <a href=“ Elijah.Borodin@icloud.com” Send e-mail> to Elijah Borodin (any queries regarding the code) 
 
-<!— FUTURE DIRECTIONS:
+<!-- FUTURE DIRECTIONS:
 v. +1 More types of "special" faces (like the fractured ones)
-v. +1 More types of "special" not 2-elements (like grains or nodes) —>
+v. +1 More types of "special" not 2-elements (like grains or nodes) -->
