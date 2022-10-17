@@ -1,0 +1,3 @@
+/Users/user/GitHub/DCC_Structural_Design_tool/CMakeFiles/rebuild_cache.dir
+/Users/user/GitHub/DCC_Structural_Design_tool/CMakeFiles/edit_cache.dir
+/Users/user/GitHub/DCC_Structural_Design_tool/CMakeFiles/DCC_Processing_Tool.dir
