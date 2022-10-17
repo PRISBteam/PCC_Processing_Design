@@ -1,6 +1,6 @@
 ///================================ DCC Kinetic module =============================================================///
 ///=======================================================================================================================///
-/** The function in this library generate different quasi-random finetic processeson the elements of the pre-constructed ///
+/** The functions in this library generate different quasi-random finetic processeson the elements of the pre-constructed ///
 *   discrete sell complex (DCC)                                                                                         **/
 ///=====================================================================================================================///
 /// 'W' for the 3D one-layer film, 'P' for the Ising-like model of Plasticity, 'F' for the Ising-like model of Fracture
@@ -11,11 +11,7 @@ typedef SparseMatrix<double> SpMat; // <Eigen library class> Declares a column-m
 typedef tuple<double, double, double> Tup; // Eigen library class
 typedef pair<double, double> Pr; // Eigen library class
 
-/// Standard (STL) C++ libraries:
-///------------------------------
-///------------------------------
 /// Attached user defined C++ libraries:
-///-------------------------------------
 ///-------------------------------------
 #include "Kinetic_Functions.h"
 ///-------------------------------------

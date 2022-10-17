@@ -1,38 +1,30 @@
-﻿///================================ DCC Processing module =============================================================///
-///=======================================================================================================================///
-/** The function in this library generate quasi-random process of changes in the elements of the pre-constructed          ///
-*   discrete sell complex (DCC) with the whole set of incidence and adjacency martices                                   **/
-///=======================================================================================================================///
+﻿///================================ DCC Processing module ===================================================================================///
+///========================================================================================================================================///
+/** The function in this library generate quasi-random or non-random processes of changes in the elements of the pre-constructed          ///
+*   discrete sell complex (DCC) with the whole set of incidence and adjacency martices                                       **/         ///
+///=====================================================================================================================================///
 
-/// Standard (STL) C++ libraries:
-///------------------------------
-/// Attached user defined C++ libraries:
+/// Attached user-defined C++ libraries:
 ///-------------------------------------
 #include "Processing_Functions.h"
 ///-------------------------------------
 
 using namespace std;
 using namespace Eigen;
-//using namespace Spectra;
 
-/// Function definitions
-std::vector<unsigned int> VectorReader(char* FilePath);
+/// User-defined function definitions:
+//std::vector<unsigned int> VectorReader(char* FilePath);
 
 /// =============== PROCESSING MODULE ============= ///
-int DCC_Processing3D(std::vector<unsigned int> &State_sVector, std::vector<unsigned int>  &special_faces_sequence, string P_type) {
-
-// State_Vector in the form : [Element index] - > [Type]
+int DCC_Processing(std::vector<unsigned int> &State_sVector, std::vector<unsigned int>  &special_faces_sequence, std::vector<unsigned int>  &ordinary_faces_sequence, string P_type) {
 // CellNumbs :: vector components: [0] - Nodes number, [1] - Edges number, [2] - Faces number, [3] - Grains number
 // Maximal fraction (max_sFaces_fraction) for simulation loop max_sFaces_fraction = [0,1]
+// State_Vector in the form : [Element index] - > [Type]
 
-/// Type of the Processing tool from config.txt
-// const_cast for processing type
-char* stype = const_cast<char*>(P_type.c_str());
-// const_cast for output directory
-char* odir = const_cast<char*>(output_folder.c_str());
+/// Type of the Processing tool from config.txt (const_cast for processing type; const_cast for output directory)
+char* stype = const_cast<char*>(P_type.c_str()); char* odir = const_cast<char*>(output_folder.c_str());
 
 /// Cases for Processing types
-
     if (*stype == 'R') { //  Random generation case
 //        Processing_Random(State_Vector, special_faces_sequence, max_sFaces_fraction);
         Processing_Random(State_sVector, special_faces_sequence, max_sFaces_fraction);
@@ -79,21 +71,14 @@ char* odir = const_cast<char*>(output_folder.c_str());
         char* SFS_dir = const_cast<char*>(SFS_path.c_str());
         special_faces_sequence = VectorReader(SFS_dir); //all Faces
         for (auto itr: special_faces_sequence) State_Vector.at(itr) = 1;
-
-
     }
 */
     else { cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'S' or 'I'..!" << endl; return 888;}
 
-    /// output special_Face_sequence to file
-    ofstream OutSGBfile; // Special Faces sequence output
-/// Output to file Special Faces order :: tess - means "numeration of Faces start with 1 instead of 0 like in the NEPER output"
-    OutSGBfile.open(odir + "SpecialGrainBoundaries.txt"s, ios::trunc);
-    if (OutSGBfile) {
-//        OutSGBfile << "Global numbers (in DCC) of special grain boundaries with the fraction " << special_faces_sequence.size()/ CellNumbs.at(2) << endl;
-        for (auto vit: special_faces_sequence) OutSGBfile << vit << endl; /// vit + 1 !!! for compatibility with the Neper output
-        OutSGBfile.close();
-    } else cout << "Error: No such a directory for\t" << odir + "SpecialGrainBoundaries.txt"s << endl;
+    /// Ordinary face sequence
+    ordinary_faces_sequence.clear();
+    for (auto  itr = State_sVector.begin(); itr != State_sVector.end(); ++itr)
+        if (*itr == 0) ordinary_faces_sequence.push_back(distance(State_sVector.begin(), itr));
 
     return 0;
 } /// The end of HAGBsProbability3D()

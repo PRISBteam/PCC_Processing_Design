@@ -153,8 +153,23 @@ tuple<double, double, double> find_aGBseed(unsigned int Facenumb, std::vector<ch
     return res = make_tuple(0.5*(xx[0] + xx[1]), 0.5*(yy[0] + yy[1]), 0.5*(zz[0] + zz[1]));
 }
 
+bool is_file_exists(const string fileName)
+{
+    char* charfileName = const_cast<char*>(fileName.c_str());
+    std::ifstream infile(charfileName);
+    return infile.good();
+}
+
 /*
  *     double J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
     double Configurational_Face_Entropy = 0, Face_Entropy_Median = 0 , Face_Entropy_Skrew = 0;
+
+ */
+
+/*
+ *     /// Ordinary face sequence
+    ordinary_faces_sequence.clear();
+    for (auto  itr = State_sVector.begin(); itr != State_sVector.end(); ++itr)
+        if (*itr == 0) ordinary_faces_sequence.push_back(distance(State_sVector.begin(), itr));
 
  */
