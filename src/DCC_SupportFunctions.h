@@ -99,19 +99,24 @@ std::vector<double> dVectorReader(char* FilePath) {
     return res;
 }
 
-/// Calculation Face-Edge index:: The function count the number of Edges with types J0, J1, J2, J3 and J4 for every junction
-vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> const& FES, vector<int> TJsTypes) {
+ /// * The function count the number of Edges possessing with types J0, J1, J2, J3 and J4 for every junction * ///
+/// * Calculation Face-Edge index ::                                                                                                     * ///
+
+vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> const& FES, vector<int> const& TJsTypes) {
     vector<double> res(100,0); /// Up to 100 types of possible TJs types
 
-    for (int l = 0; l < FES.rows(); l++) // Loop over all Edges
+    for (unsigned int l = 0; l < FES.rows(); l++) // Loop over all Edges
         if (FES.coeff(l,face_number) == 1) res[TJsTypes.at(l)]++;
+    // output in the form res[0] = #TJsTypes[0] incident to the face with the number face_number, res[1] = #TJsTypes[1] incident to the face with the number face_number,...
 
     return res;
 }
 
+ /// * Function calculates the vector<int> "TJsTypes" of types TJs in the DCC using its FES incidence matrix and special faces sequence (s_faces_sequence) * ///
+/// *                                                                                                                                                    * ///
 vector<int> EdgesTypesCalc(std::vector<unsigned int> const &CellNumbs, vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const &FES)
 {
-    vector<int> TJsTypes(CellNumbs.at(1),0);
+    vector<int> TJsTypes(CellNumbs.at(1),0); // CellNumbs.at(1) is the number of Edges
     for (auto vit: s_faces_sequence) // loop over all Special Faces
         for(int k = 0; k < CellNumbs.at(1); k++) // loop over all Edges
             if (FES.coeff(k, vit) == 1) TJsTypes.at(k)++;
