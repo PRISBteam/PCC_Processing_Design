@@ -4,6 +4,8 @@
 *   discrete sell complex (DCC)                                                                                         **/
 ///=====================================================================================================================///
 /// 'W' for the 3D one-layer film, 'P' for the Ising-like model of Plasticity, 'F' for the Ising-like model of Fracture
+using namespace std;
+using namespace Eigen;
 
 // Triplets in the form T = T(i,j,value), where i and j element's indices in the corresponding dense matrix
 typedef Triplet<double> Tr; // <Eigen library class> Declares a triplet's type name - Tr
@@ -16,14 +18,15 @@ typedef pair<double, double> Pr; // Eigen library class
 #include "Kinetic_Functions.h"
 ///-------------------------------------
 
-//std::vector <unsigned int> DCC_Kinetic(char* stype, std::vector<unsigned int> &s_faces_sequence, std::vector<char*> paths, char* input_folder, char* odir) {
 std::vector <unsigned int> DCC_Kinetic( std::vector<unsigned int> &s_faces_sequence, string K_type) {
+
 /// Output vector of the "very special" faces as the result of the module work
 std::vector <unsigned int> face_sequence;
 
     /// Type of the Kinetic tool from config.txt
     char* ktype = const_cast<char*>(K_type.c_str()); // type of the kinetic function from config.txt
     char* odir = const_cast<char*>(output_folder.c_str()); // const_cast for output directory
+    char cktype = *ktype;
 
 /// Declaration of FUNCTIONS, see the function bodies at the end of file.
     Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsigned int Cols); // The function read any matrices from lists of triplets and create corresponding sparse matrices
@@ -50,7 +53,7 @@ std::vector <unsigned int> face_sequence;
 // MEN - Edges - Nodes (1-Cells to 0-Cells) sparse incidence matrix  in the form of three column {i, j, value}, where i and j are the indices of elements with non-zero values
 // MFE - Faces - Edges (2-Cells to 1-Cells) sparse incidence matrix  in the form of three column {i, j, value}, where i and j are the indices of elements with non-zero values
 // MGF - Grains - Faces (3-Cells to 2-Cells) sparse incidence matrix  in the form of three column {i, j, value}, where i and j are the indices of elements with non-zero values // odir - source path
-    /// Adjacency sparse matrix for nodes /// Adjacency sparse matrix for edges /// Adjacency sparse matrix for faces /// Adjacency sparse matrix for grains
+/// Adjacency sparse matrix for nodes /// Adjacency sparse matrix for edges /// Adjacency sparse matrix for faces /// Adjacency sparse matrix for grains
 //    SpMat ANS(CellNumbs.at(0), CellNumbs.at(0)), AES(CellNumbs.at(1), CellNumbs.at(1)),
 //            AFS(CellNumbs.at(2), CellNumbs.at(2)), AGS(CellNumbs.at(3), CellNumbs.at(3));
 SpMat AFS(CellNumbs.at(2), CellNumbs.at(2));
@@ -70,7 +73,12 @@ SpMat   FES = SMatrixReader(paths.at(5 + (dim - 3)), (CellNumbs.at(1)), (CellNum
 //    GFS = SMatrixReader(paths.at(6 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
 
 ////////////////////////////////////// KINETIC PROCESSES ///////////////////////////////////////////////
-    if (*ktype == 'W') { // Wear
+    if (cktype == 'F' ) { // Fracture
+        face_sequence = DCC_Kinetic_cracking(s_faces_sequence, AFS, FES);
+
+    } ///End of 'Fracture' type simulations
+
+    else if (cktype == 'W') { // Wear
         double  ShearStress = 3.0*pow(10,8);
         /// Creation/Reading of grain orientations
         double Ori_angle = 0;
@@ -98,7 +106,7 @@ SpMat   FES = SMatrixReader(paths.at(5 + (dim - 3)), (CellNumbs.at(1)), (CellNum
 
     } ///End of 'Wear' type simulations
 
-    else if (*ktype == 'P') { // Plasticity
+    else if (cktype == 'P') { // Plasticity
         vector<Tup> fraction_stress_temperature;
 
         /// ========= DCC_Kinetic main function call ==========>>
@@ -118,24 +126,6 @@ SpMat   FES = SMatrixReader(paths.at(5 + (dim - 3)), (CellNumbs.at(1)), (CellNum
 //        for (auto lk : fraction_stress_temperature) if (get<0>(lk)*CellNumbs.at(2)*Burgv/DCC_size > 0.002) { cout << "Nano-slips fraction\t" << get<0>(lk) << "\tYield strength\t" << get<1>(lk) << "\tTemperature\t" << get<2>(lk) << endl;              break; }
 
     } ///End of 'Plasticity' type simulations
-    else if (*ktype == 'F' ) { // Fracture
-        face_sequence = DCC_Kinetic_cracking(s_faces_sequence, AFS, FES);
-
-        /// output cracked_Face_sequence to file
-        ofstream OutCFSfile; // Special Faces sequence output
-        /// Output to file Cracked Faces order :: tess - means "numeration of Faces start with 1 instead of 0 like in the NEPER output"
-        OutCFSfile.open(odir + "tess_CrackedGrainBoundaries.txt"s, ios::trunc);
-        if (OutCFSfile) {
-//        OutSGBfile << "Global numbers (in DCC) of cracked grain boundaries with the fraction " << special_faces_sequence.size()/ CellNumbs.at(2) << endl;
-            unsigned int numerator = 0;
-            for (auto vit: face_sequence) {
-                if ( numerator < max_cFaces_fraction*CellNumbs.at(2)) OutCFSfile << vit + 1 << endl; /// vit + 1 !!! for compatibility with the Neper output
-                    ++numerator;
-            }
-            OutCFSfile.close();
-        } else cout << "Error: No such a directory for\t" << odir + "CrackedGrainBoundaries.txt"s << endl;
-
-    } ///End of 'Fracture' type simulations
     else { cout << "ERROR [DCC_Kinetic] : unknown simulation type - please replace with 'W or P' " << endl; return face_sequence;}
 
 // Closing and deleting

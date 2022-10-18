@@ -69,8 +69,8 @@ int Processing_Random( std::vector<unsigned int> &S_Vector,  std::vector<unsigne
     } while(special_faces_fraction < max_sFaces_fraction); /// End of the Random generation process
 /// Closing and deleting
     // Remove all elements anf free the memory from the probe OrdinaryCellNumbs vector
-    OrdinaryCellNumbs.clear();
-    OrdinaryCellNumbs.shrink_to_fit();
+//    OrdinaryCellNumbs.clear();
+//    OrdinaryCellNumbs.shrink_to_fit();
 
     return 0;
 } // end  of Random
@@ -268,23 +268,23 @@ vector<unsigned int> max_set; max_set.clear(); max_set.push_back(New2CellNumb);
         special_faces_fraction = s_faces_sequence.size() / (double) CellNumbs.at(2);
         ordinary_faces_fraction = 1.0 - special_faces_fraction;
 
-        if ((int) (10.0*special_faces_fraction) % 2 == 0) cout << special_faces_fraction << endl;
+//REPAIRS        if ((int) (10.0*special_faces_fraction) % 2 == 0) cout << special_faces_fraction << endl;
     } while(special_faces_fraction < max_sFaces_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 
 /// Closing and deleting
-    max_set.clear();
-    max_set.shrink_to_fit();
-    TJsTypes.clear();
-    TJsTypes.shrink_to_fit();
-    EntropyIncreaseList.clear();
-    EntropyIncreaseList.shrink_to_fit();
-    new_neigh_TJs.clear();
-    new_neigh_TJs.shrink_to_fit();
-    new_neigh_Faces.clear();
-    new_neigh_Faces.shrink_to_fit();
-    FES.makeCompressed();
-    AFS.makeCompressed();
+//    max_set.clear();
+//    max_set.shrink_to_fit();
+//    TJsTypes.clear();
+//    TJsTypes.shrink_to_fit();
+//    EntropyIncreaseList.clear();
+//    EntropyIncreaseList.shrink_to_fit();
+//    new_neigh_TJs.clear();
+//    new_neigh_TJs.shrink_to_fit();
+//    new_neigh_Faces.clear();
+//    new_neigh_Faces.shrink_to_fit();
+//    FES.makeCompressed();
+//    AFS.makeCompressed();
 
     return 0;
 } // end of S_max

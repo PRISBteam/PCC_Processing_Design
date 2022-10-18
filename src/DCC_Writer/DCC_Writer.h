@@ -8,9 +8,9 @@
 #include "Writer_Functions.h"
 ///-------------------------------------
 
-void DCC_Writer(std::vector<unsigned int> const  &sfaces_sequence, std::vector<unsigned int> const &ofaces_sequence) {
+void DCC_Writer(std::vector<unsigned int> const  &sfaces_sequence, std::vector<unsigned int> const  &kface_sequence) {
 
     /// Output special and ordinary face sequences to the output directory specified in config.txt
-    DCC_sequences_Writer(sfaces_sequence, ofaces_sequence);
+    DCC_sequences_Writer(sfaces_sequence, kface_sequence);
 
 }
