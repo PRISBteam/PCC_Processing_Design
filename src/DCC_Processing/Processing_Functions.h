@@ -4,11 +4,20 @@
  *  in the DCC Processing module. It makes them "special" and takes out of the set of "ordinary" k-Cells.                            **/
 ///================================================================================================================================///
 
+/// Standard C++ libraries (STL):
+///------------------------------
+#include <random> //C++ 11 and above
 /// (1) Totally random choice of element with # New2CellNumb from the list of numbers {0 to SCellsNumb}
 unsigned int NewCellNumb_R(unsigned int OCellsNumb){ // Random generation of a 2-Cell number
     unsigned int New2CellNumb;
-    New2CellNumb = rand() % (OCellsNumb-1); // Random generation of the boundary number in the range from 0 to OrdinaryCellNumbs.size()-1
+    uniform_int_distribution<size_t> uni_rand (0, OCellsNumb - 1); // uniformly distributed from 0 to OCellsNumb-1 inclusive
+    std::random_device rd; // generates unsigned random integers
+    std::mt19937 mt(rd());
+
+    New2CellNumb = uni_rand(mt); // Random generation of the boundary number in the range from 0 to OrdinaryCellNumbs.size()-1
     return New2CellNumb;
+//Local heap
+//    std::random_device rd; //    std::mt19937 mt(rd()); //   std::uniform_real_distribution<double> dist(0, OCellsNumb - 1);
 }
 
 /// (2) The Random generation process function
@@ -46,7 +55,7 @@ int Processing_Random( std::vector<unsigned int> &S_Vector,  std::vector<unsigne
 //REPAIR cout << OrdinaryCellNumbs.size() << "\t\t" << New2CellNumb << "\t\t" << OrdinaryCellNumbs.at(New2CellNumb) << endl;
         /// Random generation of types !!! with IDs < number_of_types
         int NewFaceType = 1;
-        if (number_of_types > 1) NewFaceType = rand() % number_of_types; // Random chose for the chosen boundary to be assigned over all special types
+/// if (number_of_types > 1) NewFaceType = rand() % number_of_types; // Random chose for the chosen boundary to be assigned over all special types
         /// Changes in vectors from Main function
         S_Vector.at(OrdinaryCellNumbs.at(New2CellNumb)) = NewFaceType;
         s_faces_sequence.push_back(OrdinaryCellNumbs.at(New2CellNumb));
@@ -165,6 +174,12 @@ int Processing_maxEntropy(std::vector<unsigned int> &S_Vector, std::vector<unsig
   New2CellNumb = std::max_element(std::begin(EntropyIncreaseList), std::end(EntropyIncreaseList)) - std::begin(EntropyIncreaseList); // gives index of the max element
 ///min  New2CellNumb = std::min_element(std::begin(EntropyIncreaseList), std::end(EntropyIncreaseList)) - std::begin(EntropyIncreaseList); // gives index of the max element
 //REPAIR        cout << s_faces_sequence.size() << "   " << New2CellNumb << endl;
+/// Set of the faces with the same value
+vector<unsigned int> max_set; max_set.clear(); max_set.push_back(New2CellNumb);
+    for (auto  itr = EntropyIncreaseList.begin(); itr != EntropyIncreaseList.end(); ++itr)
+        if (*itr == EntropyIncreaseList.at(New2CellNumb)) max_set.push_back(distance(EntropyIncreaseList.begin(), itr));
+/// Random choice between the elements with the equal Entropy Increase
+    if(max_set.size() > 1) New2CellNumb = NewCellNumb_R(max_set.size());
 
     // Then all the corresponding maps chain
     S_Vector.at((unsigned int) New2CellNumb) = 1; // Replace the chosen element with 1 (special) instead of 0 (ordinary) in the State Faces vector
@@ -239,6 +254,7 @@ int Processing_maxEntropy(std::vector<unsigned int> &S_Vector, std::vector<unsig
         special_faces_fraction = s_faces_sequence.size() / (double) CellNumbs.at(2);
         ordinary_faces_fraction = 1.0 - special_faces_fraction;
 
+        if ((int) (10.0*special_faces_fraction) % 2 == 0) cout << special_faces_fraction << endl;
     } while(special_faces_fraction < max_sFaces_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 

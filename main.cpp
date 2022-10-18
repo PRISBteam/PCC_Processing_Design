@@ -40,6 +40,7 @@ std::vector<unsigned int> CellNumbs; // the vector named CellNumbs with the numb
 vector<char*> paths; // the vector with pathes to input and output directories and file
 double max_sFaces_fraction, max_cFaces_fraction; // maximum fractions of special and fractured (cracked) faces (2-cells)
 string input_folder, output_folder; // input and output directories readed from the file config.txt file
+std::vector<vector<unsigned int>> sface_design; // is a list of special_faces_sequence as an output of the module. The first line here is always the random case (zero-design), then following Smax (1-sequence) and Smin (2-sequence), and then all the designs in between Smax and Smin
 // ofstream OutFLfile, OutElCondfile, OutSFile; // useful ofstreams for data output
 
 //(-)vector<bool> SChar_config; // Characterisation module configuration
@@ -150,7 +151,7 @@ cout << "=======================================================================
 /// I: DCC_Processing module
         if ( ProcessingON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
             cout << "START of the DCC Processing module" << endl;
-            DCC_Processing(State_sVector, special_faces_sequence, ordinary_faces_sequence, P_type);
+            DCC_Processing(special_faces_sequence, ordinary_faces_sequence, P_type);
 /// ===== Elapsing time Processing ================
             unsigned int Processing_time = clock();
             double P_fulltime = (double) Processing_time;
