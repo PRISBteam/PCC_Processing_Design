@@ -33,12 +33,14 @@ int DCC_sequences_Writer(std::vector<unsigned int> const  &special_faces_sequenc
     /// output cracked_Face_sequence to file
     ofstream OutCFSfile; // Special Faces sequence output
     /// Output to file Cracked Faces order :: tess - means "numeration of Faces start with 1 instead of 0 like in the NEPER output"
-    OutCFSfile.open(odir + "tess_CrackedGrainBoundaries.txt"s, ios::trunc);
+    OutCFSfile.open(output_folder + "CrackedGrainBoundaries.txt"s, ios::trunc);
     if (OutCFSfile) {
 //        OutSGBfile << "Global numbers (in DCC) of cracked grain boundaries with the fraction " << special_faces_sequence.size()/ CellNumbs.at(2) << endl;
         for (auto vit: kinetic_faces_sequence)
             OutCFSfile << vit + 1 << endl; /// vit + 1 !!! for compatibility with the Neper output
 //        { if (unsigned int numerator = 0; numerator < max_cFaces_fraction*CellNumbs.at(2)) OutCFSfile << vit + 1 << endl; ++numerator; }
+    cout << "(4) Kinetic generated special faces sequence has been successfully written in " << output_folder
+             << "CrackedGrainBoundaries.txt"s << endl;
         OutCFSfile.close();
     } else cout << "Error: No such a directory for\t" << output_folder << "CrackedGrainBoundaries.txt"s << endl;
 

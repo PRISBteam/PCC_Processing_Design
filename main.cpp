@@ -358,14 +358,13 @@ std::vector<double> confCount(char* config, string &Processing_type, string &Kin
 
     res.size();
     cout << "The problem dimension that is the maximum dimension k_max of k-Cells\t | "s << res.at(0) << endl;
+    cout << "The number of i(X) designs (0 - random, 1 - random + smax,.. )\t\t\t | " << res.at(1) << endl;
     cout << "Processing type ('R', 'S', 'C' or 'X')\t\t\t\t\t\t\t\t\t | "s << Processing_type << endl;
     //cout << "Calculation type ('R', 'RW', 'S', 'F', 'I' or 'X'):\t\t\t\t\t\t | "s << Processing_type << endl;
-    cout << "The number of i(X) designs (0 - random, 1 - random + smax,.. )\t\t\t | " << res.at(1) << endl;
     //cout << "The number of special Face (2-cells) types:\t\t\t\t\t\t\t\t | " << res.at(1) << endl;
-    if (KineticON(config, 0)) cout << "Kinetic type ('W' or 'I')\t\t\t\t\t\t\t\t\t\t\t\t | "s << Kinetic_type << endl;
     cout << "MAX fraction of Faces (calculation limit) \t\t\t\t\t\t\t\t | " << res.at(2) << endl;
+    if (KineticON(config, 0)) cout << "Kinetic type ('W' or 'I')\t\t\t\t\t\t\t\t\t\t\t\t | "s << Kinetic_type << endl;
     if (KineticON(config, 0)) cout << "MAX fraction of Cracks (calculation limit)\t\t\t\t\t\t\t\t | " << res.at(3) << endl;
-    else
     cout << endl;
     cout << "Input folder:\t" << input_folder << endl;
     cout << "Output folder:\t" << output_folder << endl;
