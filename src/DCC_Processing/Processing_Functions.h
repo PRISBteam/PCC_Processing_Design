@@ -49,7 +49,7 @@ int Processing_Random( std::vector<unsigned int> &S_Vector,  std::vector<unsigne
     /// The function initialize random seed from the computer time (MUST BE BEFORE THE FOR LOOP!)
 
     do { // do{ ... }while(output_step) loop starting point
-        int New2CellNumb = 0;
+        unsigned int New2CellNumb = 0;
         New2CellNumb = NewCellNumb_R(OrdinaryCellNumbs.size()); // advanced random generator
 //REPAIR cout << OrdinaryCellNumbs.size() << "\t\t" << New2CellNumb << "\t\t" << OrdinaryCellNumbs.at(New2CellNumb) << endl;
         /// Random generation of types !!! with IDs < number_of_types

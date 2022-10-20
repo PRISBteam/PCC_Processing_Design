@@ -16,15 +16,15 @@ using namespace Eigen;
 //std::vector<unsigned int> VectorReader(char* FilePath);
 
 /// =============== PROCESSING MODULE ============= ///
-std::vector<vector<unsigned int>> DCC_Processing(std::vector<unsigned int>  &special_faces_sequence, std::vector<unsigned int>  &ordinary_faces_sequence, const string P_type, double design_number) {
+std::vector<vector<unsigned int>> DCC_Processing(std::vector<unsigned int>  &special_faces_sequence, const string P_type) {
 /// sface_design :: A list of special_faces_sequence as an output of the module. The first line here is always the random case (zero-design), then following Smax (1-sequence) and Smin (2-sequence), and then all the designs in between Smax and Smin
 // CellNumbs :: vector components: [0] - Nodes number, [1] - Edges number, [2] - Faces number, [3] - Grains number
 // Maximal fraction (max_sFaces_fraction) for simulation loop max_sFaces_fraction = [0,1]
 // State_Vector in the form : [Element index] - > [Type]
-    vector<unsigned int> State_sVector(CellNumbs.at(2),0); // State vector filling with zeros
+vector<unsigned int> State_sVector(CellNumbs.at(2),0); // State vector filling with zeros
 
 /// Type of the Processing tool from config.txt (const_cast for processing type; const_cast for output directory)
-char* stype = const_cast<char*>(P_type.c_str()); char* odir = const_cast<char*>(output_folder.c_str());
+char* stype = const_cast<char*>(P_type.c_str());
 char simulation_type = *stype;
 /// Cases for Processing types
     if (simulation_type == 'R') { //  Random generation case

@@ -30,9 +30,9 @@ S	    | Calculation type ('R', 'RW', 'S', 'F', 'I' or 'X')		| & |
 -------------------------------------------------------------------------------------------------------------------------------------
 0.99 	| MAX fraction of Special faces (calculation limit)				| ? | 	2
 -------------------------------------------------------------------------------------------------------------------------------------
-/Users/user/Dropbox/OFFICE/NEPER/Voronoi_3k/Voronoi/                 | Input folder		| ~ |
+/Users/user/Dropbox/OFFICE/NEPER/Voronoi_10k/Voronoi/                 | Input folder		| ~ |
 -------------------------------------------------------------------------------------------------------------------------------------
-/Users/user/Dropbox/OFFICE/NEPER/resultsOctober2022/V3k/ 	 	   | Output folder	| $ |
+/Users/user/Dropbox/OFFICE/NEPER/resultsOctober2022/V10k/ 	 	   | Output folder	| $ |
 -------------------------------------------------------------------------------------------------------------------------------------
 * Slash ../ at the end is essential here
 

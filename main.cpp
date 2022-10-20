@@ -35,7 +35,7 @@ typedef Triplet<double> Tr; // <Eigen library class> Declares a triplet's type w
 typedef SparseMatrix<double> SpMat; // <Eigen library class> Declares a column-major sparse matrix type of doubles with name - SpMat
 
 /// Declaration of GLOBAL variables (can be used in all the project modules and libraries)
-int dim, number_of_types; // problem dimension (2D or 3D) and the number of types of "special" elemets in the considering problem
+int dim; // problem dimension (2D or 3D) and the number of types of "special" elemets in the considering problem
 double design_number = 0;
 std::vector<unsigned int> CellNumbs; // the vector named CellNumbs with the number of k-cells of different types; will be read from file
 vector<char*> paths; // the vector with pathes to input and output directories and file
@@ -140,8 +140,6 @@ CellNumbs = VectorReader(number_of_cells); // VectorReader is a function from th
     std::vector <unsigned int> special_faces_sequence, ordinary_faces_sequence, current_sfaces_sequence, current_ofaces_sequence, crack_faces_sequence, current_cracks_sequence; // Variable sequences (in order of their generation) of special and ordinary Faces and Cracks
     // State vector | Special faces IDs
     vector <unsigned int> State_sVector(CellNumbs.at(2), 0), current_State_sVector(CellNumbs.at(2), 0), State_cVector(CellNumbs.at(2), 0), current_State_cVector(CellNumbs.at(2), 0);
-    // The number of special Face (2-cells) types
-    number_of_types = ConfigVector.at(1); // number of different special cell id's (in "binary" case number_of_types = 1)
     // MAX fraction of special Faces | Calculation limit
     max_sFaces_fraction = ConfigVector.at(2), max_cFaces_fraction = ConfigVector.at(3);
 
@@ -151,16 +149,17 @@ cout << "=======================================================================
 /// ================================================= THE LIST MODE STARTS HERE ==============================================================
 /// ==========================================================================================================================================
 /// In the LIST mode all the functions are calling one after another without loops
+double P_time = 0, K_time = 0, C_time = 0, W_time = 0;
  if ( SIMULATION_MODE(confpath) == "SIMULATION MODE(LIST)"s) { /// SIMULATION MODE: #LIST
 /// I: DCC_Processing module
         if (ProcessingON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
             cout << "START of the DCC Processing module" << endl;
-            special_face_design = DCC_Processing(special_faces_sequence, ordinary_faces_sequence, P_type, design_number);
+            special_face_design = DCC_Processing(special_faces_sequence, P_type);
 
 /// ===== Elapsing time Processing ================
             unsigned int Processing_time = clock();
-            double P_fulltime = (double) Processing_time;
-            cout << "Processing time is equal to  " << P_fulltime/pow(10.0,6.0) <<  "  seconds" << endl;
+            P_time = (double) Processing_time;
+            cout << "Processing time is equal to  " << P_time/pow(10.0,6.0) <<  "  seconds" << endl;
             cout << "-------------------------------------------------------" << endl;
         } // end if(ProcessingON(confpath))
 
@@ -171,8 +170,8 @@ cout << "=======================================================================
 
 /// ===== Elapsing time Kinetic ================
         unsigned int Kinetic_time = clock();
-        double K_fulltime = (double) Kinetic_time;
-            cout << "Kinetic time is equal to  " << K_fulltime/pow(10.0,6.0) <<  "  seconds" << endl;
+        K_time = (double) Kinetic_time - P_time;
+            cout << "Kinetic time is equal to  " << K_time/pow(10.0,6.0) <<  "  seconds" << endl;
             cout << "-------------------------------------------------------" << endl;
         }// end if(KineticON(confpath))
 
@@ -183,7 +182,7 @@ cout << "=======================================================================
 
 /// ===== Elapsing time Writer ================
         unsigned int Characterisation_time = clock();
-        double C_fulltime = (double) Characterisation_time;
+        C_time = (double) Characterisation_time - P_time - K_time;
         cout << "Characterisation time is equal to  " << C_fulltime/pow(10.0,6.0) <<  "  seconds" << endl;
         cout << "-------------------------------------------------------" << endl;
         }// end if(CharacterisationON(confpath))
@@ -194,8 +193,8 @@ cout << "=======================================================================
 
 /// ===== Elapsing time Writer ================
         unsigned int Writer_time = clock();
-        double W_fulltime = (double) Writer_time;
-        cout << "Writer time is equal to  " << W_fulltime/pow(10.0,6.0) <<  "  seconds" << endl;
+        double W_time = (double) Writer_time - P_time - K_time - C_time;
+        cout << "Writer time is equal to  " << W_time/pow(10.0,6.0) <<  "  seconds" << endl;
          } // end if(WriterON(confpath))
 
  } /// end SIMULATION MODE else (LIST)
@@ -397,6 +396,8 @@ void eraseSubStr(std::string & mainStr, const std::string & toErase)
 }
 
 /// Archive
+// The number of special Face (2-cells) types //    number_of_types = ConfigVector.at(X); // number of different special cell id's (in "binary" case number_of_types = 1)
+
 /* Two functions (dependent on the problem's spatial dimension - 2D or 3D) are launching here with the arguments of the paths for
  * adjacency AN, AE, AF, (AG) and incidence (boundary operators) BEN, BFE, (BGF) matrices. */
 
