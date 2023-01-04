@@ -1,4 +1,4 @@
-<h1>Discrete Structural Design tool</h1>
+<h1>Discrete Processing Design tool (DPD code) </h1>
 
 Version: 1.0.0
 Release date: 21/09/2022
