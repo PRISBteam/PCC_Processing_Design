@@ -1,4 +1,0 @@
-/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/ninja -G Ninja /Users/user/GitHub/DCC_Structural_Design_tool
--- Configuring done
--- Generating done
--- Build files have been written to: /Users/user/GitHub/DCC_Structural_Design_tool/cmake-build-debug
