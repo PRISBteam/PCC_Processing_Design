@@ -1,0 +1,18 @@
+
+# MAC OS
+.idea
+
+# Distribution / packaging
+build/
+release/
+downloads/
+
+# CMakeFiles
+CMakeCache.txt
+build.ninja
+cmake_install.cmake
+CMakeFiles/
+cmake-build-debug/
+
+# Other
+.cache
