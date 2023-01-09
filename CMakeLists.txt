@@ -10,7 +10,7 @@ add_executable(PCC_Processing_Design_tool
         src/DCC_Processing/DCC_Processing.h
         src/DCC_Processing/Processing_Functions.h
         # Kinetic module
-        src/DCC_Kinetic/DCCKinetic.h
+        src/DCC_Kinetic/DCC_Kinetic.h
         src/DCC_Kinetic/Kinetic_Functions.h
         # Characterisation module
         src/DCC_Characterisation/StructureCharacterisation.h
@@ -23,5 +23,5 @@ add_executable(PCC_Processing_Design_tool
         # Various support functions
         src/DCC_SupportFunctions.h
         # C++  class for PCC and related chains of special elements
-        src/DCC_Objects.h
-        )
+        src/DCC_Objects/DCC_Objects.h
+        src/DCC_Section/Planecut_Functions.h)

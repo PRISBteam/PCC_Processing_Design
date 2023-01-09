@@ -10,8 +10,8 @@ Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsig
     if (inAN.is_open()) { //If the file was successfully open, then
         while(!inAN.eof()) {
             inAN >> i >> j >> value;
-                tripletList.push_back(Tr(i, j, value));
-               // cout << i << "\t" << j << "\t" << value << endl;
+            tripletList.push_back(Tr(i, j, value));
+            // cout << i << "\t" << j << "\t" << value << endl;
         }
     } else cout << "The file " << SMpath << " cannot be read" << endl; //If something goes wrong
 //Sparse AB matrix
@@ -36,7 +36,7 @@ vector<Triplet<double>> TripletsReader(char* SMpath) {
         while(!inAN.eof()) {
             inAN >> i >> j >> value;
             tripletList.push_back(Tr(i , j, value));
-         //   cout << i << "\t" << j << "\t"<< value << "\t" << endl;
+            //   cout << i << "\t" << j << "\t"<< value << "\t" << endl;
         }
     } else cout << "The file " << SMpath << " cannot be read" << endl; //If something goes wrong
 
@@ -99,7 +99,7 @@ std::vector<double> dVectorReader(char* FilePath) {
     return res;
 }
 
- /// * The function count the number of Edges possessing with types J0, J1, J2, J3 and J4 for every junction * ///
+/// * The function count the number of Edges possessing with types J0, J1, J2, J3 and J4 for every junction * ///
 /// * Calculation Face-Edge index ::                                                                                                     * ///
 
 vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> const& FES, vector<int> const& TJsTypes) {
@@ -112,7 +112,7 @@ vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> con
     return res;
 }
 
- /// * Function calculates the vector<int> "TJsTypes" of types TJs in the DCC using its FES incidence matrix and special faces sequence (s_faces_sequence) * ///
+/// * Function calculates the vector<int> "TJsTypes" of types TJs in the DCC using its FES incidence matrix and special faces sequence (s_faces_sequence) * ///
 /// *                                                                                                                                                    * ///
 vector<int> EdgesTypesCalc(std::vector<unsigned int> const &CellNumbs, vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const &FES)
 {

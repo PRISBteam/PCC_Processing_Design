@@ -4,11 +4,19 @@
  *  in the DCC Processing module. It makes them "special" and takes out of the set of "ordinary" k-Cells.                            **/
 ///================================================================================================================================///
 
-/// Standard C++ libraries (STL):
 ///------------------------------
-#include <random> //C++ 11 and above
-/// (1) Totally random choice of element with # New2CellNumb from the list of numbers {0 to SCellsNumb}
-unsigned int NewCellNumb_R(unsigned int OCellsNumb){ // Random generation of a 2-Cell number
+/// Two basic function first (choosing of a/the particular face(s))
+///------------------------------
+/// Standard C++ libraries (STL):
+#include <random> // Require C++ 11 and above
+#include <execution> // Require C++ 17 and above
+
+/// (1) Totally random choice of the element with # New2CellNumb from the list of numbers {0 to OCellsNumb}
+/*!
+ * @param OCellsNumb // the number of ordinary faces
+ * @return New2CellNumb
+ */
+unsigned int NewCellNumb_R(unsigned int OCellsNumb){ // Random generation machine for a new 2-Cell number
     unsigned int New2CellNumb;
     uniform_int_distribution<size_t> uni_rand (0, OCellsNumb - 1); // uniformly distributed from 0 to OCellsNumb-1 inclusive
     std::random_device rd; // generates unsigned random integers
@@ -16,47 +24,88 @@ unsigned int NewCellNumb_R(unsigned int OCellsNumb){ // Random generation of a 2
 
     New2CellNumb = uni_rand(mt); // Random generation of the boundary number in the range from 0 to OrdinaryCellNumbs.size()-1
     return New2CellNumb;
-//Local heap
-//    std::random_device rd; //    std::mt19937 mt(rd()); //   std::uniform_real_distribution<double> dist(0, OCellsNumb - 1);
+// Local HEAP: std::random_device rd; //    std::mt19937 mt(rd()); //   std::uniform_real_distribution<double> dist(0, OCellsNumb - 1);
 }
 
-/// (2) The Random generation process function
+/// (2) Totally random choice of the element with # New2CellNumb from the list of numbers {0 to OCellsNumb}
+/*!
+ * @param <int> IniFaceNumber // initial number of face
+ * @param <int> strip_length // the number of faces in one strip
+ * @param <int> Leap_probability = 0 and <double> Leap_dist = 1 // for the future possibility of leaps: probability (hence frequency) and distance ((?)fraction of the complex size in grains)
+ * @return vector<int> NewFacesStrip_RW // vector of faces joining in one strip
+ */
+// strip_sface_distribution - is a vector containin the numbers of strips of each length starting with 1 expressed in # of faces
+// Example: vector<int> strip_sface_distribution = {2 4 5 27 8 6 3 1} means 2 strips of length 1 faces each, 4 strips of length 2 faces each,... , 1 strip of length 8 faces each
+// int strip_length - is the number of faces in the current strip or RW path length in # of faces
+/// This RW choose ANY faces, not necessary only ordinary ones (!)
+vector<int> NewFacesStrip_RW( int iniFaceNumber, int strip_length, int Leap_friquency = 1, double Leap_dist = 1) { // Random generation machine for a strips of new 2-Cells
+    unsigned int New2CellNumb;  vector<int> NewStripVector_RW;
+    vector<double> neigh_Faces; // vector for all neighbours of each face
+    /// Sparse Face Adjacency matrix - reading from the file of the considered PCC
+    SpMat AFS = SMatrixReader(paths.at(2 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(2))); //all Faces
+    AFS = 0.5 * (AFS + SparseMatrix<double>(AFS.transpose()));     //  Full symmetric AFS matrix instead of triagonal
+    // Find ordinary-ONLY faces: Calculation OrdinaryCellNumbs vector based on a given S_Vector std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(2), 1); // Vector of the size equal to the total number of faces in PCC initialised with '1's for( unsigned int lit = 0; lit < OrdinaryCellNumbs.size(); lit++) OrdinaryCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces // S_Vector with its non-zero elements set any pre-define structure of special element feeding to the function Processing_Random for( unsigned int itr : S_Vector) if(itr != 0) OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
+
+    /// (1) One random face first as the first face of the strip
+    NewStripVector_RW.push_back(iniFaceNumber); // add new element to the NewFacesStrip_RW face vector
+
+    /// (2) Loop over strip_length (in the current basket of the strip lengths distribution)
+    for (int strip_length_counter = 0; strip_length_counter < strip_length; strip_length_counter++) {
+        // Looking for all the face neighbours
+        for (int k = 0; k < CellNumbs.at(2); ++k) // Loop over all the Faces in the PCC
+            if (AFS.coeff(New2CellNumb, k) == 1) neigh_Faces.push_back(k); // set of all the face neighbours
+        // new random choice between all the face neighbours
+        New2CellNumb = neigh_Faces.at(NewCellNumb_R(neigh_Faces.size()));
+        NewStripVector_RW.push_back(New2CellNumb); // add new element to the NewFacesStrip_RW face vector
+        neigh_Faces.clear(); // clear the vector for the next face neighbours
+    } // end of  for (int strip_length_counter = 0; strip_length_counter < f_length; strip_length_counter++) {
+
+    return NewStripVector_RW;
+}
+
+///--------------------------------------------------------------------------------
+/// Several more complex generation function (generation of face sequences)
+///--------------------------------------------------------------------------------
+/// (3) The Random generation process function
 /*!
  * @param S_Vector
  * @param s_faces_sequence
  * @param max_sFaces_fraction
  */
-int Processing_Random( std::vector<unsigned int> &S_Vector,  std::vector<unsigned int> &s_faces_sequence, double max_sFaces_fraction) {
+/// S_Vector with its non-zero elements set any pre-define structure of special element feeding to the function Processing_Random
+void Processing_Random(std::vector<unsigned int> &S_Vector,  std::vector<unsigned int> &s_faces_sequence, double max_sFaces_fraction) {
 ///================================================================= 'R' =======================================================================////
 /// ====================================================>  Random generation process  <========================================================////
 ///===========================================================================================================================================////
 
 ///=============================================================================================================================================////
-/// =====> Initial initialisation with the previous calculation step (if any) based on the _special_faces_sequence_
+/// =====> Initial initialisation with the previous calculation step (if any) based on the "special_faces_sequence" file
 
 // OrdinaryCellNumbs is just a tricky way to acceleration the random process
-    std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(2), 1); // Vector of the size equal to the total number of faces in DCC initialised with '0's
-   // all the cell Numbers start with 0, not 1 like in Neper and other software (!)
+    std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(2), 1); // Vector of the size equal to the total number of faces in PCC initialised with '1's
+    // (!) all the cell Numbers start with 0, not 1 like in Neper, Matlab, Fortran and many other software
     for( unsigned int lit = 0; lit < OrdinaryCellNumbs.size(); lit++) OrdinaryCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces
-    for( unsigned int itr : S_Vector) if(itr != 0) OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
 
-    // unsigned int OCellAmount = std::count(SpecialCellNumbs->begin(), SpecialCellNumbs->end(), 0);
+    /// S_Vector with its non-zero elements set any pre-define structure of special element feeding to the function Processing_Random
+    for( unsigned int itr : S_Vector)
+        if(itr != 0) OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
+
     double ordinary_faces_fraction = OrdinaryCellNumbs.size()/ (double) CellNumbs.at(2);
-    double special_faces_fraction = 1.0 - ordinary_faces_fraction;
-    if (special_faces_fraction >= max_sFaces_fraction) return 0;
+    double special_faces_fraction = 1.0 - ordinary_faces_fraction; // special face vecror definition based on the ordinary face vector
+    if (special_faces_fraction >= max_sFaces_fraction) return;
+    // If, after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 
-/// ================= Loop before max_sFaces_fraction fractions of special cells  =======================>
-    /// The function initialize random seed from the computer time (MUST BE BEFORE THE FOR LOOP!)
-
+/// ================= Loop over all ordinary Faces before sFaces_fraction = @parameter max_sFaces_fraction fractions of special cells  =======================>
     do { // do{ ... }while(output_step) loop starting point
         unsigned int New2CellNumb = 0;
-        New2CellNumb = NewCellNumb_R(OrdinaryCellNumbs.size()); // advanced random generator
+        New2CellNumb = NewCellNumb_R(OrdinaryCellNumbs.size()); // advanced random generator of  pecial faces
 //REPAIR cout << OrdinaryCellNumbs.size() << "\t\t" << New2CellNumb << "\t\t" << OrdinaryCellNumbs.at(New2CellNumb) << endl;
         /// Random generation of types !!! with IDs < number_of_types
         int NewFaceType = 1;
-/// if (number_of_types > 1) NewFaceType = rand() % number_of_types; // Random chose for the chosen boundary to be assigned over all special types
+        // As an option: if (number_of_types > 1) NewFaceType = rand() % number_of_types; // Random chose for the chosen boundary to be assigned over all special types
+
         /// Changes in vectors from Main function
-        S_Vector.at(OrdinaryCellNumbs.at(New2CellNumb)) = NewFaceType; // change element of the State Vector
+        S_Vector.at(OrdinaryCellNumbs.at(New2CellNumb)) = NewFaceType; // change element of the State Vector according to the NewFaceType
         s_faces_sequence.push_back(OrdinaryCellNumbs.at(New2CellNumb)); // add new element to the s_faces_sequence
 
         // It is a key tricky point for the fast Random generation process: vector decreases after each turn from an ordinary to special face BUT we chose all the boundary one by one because their initial numeration stored in the SpecialCellNumbs[] vector !
@@ -67,13 +116,71 @@ int Processing_Random( std::vector<unsigned int> &S_Vector,  std::vector<unsigne
         special_faces_fraction = 1.0 - ordinary_faces_fraction;
 
     } while(special_faces_fraction < max_sFaces_fraction); /// End of the Random generation process
-/// Closing and deleting
-    // Remove all elements anf free the memory from the probe OrdinaryCellNumbs vector
-//    OrdinaryCellNumbs.clear();
-//    OrdinaryCellNumbs.shrink_to_fit();
+// Closing and deleting // Remove all elements anf free the memory from the probe OrdinaryCellNumbs vector // OrdinaryCellNumbs.clear(); // OrdinaryCellNumbs.shrink_to_fit();
 
-    return 0;
+    return;
 } // end  of Random
+
+/// (2) Lengthy special strips with the distribution of lengths taken from file
+vector<vector<int>> RStrips_Distribution( std::vector<unsigned int> const &face_strip_distribution, std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence) {
+///================================================================= 'L' =======================================================================////
+/// ==============================================>  Random lengthy strips generation process  <===============================================////
+///===========================================================================================================================================////
+    int NewFaceType = 1; // Random generation of types with IDs < number_of_types
+    vector<vector<int>> RW_series;
+
+    /// Random Walker (RW) start
+    // OrdinaryCellNumbs is just a tricky way to acceleration the random process
+    std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(2), 1); // Vector of the size equal to the total number of faces in DCC initialised with '0's
+    // (!) all the cell Numbers start with 0, not 1 like in Neper, Matlab, Fortran and many other software
+    for(unsigned int lit = 0; lit < OrdinaryCellNumbs.size(); lit++) OrdinaryCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces
+
+    /// S_Vector with its non-zero elements set any pre-define structure of special element feeding to the function Processing_Random
+    for(unsigned int itr : S_Vector)
+        if(itr != 0) OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
+
+    // Initial face fractions
+    double ordinary_faces_fraction = OrdinaryCellNumbs.size()/ (double) CellNumbs.at(2);
+    double special_faces_fraction = 1.0 - ordinary_faces_fraction;
+    if (special_faces_fraction >= max_sFaces_fraction) return RW_series; // if, after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
+
+    /// (1) Loop over the vector of the strips distribution (several "baskets")
+    for (auto  itr = face_strip_distribution.begin(); itr != face_strip_distribution.end(); ++itr) {
+
+        /// (2) Inside each basket
+        int strip_length = (distance(face_strip_distribution.begin(), itr) + 1.0); // strip lengths, starting with 1
+        // Example: vector<int> strip_sface_distribution = {2 4 5 27 8 6 3 1} means 2 strips of length 1 faces each, 4 strips of length 2 faces each,... , 1 strip of length 8 faces each
+        for (int number_of_lstrips = 0; number_of_lstrips < (*itr); number_of_lstrips++) { // Number of strips of size *itr > 0
+
+            /// Random choice from ALL 2-Cells the iniFaceNumber - initial face for Random Walker start
+            int iniFaceNumber = NewCellNumb_R(CellNumbs.at(2)); // random choice function (!) can choose already special face
+
+            /// Ranfdom Walker giving the sequence of faces vector<int> NewStripVector_RW of length strip_length as a result
+            vector<int> NewStripVector_RW = NewFacesStrip_RW(iniFaceNumber, strip_length);
+
+            /// Add a new strip to the vector of sfaces-strips
+            RW_series.push_back(NewStripVector_RW);
+
+            /// Changes in vectors from Main function - first element of the strip
+            for ( int val : NewStripVector_RW) {
+                S_Vector.at(val) += 1; // change element of the State Vector
+                s_faces_sequence.push_back(val); // add new element to the s_faces_sequence
+            }
+
+        } // end of for (int number_of_lstrips = 0; number_of_lstrips < *itr; number_of_lstrips++) { // Number of strips of size *itr > 0
+
+        /// OrdinaryCellNumbs update
+        for(unsigned int itr : S_Vector)
+            if(itr != 0) OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
+
+        // Special and Ordinary Faces fraction calculation
+        ordinary_faces_fraction = OrdinaryCellNumbs.size() / (double) CellNumbs.at(2);
+        special_faces_fraction = 1.0 - ordinary_faces_fraction;
+    } // end of    for (auto  itr = face_strip_distribution.begin(); itr != face_strip_distribution.end(); ++itr) {
+//REPAIR    for (auto a_vector: S_Vector) cout << a_vector << endl;
+
+    return RW_series;
+} // end  of Random lengthy inclusions
 
 /// (3) Maximum entropy generation process
 /*!
@@ -149,7 +256,7 @@ int Processing_maxEntropy(std::vector<unsigned int> &S_Vector, std::vector<unsig
             vector<double> j_types_neigh_fractions = GBIndex(k, FES, TJsTypes); //Types (up to 100 kinds) of the edges incident to the considered Face
 //REPAIR   for(auto kl : j_types_neigh_fractions) cout << " " <<kl ; cout << endl;
 
-        /// For a particular Face face_number = k (!)
+            /// For a particular Face face_number = k (!)
             /// Values before conversion
             J00 = j_types_neigh_fractions.at(0);
             J10 = j_types_neigh_fractions.at(1);
@@ -175,14 +282,14 @@ int Processing_maxEntropy(std::vector<unsigned int> &S_Vector, std::vector<unsig
 
     double New2CellNumb = 0; // Only one possible Face type (binary model)
     /// Number of element giving the maximum increase in configuration entropy at its conversion
-  New2CellNumb = std::max_element(std::begin(EntropyIncreaseList), std::end(EntropyIncreaseList)) - std::begin(EntropyIncreaseList); // gives index of the max element
+    New2CellNumb = std::max_element(std::begin(EntropyIncreaseList), std::end(EntropyIncreaseList)) - std::begin(EntropyIncreaseList); // gives index of the max element
 //old// min  New2CellNumb = std::min_element(std::begin(EntropyIncreaseList), std::end(EntropyIncreaseList)) - std::begin(EntropyIncreaseList); // gives index of the max element
 //REPAIR        cout << s_faces_sequence.size() << "   " << New2CellNumb << endl;
 /// Form the max_set of the faces with the same value of EntropyIncreaseList
-vector<unsigned int> max_set; max_set.clear(); max_set.push_back(New2CellNumb);
+    vector<unsigned int> max_set; max_set.clear(); max_set.push_back(New2CellNumb);
     for (auto  itr = EntropyIncreaseList.begin(); itr != EntropyIncreaseList.end(); ++itr)
         if (*itr == EntropyIncreaseList.at(New2CellNumb)) max_set.push_back(distance(EntropyIncreaseList.begin(), itr));
- /// Random choice the number of the element in the max_set with the equal Entropy Increase NewCellNumb_R(max_set.size())
+    /// Random choice the number of the element in the max_set with the equal Entropy Increase NewCellNumb_R(max_set.size())
 /// and then choose the final element New2CellNumb as max_set[NewCellNumb_R(max_set.size())]
     if(max_set.size() > 1) New2CellNumb = max_set.at(NewCellNumb_R(max_set.size()));
 
@@ -435,14 +542,14 @@ int Processing_ipIndex(std::vector<unsigned int> &S_Vector, std::vector<unsigned
         double New2CellNumb = 0; // Only one possible Face type (binary model)
         double min_val = pow(10, 30);
         /// Number of element giving the maximum increase in configuration entropy at its conversion
-unsigned int ipl = 0;
-for ( auto pl : EntropyIncreaseList ) {
-    if (pl < min_val) {
-        min_val = pl;
-        New2CellNumb = (double) ipl;
-    }
-    ++ipl;
-}
+        unsigned int ipl = 0;
+        for ( auto pl : EntropyIncreaseList ) {
+            if (pl < min_val) {
+                min_val = pl;
+                New2CellNumb = (double) ipl;
+            }
+            ++ipl;
+        }
 //REPAIR     cout  << "\t\t" <<  New2CellNumb << "\t\t" << EntropyIncreaseList.at(New2CellNumb) << endl;
 
         // Then all the corresponding maps chain
@@ -476,7 +583,7 @@ for ( auto pl : EntropyIncreaseList ) {
     FES.makeCompressed();
     AFS.makeCompressed();
 
-  return 0;
+    return 0;
 } /// end of Processing_ipIndex()
 
 /// (5) DDRX process
@@ -545,6 +652,21 @@ std::vector <unsigned int> Smax_sequence_reader(char* SFS_dir) {
 // REPAIR   cout << "S_size =\t" << special_faces_sequence.size() << endl;
 
 }
+
+/// Log-normal distribution generator
+std::vector<double> Log_normal_distribution (double &mu_f, double &sigm_f, int baskets) { // Log-normal distribution generator
+    vector<double>  s_lenght_distribution;
+    for (int x = 1; x < baskets; x++) {
+        double X = 1.0 * x; // scale
+        s_lenght_distribution.push_back((1.0 / (X * sigm_f * sqrt(2.0 * 3.14159))) * exp(-pow((log(X) - log(mu_f)), 2) / (2.0 * pow(sigm_f, 2))));
+    }
+
+    s_lenght_distribution.at(0) += 1.0 - std::accumulate(s_lenght_distribution.begin(), s_lenght_distribution.end(), decltype(s_lenght_distribution)::value_type(0));
+    //cout << std::accumulate(s_lenght_distribution.begin(), s_lenght_distribution.end(), decltype(s_lenght_distribution)::value_type(0)) << endl;
+
+    return s_lenght_distribution; // end of Stips_distribution function
+}
+
 
 /// Heap
 /*

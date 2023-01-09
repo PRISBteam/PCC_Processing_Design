@@ -108,7 +108,8 @@ public:
 
 #endif
 
-/// Stress concentrators
+
+/// (2) The class of stress concentrators related to defects in one special face element of a PCC
 
 class face_concentrators {
     double total_elastic_energy = 0;
@@ -126,7 +127,7 @@ public:
         conc_face_number = ConcFace;
     }
 
-   face_concentrators (unsigned int ConcFace, unsigned int Bl, unsigned int Cl) { // constructor 2 complex
+    face_concentrators (unsigned int ConcFace, unsigned int Bl, unsigned int Cl) { // constructor 2 complex
         conc_face_number = ConcFace;
         bl_index = Bl;
         cl_index = Cl;
@@ -141,4 +142,149 @@ public:
     {
         return cl_index;
     }
- }; // end of class
+}; // end of class
+
+/// (3) The class of Grains in a PCC
+
+class grain3D {
+    unsigned int grain_id;
+    vector<tuple<double, double, double>> minmax_node_coordinates; // a vecor containing two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}
+
+private:
+    // list of nodes
+    vector<unsigned int> node_ids;
+
+    // list of triplets of nodes coordinated
+    vector<tuple<double, double, double>> node_coordinates;
+
+public:
+
+    grain3D(unsigned int grain_new_id) { // constructor 1 simple
+        grain_id = grain_new_id;
+    }
+
+    void Set_node_ids(unsigned int grain_id, SpMat const &GFS, SpMat const &FES, SpMat const &ENS) { // set the node ids
+        /// GFS -> FES -> ENS
+        if(node_ids.size() == 0) {
+            for(unsigned int l = 0; l < CellNumbs.at(2); l++) {// over all Faces (l)
+                if (GFS.coeff(grain_id, l) == 1) {
+                    for (unsigned int j = 0; j < CellNumbs.at(1); j++) // over all Edges (j)
+                        if (FES.coeff(l, j) == 1) { // at the chosen Face with ID = 'l'
+                            for (unsigned int i = 0; i < CellNumbs.at(0); i++) // over all Nodes
+                                if (ENS.coeff(j, i) == 1) node_ids.push_back(i); // at the chosen Face with ID = 'l'
+                        } // end of if (FES.coeff(l, j) == 1)
+                } // end of (GFS.coeff(m, l) == 1)
+            } // end of for(unsigned int l = 0; l < CellNumbs.at(2); l++) - Faces
+
+        }/// end of if(node_ids.size() == 0)
+
+    }
+
+    /// return - vector of all node (vertices) coordinates of a grain
+    void Set_node_coordinates(unsigned int grain_id, vector<tuple<double, double, double>> const &vertex_coordinates) { // set the node ids from Tr = triplet list
+        vector<unsigned int> node_ids;
+        for (auto  itr = node_ids.begin(); itr != node_ids.end(); ++itr)
+            if(find(node_ids.begin(), node_ids.end(), distance(node_ids.begin(), itr)) != node_ids.end())
+                node_coordinates.push_back(vertex_coordinates.at(*itr)); // vector<unsigned int> node_ids;
+    }
+
+    vector<unsigned int> Get_node_ids(unsigned int grain_id) { // set the node ids
+        return node_ids;
+    }
+
+    vector<tuple<double, double, double>> Get_node_coordinates(unsigned int grain_id) { // set the node ids
+        if (node_coordinates.size() != 0) {
+            return node_coordinates;
+        } else if (node_coordinates.size() > 0) {
+            Set_node_coordinates(grain_id, vertex_coordinates);
+            return node_coordinates;
+        } else {
+            throw std::invalid_argument(
+                    "Please call Set_node_coordinates(unsigned int grain_id, vector<tuple<double, double, double>> const &vertex_coordinates) method first!");
+            return node_coordinates;
+        }
+    }// end of  Get_node_coordinates() method
+
+    /// return - vector with two tuples : { x_min, y_min, z_min; x_max, y_max, z_max} of a grain witn number grain_id
+    vector<tuple<double, double, double>> Get_minmax_node_coordinates(unsigned int grain_id) { // min and max {x,y,z} values of vertices for a grain
+        // class Grain3D function Get_node_coordinates(grain_id)
+        vector<tuple<double, double, double>> minmax_tuple;
+        ///Get_node_coordinates(grain_id)
+        vector<tuple<double, double, double>> tup_node_coordinates = Get_node_coordinates(grain_id);
+        // separating in three parts
+        vector<double> x_node_coordinates, y_node_coordinates, z_node_coordinates;
+
+        for (auto itr = tup_node_coordinates.begin(); itr != tup_node_coordinates.end(); ++itr) {
+            x_node_coordinates.push_back(get<0>(*itr));
+            y_node_coordinates.push_back(get<1>(*itr));
+            z_node_coordinates.push_back(get<2>(*itr));
+        }
+//        std::for_each(tup_node_coordinates.begin(), tup_node_coordinates.end(), );
+
+        auto itx = std::minmax_element(x_node_coordinates.begin(), x_node_coordinates.end());
+        int xmin = *itx.first;
+        int xmax = *itx.second;
+
+        auto ity = std::minmax_element(y_node_coordinates.begin(), y_node_coordinates.end());
+        int ymin = *ity.first;
+        int ymax = *ity.second;
+
+        auto itz = std::minmax_element(z_node_coordinates.begin(), z_node_coordinates.end());
+        int zmin = *itz.first;
+        int zmax = *itz.second;
+
+        minmax_tuple = {make_tuple(xmin, ymin, zmin), make_tuple(xmax, ymax, zmax)};
+
+        return minmax_tuple;
+    }
+
+}; // end of class grain3D
+
+/// (4) The class of a Microcrack
+
+class macrocrack {
+    int crack_id = 0;
+    double total_fracture_energy = 0;
+
+private:
+    double a_n;
+    double b_n;
+    double c_n;
+    double D_plane;
+    double crack_length;
+
+    double stress_concentrators_energy = 0;
+    double bridging_elastic_energy = 0;
+
+
+public:
+
+    macrocrack(int crack_id_new) { // constructor 1, simple
+        crack_id = crack_id_new;
+        a_n = 0.0;
+        b_n = 0.0;
+        c_n = 1.0;
+        D_plane = 0.0;
+        crack_length = 0.0;
+    }
+
+    macrocrack(int crack_id_new, double a_coeff, double b_coeff, double c_coeff, double D_coeff, double crack_length_new) { // constructor 2, more specific
+        crack_id = crack_id_new;
+        a_n = a_coeff;
+        b_n = b_coeff;
+        c_n = c_coeff;
+        D_plane = a_coeff;
+        crack_length = crack_length_new;
+    }
+/*
+    double Get_surface_energy()
+    {
+        if (crack_length != 0.0)
+            return ;
+        else
+            return 0.0;
+    }
+*/
+
+}; // end of class
+

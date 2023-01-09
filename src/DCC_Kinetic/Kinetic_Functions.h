@@ -13,7 +13,9 @@ std::vector <unsigned int> DCC_Kinetic_cracking(std::vector<unsigned int> &s_fac
     std::vector <double> lsc_rGO_energy(CellNumbs.at(2),0), lsc_crack_energy(CellNumbs.at(2),0); // energies related with the local stress concentrators
     std::vector <double> Face_energy(CellNumbs.at(2),0), Face_current_energy(CellNumbs.at(2),0); // energies for all GBs
     double crack_fraction = 0.0;
-    double sface_energy_rGO = 0.5*pow(10,-3), sface_energy_matrix = 1.0*pow(10,-3);
+//old    double sface_energy_rGO = 0.5*pow(10,-3), sface_energy_matrix = 1.0*pow(10,-3);
+    double sface_energy_matrix = 2.0, sface_energy_rGO = 1.0, sface_energy_aggl = 0.4;
+
     double  lsc_rGO = 4.0*sface_energy_rGO, lsc_crack = 2.0*sface_energy_rGO; // energy values related with the stress concentrators
     double kB = 1.3807*pow(10,-23); // Boltzmann constant
 
@@ -167,8 +169,8 @@ vector<Tup> DCC_Kinetic_Plasticity( Eigen::SparseMatrix<double> const& FES)  {
     /// Model parameters
     double Burgv = BurgvCu, ShMod = ShearModCu, a_lattice = a_latticeCu;
     double lambda = 0.0*pow(10,-9)*46.0*pow(10,9), //Shear modulus
-             alpha = 1.0*pow(10,-1)*ShMod; ///////
-                     //pow(10,-3)*ShMod; /// model coefficient alpha*s^2
+    alpha = 1.0*pow(10,-1)*ShMod; ///////
+    //pow(10,-3)*ShMod; /// model coefficient alpha*s^2
     double D_size = 11.0*a_lattice; /// Complex size ///
     vector<double> external_normal = { 0.0, 0.0, 1.0 }; /// normal to the external face
     /// From unit areas to the real ones [m^2]
@@ -185,11 +187,11 @@ vector<Tup> DCC_Kinetic_Plasticity( Eigen::SparseMatrix<double> const& FES)  {
         vector<vector<double>> stress_tensor = {{s11, s12, s13}, {s21, s22, s23}, {s31, s32, s33} };
         /// OBTAINING OF NORMAL VECTORS
         tang_vector = lt_vector(stress_tensor, norms_vector);
-         //for (auto p : tang_vector) cout << p[0] << "\t" << p[1] << "\t" << p[2] << endl; exit(32);
+        //for (auto p : tang_vector) cout << p[0] << "\t" << p[1] << "\t" << p[2] << endl; exit(32);
         /// Slip vectors
         vector<double> slip_vector; // vector of nano-slips mudulus (s)
         for(auto sa : SAreas_m2) slip_vector.push_back(Burgv * sqrt(M_PI/sa)); // nano-slip value s = b * Sqrt(Pi/As)
-            //for (auto p : slip_vector) cout << "slip_vector" << SAreas_m2.size() << endl;
+        //for (auto p : slip_vector) cout << "slip_vector" << SAreas_m2.size() << endl;
 
         /// METROPOLIS algorithm ///
         /// Iteration number for METROPOLIS algorithm
@@ -202,8 +204,8 @@ vector<Tup> DCC_Kinetic_Plasticity( Eigen::SparseMatrix<double> const& FES)  {
         std::fill(State_Vector.begin(), State_Vector.end(), 0);
         if (alpha - s_min < -100.0) std::fill(State_Vector.begin(), State_Vector.end(), 1);
         else if (alpha - s_min > -100.0 && alpha - s_min < 100.0) State_Vector = Metropolis(stress_tensor, norms_vector, tang_vector, Temperature, CellNumbs, iteration_number, slip_vector, alpha, lambda); // Metropolis() function is defined below
-       // for(auto state : State_Vector) cout << state << "\t";
-       // cout << "End" << endl;
+        // for(auto state : State_Vector) cout << state << "\t";
+        // cout << "End" << endl;
         //cout << "alpha - s_min  =\t" << alpha - s_min << endl;
 
         /// Plastic strain
@@ -224,7 +226,7 @@ vector<Tup> DCC_Kinetic_Plasticity( Eigen::SparseMatrix<double> const& FES)  {
         //cout << "Stress  =\t" << ShearStress << "\tPlastic strain\t" << Plastic_Strain << endl;
         /// Output and stop!
         if (Plastic_Strain >= 0.002) { cout << "Plastic strain =\t" << Plastic_Strain << "\tYield strength [GPa] =\t" << ShearStress/pow(10,9) << endl; return fraction_stress_temperature;}
-      //  cout << "\tSlip fraction =\t" << slip_fraction << "\tPlastic strain =\t" << Plastic_Strain << "\tYield strength [GPa] =\t" << ShearStress/pow(10,9) << endl;
+        //  cout << "\tSlip fraction =\t" << slip_fraction << "\tPlastic strain =\t" << Plastic_Strain << "\tYield strength [GPa] =\t" << ShearStress/pow(10,9) << endl;
 
     } // end of for (< calculation_steps)
 
@@ -245,16 +247,16 @@ vector<unsigned int> Metropolis(vector<vector<double>> &stress_tensor, vector<ve
     srand((unsigned) time(NULL)); // The function initialize random seed from the computer time (MUST BE BEFORE THE FOR LOOP!)
 
     for (long i = 0; i < iteration_number; ++i) {
-    // 2. Random choice of a new Face
-    long NewSlipNumber = rand() % (CellNumbs.at(2) -2); // Random generation of the boundary number in the range from 0 to CellNumbs.at(2)
+        // 2. Random choice of a new Face
+        long NewSlipNumber = rand() % (CellNumbs.at(2) -2); // Random generation of the boundary number in the range from 0 to CellNumbs.at(2)
 
-    // 3. If dH < 0 energetically favourable -> Accept trial and change the type
+        // 3. If dH < 0 energetically favourable -> Accept trial and change the type
         if (SlipState_Vector.at(NewSlipNumber) == 1) {
             SlipState_Vector.at(NewSlipNumber) = 0;
         } //if
-     // 4. Else if dH > 0 consider the acceptance probability
+            // 4. Else if dH > 0 consider the acceptance probability
         else if (SlipState_Vector.at(NewSlipNumber) == 0) {
-    // Model variables
+            // Model variables
             double Snt = 0.0, s2 = 0.0;
             vector<vector<double>> sik{ {0,0,0}, {0,0,0}, {0,0,0} };
 //            cout << NewSlipNumber << "\t" << slip_vector.at(NewSlipNumber) << endl;
@@ -262,11 +264,11 @@ vector<unsigned int> Metropolis(vector<vector<double>> &stress_tensor, vector<ve
             for (int i = 0; i < 3; ++i) {
                 for (int j = 0; j < 3; ++j) {
                     sik[i][j] = 0.5 * slip_vector.at(NewSlipNumber) * (norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j] +
-                                                norms_vector.at(NewSlipNumber)[j] * tang_vector.at(NewSlipNumber)[i]);
+                                                                       norms_vector.at(NewSlipNumber)[j] * tang_vector.at(NewSlipNumber)[i]);
                     Snt += stress_tensor[i][j] * sik[i][j];
 
                     s2 += 0.5 * pow(slip_vector.at(NewSlipNumber),2) * (norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j]*norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j] +
-                            norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j]*norms_vector.at(NewSlipNumber)[j] * tang_vector.at(NewSlipNumber)[i]);
+                                                                        norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j]*norms_vector.at(NewSlipNumber)[j] * tang_vector.at(NewSlipNumber)[i]);
                 }
             }
             /// New ACCEPTANCE PROBABILITY
@@ -275,13 +277,13 @@ vector<unsigned int> Metropolis(vector<vector<double>> &stress_tensor, vector<ve
                 double P_ac = exp(-(alpha * pow(slip_vector.at(NewSlipNumber),2) - Snt - lambda * slip_vector.at(NewSlipNumber)) / (Rc * Temperature));
                 if (P_ac > 1) P_ac = 1.0;
             } else P_ac = 0;
-           // cout << "Alpha\t" << alpha * pow(slip_vector.at(NewSlipNumber),2) - Snt  << "\t SNT\t" << Snt << "\tProb\t" << exp(-(alpha * s2 - Snt - lambda * slip_vector.at(NewSlipNumber)) / (Rc * Temperature)) << endl;
+            // cout << "Alpha\t" << alpha * pow(slip_vector.at(NewSlipNumber),2) - Snt  << "\t SNT\t" << Snt << "\tProb\t" << exp(-(alpha * s2 - Snt - lambda * slip_vector.at(NewSlipNumber)) / (Rc * Temperature)) << endl;
 
             double rv = (rand() / (RAND_MAX + 1.0)); // Generate random value in the range [0,1]
-                if (rv <= P_ac) {
-    //   if (P_ac > 0) cout << "P_ac =\t" << P_ac << "\trandom number\t" << rv << endl;
-                    SlipState_Vector.at(NewSlipNumber) = 1;
-                } else SlipState_Vector.at(NewSlipNumber) = 0;
+            if (rv <= P_ac) {
+                //   if (P_ac > 0) cout << "P_ac =\t" << P_ac << "\trandom number\t" << rv << endl;
+                SlipState_Vector.at(NewSlipNumber) = 1;
+            } else SlipState_Vector.at(NewSlipNumber) = 0;
 
         } // end of  else if (SlipState_Vector.at(NewSlipNumber) == 0)
 
@@ -318,9 +320,9 @@ vector<vector<double>> lt_vector(vector<vector<double>> &stress_tensor, vector<v
         if (inner_product(ttv.at(fnumb).begin(), ttv.at(fnumb).end(), ttv.at(fnumb).begin(), 0.0L) != 0) {
             lt0 =
                     ttv0 / sqrt(inner_product(ttv.at(fnumb).begin(), ttv.at(fnumb).end(), ttv.at(fnumb).begin(), 0.0L));
-             lt1 =
+            lt1 =
                     ttv1 / sqrt(inner_product(ttv.at(fnumb).begin(), ttv.at(fnumb).end(), ttv.at(fnumb).begin(), 0.0L));
-             lt2 =
+            lt2 =
                     ttv2 / sqrt(inner_product(ttv.at(fnumb).begin(), ttv.at(fnumb).end(), ttv.at(fnumb).begin(), 0.0L));
         }
         lt.push_back({lt0, lt1, lt2});
