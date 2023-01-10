@@ -111,7 +111,7 @@ public:
 
 /// (2) The class of stress concentrators related to defects in one special face element of a PCC
 
-class face_concentrators {
+class face_concentrator {
     double total_elastic_energy = 0;
 
 private:
@@ -123,11 +123,11 @@ private:
     double Cl_elastic_energy = 0;
 public:
 
-    face_concentrators (unsigned int ConcFace) { // constructor 1 simple
+    face_concentrator (unsigned int ConcFace) { // constructor 1 simple
         conc_face_number = ConcFace;
     }
 
-    face_concentrators (unsigned int ConcFace, unsigned int Bl, unsigned int Cl) { // constructor 2 complex
+    face_concentrator (unsigned int ConcFace, unsigned int Bl, unsigned int Cl) { // constructor 2 complex
         conc_face_number = ConcFace;
         bl_index = Bl;
         cl_index = Cl;
@@ -286,5 +286,108 @@ public:
     }
 */
 
-}; // end of class
+}; // end of class MACROCRACK
+
+class grain_boundaries{
+
+public:
+    unsigned int GB_id; // grain boundary ID
+
+    grain_boundaries(unsigned int GB_new_id) { //class simple constructor
+        GB_id = GB_new_id;
+    }
+
+/// GB state
+    bool is_inclusion; // 0 - no, 1 - yes
+    bool is_fractured; // 0 - no, 1 - yes
+    bool is_agglomeration; // 0 - no, 1 - yes
+
+/// Set values methods
+
+    void Set_surface_energy(vector<double> GB_SE_vector ){
+        surface_energy = GB_SE_vector.at(GB_id);
+    }
+
+    void Set_external_elastic_energy(vector<double> GB_EEE_vector) { /// EEE: external elastic energy vector
+        external_elastic_energy = GB_EEE_vector.at(GB_id);
+    }
+
+    void Set_crack_interaction_energy(vector<double> GB_CIE_vector) {
+        crack_interaction_energy = GB_CIE_vector.at(GB_id);
+    }
+
+    void Set_Bl_energy(vector<double> GB_BLE_vector) {
+        Bl_energy = GB_BLE_vector.at(GB_id);
+    }
+
+    void Set_Cl_energy(vector<double> GB_CLE_vector){
+        Cl_energy = GB_CLE_vector.at(GB_id);
+    }
+
+/// Get values methods
+    double Get_surface_energy(unsigned int GB_id){
+        if(surface_energy != 0)
+            return surface_energy;
+        else {
+            Set_surface_energy(GB_SE_vector);
+            return surface_energy; }
+    }
+
+    double Get_external_elastic_energy(unsigned int GB_id) { /// EEE: external elastic energy vector
+        if(external_elastic_energy != 0)
+            return external_elastic_energy;
+        else {
+            Set_external_elastic_energy(GB_EEE_vector);
+            return external_elastic_energy; }
+    }
+
+    double Get_crack_interaction_energy(unsigned int GB_id) {
+        if(crack_interaction_energy != 0)
+            return crack_interaction_energy;
+        else {
+            Set_crack_interaction_energy(GB_CIE_vector);
+            return crack_interaction_energy; }
+    }
+
+    double Get_Bl_energy(int GB_id){
+        if(Bl_energy != 0)
+            return Bl_energy;
+        else {
+            Set_Bl_energy(GB_BLE_vector);
+            return Bl_energy; }
+    }
+
+    double Get_Cl_energy(unsigned int GB_id){
+        if(Cl_energy != 0)
+            return Cl_energy;
+        else {
+            Set_Cl_energy(GB_CLE_vector);
+            return Cl_energy; }
+    }
+
+    double Get_total_energy(){
+
+       /// total_energy; //= surface_energy + external_elastic_energy + Bl_energy + Cl_energy;
+    }
+
+private:
+
+/// Combinatorial
+    int GB_edges_number;  //equal to the number of neighbours
+    int GB_nodes_number;
+
+///Geometry
+    double GB_area;
+    double GB_perimeter;
+
+    tuple<double,double,double> GB_barycentre_coordinates;
+
+///Energies
+    double surface_energy;
+    double external_elastic_energy;
+    double crack_interaction_energy;
+    double Bl_energy;
+    double Cl_energy;
+    double total_energy; //= surface_energy + external_elastic_energy + Bl_energy + Cl_energy;
+};
 

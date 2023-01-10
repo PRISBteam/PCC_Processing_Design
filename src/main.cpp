@@ -47,11 +47,14 @@ string input_folder, output_folder; // input and output directories readed from 
 std::vector<vector<unsigned int>> special_face_design; // is a list of special_faces_sequence as an output of the module. The first line here is always the random case (zero-design), then following Smax (1-sequence) and Smin (2-sequence), and then all the designs in between Smax and Smin
 std::vector<unsigned int> face_strip_distribution; // a vector containing length distribution of special faces (strips)
 
-/// Complex Geometry ::
+/// PCC Complex Geometry ::
 // coordinates
 std::vector<tuple<double, double, double>> vertex_coordinates, grain_barycenter_coordinates, face_barycenter_coordinates;
 // measures
-std::vector<double> grain_volumes, face_areas, edge_lengths;
+std::vector<double> grain_volumes_vector, face_areas_vector, edge_lengths_vector;
+
+/// PCC Complex Energies ::
+std::vector<double> GB_SE_vector, GB_EEE_vector, GB_CIE_vector, GB_BLE_vector, GB_CLE_vector;
 
 /// All global OFFSTREAMS
 ofstream OutFLfile, OutJFile, OutJ2File, OutSFile, OutS2File, OutPowersADistributions, OutAvLengthsADistributions, OutAgglStatistics, OutElCondfile;
