@@ -76,6 +76,9 @@ ofstream OutFLfile, OutJFile, OutJ2File, OutSFile, OutS2File, OutPowersADistribu
 /* As its output module generates one or several sequences of "fractured" element's id's; the new "fractured" State vector of Faces (2-cells) can be generated */
 #include "DCC_Kinetic/DCC_Kinetic.h"
 
+/* Multiphysics module assign various physical quantities (energies, temperature, electrical conductivity) to the k-Cells of PCC subcomplexes */
+#include "DCC_Multiphysics/DCC_Multiphysics.h"
+
 /* Sections module calculates reduced PCC subcomplexes (including plain cuts) inheriting (reduced) special element sequences and state vectors of the original (processed) PCC */
 #include "DCC_Section/DCC_Subcomplex.h"
 
@@ -86,8 +89,9 @@ ofstream OutFLfile, OutJFile, OutJ2File, OutSFile, OutS2File, OutPowersADistribu
 #include "DCC_Writer/DCC_Writer.h"
 
 /// Declaration of FUNCTIONS, please see the function bodies at the end of the main file
-std::vector<double> confCount(char* config, string &Processing_type, string &Kinetic_type, string &input_folder, string &output_folder); // Read and output the initial configuration from the config.txt file
+std::vector<double> confCount(char* config, string &Subcomplex_type, string &Processing_type, string &Kinetic_type, string &input_folder, string &output_folder); // Read and output the initial configuration from the config.txt file
 string SIMULATION_MODE(char* config); // Check the SIMULATION MODE type in the config.txt file
+bool SubcomplexON(char* config, bool time_step_one); // Check the Subcomplex (Section) module status (On/Off) in the config.txt file
 bool ProcessingON(char* config, bool time_step_one); // Check the Processing module status (On/Off) in the config.txt file
 bool KineticON(char* config, bool time_step_one); // Check the Kinetic module status (On/Off) in the config.txt file
 bool CharacterisationON(char* config, bool time_step_one); // Check the Structure Characterisation module status (On/Off) in the config.txt file
@@ -108,11 +112,12 @@ int main() {
 
 /// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen
     // The source directory and simulation type from file config.txt
+    string S_type; // 'P' or 'H' :: This char define the subsection type: 'P' for the whole Plane cut, 'H' for the half-plane cut like a crack
     string P_type; // 'R' or 'S' :: This char define the process type: 'R' for Random, 'S' for maximum configuration Entropy production /// It the plans 'D', 'I' or 'E' :: 'D' for DDRX process (DCC retessellations with the new seeds), 'I' for the Index-based generation modes, 'E' for experimental data obtained by EBSD
     string K_type; // 'F' :: This char define the Kinetic process type: 'F' for the Ising-like model of Fracture /// In the plans 'W' or 'P' :: 'W' for the 3D one-layer film, 'P' for the Ising-like model of Plasticity
 
 /// ConfigVector contains all the control variables of the program readed from the config.txt
-    vector<double> ConfigVector = confCount(confpath, P_type, K_type, input_folder, output_folder);
+    vector<double> ConfigVector = confCount(confpath, S_type, P_type, K_type, input_folder, output_folder);
     char* indir = const_cast<char*>(input_folder.c_str()); // const_cast for input directory //    char* odir = const_cast<char*>(output_folder.c_str()); // const_cast for output directory
     dim = ConfigVector.at(0); // space dimension of the problem (dim = 2 or 3);
     design_number = ConfigVector.at(1);
@@ -187,6 +192,16 @@ int main() {
     if ( SIMULATION_MODE(confpath) == "SIMULATION MODE(LIST)"s) { /// SIMULATION MODE: #LIST
 
 // Clear S_Vector //std::fill(S_Vector.begin(), S_Vector.end(), 0);
+/// 0: DCC_Processing module
+        if (SubcomplexON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
+            cout << "START of the DCC Subcomplex module" << endl;
+            if (S_type == "P") {
+                /// specific parameters for a subcomplex PLANE CUT !!!
+                double a_p = 0.0, b_p = 0.0, c_p = 1.0, D_p = 0.5;
+
+                DCC_Subcomplex(a_p, b_p, c_p, D_p, special_faces_sequence);
+            }
+        } // end of if (SubcomplexON(confpath, time_step_one))
 /// I: DCC_Processing module
         if (ProcessingON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
             cout << "START of the DCC Processing module" << endl;
@@ -416,8 +431,27 @@ bool WriterON(char* config, bool time_step_one) {
     return isWriterON;
 }
 
+    bool SubcomplexON(char* config, bool time_step_one) {
+        std::string line;
+        ifstream inConf(config);
+        bool isSectionON = 0;
+
+        if (inConf) { // If the file was successfully open, then
+            while(getline(inConf, line, '\n'))
+// REPAIR            cout << line << endl;
+                if (!line.compare("DCC_Section SWITCHED ON"s)) {
+                    isSectionON = 1;
+                    if (time_step_one == 1) cout << "ON    | DCC_Section"s << endl;
+                    return isSectionON;
+                }
+        } else cout << "SubcomplexON() error: The file " << config << " cannot be read" << endl; // If something goes wrong
+
+        if (time_step_one == 1) cout << "OFF   | DCC_Section"s << endl;
+        return isSectionON;
+    }
+
 /// Reading and Output of the configuration file
-std::vector<double> confCount(char* config, string &Processing_type, string &Kinetic_type, string &input_folder, string &output_folder) {
+std::vector<double> confCount(char* config, string &Subcomplex_type, string &Processing_type, string &Kinetic_type, string &input_folder, string &output_folder) {
     vector<double> res;
 
     string line;
@@ -428,7 +462,8 @@ std::vector<double> confCount(char* config, string &Processing_type, string &Kin
         while (getline(inConf, line, '\n')) {
             // Number of types
             for (auto it: line) {
-                if (it == '&') Processing_type = line.at(0); // simulation type
+                if (it == '}') Subcomplex_type = line.at(0); // simulation type
+                else if (it == '&') Processing_type = line.at(0); // simulation type
                 else if (it == '`') Kinetic_type = line.at(0); // simulation Kinetic type
 
                 else if (it == '@') res.push_back(line.at(0) - '0'); // dimension of the problem; res[1]

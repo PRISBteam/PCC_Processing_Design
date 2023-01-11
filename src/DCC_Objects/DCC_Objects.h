@@ -288,12 +288,12 @@ public:
 
 }; // end of class MACROCRACK
 
-class grain_boundaries{
+class grain_boundary{
 
 public:
     unsigned int GB_id; // grain boundary ID
 
-    grain_boundaries(unsigned int GB_new_id) { //class simple constructor
+    grain_boundary(unsigned int GB_new_id) { // class simple constructor
         GB_id = GB_new_id;
     }
 
