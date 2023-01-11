@@ -189,19 +189,19 @@ int main() {
 //REPAIR    OfStreams_trancator();
     special_face_design.clear(); // clearing file
 
+    /// 0: DCC_Processing module
+    if (SubcomplexON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
+        cout << "START of the DCC Subcomplex module" << endl;
+        if (S_type == "P") {
+            /// specific parameters for a subcomplex PLANE CUT !!!
+            double a_p = 0.0, b_p = 0.0, c_p = 1.0, D_p = 0.5;
+            DCC_Subcomplex(a_p, b_p, c_p, D_p, special_faces_sequence);
+        }
+    } // end of if (SubcomplexON(confpath, time_step_one))
+
     if ( SIMULATION_MODE(confpath) == "SIMULATION MODE(LIST)"s) { /// SIMULATION MODE: #LIST
-
 // Clear S_Vector //std::fill(S_Vector.begin(), S_Vector.end(), 0);
-/// 0: DCC_Processing module
-        if (SubcomplexON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
-            cout << "START of the DCC Subcomplex module" << endl;
-            if (S_type == "P") {
-                /// specific parameters for a subcomplex PLANE CUT !!!
-                double a_p = 0.0, b_p = 0.0, c_p = 1.0, D_p = 0.5;
 
-                DCC_Subcomplex(a_p, b_p, c_p, D_p, special_faces_sequence);
-            }
-        } // end of if (SubcomplexON(confpath, time_step_one))
 /// I: DCC_Processing module
         if (ProcessingON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
             cout << "START of the DCC Processing module" << endl;
@@ -439,7 +439,7 @@ bool WriterON(char* config, bool time_step_one) {
         if (inConf) { // If the file was successfully open, then
             while(getline(inConf, line, '\n'))
 // REPAIR            cout << line << endl;
-                if (!line.compare("DCC_Section SWITCHED ON"s)) {
+                if (line.compare("DCC_Section SWITCHED ON"s)) {
                     isSectionON = 1;
                     if (time_step_one == 1) cout << "ON    | DCC_Section"s << endl;
                     return isSectionON;
@@ -462,8 +462,8 @@ std::vector<double> confCount(char* config, string &Subcomplex_type, string &Pro
         while (getline(inConf, line, '\n')) {
             // Number of types
             for (auto it: line) {
-                if (it == '}') Subcomplex_type = line.at(0); // simulation type
-                else if (it == '&') Processing_type = line.at(0); // simulation type
+                if (it == '}') Subcomplex_type = line.at(0); // simulation Section type
+                else if (it == '&') Processing_type = line.at(0); // simulation Processing type
                 else if (it == '`') Kinetic_type = line.at(0); // simulation Kinetic type
 
                 else if (it == '@') res.push_back(line.at(0) - '0'); // dimension of the problem; res[1]
@@ -500,7 +500,8 @@ std::vector<double> confCount(char* config, string &Subcomplex_type, string &Pro
     res.size();
     cout << "The problem dimension that is the maximum dimension k_max of k-Cells\t | "s << res.at(0) << endl;
     cout << "The number of i(X) designs (0 - random, 1 - random + smax,.. )\t\t\t | " << res.at(1) << endl;
-    cout << "Processing type ('R', 'S', 'C' or 'X')\t\t\t\t\t\t\t\t\t | "s << Processing_type << endl;
+    if (SubcomplexON(config, 0)) cout << "Subcomplex type ('P' or 'H')\t\t\t\t\t\t\t\t\t | "s << Subcomplex_type << endl;
+    if (ProcessingON(config, 0)) cout << "Processing type ('R', 'S', 'C' or 'X')\t\t\t\t\t\t\t\t\t | "s << Processing_type << endl;
     //cout << "Calculation type ('R', 'RW', 'S', 'F', 'I' or 'X'):\t\t\t\t\t\t | "s << Processing_type << endl;
     //cout << "The number of special Face (2-cells) types:\t\t\t\t\t\t\t\t | " << res.at(1) << endl;
     cout << "MAX fraction of Faces (calculation limit) \t\t\t\t\t\t\t\t | " << res.at(2) << endl;

@@ -25,7 +25,7 @@ vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double c_coe
     AGS = 0.5 * (AGS + SparseMatrix<double>(AGS.transpose()));
 
     /// Vertex coordinates reader into triplet double vector
-    string VCpath_string = input_folder + "voro_seeds"s;
+    string VCpath_string = input_folder + "voro_seeds.txt"s;
     char* VCpath = const_cast<char*>(VCpath_string.c_str());
     //vector<Triplet<double>> vertex_coordinates = TripletsReader(VCpath);
     vector<tuple<double, double, double>> vertex_coordinates = TuplesReader(VCpath);
@@ -35,11 +35,14 @@ vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double c_coe
 
 #pragma omp parallel for // parallel execution by OpenMP
     for(unsigned int m = 0; m < CellNumbs.at(3); m++) {// each Grain
-        grains_list.push_back(grain3D(m));
-        grains_list.at(m).Set_node_ids(m,GFS, FES, ENS);
+        grain3D new_grain = grain3D(m);
+        cout << new_grain.grain_id << endl;
+        grains_list.push_back(new_grain);
+        grains_list.at(m).Set_node_ids(m, GFS, FES, ENS);
+        cout << grains_list.at(m).grain_id << endl;
         grains_list.at(m).Set_node_coordinates(m, vertex_coordinates);
-    } // end of for(unsigned int m = 0; m < CellNumbs.at(3); m++) - Grains
 
+    } // end of for(unsigned int m = 0; m < CellNumbs.at(3); m++) - Grains
 /// For each grain minmax_coord vector grain_coordinate_extremums of two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}
 #pragma omp parallel for // parallel execution by OpenMP
     for(unsigned int m = 0; m < CellNumbs.at(3); m++) {// each Grain

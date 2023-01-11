@@ -147,7 +147,6 @@ public:
 /// (3) The class of Grains in a PCC
 
 class grain3D {
-    unsigned int grain_id;
     vector<tuple<double, double, double>> minmax_node_coordinates; // a vecor containing two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}
 
 private:
@@ -158,6 +157,8 @@ private:
     vector<tuple<double, double, double>> node_coordinates;
 
 public:
+
+    unsigned int grain_id;
 
     grain3D(unsigned int grain_new_id) { // constructor 1 simple
         grain_id = grain_new_id;
