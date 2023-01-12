@@ -168,11 +168,11 @@ public:
         /// GFS -> FES -> ENS
         if(node_ids.size() == 0) {
             for(unsigned int l = 0; l < CellNumbs.at(2); l++) {// over all Faces (l)
-                if (GFS.coeff(grain_id, l) == 1) {
+                if (GFS.coeff(l, grain_id) == 1) {
                     for (unsigned int j = 0; j < CellNumbs.at(1); j++) // over all Edges (j)
-                        if (FES.coeff(l, j) == 1) { // at the chosen Face with ID = 'l'
+                        if (FES.coeff(j, l) == 1) { // at the chosen Face with ID = 'l'
                             for (unsigned int i = 0; i < CellNumbs.at(0); i++) // over all Nodes
-                                if (ENS.coeff(j, i) == 1) node_ids.push_back(i); // at the chosen Face with ID = 'l'
+                                if (ENS.coeff(i, j) == 1) node_ids.push_back(i); // at the chosen Face with ID = 'l'
                         } // end of if (FES.coeff(l, j) == 1)
                 } // end of (GFS.coeff(m, l) == 1)
             } // end of for(unsigned int l = 0; l < CellNumbs.at(2); l++) - Faces

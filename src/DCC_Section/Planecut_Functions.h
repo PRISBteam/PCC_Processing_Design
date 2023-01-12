@@ -4,7 +4,7 @@
 ///================================================================================================================================///
 
 /// The [parallelised] function output grain_ids from the plain cut (a,b,c,D)
-vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double c_coeff, double D_coeff) {
+vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double c_coeff, double D_coeff, vector<tuple<double, double, double>> const &vertex_coordinates) {
 /// The plane parameters: a_coeff*X + b_coeff*Y + c_coeff*Z = D
     vector<unsigned int> planecut_grains;
 
@@ -24,31 +24,27 @@ vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double c_coe
     ///  Full symmetric AGS matrix instead of triagonal
     AGS = 0.5 * (AGS + SparseMatrix<double>(AGS.transpose()));
 
-    /// Vertex coordinates reader into triplet double vector
-    string VCpath_string = input_folder + "voro_seeds.txt"s;
-    char* VCpath = const_cast<char*>(VCpath_string.c_str());
-    //vector<Triplet<double>> vertex_coordinates = TripletsReader(VCpath);
-    vector<tuple<double, double, double>> vertex_coordinates = TuplesReader(VCpath);
-
+    /// Grains
     vector<grain3D> grains_list; // vector of grains (class grain3D)
-    // vertex_coordinates : coordinates of all vertices
 
 #pragma omp parallel for // parallel execution by OpenMP
     for(unsigned int m = 0; m < CellNumbs.at(3); m++) {// each Grain
         grain3D new_grain = grain3D(m);
-        cout << new_grain.grain_id << endl;
+//        cout << new_grain.grain_id << endl;
         grains_list.push_back(new_grain);
+//        cout << GFS.cols() << "  " << CellNumbs.at(3) << endl;
         grains_list.at(m).Set_node_ids(m, GFS, FES, ENS);
-        cout << grains_list.at(m).grain_id << endl;
+//        cout << grains_list.at(m).grain_id << endl;
         grains_list.at(m).Set_node_coordinates(m, vertex_coordinates);
-
     } // end of for(unsigned int m = 0; m < CellNumbs.at(3); m++) - Grains
-/// For each grain minmax_coord vector grain_coordinate_extremums of two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}
+
+    /// For each grain minmax_coord vector grain_coordinate_extremums of two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}
 #pragma omp parallel for // parallel execution by OpenMP
     for(unsigned int m = 0; m < CellNumbs.at(3); m++) {// each Grain
         vector<tuple<double, double, double>> grain_coordinate_extremums = grains_list.at(m).Get_minmax_node_coordinates(m);
 // get<0>(grain_coordinate_extremums.at(0)) -> MIN X coordinate, get<1>(grain_coordinate_extremums.at(0)) -> MIN Y coordinate, get<0>(grain_coordinate_extremums.at(1)) -> MAX X coordinate, etc..
-        ///min
+
+        ///MinMax condition:
         // a_coeff*X + b_coeff*Y + c_coeff*Z = D
         if(D_coeff >= a_coeff*get<0>(grain_coordinate_extremums.at(0)) + b_coeff*get<1>(grain_coordinate_extremums.at(0)) + c_coeff*get<2>(grain_coordinate_extremums.at(0)) &&
            D_coeff <= a_coeff*get<0>(grain_coordinate_extremums.at(1)) + b_coeff*get<1>(grain_coordinate_extremums.at(1)) + c_coeff*get<2>(grain_coordinate_extremums.at(1)) )
@@ -56,5 +52,9 @@ vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double c_coe
             planecut_grains.push_back(m);
     } // end of for(unsigned int m = 0; m < CellNumbs.at(3); m++) {// each Grain
 //a,b,c,d
+
+    for (auto gid : planecut_grains)
+                 cout << gid << endl;
+
     return planecut_grains;
 }
