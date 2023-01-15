@@ -10,12 +10,14 @@ Current manual release date: 15 January 2023 \<b>
 The code works both with 3-complexes (3D) and 2-complexes (2D) BUT - to make results consistent with 2D/3D EBSD scans - it assumes that the grains are 3-cells in the 3D, 2-cells in the 2D case, and so on for grain boundaries and other element types. So it actually replaces definitions of k-cells with ( k + (dim - 3) )-cells, where dim = {2, 3} is the dimension of the problem. In such a way 2-cells are ALWAYS associated with grain boundaries on EBSD maps and are edges for 2D case! <\p>
   
 <h2> General specifications <\h2>
+  
 <p> The code is written and tested in C++ 17 with the parallelised verson used some features of C++ 20. It is used explicitly Eigen and Spectra libraries which must be downloaded from (spectra...) and copied to the directory containing all the STL C++ libraries on the local PC.
 
 The computational costs of different calculation types, functions and tasks are hugely different: for instance, the component analysis or Monte-Carlo simulations are a very time consuming procedures, while the random generation of special chains are fast. <\p>
 
 <h2> Basic definitions <\h2>
-  
+ 
+<p> 
 <ol>
   <li>k-Cells: </li>
   <li>Nodes: </li>
@@ -35,6 +37,8 @@ The computational costs of different calculation types, functions and tasks are 
   <li>Subcomplex: including Plane cut (a,b,c,D), (reduced (k-1)-complex)</li>
   <li>Skeletons: </li>
 </ol>
+  
+  <\p>
   
 <h2> Polyhedral cell complex, its skeletons and chains </h2>
 
