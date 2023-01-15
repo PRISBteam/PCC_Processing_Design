@@ -19,6 +19,7 @@ The computational costs of different calculation types, functions and tasks are 
  
 <p> 
 <ol>
+  <li>Polyhedral cell complex (PCC): </li>
   <li>k-Cells: </li>
   <li>Nodes: </li>
   <li>Edges: </li>
@@ -35,26 +36,35 @@ The computational costs of different calculation types, functions and tasks are 
   <li>element types: including NewFaceType</li>
   <li>Normal and reduced Incidence and Adjacency matrices</li>
   <li>Subcomplex: including Plane cut (a,b,c,D), (reduced (k-1)-complex)</li>
-  <li>Skeletons: </li>
+  <li>k-Skeleton: </li>
+  <li>k-Chain: </li>
+  <li>k-sChain: </li>
+  <li>k-cChain: </li> 
 </ol>
   
   </p>
   
-<h2> Polyhedral cell complex, its skeletons and chains </h2>
+<h2> More sources on the mathematics related to the Polyhedral cell complexes</h2>
 
 An excellent simple introduction to the DCC with their various applications is given in the <a href="https://link.springer.com/book/10.1007/978-1-84996-290-2" target="_blank"> book </a> of Leo Grady and Jonathan Polimeni _“Discrete Calculus. Applied Analysis on Graphs for Computational Science. (2010)_
 
-The combinatorial cell complex…
+<h2>Modules</h2>
 
+Modules
 
-Skeleton, by its definition, is..
+All the modules except the Main consist of the interface and the core parts.  The interfaces contains pre- and post-processing of data for this particular module, adapting input from the Main, and manage the function implementations according to the calculation types specified in the configuration file. 
 
-An arbitrary set of k-cells sets the chain as the part of the corresponding k-skeleton in the complex set of the <i> k-chain </i>. Essentially, the ultimate goal of the code is to create a list of k-chains (or k-sequences) in the order of appearance of new elements during the consideration process. 
-
+</ol>
+  <li>PCC_Main: include libraries, global variables, reading from files, launching the other modules and simulation tasks; </li>
+  <li>PCC_Processing: assign chains of special k-cells. Essentially, the ultimate goal of the module is to create a list of k-chains (or k-sequences) in the order of appearance of new elements during the consideration process; </li>
+  <li>PCC_Subcomplex: including Plane cut (a,b,c,D), (reduced (k-1)-complex)</li>
+  <li>PCC_Characterisation: performs characterisation of special structures; </li>
+  <li>PCC_Writer: output data in files; </li>
+  <li>Objects.h </li>
+  <li>Support Functions </li> 
+</ol>
 
 <h2> Where to take a complex? </h2>
-
-
 The discrete cell complex is a pretty well-known object that originated from the field of algebraic topology, so it can be obtained in many various ways Below is just a concise review of a couple of flexible tools developed in the Mechanics and Physics of Solids research group in the University of Manchester providing DCCs based on Voronoi and a few others tessellations of space by convex polygons. 
 
 <h3> Tessellations of space provided by Neper software </h3>
