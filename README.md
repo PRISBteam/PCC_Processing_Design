@@ -1,15 +1,43 @@
 <h1>Discrete Processing Design tool (DPD code) </h1>
 
-Version: 1.0.0
-Release date: 21/09/2022
+Version: 0.3.0
+First manual release date: 21/09/2022
+Current manual release date: 15 January 2023
 
-<p> DSD code is a <i> Materials Design tool</i> intended to design defect microstructure evolution during material processing. The code provides an effective tool for the studies and design of both material microstructures and the effect of the specific material processing routes. Its key feature is the usage of polyhedral cell complexes, which provide a discrete space for designing realistic material defect structures of different dimensions and types. 
-This module serves as a simple tool for obtaining the defect chains of different dimensions (line defects, surface defects, different volumetric phases) defined on a specific discrete space, normally corresponding to the real material’s topology and predefined set of topological characteristics.
-It appeared to be very useful for simultaneous optimisation of several physical and mechanical properties, depending on the multidimensional microstructure. The model example is the Voronoi 3D tessellation imitating the polycrystalline material with different phases in grains or pores, various types of grain boundaries and their junctions and precipitates as the point defects. 
+<p> DPD code is a <i> Materials Design tool</i> intended to design defect microstructure evolution during material processing. The code provides an effective tool for the studies and design of both material microstructures and the effect of the specific material processing routes. Its key feature is the usage of polyhedral cell complexes, which provide a discrete space for designing realistic material defect structures of different dimensions and types. </p>
 
-The two following introductory sections discuss the basics of the DCCs theory needed for understanding the code input and output and the practical ways to obtain different DCCs as the sets of sparse matrices of their operators. </p>
+<p> This is a C++ based software project consisting of several modules working with pre-created Polyhedral Cell Complex (PCC) as the set of its incidence and adjacency matrices represented in a sparse matrix form.  The code contains 4 main modules (Processing, Characterisation and Writer), the library of Simulation tasks and the Main module merging everything together, reading configurations and data files,  and launching all the other modules.
 
+The code works both with 3-complexes (3D) and 2-complexes (2D) BUT - to make results consistent with 2D/3D EBSD scans - it assumes that the grains are 3-cells in the 3D, 2-cells in the 2D case, and so on for grain boundaries and other element types. So it actually replaces definitions of k-cells with ( k + (dim - 3) )-cells, where dim = {2, 3} is the dimension of the problem. In such a way 2-cells are ALWAYS associated with grain boundaries on EBSD maps and are edges for 2D case!
+<\p>
+  
+<h2> General specifications <\h2>
+<p> The code is written and tested in C++ 17 with the parallelised verson used some features of C++ 20. It is used explicitly Eigen and Spectra libraries which must be downloaded from (spectra...) and copied to the directory containing all the STL C++ libraries on the local PC.
 
+The computational costs of different calculation types, functions and tasks are hugely different: for instance, the component analysis or Monte-Carlo simulations are a very time consuming procedures, while the random generation of special chains are fast. <\p>
+
+<h2> Basic definitions <\h2>
+  
+<ol>
+  <li>k-Cells: </li>
+  <li>Nodes: </li>
+  <li>Edges: </li>
+  <li>Faces: </li>
+  <li>Volumes: </li>
+  <li>cell number: </li>
+  <li>cell fraction: </li>
+  <li>Ordinary cells: including OCellsNumb or  OrdinaryCellNumbs; related variables New2CellNumb </li>
+  <li>Special cells: including SCellsNumb or  SpecialCellNumbs </li>
+  <li>sfaces_sequence</li>
+  <li>cfaces_sequence</li>
+  <li>induced topology of the defect structure: </li>
+  <li>State_sVector: If there are several types of special k-cells, only pair of s_faces_sequence and State_sVector describing types for each of them </li>
+  <li>element types: including NewFaceType</li>
+  <li>Normal and reduced Incidence and Adjacency matrices</li>
+  <li>Subcomplex: including Plane cut (a,b,c,D), (reduced (k-1)-complex)</li>
+  <li>Skeletons: </li>
+</ol>
+  
 <h2> Polyhedral cell complex, its skeletons and chains </h2>
 
 An excellent simple introduction to the DCC with their various applications is given in the <a href="https://link.springer.com/book/10.1007/978-1-84996-290-2" target="_blank"> book </a> of Leo Grady and Jonathan Polimeni _“Discrete Calculus. Applied Analysis on Graphs for Computational Science. (2010)_
