@@ -49,12 +49,9 @@ The computational costs of different calculation types, functions and tasks are 
 An excellent simple introduction to the DCC with their various applications is given in the <a href="https://link.springer.com/book/10.1007/978-1-84996-290-2" target="_blank"> book </a> of Leo Grady and Jonathan Polimeni _“Discrete Calculus. Applied Analysis on Graphs for Computational Science. (2010)_
 
 <h2>Modules</h2>
-
-Modules
-
 All the modules except the Main consist of the interface and the core parts.  The interfaces contains pre- and post-processing of data for this particular module, adapting input from the Main, and manage the function implementations according to the calculation types specified in the configuration file. 
 
-</ol>
+<ol>
   <li>PCC_Main: include libraries, global variables, reading from files, launching the other modules and simulation tasks; </li>
   <li>PCC_Processing: assign chains of special k-cells. Essentially, the ultimate goal of the module is to create a list of k-chains (or k-sequences) in the order of appearance of new elements during the consideration process; </li>
   <li>PCC_Subcomplex: including Plane cut (a,b,c,D), (reduced (k-1)-complex)</li>
