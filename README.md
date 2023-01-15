@@ -99,6 +99,13 @@ IV. WRITER
   
 Objects and Support functions.h
 
+<h2>External files</h2>
+<ul>	
+<li> Configuration file </li>
+<li> PCC sparse matrices and their reading </li>  
+<li> Input and output folders </li>
+</ul>
+	
 <h2> Where to take a complex? </h2>
 The discrete cell complex is a pretty well-known object that originated from the field of algebraic topology, so it can be obtained in many various ways Below is just a concise review of a couple of flexible tools developed in the Mechanics and Physics of Solids research group in the University of Manchester providing DCCs based on Voronoi and a few others tessellations of space by convex polygons. 
 
