@@ -1,6 +1,6 @@
 <h1>Discrete Processing Design tool (DPD code)</h1>
 
-Version: 0.3.0 <br>
+Manual version: 0.3.0 <br>
 First manual release date: 21/09/2022 <br>
 Current manual release date: 15 January 2023 <br>
 
@@ -60,6 +60,44 @@ All the modules except the Main consist of the interface and the core parts.  Th
   <li>Objects.h </li>
   <li>Support Functions </li> 
 </ol>
+
+Main
+
+I. SUBCOMPLEX
+
+II. PROCESSING
+
+Aim: Set new structures (chains) on a PCC elements.
+
+Several <i>generation types</i> deigned for various simulation tasks are available:
+
+One-element generation functions
+<ol>
+<li> Random choice of a single element </li>
+	- Use advanced algorithm  (C++ …. Library) for random number generation;
+	- Used in all the other more complicated structure generation processes.
+<li> Random Walker with leaps </li>
+	- The random walk algorithm choosing travelling across the any k-skeleton (for any k) with some possibility of larger-scale leaps;
+	-   Every new regular (without leap) step it choses between the neighbouring k-Cells using the Random choice function( );  
+ </ol>
+
+Elements’ chain generation functions
+<ol>
+<li> Random one by one choice of special elements </li>
+	- Currently allow to set several types of special faces that encoded in the couple of sfaces_sequence (showing the generation order and allowing then easily change the fraction of special faces) and  State_Vector  (showing the type for each of the faces);
+	- As its output generates set of vectors of  s<element>_sequences and  corresponding State_<element>Vector 
+	- In a binary case (0 and 1 types only) sfaces_sequence is enough for the whole representation of special chains;
+<li> Strip distributions </li>
+<li> Max/Min configuration entropy production principle </li>
+<li> Metropolis-like algorithm with the "energy" minimisation (design module) </li>
+<li> Ising-like model </li>
+</ol>
+
+III. CHARACTERISATION
+
+IV. WRITER
+  
+Objects and Support functions.h
 
 <h2> Where to take a complex? </h2>
 The discrete cell complex is a pretty well-known object that originated from the field of algebraic topology, so it can be obtained in many various ways Below is just a concise review of a couple of flexible tools developed in the Mechanics and Physics of Solids research group in the University of Manchester providing DCCs based on Voronoi and a few others tessellations of space by convex polygons. 
