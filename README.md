@@ -1,21 +1,21 @@
 <h1>Discrete Processing Design tool (DPD code)</h1>
 
-Version: 0.3.0
-First manual release date: 21/09/2022 \<break>
-Current manual release date: 15 January 2023 \<break>
+Version: 0.3.0 <br>
+First manual release date: 21/09/2022 <br>
+Current manual release date: 15 January 2023 <br>
 
-<p>DPD code is a <i> Materials Design tool</i> intended to design defect microstructure evolution during material processing. The code provides an effective tool for the studies and design of both material microstructures and the effect of the specific material processing routes. Its key feature is the usage of polyhedral cell complexes, which provide a discrete space for designing realistic material defect structures of different dimensions and types.</p>
+<p> DPD code is a <i> Materials Design tool</i> intended to design defect microstructure evolution during material processing. The code provides an effective tool for the studies and design of both material microstructures and the effect of the specific material processing routes. Its key feature is the usage of polyhedral cell complexes, which provide a discrete space for designing realistic material defect structures of different dimensions and types. </p>
 
-<p>This is a C++ based software project consisting of several modules working with pre-created Polyhedral Cell Complex (PCC) as the set of its incidence and adjacency matrices represented in a sparse matrix form.  The code contains 4 main modules (Processing, Characterisation and Writer), the library of Simulation tasks and the Main module merging everything together, reading configurations and data files,  and launching all the other modules.
-The code works both with 3-complexes (3D) and 2-complexes (2D) BUT - to make results consistent with 2D/3D EBSD scans - it assumes that the grains are 3-cells in the 3D, 2-cells in the 2D case, and so on for grain boundaries and other element types. So it actually replaces definitions of k-cells with ( k + (dim - 3) )-cells, where dim = {2, 3} is the dimension of the problem. In such a way 2-cells are ALWAYS associated with grain boundaries on EBSD maps and are edges for 2D case!<\p>
+<p> This is a C++ based software project consisting of several modules working with pre-created Polyhedral Cell Complex (PCC) as the set of its incidence and adjacency matrices represented in a sparse matrix form. The code contains 4 main modules (Processing, Characterisation and Writer), the library of Simulation tasks and the Main module merging everything together, reading configurations and data files,  and launching all the other modules.
+The code works both with 3-complexes (3D) and 2-complexes (2D) BUT - to make results consistent with 2D/3D EBSD scans - it assumes that the grains are 3-cells in the 3D, 2-cells in the 2D case, and so on for grain boundaries and other element types. So it actually replaces definitions of k-cells with ( k + (dim - 3) )-cells, where dim = {2, 3} is the dimension of the problem. In such a way 2-cells are ALWAYS associated with grain boundaries on EBSD maps and are edges for 2D case! </p>
   
-<h2>General specifications<\h2>
+<h2>General specifications</h2>
   
-<p>The code is written and tested in C++ 17 with the parallelised verson used some features of C++ 20. It is used explicitly Eigen and Spectra libraries which must be downloaded from (spectra...) and copied to the directory containing all the STL C++ libraries on the local PC.
+<p>The code is written and tested in C++ 17 with the parallelised verson used some features of C++ 20. It is used explicitly Eigen and Spectra libraries which must be <a href="https://spectralib.org/download.html"> downloaded</a> and copied to the directory containing all the STL C++ libraries on the local PC.
 
 The computational costs of different calculation types, functions and tasks are hugely different: for instance, the component analysis or Monte-Carlo simulations are a very time consuming procedures, while the random generation of special chains are fast.<\p>
 
-<h2>Basic definitions<\h2>
+<h2>Basic definitions</h2>
  
 <p> 
 <ol>
@@ -38,7 +38,7 @@ The computational costs of different calculation types, functions and tasks are 
   <li>Skeletons: </li>
 </ol>
   
-  <\p>
+  </p>
   
 <h2> Polyhedral cell complex, its skeletons and chains </h2>
 
