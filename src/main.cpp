@@ -50,7 +50,10 @@ std::vector<unsigned int> face_strip_distribution; // a vector containing length
 /// PCC Complex Geometry ::
 // coordinates
 std::vector<tuple<double, double, double>> vertex_coordinates, grain_barycenter_coordinates, face_barycenter_coordinates;
-// measures
+// Lengths: Lx, Ly, Lz
+double Lx_size = 1.0, Ly_size = 1.0, Lz_size = 1.0; // initial values, then they can be read from file
+
+// Measures
 std::vector<double> grain_volumes_vector, face_areas_vector, edge_lengths_vector;
 
 /// PCC Complex Energies ::
@@ -192,11 +195,14 @@ int main() {
     /// 0: DCC_Processing module
     if (SubcomplexON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
         cout << "START of the DCC Subcomplex module" << endl;
-        if (S_type == "P") {
+        if (S_type == "P") { // subcomplex type  "plane cut"
             /// specific parameters for a subcomplex PLANE CUT !!!
             double a_p = 0.0, b_p = 0.0, c_p = 1.0, D_p = 0.5;
-            DCC_Subcomplex(a_p, b_p, c_p, D_p, special_faces_sequence);
-        }
+            unsigned int subcomplex_id_new = 0;
+            subcomplex new_Cut = subcomplex(subcomplex_id_new);
+            DCC_Subcomplex(new_Cut, special_faces_sequence, crack_faces_sequence);
+
+            }
     } // end of if (SubcomplexON(confpath, time_step_one))
 
     if ( SIMULATION_MODE(confpath) == "SIMULATION MODE(LIST)"s) { /// SIMULATION MODE: #LIST

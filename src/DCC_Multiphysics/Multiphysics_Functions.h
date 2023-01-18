@@ -4,6 +4,87 @@
  *                                                                                              **/
 ///================================================================================================================================///
 using namespace std;
+
+void crack_1mode_stress_field(double Puasson_coeff = 0.3, double new_crack_length, double external_vonMizes_stress, vector<tuple<double, double, double>> const &vertex_coordinates){
+    double nu = Puasson_coeff;
+    double Len = new_crack_length;
+    double Sigm = external_vonMizes_stress;
+
+    for (unsigned int itr = 0; itr < vertex_coordinates.size(); ++itr) {
+        double x = get<0>(vertex_coordinates.at(itr));
+        double y = get<1>(vertex_coordinates.at(itr));
+        double z = get<2>(vertex_coordinates.at(itr));
+
+        /// The first crack mode ::
+        double Pp = ((pow(x, 2.0) - pow(y, 2.0) - pow(pow(Len, 2) / 4.0), 2.0) + 4.0 * (pow(x, 2.0)) * (pow(y, 2.0))) ^ (0.5);
+        double Qp = (Pp + (x ^ 2 - y ^ 2 - Len ^ 2 / 4.0)) ^ 0.5;
+        double Qm = (Pp - (x ^ 2 - y ^ 2 - Len ^ 2 / 4.0)) ^ 0.5;
+        double Sxx = Sigm * (Pp * (x ^ 2 + y ^ 2 - Len ^ 2 / 4.0) * (Abs[y] * Qm - Abs[x] * Qp) -
+                             abs(x) * Qp * (y ^ 4 - 2.0 * (x ^ 2 + Len ^ 2 / 4.0) * y ^ 2 -
+                                                                                        3.0 * (x ^ 2 - Len ^ 2 / 4.0) ^
+                                            2) +
+                             Abs[y] * Qm * (y ^ 4 + 6.0 * (x ^ 2 + Len ^ 2 / 4.0) * y ^ 2 +
+                                                                                        5.0 * (x ^ 2 - Len ^ 2 / 4.0) ^
+                                            2)) / (2.0 * (2.0 ^ (0.5)) * Pp ^ 3);
+        double Syy = Sigm * (Pp * (x ^ 2 + y ^ 2 - Len ^ 2 / 4.0) * (Abs[x] * Qp - Abs[y] * Qm) +
+                             Abs[x] * Qp * (5.0 * y ^ 4 +
+                                                      6.0 * (x ^ 2 + Len ^ 2 / 4.0) * y ^ 2 + (x ^ 2 - Len ^ 2 / 4.0) ^
+                                            2) +
+                             Abs[y] * Qm * (3.0 * y ^ 4 +
+                                                      2.0 * (x ^ 2 + Len ^ 2 / 4.0) *
+                                                      y ^ 2 - (x ^ 2 - Len ^ 2 / 4.0) ^ 2)) /
+                     (2.0 * (2.0 ^ (0.5)) * Pp ^ 3) + Sigm;
+        double Szz = nu * (Sxx + Syy);
+        double Sxy = Sigm *
+                     Sign[x * y] * (Pp * (x ^ 2 + y ^ 2 - Len ^ 2 / 4.0) * (Abs[x] * Qm + Abs[y] * Qp) -
+                                    Abs[x] * Qm * (3.0 * y ^ 4 +
+                                                             2.0 * (x ^ 2 + Len ^ 2 / 4.0) * y ^
+                                                   2 - (x ^ 2 - Len ^ 2 / 4.0) ^ 2) +
+                                    Abs[y] * Qp * (y ^ 4 - 2.0 * (x ^ 2 + Len ^ 2 / 4.0) * y ^ 2 -
+                                                                                               3.0 *
+                                                                                               (x ^ 2 - Len ^ 2 / 4.0) ^
+                                                   2)) / (2.0 * (2.0 ^ (0.5)) * Pp ^ 3);
+        /// The second crack mode ::
+        /*S2xx := 0.5*Sigm*
+                Sign[x*y]*(Pp^2*(x^2 + y^2 - Len^2/4.0)*(Abs[x]*Qm + Abs[y]*Qp) +
+                              Abs[x]*Qm*(1.0*y^4 + 6.0*(x^2 + Len^2/4.0)*y^2 +
+                                                                           5.0*(x^2 - Len^2/4.0)^2) -
+                              Abs[y]*Qp*(3.0*y^4 + 10.0*(x^2 + Len^2/4.0)*y^2 +
+                                                                            7.0*(x^2 - Len^2/4.0)^2))/(2.0*(2.0^(0.5))*Pp^6)
+        S2yy := -0.5*Sigm*
+                Sign[x*y]*(Pp^2*(x^2 + y^2 - Len^2/4.0)*(Abs[x]*Qm + Abs[y]*Qp) -
+                              Abs[x]*Qm*(3.0*y^4 + 2.0*(x^2 + Len^2/4.0)*y^2 -
+                                                                           1.0*(x^2 - Len^2/4.0)^2) +
+                              Abs[y]*Qp*(1.0*y^4 - 2.0*(x^2 + Len^2/4.0)*y^2 -
+                                                                           3.0*(x^2 - Len^2/4.0)^2))/(2.0*(2.0^(0.5))*Pp^6)
+        S2xy := -0.5*
+                Sigm* (Pp^2*(x^2 + y^2 - Len^2/4.0)*(Abs[y]*Qm - Abs[x]*Qp) -
+                          Abs[x]*Qp*(1.0*y^4 - 2.0*(x^2 + Len^2/4.0)*y^2 -
+                                                                       3.0*(x^2 - Len^2/4.0)^2) +
+                          Abs[y]*Qm*(1.0*y^4 + 6.0*(x^2 + Len^2/4.0)*y^2 +
+                                                                       5.0*(x^2 - Len^2/4.0)^2))/(2.0*(2.0^(0.5))*Pp^6)
+        dl = 0.0
+        xp := x + dl
+        xm = x - dl
+       /// The third crack mode ::
+        Pp3 := ((xp^2 - y^2 + y*Len)^2 + 4.0*xp^2*(y - Len/2.0)^2)^0.5
+        Qm3 := (Pp3^2 - (xp^2 - y^2 + y*Len))^0.5
+        Qp3 := (Pp3^2 + (xp^2 - y^2 + y*Len))^0.5
+        S3xy := 0.5*
+                Sigm* (Pp3^2*(xp^2 + y^2 - y*Len)*(Qp3*(xp - y + Len/2.0) +
+                                                   Qm3*(xp + y - Len/2.0)) +
+                           Qm3*(xp + y - Len/2.0)*(1.0*xp^4 -
+                                                          2.0*xm^2*(y^2 - y*Len + Len^2/2.0) - 3.0*y^2*(y - Len)^2) +
+                           Qp3*(y - Len/2.0)*(3.0*xp^4 +
+                                                     2.0*xm^2*(y^2 - y*Len + Len^2/2.0) - y^2*(y - Len)^2) +
+                           Qp3*xp*(xp^4 + 6.0*xm^2*(y^2 - y*Len + Len^2/2.0) +
+                                                 5.0*y^2*(y - Len)^2))/(2.0*(2.0^(0.5))*Pp3^6)
+    */
+        double SigmMAX = (1.0 + nu) * (Sxx + Syy + Szz) / 3.0;
+        double Mizes = (0.5 * ((Sxx - Syy) ^ 2 + (Sxx - Szz) ^ 2 + (Syy - Szz) ^ 2 + 6 * Sxy ^ 2)) ^ 0.5;
+    } // end of for( itr )
+} /// end of crack_1mode_stress_field() function
+
 /*
 std::vector<double> Energy_GBs_state() {
     std::vector<double> total_GBenergies_vector; // main function output

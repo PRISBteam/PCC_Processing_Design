@@ -2,8 +2,215 @@
 
 #ifndef agglomeration_H
 #define agglomeration_H
+#ifndef subcomplex_H
+#define subcomplex_H
 
-/// (1) The class of agglomeration of defects in one special face element of a PCC
+/// #0# The class of Grain Boundaries in a PCC
+class grain_boundary{
+
+public:
+    unsigned int GB_id; // grain boundary ID
+
+    grain_boundary(unsigned int GB_new_id) { // class simple constructor
+        GB_id = GB_new_id;
+    }
+
+/// GB state
+    bool is_inclusion; // 0 - no, 1 - yes
+    bool is_fractured; // 0 - no, 1 - yes
+    bool is_agglomeration; // 0 - no, 1 - yes
+
+/// Set values methods
+
+    void Set_surface_energy(vector<double> GB_SE_vector ){
+        surface_energy = GB_SE_vector.at(GB_id);
+    }
+
+    void Set_external_elastic_energy(vector<double> GB_EEE_vector) { /// EEE: external elastic energy vector
+        external_elastic_energy = GB_EEE_vector.at(GB_id);
+    }
+
+    void Set_crack_interaction_energy(vector<double> GB_CIE_vector) {
+        crack_interaction_energy = GB_CIE_vector.at(GB_id);
+    }
+
+    void Set_Bl_energy(vector<double> GB_BLE_vector) {
+        Bl_energy = GB_BLE_vector.at(GB_id);
+    }
+
+    void Set_Cl_energy(vector<double> GB_CLE_vector){
+        Cl_energy = GB_CLE_vector.at(GB_id);
+    }
+
+/// Get values methods
+    double Get_surface_energy(unsigned int GB_id){
+        if(surface_energy != 0)
+            return surface_energy;
+        else {
+            Set_surface_energy(GB_SE_vector);
+            return surface_energy; }
+    }
+
+    double Get_external_elastic_energy(unsigned int GB_id) { /// EEE: external elastic energy vector
+        if(external_elastic_energy != 0)
+            return external_elastic_energy;
+        else {
+            Set_external_elastic_energy(GB_EEE_vector);
+            return external_elastic_energy; }
+    }
+
+    double Get_crack_interaction_energy(unsigned int GB_id) {
+        if(crack_interaction_energy != 0)
+            return crack_interaction_energy;
+        else {
+            Set_crack_interaction_energy(GB_CIE_vector);
+            return crack_interaction_energy; }
+    }
+
+    double Get_Bl_energy(int GB_id){
+        if(Bl_energy != 0)
+            return Bl_energy;
+        else {
+            Set_Bl_energy(GB_BLE_vector);
+            return Bl_energy; }
+    }
+
+    double Get_Cl_energy(unsigned int GB_id){
+        if(Cl_energy != 0)
+            return Cl_energy;
+        else {
+            Set_Cl_energy(GB_CLE_vector);
+            return Cl_energy; }
+    }
+
+    double Get_total_energy(){
+
+        /// total_energy; //= surface_energy + external_elastic_energy + Bl_energy + Cl_energy;
+    }
+
+private:
+
+/// Combinatorial
+    int GB_edges_number;  //equal to the number of neighbours
+    int GB_nodes_number;
+
+///Geometry
+    double GB_area;
+    double GB_perimeter;
+
+    tuple<double,double,double> GB_barycentre_coordinates;
+
+///Energies
+    double surface_energy;
+    double external_elastic_energy;
+    double crack_interaction_energy;
+    double Bl_energy;
+    double Cl_energy;
+    double total_energy; //= surface_energy + external_elastic_energy + Bl_energy + Cl_energy;
+};
+
+
+
+/// #2# The class of Grains in a PCC
+
+class grain3D {
+    vector<tuple<double, double, double>> minmax_node_coordinates; // a vecor containing two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}
+
+private:
+    // list of nodes
+    vector<unsigned int> node_ids;
+
+    // list of triplets of nodes coordinated
+    vector<tuple<double, double, double>> node_coordinates;
+
+public:
+
+    unsigned int grain_id;
+
+    grain3D(unsigned int grain_new_id) { // constructor 1 simple
+        grain_id = grain_new_id;
+    }
+
+    void Set_node_ids(unsigned int grain_id, SpMat const &GFS, SpMat const &FES, SpMat const &ENS) { // set the node ids
+        /// GFS -> FES -> ENS
+        if(node_ids.size() == 0) {
+            for(unsigned int l = 0; l < CellNumbs.at(2); l++) {// over all Faces (l)
+                if (GFS.coeff(l, grain_id) == 1) {
+                    for (unsigned int j = 0; j < CellNumbs.at(1); j++) // over all Edges (j)
+                        if (FES.coeff(j, l) == 1) { // at the chosen Face with ID = 'l'
+                            for (unsigned int i = 0; i < CellNumbs.at(0); i++) // over all Nodes
+                                if (ENS.coeff(i, j) == 1) node_ids.push_back(i); // at the chosen Face with ID = 'l'
+                        } // end of if (FES.coeff(l, j) == 1)
+                } // end of (GFS.coeff(m, l) == 1)
+            } // end of for(unsigned int l = 0; l < CellNumbs.at(2); l++) - Faces
+
+        }/// end of if(node_ids.size() == 0)
+
+    }
+
+    /// return - vector of all node (vertices) coordinates of a grain
+    void Set_node_coordinates(unsigned int grain_id, vector<tuple<double, double, double>> const &vertex_coordinates) { // set the node ids from Tr = triplet list
+        vector<unsigned int> node_ids;
+        for (auto  itr = node_ids.begin(); itr != node_ids.end(); ++itr)
+            if(find(node_ids.begin(), node_ids.end(), distance(node_ids.begin(), itr)) != node_ids.end())
+                node_coordinates.push_back(vertex_coordinates.at(*itr)); // vector<unsigned int> node_ids;
+    }
+
+    vector<unsigned int> Get_node_ids(unsigned int grain_id) { // set the node ids
+        return node_ids;
+    }
+
+    vector<tuple<double, double, double>> Get_node_coordinates(unsigned int grain_id) { // set the node ids
+        if (node_coordinates.size() != 0) {
+            return node_coordinates;
+        } else if (node_coordinates.size() > 0) {
+            Set_node_coordinates(grain_id, vertex_coordinates);
+            return node_coordinates;
+        } else {
+            throw std::invalid_argument(
+                    "Please call Set_node_coordinates(unsigned int grain_id, vector<tuple<double, double, double>> const &vertex_coordinates) method first!");
+            return node_coordinates;
+        }
+    }// end of  Get_node_coordinates() method
+
+    /// return - vector with two tuples : { x_min, y_min, z_min; x_max, y_max, z_max} of a grain witn number grain_id
+    vector<tuple<double, double, double>> Get_minmax_node_coordinates(unsigned int grain_id) { // min and max {x,y,z} values of vertices for a grain
+        // class Grain3D function Get_node_coordinates(grain_id)
+        vector<tuple<double, double, double>> minmax_tuple;
+        ///Get_node_coordinates(grain_id)
+        vector<tuple<double, double, double>> tup_node_coordinates = Get_node_coordinates(grain_id);
+        // separating in three parts
+        vector<double> x_node_coordinates, y_node_coordinates, z_node_coordinates;
+
+        for (auto itr = tup_node_coordinates.begin(); itr != tup_node_coordinates.end(); ++itr) {
+            x_node_coordinates.push_back(get<0>(*itr));
+            y_node_coordinates.push_back(get<1>(*itr));
+            z_node_coordinates.push_back(get<2>(*itr));
+        }
+//        std::for_each(tup_node_coordinates.begin(), tup_node_coordinates.end(), );
+
+        auto itx = std::minmax_element(x_node_coordinates.begin(), x_node_coordinates.end());
+        int xmin = *itx.first;
+        int xmax = *itx.second;
+
+        auto ity = std::minmax_element(y_node_coordinates.begin(), y_node_coordinates.end());
+        int ymin = *ity.first;
+        int ymax = *ity.second;
+
+        auto itz = std::minmax_element(z_node_coordinates.begin(), z_node_coordinates.end());
+        int zmin = *itz.first;
+        int zmax = *itz.second;
+
+        minmax_tuple = {make_tuple(xmin, ymin, zmin), make_tuple(xmax, ymax, zmax)};
+
+        return minmax_tuple;
+    }
+
+}; // end of class grain3D
+
+
+
+/// #3# The class of Agglomeration of defects in one special face element of a PCC
 class agglomeration {
     double adhesion_energy = 0;
     double surface_energy = 0;
@@ -106,10 +313,7 @@ public:
 
 }; // end of class agglomeration
 
-#endif
-
-
-/// (2) The class of stress concentrators related to defects in one special face element of a PCC
+/// #4# The class of stress concentrators related to defects in one special face element of a PCC
 
 class face_concentrator {
     double total_elastic_energy = 0;
@@ -144,105 +348,92 @@ public:
     }
 }; // end of class
 
-/// (3) The class of Grains in a PCC
 
-class grain3D {
-    vector<tuple<double, double, double>> minmax_node_coordinates; // a vecor containing two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}
+
+/// #5# The class of a SUBCOMPLEX
+class subcomplex {
 
 private:
-    // list of nodes
-    vector<unsigned int> node_ids;
+    /// 1. Combinatorics
+    std::vector <unsigned int> sub_grains_sequence;
+    std::vector <unsigned int> sub_faces_sequence;
+    std::vector <unsigned int> sub_nodes_sequence;
+    std::vector <unsigned int> common_faces_sequence;
+    std::vector <unsigned int> s_sub_faces_sequence;
+    std::vector <unsigned int> c_sub_faces_sequence;
 
-    // list of triplets of nodes coordinated
-    vector<tuple<double, double, double>> node_coordinates;
+    /// 2. Geometry
+
+    vector<tuple<double, double, double>> vertex_coordinates;
+    vector<tuple<double, double, double>> face_coordinates;
+    vector<tuple<double, double, double>> grain_coordinates;
 
 public:
+    unsigned int subcomplex_id = 0;
 
-    unsigned int grain_id;
-
-    grain3D(unsigned int grain_new_id) { // constructor 1 simple
-        grain_id = grain_new_id;
+    //1
+    subcomplex(unsigned int subcomplex_id_new) { // constructor 1, simple
+        subcomplex_id = subcomplex_id_new;
     }
-
-    void Set_node_ids(unsigned int grain_id, SpMat const &GFS, SpMat const &FES, SpMat const &ENS) { // set the node ids
-        /// GFS -> FES -> ENS
-        if(node_ids.size() == 0) {
-            for(unsigned int l = 0; l < CellNumbs.at(2); l++) {// over all Faces (l)
-                if (GFS.coeff(l, grain_id) == 1) {
-                    for (unsigned int j = 0; j < CellNumbs.at(1); j++) // over all Edges (j)
-                        if (FES.coeff(j, l) == 1) { // at the chosen Face with ID = 'l'
-                            for (unsigned int i = 0; i < CellNumbs.at(0); i++) // over all Nodes
-                                if (ENS.coeff(i, j) == 1) node_ids.push_back(i); // at the chosen Face with ID = 'l'
-                        } // end of if (FES.coeff(l, j) == 1)
-                } // end of (GFS.coeff(m, l) == 1)
-            } // end of for(unsigned int l = 0; l < CellNumbs.at(2); l++) - Faces
-
-        }/// end of if(node_ids.size() == 0)
-
+    //2
+    subcomplex(unsigned int subcomplex_id_new, std::vector <unsigned int> new_sub_grains_sequence) { // constructor 2, based on a sub_grains_sequence
+        subcomplex_id = subcomplex_id_new;
+        Set_grains_sequence(new_sub_grains_sequence);
     }
+    /// needs to be developed (!!!)
 
-    /// return - vector of all node (vertices) coordinates of a grain
-    void Set_node_coordinates(unsigned int grain_id, vector<tuple<double, double, double>> const &vertex_coordinates) { // set the node ids from Tr = triplet list
-        vector<unsigned int> node_ids;
-        for (auto  itr = node_ids.begin(); itr != node_ids.end(); ++itr)
-            if(find(node_ids.begin(), node_ids.end(), distance(node_ids.begin(), itr)) != node_ids.end())
-                node_coordinates.push_back(vertex_coordinates.at(*itr)); // vector<unsigned int> node_ids;
-    }
-
-    vector<unsigned int> Get_node_ids(unsigned int grain_id) { // set the node ids
-        return node_ids;
-    }
-
-    vector<tuple<double, double, double>> Get_node_coordinates(unsigned int grain_id) { // set the node ids
-        if (node_coordinates.size() != 0) {
-            return node_coordinates;
-        } else if (node_coordinates.size() > 0) {
-            Set_node_coordinates(grain_id, vertex_coordinates);
-            return node_coordinates;
-        } else {
-            throw std::invalid_argument(
-                    "Please call Set_node_coordinates(unsigned int grain_id, vector<tuple<double, double, double>> const &vertex_coordinates) method first!");
-            return node_coordinates;
+    subcomplex Get_half_plane(unsigned int subcomplex_id_new, std::vector <unsigned int> const &sub_grains_sequence, int length_ratio, int const axis_id) {
+      //int axis_id; // id of a considered axis: 1 for x, 2 for y and 3 for z
+        subcomplex half_plane_subcomplex = subcomplex(subcomplex_id_new,sub_grains_sequence);
+        switch (axis_id) {
+            case 1: {
+                double edge_coord = length_ratio*Lx_size; break; }
+            case 2: {
+                double edge_coord = length_ratio*Ly_size; break; }
+            case 3: {
+                double edge_coord = length_ratio*Lz_size; break; }
         }
-    }// end of  Get_node_coordinates() method
 
-    /// return - vector with two tuples : { x_min, y_min, z_min; x_max, y_max, z_max} of a grain witn number grain_id
-    vector<tuple<double, double, double>> Get_minmax_node_coordinates(unsigned int grain_id) { // min and max {x,y,z} values of vertices for a grain
-        // class Grain3D function Get_node_coordinates(grain_id)
-        vector<tuple<double, double, double>> minmax_tuple;
-        ///Get_node_coordinates(grain_id)
-        vector<tuple<double, double, double>> tup_node_coordinates = Get_node_coordinates(grain_id);
-        // separating in three parts
-        vector<double> x_node_coordinates, y_node_coordinates, z_node_coordinates;
-
-        for (auto itr = tup_node_coordinates.begin(); itr != tup_node_coordinates.end(); ++itr) {
-            x_node_coordinates.push_back(get<0>(*itr));
-            y_node_coordinates.push_back(get<1>(*itr));
-            z_node_coordinates.push_back(get<2>(*itr));
-        }
-//        std::for_each(tup_node_coordinates.begin(), tup_node_coordinates.end(), );
-
-        auto itx = std::minmax_element(x_node_coordinates.begin(), x_node_coordinates.end());
-        int xmin = *itx.first;
-        int xmax = *itx.second;
-
-        auto ity = std::minmax_element(y_node_coordinates.begin(), y_node_coordinates.end());
-        int ymin = *ity.first;
-        int ymax = *ity.second;
-
-        auto itz = std::minmax_element(z_node_coordinates.begin(), z_node_coordinates.end());
-        int zmin = *itz.first;
-        int zmax = *itz.second;
-
-        minmax_tuple = {make_tuple(xmin, ymin, zmin), make_tuple(xmax, ymax, zmax)};
-
-        return minmax_tuple;
+        return half_plane_subcomplex;
     }
 
-}; // end of class grain3D
+    /// grains
+    void Set_grains_sequence(std::vector <unsigned int> new_sub_grains_sequence){
+        sub_grains_sequence = new_sub_grains_sequence; }
+    //1
+    std::vector <unsigned int>  Get_grains_sequence(unsigned int  subcomplex_id){
+        if(sub_grains_sequence.size() != 0)
+            return sub_grains_sequence;
+    }
+    //2
+    std::vector <unsigned int>  Get_grains_sequence(unsigned int  subcomplex_id, std::vector <unsigned int> new_sub_grains_sequence){
+        if(sub_grains_sequence.size() != 0)
+            return sub_grains_sequence;
+        else {
+            Set_grains_sequence(new_sub_grains_sequence);
+            return sub_grains_sequence; }
+    }
 
-/// (4) The class of a Microcrack
+    /// faces
+    void Set_faces_sequence(std::vector <unsigned int> new_sub_faces_sequence){
+        sub_faces_sequence = new_sub_faces_sequence; }
+    //1
+    std::vector <unsigned int>  Get_faces_sequence(unsigned   subcomplex_id){
+        if(sub_faces_sequence.size() != 0)
+            return sub_faces_sequence; }
+    //2
+    std::vector <unsigned int>  Get_faces_sequence(unsigned int  subcomplex_id, std::vector <unsigned int> new_sub_faces_sequence){
+        if(sub_faces_sequence.size() != 0)
+            return sub_faces_sequence;
+        else {
+            Set_grains_sequence(new_sub_faces_sequence);
+            return sub_faces_sequence; }
+    }
 
+}; /// end of class SUBCOMPLEX
+
+
+/// #6# The class of a MACROCRACK
 class macrocrack {
     int crack_id = 0;
     double total_fracture_energy = 0;
@@ -260,6 +451,7 @@ private:
 
 public:
 
+    //1
     macrocrack(int crack_id_new) { // constructor 1, simple
         crack_id = crack_id_new;
         a_n = 0.0;
@@ -269,13 +461,24 @@ public:
         crack_length = 0.0;
     }
 
+    //2
     macrocrack(int crack_id_new, double a_coeff, double b_coeff, double c_coeff, double D_coeff, double crack_length_new) { // constructor 2, more specific
         crack_id = crack_id_new;
         a_n = a_coeff;
         b_n = b_coeff;
         c_n = c_coeff;
-        D_plane = a_coeff;
+        D_plane = D_coeff;
         crack_length = crack_length_new;
+    }
+
+    //3
+    macrocrack(int crack_id_new, unsigned int subcomplex_id_new, double length_ratio) { // constructor 2, with subcomplex
+        subcomplex new_half_plane(0);
+        /// needs to be done !!
+//        new_half_plane.Get_half_plane(subcomplex_id_new, length_ratio, axis_id);
+//        (unsigned int subcomplex_id_new, std::vector <unsigned int> const &sub_grains_sequence, int length_ratio, int const axis_id)
+        crack_id = crack_id_new;
+//        a_n = a_coeff; b_n = b_coeff;  c_n = c_coeff;  D_plane = D_coeff; crack_length = crack_length_new;
     }
 /*
     double Get_surface_energy()
@@ -287,108 +490,8 @@ public:
     }
 */
 
-}; // end of class MACROCRACK
+}; /// end of class MACROCRACK
 
-class grain_boundary{
-
-public:
-    unsigned int GB_id; // grain boundary ID
-
-    grain_boundary(unsigned int GB_new_id) { // class simple constructor
-        GB_id = GB_new_id;
-    }
-
-/// GB state
-    bool is_inclusion; // 0 - no, 1 - yes
-    bool is_fractured; // 0 - no, 1 - yes
-    bool is_agglomeration; // 0 - no, 1 - yes
-
-/// Set values methods
-
-    void Set_surface_energy(vector<double> GB_SE_vector ){
-        surface_energy = GB_SE_vector.at(GB_id);
-    }
-
-    void Set_external_elastic_energy(vector<double> GB_EEE_vector) { /// EEE: external elastic energy vector
-        external_elastic_energy = GB_EEE_vector.at(GB_id);
-    }
-
-    void Set_crack_interaction_energy(vector<double> GB_CIE_vector) {
-        crack_interaction_energy = GB_CIE_vector.at(GB_id);
-    }
-
-    void Set_Bl_energy(vector<double> GB_BLE_vector) {
-        Bl_energy = GB_BLE_vector.at(GB_id);
-    }
-
-    void Set_Cl_energy(vector<double> GB_CLE_vector){
-        Cl_energy = GB_CLE_vector.at(GB_id);
-    }
-
-/// Get values methods
-    double Get_surface_energy(unsigned int GB_id){
-        if(surface_energy != 0)
-            return surface_energy;
-        else {
-            Set_surface_energy(GB_SE_vector);
-            return surface_energy; }
-    }
-
-    double Get_external_elastic_energy(unsigned int GB_id) { /// EEE: external elastic energy vector
-        if(external_elastic_energy != 0)
-            return external_elastic_energy;
-        else {
-            Set_external_elastic_energy(GB_EEE_vector);
-            return external_elastic_energy; }
-    }
-
-    double Get_crack_interaction_energy(unsigned int GB_id) {
-        if(crack_interaction_energy != 0)
-            return crack_interaction_energy;
-        else {
-            Set_crack_interaction_energy(GB_CIE_vector);
-            return crack_interaction_energy; }
-    }
-
-    double Get_Bl_energy(int GB_id){
-        if(Bl_energy != 0)
-            return Bl_energy;
-        else {
-            Set_Bl_energy(GB_BLE_vector);
-            return Bl_energy; }
-    }
-
-    double Get_Cl_energy(unsigned int GB_id){
-        if(Cl_energy != 0)
-            return Cl_energy;
-        else {
-            Set_Cl_energy(GB_CLE_vector);
-            return Cl_energy; }
-    }
-
-    double Get_total_energy(){
-
-       /// total_energy; //= surface_energy + external_elastic_energy + Bl_energy + Cl_energy;
-    }
-
-private:
-
-/// Combinatorial
-    int GB_edges_number;  //equal to the number of neighbours
-    int GB_nodes_number;
-
-///Geometry
-    double GB_area;
-    double GB_perimeter;
-
-    tuple<double,double,double> GB_barycentre_coordinates;
-
-///Energies
-    double surface_energy;
-    double external_elastic_energy;
-    double crack_interaction_energy;
-    double Bl_energy;
-    double Cl_energy;
-    double total_energy; //= surface_energy + external_elastic_energy + Bl_energy + Cl_energy;
-};
+#endif
+#endif
 

@@ -4,6 +4,7 @@
  *  in the DCC Kinetic module. It makes them "special" and takes out of the set of "ordinary" k-Cells.                            **/
 ///================================================================================================================================///
 
+/// #1# Kinetic function for multiple cracking
 std::vector <unsigned int> DCC_Kinetic_cracking(std::vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const& AFS, Eigen::SparseMatrix<double> const& FES) {
 
     std::vector <unsigned int> crack_faces_sequence, S_crackVector(CellNumbs.at(2), 0); // sequence of the cracked Faces
@@ -94,10 +95,50 @@ std::vector <unsigned int> DCC_Kinetic_cracking(std::vector<unsigned int> &s_fac
     } // end for ( i < CellNumbs.at(2) )
 
     return crack_faces_sequence;
-}
+} /// end of Kinetic_cracking
+/// -----------------------------------------------------------------------------------------------------------------///
 
-//int DCC_Kinetic_Wear(double ShearStress, vector<Tup> &Grain_Orientations, Eigen::SparseMatrix<double> const& FES, std::vector<unsigned int> &CellNumbs, char* input_folder, char* output_dir) {
-int DCC_Kinetic_Wear(double ShearStress, vector<Tup> &Grain_Orientations, Eigen::SparseMatrix<double> const& FES) {
+/// #2# Macro crack function
+std::vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double c_coeff, double D_coeff, vector<tuple<double, double, double>> const &vertex_coordinates);
+vector<double> Macrocrack_growth(double max_size_ratio, subcomplex crack_plane_subcomplex) {
+    vector<double> cracked_face_sequence;
+    vector<double> total_spend_energy, total_released_energy, surface_spend_energy,
+            cracking_spend_energy, bridging_spend_energy, Bl_released_energy, Cl_released_energy;
+
+    vector<macrocrack> plane_crack_growth;
+    int number_of_growth_steps = 1000;
+    double length_ratio_step = max_size_ratio / ((double) number_of_growth_steps);
+
+    for (int growth_step = 0; growth_step < number_of_growth_steps; ++growth_step) {
+        double length_ratio = growth_step * length_ratio_step;
+        /// growth_step is a subcomplex id for new_halfplane
+        double a_coeff = 0.0, b_coeff = 0.0, c_coeff = 1.0, D_coeff = 0.5;
+        int axis_id = 1; // 1 -> x
+        std::vector<unsigned int> full_plane_grains = DCC_Plane_cut(a_coeff, b_coeff, c_coeff, D_coeff, vertex_coordinates);
+        subcomplex new_halfplane = crack_plane_subcomplex.Get_half_plane(growth_step,full_plane_grains, length_ratio, axis_id);
+
+        plane_crack_growth.push_back(
+            //macrocrack(int crack_id_new, unsigned int subcomplex_id_new, double length_ratio)
+            macrocrack(growth_step, growth_step,length_ratio)); // creation of a new macrocrack with id = growth_step and
+    } // for (int growth_step = 0; growth_step < number_of_growth_steps; ++growth_step)
+/*
+    for (macrocrack lcrack: plane_crack_growth) {
+        total_spend_energy.push_back(lcrack.Get_ ? _energy(length_ratio));
+        total_released_energy.push_back(lcrack.Get_ ? _energy(length_ratio));
+        surface_spend_energy.push_back(lcrack.Get_ ? _energy(length_ratio));
+        cracking_spend_energy.push_back(lcrack.Get_ ? _energy(
+                length_ratio)); // including the increasing Cl instead of Bl energy concentrators
+        bridging_spend_energy.push_back(lcrack.Get_ ? _energy(length_ratio));
+        Bl_released_energy.push_back(lcrack.Get_ ? _energy(length_ratio));
+        Cl_released_energy.push_back(lcrack.Get_ ? _energy(length_ratio)); }
+
+    return cracked_face_sequence; // empty now !!!
+    */
+} ///end of Macrocrack
+/// -----------------------------------------------------------------------------------------------------------------///
+
+/// #3# Wear (thin films plasticity) function
+ void DCC_Kinetic_Wear(double ShearStress, vector<Tup> &Grain_Orientations, Eigen::SparseMatrix<double> const& FES) {
 
     /// Input and output directories
     char* odir = const_cast<char*>(output_folder.c_str()); // const_cast for output directory
@@ -117,13 +158,13 @@ int DCC_Kinetic_Wear(double ShearStress, vector<Tup> &Grain_Orientations, Eigen:
     srand((unsigned) time(NULL));
 
     cout << "Hello there!" << endl;
-    return 1;
-}
+    return;
+} /// end of Wear (thin film plasticity) function
+/// -----------------------------------------------------------------------------------------------------------------///
 
 ///*============================================================================================*///
 ///*============================== DCC_Kinetic_Plasticity function =============================*///
-
-//vector<Tup> DCC_Kinetic_Plasticity(Eigen::SparseMatrix<double> const& FES, std::vector<unsigned int> &CellNumbs, char* input_folder, char* output_dir)  {
+/// #3# Plasticity (thin films plasticity) function
 vector<Tup> DCC_Kinetic_Plasticity( Eigen::SparseMatrix<double> const& FES)  {
 
     //resultant tuple
@@ -232,7 +273,8 @@ vector<Tup> DCC_Kinetic_Plasticity( Eigen::SparseMatrix<double> const& FES)  {
 
     cout << "Stress is not in the range!" << endl;
     return fraction_stress_temperature;
-}
+} /// end of kinetic plasticity function
+/// -----------------------------------------------------------------------------------------------------------------///
 
 vector<unsigned int> Metropolis(vector<vector<double>> &stress_tensor, vector<vector<double>> &norms_vector, vector<vector<double>> &tang_vector, double &Temperature, std::vector<unsigned int> &CellNumbs, long iteration_number, vector<double> &slip_vector, double alpha, double lambda){
     /// I. Constant initial state initialisation
@@ -290,8 +332,10 @@ vector<unsigned int> Metropolis(vector<vector<double>> &stress_tensor, vector<ve
     } // for loop (i < iteration_number)
 
     return SlipState_Vector;
-} // end of Metropolis
+} /// end of Metropolis function
+/// -----------------------------------------------------------------------------------------------------------------///
 
+// support function for the Metropolis function
 vector<vector<double>> lt_vector(vector<vector<double>> &stress_tensor, vector<vector<double>> norms_vector) {
     vector<vector<double>> tv, tnv, ttv, lt; // traction vector tv and its normal (tnv) and tangent (ttv) components + tangential vector to the slip plane lt
 
@@ -331,3 +375,4 @@ vector<vector<double>> lt_vector(vector<vector<double>> &stress_tensor, vector<v
 
     return lt;
 } /// end of lt_vector() function
+/// -----------------------------------------------------------------------------------------------------------------///

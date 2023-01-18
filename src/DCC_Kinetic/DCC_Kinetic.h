@@ -1,7 +1,7 @@
 ///================================ DCC Kinetic module =============================================================///
 ///=======================================================================================================================///
-/** The functions in this library generate different quasi-random finetic processeson the elements of the pre-constructed ///
-*   discrete sell complex (DCC)                                                                                         **/
+/** The functions in this library generate different quasi-random kinetic processing the elements of the pre-constructed ///
+*   polyhedral cell complex (PCC)                                                                                         **/
 ///=====================================================================================================================///
 /// 'W' for the 3D one-layer film, 'P' for the Ising-like model of Plasticity, 'F' for the Ising-like model of Fracture
 using namespace std;
@@ -71,13 +71,16 @@ std::vector <unsigned int> DCC_Kinetic( std::vector<unsigned int> &s_faces_seque
 //    ENS = SMatrixReader(paths.at(4 + (dim - 3)), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Nodes-Edges
     SpMat   FES = SMatrixReader(paths.at(5 + (dim - 3)), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
 //    GFS = SMatrixReader(paths.at(6 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
-
+ /// =================================================================================================///
 ////////////////////////////////////// KINETIC PROCESSES ///////////////////////////////////////////////
+
+    /// #2# Kinetic type FRACTURE (CRACKING)
     if (cktype == 'F' ) { // Fracture
         face_sequence = DCC_Kinetic_cracking(s_faces_sequence, AFS, FES);
 
     } ///End of 'Fracture' type simulations
 
+    /// #2# Kinetic type WEAR
     else if (cktype == 'W') { // Wear
         double  ShearStress = 3.0*pow(10,8);
         /// Creation/Reading of grain orientations
@@ -105,7 +108,9 @@ std::vector <unsigned int> DCC_Kinetic( std::vector<unsigned int> &s_faces_seque
         } else cout << "Error: No such a directory for\t" << odir + "GrainOrientations.txt"s << endl;
 
     } ///End of 'Wear' type simulations
+/// -----------------------------------------------------------------------------------------------------------------///
 
+    /// #3# Kinetic type PLASTICITY
     else if (cktype == 'P') { // Plasticity
         vector<Tup> fraction_stress_temperature;
 
@@ -126,7 +131,8 @@ std::vector <unsigned int> DCC_Kinetic( std::vector<unsigned int> &s_faces_seque
 //        for (auto lk : fraction_stress_temperature) if (get<0>(lk)*CellNumbs.at(2)*Burgv/DCC_size > 0.002) { cout << "Nano-slips fraction\t" << get<0>(lk) << "\tYield strength\t" << get<1>(lk) << "\tTemperature\t" << get<2>(lk) << endl;              break; }
 
     } ///End of 'Plasticity' type simulations
-    else { cout << "ERROR [DCC_Kinetic] : unknown simulation type - please replace with 'W or P' " << endl; return face_sequence;}
+/// -----------------------------------------------------------------------------------------------------------------///
+    else cout << "ERROR [DCC_Kinetic] : unknown simulation type - please replace with 'W or P' " << endl; return face_sequence;
 
 // Closing and deleting
 

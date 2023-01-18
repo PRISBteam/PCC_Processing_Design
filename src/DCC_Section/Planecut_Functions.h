@@ -4,7 +4,7 @@
 ///================================================================================================================================///
 
 /// The [parallelised] function output grain_ids from the plain cut (a,b,c,D)
-vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double c_coeff, double D_coeff, vector<tuple<double, double, double>> const &vertex_coordinates) {
+std::vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double c_coeff, double D_coeff, vector<tuple<double, double, double>> const &vertex_coordinates) {
 /// The plane parameters: a_coeff*X + b_coeff*Y + c_coeff*Z = D
     vector<unsigned int> planecut_grains;
 
