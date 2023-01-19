@@ -27,6 +27,7 @@ double a_coeff = 0.0, b_coeff = 0.0, c_coeff = 1.0, D_coeff = 0.5;
 /// Grains in a plane
 sub_grains_sequence = DCC_Plane_cut(a_coeff, b_coeff, c_coeff, D_coeff);
 
+
 /// Common grain coordinates
     for(auto subgc : sub_grains_sequence)
         subcomplex_grain_coordinates.push_back(grain_coordinates.at(subgc));
