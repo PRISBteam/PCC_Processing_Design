@@ -149,11 +149,10 @@ public:
     }
 
     /// return - vector of all node (vertices) coordinates of a grain
-    void Set_node_coordinates(unsigned int grain_id, vector<tuple<double, double, double>> const &vertex_coordinates) { // set the node ids from Tr = triplet list
-        vector<unsigned int> node_ids;
+    void Set_node_coordinates(unsigned int grain_id) { // set the node ids from Tr = triplet list
         for (auto  itr = node_ids.begin(); itr != node_ids.end(); ++itr)
             if(find(node_ids.begin(), node_ids.end(), distance(node_ids.begin(), itr)) != node_ids.end())
-                node_coordinates.push_back(vertex_coordinates.at(*itr)); // vector<unsigned int> node_ids;
+                node_coordinates.push_back(vertex_coordinates_vector.at(*itr)); // vector<unsigned int> node_ids;
     }
 
     vector<unsigned int> Get_node_ids(unsigned int grain_id) { // set the node ids
@@ -164,7 +163,7 @@ public:
         if (node_coordinates.size() != 0) {
             return node_coordinates;
         } else if (node_coordinates.size() > 0) {
-            Set_node_coordinates(grain_id, vertex_coordinates);
+            Set_node_coordinates(grain_id);
             return node_coordinates;
         } else {
             throw std::invalid_argument(
@@ -207,8 +206,6 @@ public:
     }
 
 }; // end of class grain3D
-
-
 
 /// #3# The class of Agglomeration of defects in one special face element of a PCC
 class agglomeration {
@@ -364,12 +361,12 @@ private:
 
     /// 2. Geometry
 
-    vector<tuple<double, double, double>> vertex_coordinates;
-    vector<tuple<double, double, double>> face_coordinates;
-    vector<tuple<double, double, double>> grain_coordinates;
+    //vector<tuple<double, double, double>> vertex_coordinates;
+    vector<tuple<double, double, double>> common_faces_coordinates;
+    vector<tuple<double, double, double>> sub_grain_coordinates;
 
 public:
-    unsigned int subcomplex_id = 0;
+    unsigned int subcomplex_id;
 
     //1
     subcomplex(unsigned int subcomplex_id_new) { // constructor 1, simple
@@ -397,28 +394,35 @@ public:
         return half_plane_subcomplex;
     }
 
-    /// grains
+    /// Grains
     void Set_grains_sequence(std::vector <unsigned int> new_sub_grains_sequence){
         sub_grains_sequence = new_sub_grains_sequence; }
-    //1
-    std::vector <unsigned int>  Get_grains_sequence(unsigned int  subcomplex_id){
+    std::vector <unsigned int> Get_grains_sequence(unsigned int subcomplex_id){
         if(sub_grains_sequence.size() != 0)
-            return sub_grains_sequence;
-    }
-    //2
-    std::vector <unsigned int>  Get_grains_sequence(unsigned int  subcomplex_id, std::vector <unsigned int> new_sub_grains_sequence){
-        if(sub_grains_sequence.size() != 0)
-            return sub_grains_sequence;
-        else {
-            Set_grains_sequence(new_sub_grains_sequence);
             return sub_grains_sequence; }
-    }
 
-    /// faces
+    void Set_common_faces_sequence(std::vector <unsigned int> new_common_faces_sequence){
+        common_faces_sequence = new_common_faces_sequence; }
+    std::vector <unsigned int> Get_common_faces_sequence(unsigned int subcomplex_id){
+        return common_faces_sequence; }
+
+    /// geometry
+    void Set_sub_grain_coordinates(std::vector<tuple<double, double, double>> new_sub_grain_coordinates){
+        sub_grain_coordinates = new_sub_grain_coordinates; }
+    std::vector<tuple<double, double, double>> Get_sub_grain_coordinates(unsigned int subcomplex_id){
+        return sub_grain_coordinates; }
+
+    /* //2
+    std::vector <unsigned int>  Get_grains_sequence(unsigned int subcomplex_id, std::vector <unsigned int> new_sub_grains_sequence){
+        if(sub_grains_sequence.size() != 0) return sub_grains_sequence;
+        else { Set_grains_sequence(new_sub_grains_sequence); return sub_grains_sequence; } }
+        */
+
+    /// Faces
     void Set_faces_sequence(std::vector <unsigned int> new_sub_faces_sequence){
         sub_faces_sequence = new_sub_faces_sequence; }
     //1
-    std::vector <unsigned int>  Get_faces_sequence(unsigned   subcomplex_id){
+    std::vector <unsigned int>  Get_faces_sequence(unsigned int  subcomplex_id){
         if(sub_faces_sequence.size() != 0)
             return sub_faces_sequence; }
     //2
@@ -430,12 +434,17 @@ public:
             return sub_faces_sequence; }
     }
 
+    /// geometry
+    void Set_common_faces_coordinates(std::vector<tuple<double, double, double>> new_common_faces_coordinates){
+        common_faces_coordinates = new_common_faces_coordinates; }
+    std::vector<tuple<double, double, double>> Set_common_faces_coordinates(unsigned int subcomplex_id){
+        return common_faces_coordinates; }
+
 }; /// end of class SUBCOMPLEX
 
 
 /// #6# The class of a MACROCRACK
 class macrocrack {
-    int crack_id = 0;
     double total_fracture_energy = 0;
 
 private:
@@ -450,6 +459,7 @@ private:
 
 
 public:
+    int crack_id = 0;
 
     //1
     macrocrack(int crack_id_new) { // constructor 1, simple
@@ -479,6 +489,10 @@ public:
 //        (unsigned int subcomplex_id_new, std::vector <unsigned int> const &sub_grains_sequence, int length_ratio, int const axis_id)
         crack_id = crack_id_new;
 //        a_n = a_coeff; b_n = b_coeff;  c_n = c_coeff;  D_plane = D_coeff; crack_length = crack_length_new;
+    }
+
+    double Get_crack_length(int crack_id_new) {
+        return crack_length;
     }
 /*
     double Get_surface_energy()

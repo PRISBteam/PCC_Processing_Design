@@ -4,7 +4,7 @@
 ///================================================================================================================================///
 
 /// The [parallelised] function output grain_ids from the plain cut (a,b,c,D)
-std::vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double c_coeff, double D_coeff, vector<tuple<double, double, double>> const &vertex_coordinates) {
+std::vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double c_coeff, double D_coeff) {
 /// The plane parameters: a_coeff*X + b_coeff*Y + c_coeff*Z = D
     vector<unsigned int> planecut_grains;
 
@@ -35,7 +35,7 @@ std::vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double 
 //        cout << GFS.cols() << "  " << CellNumbs.at(3) << endl;
         grains_list.at(m).Set_node_ids(m, GFS, FES, ENS);
 //        cout << grains_list.at(m).grain_id << endl;
-        grains_list.at(m).Set_node_coordinates(m, vertex_coordinates);
+        grains_list.at(m).Set_node_coordinates(m);
     } // end of for(unsigned int m = 0; m < CellNumbs.at(3); m++) - Grains
 
     /// For each grain minmax_coord vector grain_coordinate_extremums of two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}

@@ -48,15 +48,18 @@ std::vector<vector<unsigned int>> special_face_design; // is a list of special_f
 std::vector<unsigned int> face_strip_distribution; // a vector containing length distribution of special faces (strips)
 
 /// PCC Complex Geometry ::
-// coordinates
-std::vector<tuple<double, double, double>> vertex_coordinates, grain_barycenter_coordinates, face_barycenter_coordinates;
-// Lengths: Lx, Ly, Lz
+/// Coordinates
+vector<tuple<double, double, double>> vertex_coordinates_vector, face_coordinates_vector, grain_coordinates_vector;
+
+//std::vector<tuple<double, double, double>> vertex_coordinates, grain_barycenter_coordinates, face_barycenter_coordinates;
+// Complex size: (lengths) Lx, Ly, Lz
 double Lx_size = 1.0, Ly_size = 1.0, Lz_size = 1.0; // initial values, then they can be read from file
 
-// Measures
+/// Measures
 std::vector<double> grain_volumes_vector, face_areas_vector, edge_lengths_vector;
 
 /// PCC Complex Energies ::
+std::vector <double> face_elastic_energies;
 std::vector<double> GB_SE_vector, GB_EEE_vector, GB_CIE_vector, GB_BLE_vector, GB_CLE_vector;
 
 /// All global OFFSTREAMS
@@ -101,6 +104,10 @@ bool CharacterisationON(char* config, bool time_step_one); // Check the Structur
 bool WriterON(char* config, bool time_step_one); // Check the Structure Writer module status (On/Off) in the config.txt file
 void eraseSubStr(std::string & mainStr, const std::string & toErase); // support (technical) function: erase the first occurrence of given substring from main string
 
+/// PCC Special Elements
+// #1# Macro-cracks
+std::vector <macrocrack> large_cracks_vector;
+
 ///* ........................................................................................    Main    ................................................................ *///
 int main() {
     cout << "-------------------------------------------------------------------------------------" << endl;
@@ -140,6 +147,30 @@ int main() {
     if (is_file_exists(input_folder + "voro_Ncells.txt"s)) { ncells = input_folder + "voro_Ncells.txt"s; number_of_cells = const_cast<char*>(ncells.c_str()); }
     else if (is_file_exists(input_folder + "delau_Ncells.txt"s)) { ncells = input_folder + "delau_Ncells.txt"s; number_of_cells = const_cast<char*>(ncells.c_str()); }
     else { ncells = input_folder + "number_of_cells.txt"s; number_of_cells = const_cast<char*>(ncells.c_str()); }
+
+    /// All grain coordinates
+    string GCpath_string = input_folder + "grain_seeds.txt"s;
+    char* GCpath = const_cast<char*>(GCpath_string.c_str());
+    vector<tuple<double, double, double>> grain_coordinates = TuplesReader(GCpath);
+
+    /// All face coordinates
+    for(unsigned int fnumber = 0; fnumber < CellNumbs.at(2); ++fnumber)
+            face_coordinates_vector.push_back(find_aGBseed(fnumber, paths, CellNumbs, grain_coordinates)); // tuple<double, double, double> NewSeed_coordinates = make_tuple(0, 0, 0);
+
+    /// All vertex coordinates
+    string VCpath_string = input_folder + "voro_seeds.txt"s;
+    char* VCpath = const_cast<char*>(VCpath_string.c_str());
+    vector<tuple<double, double, double>> vertex_coordinates_vector = TuplesReader(VCpath);
+
+    /// All grain volumes
+    string GVpath_string = input_folder + "grain_volumes.txt"s;
+    char* GVpath = const_cast<char*>(GVpath_string.c_str());
+    grain_volumes_vector = dVectorReader(GVpath);
+
+    /// All face areas
+    string GBApath_string = input_folder + "face_areas.txt"s;
+    char* GBApath = const_cast<char*>(GBApath_string.c_str());
+    face_areas_vector = dVectorReader(GBApath);
 
     /// Useful ofstreams cleaning for data output
     OutJFile.open(output_folder + "TJp_random_theory.txt"s, ios::trunc); OutJFile.close();
@@ -271,11 +302,22 @@ int main() {
                     fill(current_State_sVector.begin(), current_State_sVector.end(), 0);
                     for (auto sv: current_sfaces_sequence) current_State_sVector.at(sv) = 1;
 
+/// II_: DCC_Multiphysics module
+
+                    int crack_id_new = 0;
+                    unsigned int subcomplex_id_new = 0;
+                    double length_ratio = 0.1;
+                    double crack_length = length_ratio * Lx_size; /// Lx_size here Lx only now!!!
+                    //large_cracks_vector.push_back(macrocrack(crack_id_new, subcomplex_id_new, length_ratio));
+                    large_cracks_vector.push_back(macrocrack(crack_id_new, 0, 0, 1, 0.5, crack_length));
+                    double external_vonMizes_stress = pow(10.0,6.0);
+                    face_elastic_energies = DCC_Multiphysics(large_cracks_vector, external_vonMizes_stress);
+
 /// III: DCC_Kinetic module
                     if (KineticON(confpath, time_step_one)) { // if DCC_Kinetic is SWITCH ON in the config.txt file
 
                         cout << "START of the DCC Kinetic module" << endl;
-                        kface_sequence = DCC_Kinetic(special_faces_sequence, K_type);
+                        kface_sequence = DCC_Kinetic(face_elastic_energies, special_faces_sequence, K_type);
 
 /// ===== Elapsing time Kinetic ================
                         unsigned int Kinetic_time = clock();
