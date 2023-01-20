@@ -6,6 +6,7 @@
 /// Attached user defined C++ libraries:
 ///-------------------------------------
 #include "Writer_Functions.h"
+//#include "DCC_Writer/Writer_Functions.h"
 ///-------------------------------------
 
 void DCC_Writer(std::vector<unsigned int> const  &sfaces_sequence, std::vector<unsigned int> const  &kface_sequence,  vector <unsigned int> &State_sVector, double const &mu_f, double const &sigm_f, vector<vector<int>> const &RW_series_vector, const string P_type) {
@@ -28,5 +29,5 @@ void DCC_Writer(std::vector<unsigned int> const  &sfaces_sequence, std::vector<u
 
     } // end of if(P_simulation_type == 'L')
 
-    return ;
+        return ;
 }

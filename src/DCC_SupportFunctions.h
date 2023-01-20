@@ -74,6 +74,23 @@ vector<tuple<double, double, double>> TuplesReader(char* SMpath) {
 
     return tripletList;
 }
+vector<tuple<double, double, double>> dTuplesReader(char* SMpath, unsigned int &size) {
+    typedef tuple<double, double, double> Tup; // Eigen library class
+    std::vector<Tup> tripletList; // Probe vector of triplets
+
+    double i = 0.0, j = 0.0, value = 0.0, t_length = 0;
+    ifstream inAN(SMpath);
+    if (inAN.is_open()) { //If the file was successfully open, then
+        while(!inAN.eof()) {
+            inAN >> i >> j >> value;
+            tripletList.push_back(make_tuple(i, j, value));
+            //   cout << i << "\t" << j << "\t"<< value << "\t" << endl;
+        }
+    } else cout << "The file " << SMpath << " cannot be read" << endl; //If something goes wrong
+
+    size = tripletList.size();
+    return tripletList;
+}
 
 /// Creation int std::Vector from file
 std::vector<unsigned int> VectorReader(char* FilePath) {
@@ -125,7 +142,7 @@ vector<int> EdgesTypesCalc(std::vector<unsigned int> const &CellNumbs, vector<un
 }
 
 /// DDRX support function :: GFS matrix reading and calculation of new seeds at the centres of GBs
-tuple<double, double, double> find_aGBseed(unsigned int Facenumb, std::vector<char*> const paths, std::vector<unsigned int> & CellNumbs, vector<tuple<double, double, double>> & AllSeeds_coordinates) {
+tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<char*> const paths, std::vector<unsigned int> & CellNumbs, vector<tuple<double, double, double>> & AllSeeds_coordinates) {
     tuple <double, double, double> res; // find two grain neighbour for fnumber
     //Triplet<double> res;     // find two grain neighbour for fnumber
 
@@ -134,13 +151,14 @@ tuple<double, double, double> find_aGBseed(unsigned int Facenumb, std::vector<ch
     GFS = SMatrixReader(paths.at(6), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
 
     vector<int> Grain_neighbours;
-
     vector<unsigned int> grainIDs;
-    for (unsigned int j = 0; j < CellNumbs.at(3); ++j) {
-        if(GFS.coeff(Facenumb, j) == 1) {
+#pragma omp parallel for // parallel execution by OpenMP
+for (unsigned int j = 0; j < CellNumbs.at(3); ++j) {
+        if(GFS.coeff(facenumb, j) == 1) {
             for (unsigned int k = j; k < CellNumbs.at(3); ++k) {
-                if (GFS.coeff(Facenumb, k) == 1) {
-                    grainIDs.push_back(j); grainIDs.push_back(k); }
+                if (GFS.coeff(facenumb, k) == 1) {
+                    grainIDs.push_back(j);
+                    grainIDs.push_back(k); }
             }
         }
     }
@@ -150,12 +168,15 @@ tuple<double, double, double> find_aGBseed(unsigned int Facenumb, std::vector<ch
     xx.push_back(get<0>(AllSeeds_coordinates.at(grainIDs[0])));
     xx.push_back(get<0>(AllSeeds_coordinates.at(grainIDs[1])));
     yy.push_back(get<1>(AllSeeds_coordinates.at(grainIDs[0])));
-    yy.push_back(get<1>(AllSeeds_coordinates.at(grainIDs[0])));
+    yy.push_back(get<1>(AllSeeds_coordinates.at(grainIDs[1])));
     zz.push_back(get<2>(AllSeeds_coordinates.at(grainIDs[0])));
-    zz.push_back(get<2>(AllSeeds_coordinates.at(grainIDs[0])));
+    zz.push_back(get<2>(AllSeeds_coordinates.at(grainIDs[1])));
+    res = make_tuple(0.5*(xx[0] + xx[1]), 0.5*(yy[0] + yy[1]), 0.5*(zz[0] + zz[1]));
+//    cout << "facenumb " << facenumb << " " << 0.5*(xx[0] + xx[1]) << "\t" << 0.5*(yy[0] + yy[1]) << "\t"<< 0.5*(zz[0] + zz[1]) << "\t" << endl;
+//    cout << "facenumb " << facenumb << " " << get<0>(res) << "\t" << get<1>(res) << "\t"<< get<2>(res) << "\t" << endl;
 
-//    cout << 0.5*(xx[0] + xx[1]) << "\t" << 0.5*(yy[0] + yy[1]) << "\t"<< 0.5*(zz[0] + zz[1]) << "\t" << endl;
-    return res = make_tuple(0.5*(xx[0] + xx[1]), 0.5*(yy[0] + yy[1]), 0.5*(zz[0] + zz[1]));
+    return res;
+
 }
 
 bool is_file_exists(const string fileName)

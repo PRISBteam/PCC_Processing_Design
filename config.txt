@@ -21,7 +21,7 @@ DCC_Section SWITCHED ON
 | Value | Description | Special sign | Index in the Configuration vector |
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 -------------------------------------------------------------------------------------------------------------------------------------
-P	| Calculation type ('P' - plane cut, 'H' - half-plane cut with length a)		| } |	00
+P	    | Calculation type ('P' - plane cut, 'H' - half-plane cut with length a)		| } |	00
 0.3     | half-plane length a = r/L, where r is the size and L is the length of the whole plane
 
 =====================================================================================================================================
