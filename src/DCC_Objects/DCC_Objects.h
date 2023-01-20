@@ -367,6 +367,7 @@ private:
 
 public:
     unsigned int subcomplex_id;
+    double sub_length;
 
     //1
     subcomplex(unsigned int subcomplex_id_new) { // constructor 1, simple
@@ -377,22 +378,6 @@ public:
         subcomplex_id = subcomplex_id_new;
         Set_grains_sequence(new_sub_grains_sequence);
     }
-    /// needs to be developed (!!!)
-
-    subcomplex Get_half_plane(unsigned int subcomplex_id_new, std::vector <unsigned int> const &sub_grains_sequence, int length_ratio, int const axis_id) {
-      //int axis_id; // id of a considered axis: 1 for x, 2 for y and 3 for z
-        subcomplex half_plane_subcomplex = subcomplex(subcomplex_id_new,sub_grains_sequence);
-        switch (axis_id) {
-            case 1: {
-                double edge_coord = length_ratio*Lx_size; break; }
-            case 2: {
-                double edge_coord = length_ratio*Ly_size; break; }
-            case 3: {
-                double edge_coord = length_ratio*Lz_size; break; }
-        }
-
-        return half_plane_subcomplex;
-    }
 
     /// Grains
     void Set_grains_sequence(std::vector <unsigned int> new_sub_grains_sequence){
@@ -401,10 +386,6 @@ public:
         if(sub_grains_sequence.size() != 0)
             return sub_grains_sequence; }
 
-    void Set_common_faces_sequence(std::vector <unsigned int> new_common_faces_sequence){
-        common_faces_sequence = new_common_faces_sequence; }
-    std::vector <unsigned int> Get_common_faces_sequence(unsigned int subcomplex_id){
-        return common_faces_sequence; }
 
     /// geometry
     void Set_sub_grain_coordinates(std::vector<tuple<double, double, double>> new_sub_grain_coordinates){
@@ -425,20 +406,86 @@ public:
     std::vector <unsigned int>  Get_faces_sequence(unsigned int  subcomplex_id){
         if(sub_faces_sequence.size() != 0)
             return sub_faces_sequence; }
-    //2
+
+    void Set_common_faces_sequence(std::vector <unsigned int> new_common_faces_sequence){
+        common_faces_sequence = new_common_faces_sequence; }
+    std::vector <unsigned int> Get_common_faces_sequence(unsigned int subcomplex_id){
+        return common_faces_sequence; }
+
+/*    //2
     std::vector <unsigned int>  Get_faces_sequence(unsigned int  subcomplex_id, std::vector <unsigned int> new_sub_faces_sequence){
         if(sub_faces_sequence.size() != 0)
             return sub_faces_sequence;
         else {
             Set_grains_sequence(new_sub_faces_sequence);
             return sub_faces_sequence; }
+    } */
+
+    void Set_sfaces_sequence(std::vector <unsigned int> ssub_faces_sequence){
+        s_sub_faces_sequence = ssub_faces_sequence;
+    }
+    std::vector <unsigned int> Get_sfaces_sequence(unsigned int  subcomplex_id){
+        return s_sub_faces_sequence;
+    }
+
+    void Set_cfaces_sequence(std::vector <unsigned int> csub_faces_sequence){
+        c_sub_faces_sequence = csub_faces_sequence;
+    }
+    std::vector <unsigned int> Get_cfaces_sequence(unsigned int  subcomplex_id){
+        return c_sub_faces_sequence;
     }
 
     /// geometry
     void Set_common_faces_coordinates(std::vector<tuple<double, double, double>> new_common_faces_coordinates){
         common_faces_coordinates = new_common_faces_coordinates; }
-    std::vector<tuple<double, double, double>> Set_common_faces_coordinates(unsigned int subcomplex_id){
+
+    std::vector<tuple<double, double, double>> Get_common_faces_coordinates(unsigned int subcomplex_id){
         return common_faces_coordinates; }
+
+    subcomplex Get_half_plane(subcomplex plane_cut, double crack_length){
+        vector<tuple<double, double, double>> grain_coordinates = grain_coordinates_vector;
+        vector<tuple<double, double, double>> face_coordinates = face_coordinates_vector;
+
+        subcomplex half_plane_cut(0);
+        std::vector<unsigned int> half_sub_grains_sequence, half_common_faces_sequence, half_sub_sfaces_sequence;
+        std::vector<unsigned int> sub_grains_sequence = half_plane_cut.Get_grains_sequence(0);
+        std::vector<unsigned int> sub_common_face_sequence = half_plane_cut.Get_common_faces_sequence(0);
+        std::vector<unsigned int> sub_sfaces_sequence = half_plane_cut.Get_sfaces_sequence(0);
+        std::vector<tuple<double, double, double>> sub_common_face_coordinates = half_plane_cut.Get_common_faces_coordinates(0);
+
+        for (auto  itr = grain_coordinates.begin(); itr != grain_coordinates.end(); ++itr)
+            if (std::find(sub_grains_sequence.begin(), sub_grains_sequence.end(), distance(grain_coordinates.begin(),itr)) != sub_grains_sequence.end()
+                    && get<0>(*itr) < crack_length) half_sub_grains_sequence.push_back(distance(grain_coordinates.begin(),itr));
+
+        for (auto  itr2 = face_coordinates.begin(); itr2 != face_coordinates.end(); ++itr2)
+            if (std::find(sub_common_face_sequence.begin(), sub_common_face_sequence.end(), distance(face_coordinates.begin(),itr2)) != sub_common_face_sequence.end()
+                    && get<0>(*itr2) < crack_length) half_common_faces_sequence.push_back(distance(face_coordinates.begin(),itr2));
+
+        for (auto  itr3 = face_coordinates.begin(); itr3 != face_coordinates.end(); ++itr3)
+            if (std::find(sub_sfaces_sequence.begin(), sub_sfaces_sequence.end(), distance(face_coordinates.begin(),itr3)) != sub_sfaces_sequence.end()
+                && get<0>(*itr3) < crack_length) half_sub_sfaces_sequence.push_back(distance(face_coordinates.begin(),itr3));
+
+        half_plane_cut.Set_grains_sequence(half_sub_grains_sequence); // all grains before cut
+        half_plane_cut.Set_common_faces_sequence(half_common_faces_sequence); // common faces
+        half_plane_cut.Set_sfaces_sequence(half_sub_sfaces_sequence); //special faces
+        //half_plane_cut.Set_common_faces_coordinates(common_faces_coordinates);
+        //half_plane_cut.Set_sub_grain_coordinates(subcomplex_grain_coordinates);
+        //half_plane_cut.Set_cfaces_sequence(c_sub_faces_sequence); //cracked (induced) faces
+        sub_length = crack_length;
+
+        return half_plane_cut;
+    }
+
+/*    //int axis_id; // id of a considered axis: 1 for x, 2 for y and 3 for z
+    switch (axis_id) {
+        case 1: {
+            double edge_coord = length_ratio*Lx_size; break; }
+        case 2: {
+            double edge_coord = length_ratio*Ly_size; break; }
+        case 3: {
+            double edge_coord = length_ratio*Lz_size; break; }
+    }
+*/
 
 }; /// end of class SUBCOMPLEX
 
@@ -446,6 +493,7 @@ public:
 /// #6# The class of a MACROCRACK
 class macrocrack {
     double total_fracture_energy = 0;
+    subcomplex half_plane_subcomplex; // geometry part
 
 private:
     double a_n;
@@ -454,15 +502,13 @@ private:
     double D_plane;
     double crack_length;
 
-    double stress_concentrators_energy = 0;
-    double bridging_elastic_energy = 0;
-
-
 public:
     int crack_id = 0;
-
+    double stress_concentrators_energy;
+    double bridging_elastic_energy;
+/*
     //1
-    macrocrack(int crack_id_new) { // constructor 1, simple
+    macrocrack(int crack_id_new) { // standard simple constructor 1
         crack_id = crack_id_new;
         a_n = 0.0;
         b_n = 0.0;
@@ -480,21 +526,29 @@ public:
         D_plane = D_coeff;
         crack_length = crack_length_new;
     }
+*/
 
     //3
-    macrocrack(int crack_id_new, unsigned int subcomplex_id_new, double length_ratio) { // constructor 2, with subcomplex
-        subcomplex new_half_plane(0);
-        /// needs to be done !!
-//        new_half_plane.Get_half_plane(subcomplex_id_new, length_ratio, axis_id);
-//        (unsigned int subcomplex_id_new, std::vector <unsigned int> const &sub_grains_sequence, int length_ratio, int const axis_id)
+    macrocrack(int crack_id_new, subcomplex &half_plane_sub) : half_plane_subcomplex(0) { // constructor 3, with a subcomplex
         crack_id = crack_id_new;
-//        a_n = a_coeff; b_n = b_coeff;  c_n = c_coeff;  D_plane = D_coeff; crack_length = crack_length_new;
+        crack_length = half_plane_sub.sub_length; // crack length from the corresponding subcomplex size
+        half_plane_subcomplex = half_plane_sub; //set subcomplex
     }
 
     double Get_crack_length(int crack_id_new) {
         return crack_length;
     }
-/*
+
+    subcomplex Get_subcomplex(int crack_id_new) {
+        return half_plane_subcomplex;
+    }
+
+    std::vector <unsigned int> Get_faces_sequence(unsigned int  crack_id){
+            return half_plane_subcomplex.Get_faces_sequence(crack_id); }
+
+    std::vector <tuple<double,double,double>> Get_common_faces_coordinates(unsigned int  crack_id){
+        return half_plane_subcomplex.Get_common_faces_coordinates(crack_id); }
+    /*
     double Get_surface_energy()
     {
         if (crack_length != 0.0)

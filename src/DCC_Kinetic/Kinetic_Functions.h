@@ -216,6 +216,7 @@ std::vector <unsigned int> DCC_Kinetic_cracking(std::vector<unsigned int> &s_fac
 /// -----------------------------------------------------------------------------------------------------------------///
 
 /// #2# Macro crack function
+/*
 std::vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double c_coeff, double D_coeff);
 vector<double> Macrocrack_growth(double max_size_ratio, subcomplex crack_plane_subcomplex) {
     vector<double> cracked_face_sequence;
@@ -238,7 +239,8 @@ vector<double> Macrocrack_growth(double max_size_ratio, subcomplex crack_plane_s
             //macrocrack(int crack_id_new, unsigned int subcomplex_id_new, double length_ratio)
             macrocrack(growth_step, growth_step,length_ratio)); // creation of a new macrocrack with id = growth_step and
     } // for (int growth_step = 0; growth_step < number_of_growth_steps; ++growth_step)
-/*
+
+ /*
     for (macrocrack lcrack: plane_crack_growth) {
         total_spend_energy.push_back(lcrack.Get_ ? _energy(length_ratio));
         total_released_energy.push_back(lcrack.Get_ ? _energy(length_ratio));
@@ -250,8 +252,9 @@ vector<double> Macrocrack_growth(double max_size_ratio, subcomplex crack_plane_s
         Cl_released_energy.push_back(lcrack.Get_ ? _energy(length_ratio)); }
 
     return cracked_face_sequence; // empty now !!!
-    */
+
 } ///end of Macrocrack
+*/
 /// -----------------------------------------------------------------------------------------------------------------///
 
 /// #3# Wear (thin films plasticity) function

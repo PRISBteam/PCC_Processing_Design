@@ -8,8 +8,6 @@
 #include "Writer_Functions.h"
 ///-------------------------------------
 
-using namespace std;
-
 void DCC_Writer(std::vector<unsigned int> const  &sfaces_sequence, std::vector<unsigned int> const  &kface_sequence,  vector <unsigned int> &State_sVector, double const &mu_f, double const &sigm_f, vector<vector<int>> const &RW_series_vector, const string P_type) {
 
     int output_counter = 0; // special counter for output numeration

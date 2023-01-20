@@ -21,20 +21,14 @@ std::vector <unsigned int>  sub_grains_sequence, sub_faces_sequence, common_face
     vector<tuple<double, double, double>> subcomplex_grain_coordinates;
     vector<tuple<double, double, double>> grain_coordinates = grain_coordinates_vector;
 
-/// All subcomplex grains (sub_grains_sequence)
-
+/// All subcomplex grains (subcomplex_grain_sequence)
 double a_coeff = 0.0, b_coeff = 0.0, c_coeff = 1.0, D_coeff = 0.5;
 /// Grains in a plane
 sub_grains_sequence = DCC_Plane_cut(a_coeff, b_coeff, c_coeff, D_coeff);
 
-
 /// Common grain coordinates
     for(auto subgc : sub_grains_sequence)
         subcomplex_grain_coordinates.push_back(grain_coordinates.at(subgc));
-
-int subcomplex_id = new_cut.subcomplex_id;
-double crack_length_ratio = 0.1;
-new_cut.Get_half_plane(subcomplex_id, sub_grains_sequence, crack_length_ratio, 1);
 
 /// All subcomplex faces (sub_faces_sequence)
 if (sub_grains_sequence.size() > 0) {
@@ -75,6 +69,8 @@ if (sub_faces_sequence.size() > 0)
     new_cut.Set_faces_sequence(sub_faces_sequence);
     new_cut.Set_common_faces_coordinates(common_faces_coordinates);
     new_cut.Set_sub_grain_coordinates(subcomplex_grain_coordinates);
+    new_cut.Set_sfaces_sequence(s_sub_faces_sequence); //special faces
+    new_cut.Set_cfaces_sequence(c_sub_faces_sequence); //cracked (induced) faces
 
 return new_cut;
 }
