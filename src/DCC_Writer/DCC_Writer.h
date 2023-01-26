@@ -9,7 +9,7 @@
 //#include "DCC_Writer/Writer_Functions.h"
 ///-------------------------------------
 
-void DCC_Writer(std::vector<unsigned int> const  &sfaces_sequence, std::vector<unsigned int> const  &kface_sequence,  vector <unsigned int> &State_sVector, double const &mu_f, double const &sigm_f, vector<vector<int>> const &RW_series_vector, const string P_type) {
+void DCC_Writer(std::vector<unsigned int> const  &sfaces_sequence, std::vector<unsigned int> const  &kface_sequence, macrocrack const &large_crack, vector <unsigned int> &State_sVector, double const &mu_f, double const &sigm_f, vector<vector<int>> const &RW_series_vector,  const string P_type) {
 
     int output_counter = 0; // special counter for output numeration
     vector<agglomeration> agglomerations_vector; // vector containing aglomarations as its objects - only for L type simulations (!)
@@ -28,6 +28,5 @@ void DCC_Writer(std::vector<unsigned int> const  &sfaces_sequence, std::vector<u
         Agglomerations_Writer(output_counter, RW_series_vector, mu_f, sigm_f);
 
     } // end of if(P_simulation_type == 'L')
-
-        return ;
+     return ;
 }

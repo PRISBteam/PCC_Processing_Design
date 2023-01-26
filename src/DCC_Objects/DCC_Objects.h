@@ -120,6 +120,9 @@ private:
     // list of nodes
     vector<unsigned int> node_ids;
 
+    // list of GBs
+    vector<unsigned int> GBs_list;
+
     // list of triplets of nodes coordinated
     vector<tuple<double, double, double>> node_coordinates;
 
@@ -148,12 +151,39 @@ public:
 
     }
 
+    void Set_GBs_list(unsigned int grain_id, SpMat const &GFS) {
+        for (unsigned int l = 0; l < CellNumbs.at(2); l++) // for each GB
+                if (GFS.coeff(l, grain_id) == 1)
+                    GBs_list.push_back(l);
+    }
+
+    vector<unsigned int> Get_GBs_list() {
+            if (GBs_list.size() > 0) return GBs_list;
+                else cout << "coution GBs_list.size() = 0! Please Set_GBs_list(unsigned int grain_id, SpMat const &GFS)  first!"s << endl;
+            }
+
     /// return - vector of all node (vertices) coordinates of a grain
     void Set_node_coordinates(unsigned int grain_id) { // set the node ids from Tr = triplet list
-        for (auto  itr = node_ids.begin(); itr != node_ids.end(); ++itr)
-            if(find(node_ids.begin(), node_ids.end(), distance(node_ids.begin(), itr)) != node_ids.end())
-                node_coordinates.push_back(vertex_coordinates_vector.at(*itr)); // vector<unsigned int> node_ids;
+//        for (auto  itr = node_ids.begin(); itr != node_ids.end(); ++itr)
+            //if(find(node_ids.begin(), node_ids.end(), distance(node_ids.begin(), itr)) != node_ids.end())
+//                node_coordinates.push_back(vertex_coordinates_vector.at(*itr)); // vector<unsigned int> node_ids;
+if(node_ids.size()>0) {
+//REPAIR
+    for (auto ids: node_ids) {
+//REPAIR        cout << "vertex_coordinates_vector size " << vertex_coordinates_vector.size() << endl;
+//REPAIR        cout << "ids: " << ids << " node_coordinates size: " << get<0>(vertex_coordinates_vector.at(ids)) << endl;
+
+        node_coordinates.push_back(vertex_coordinates_vector.at(ids)); // vector<unsigned int> node_ids;
+//REPAIR cout << "grain id: " << grain_id << " node_coordinates size: " << node_coordinates.size() << endl;
     }
+
+}
+        else {
+            cout << "Caution! The size of node_ids vector of the grain " << grain_id << " is 0 !" << endl;
+            node_coordinates.push_back(make_tuple(0,0,0)); /// change after !!
+        }
+
+    } // the end of Set_node_coordinates
 
     vector<unsigned int> Get_node_ids(unsigned int grain_id) { // set the node ids
         return node_ids;
@@ -174,33 +204,36 @@ public:
 
     /// return - vector with two tuples : { x_min, y_min, z_min; x_max, y_max, z_max} of a grain witn number grain_id
     vector<tuple<double, double, double>> Get_minmax_node_coordinates(unsigned int grain_id) { // min and max {x,y,z} values of vertices for a grain
-        // class Grain3D function Get_node_coordinates(grain_id)
         vector<tuple<double, double, double>> minmax_tuple;
         ///Get_node_coordinates(grain_id)
-        vector<tuple<double, double, double>> tup_node_coordinates = Get_node_coordinates(grain_id);
+        vector<tuple<double, double, double>> tup_node_coordinates = Get_node_coordinates(grain_id); // class Grain3D function Get_node_coordinates(grain_id)
+//REPAIR        cout << "Xtup_node_coordinates " << get<0>(tup_node_coordinates.at(0)) << " Ytup_node_coordinates " <<get<1>(tup_node_coordinates.at(0)) << " Ztup_node_coordinates " << get<2>(tup_node_coordinates.at(0)) << endl;
+
         // separating in three parts
         vector<double> x_node_coordinates, y_node_coordinates, z_node_coordinates;
-
         for (auto itr = tup_node_coordinates.begin(); itr != tup_node_coordinates.end(); ++itr) {
             x_node_coordinates.push_back(get<0>(*itr));
             y_node_coordinates.push_back(get<1>(*itr));
             z_node_coordinates.push_back(get<2>(*itr));
         }
+//REPAIR        cout << "x_node_coordinates " << (x_node_coordinates.at(0)) << " y_node_coordinates " << (y_node_coordinates.at(0)) << " z_node_coordinates " << (z_node_coordinates.at(0)) << endl;
 //        std::for_each(tup_node_coordinates.begin(), tup_node_coordinates.end(), );
 
+// Return iterators (!)
         auto itx = std::minmax_element(x_node_coordinates.begin(), x_node_coordinates.end());
-        int xmin = *itx.first;
-        int xmax = *itx.second;
+        double xmin = *itx.first;
+        double xmax = *itx.second;
 
         auto ity = std::minmax_element(y_node_coordinates.begin(), y_node_coordinates.end());
-        int ymin = *ity.first;
-        int ymax = *ity.second;
+        double ymin = *ity.first;
+        double ymax = *ity.second;
 
         auto itz = std::minmax_element(z_node_coordinates.begin(), z_node_coordinates.end());
-        int zmin = *itz.first;
-        int zmax = *itz.second;
+        double zmin = *itz.first;
+        double zmax = *itz.second;
 
         minmax_tuple = {make_tuple(xmin, ymin, zmin), make_tuple(xmax, ymax, zmax)};
+//REPAIR !!        cout << "Xmin " << get<0>(minmax_tuple.at(0)) << " Ymin " <<get<1>(minmax_tuple.at(0)) << " Zmin " << get<2>(minmax_tuple.at(0)) << endl;
 
         return minmax_tuple;
     }
@@ -368,6 +401,8 @@ private:
 public:
     unsigned int subcomplex_id;
     double sub_length;
+    double a_n; double b_n; double c_n; double D_plane;
+    vector<double> crack_plane = {a_n, b_n, c_n, D_plane};
 
     //1
     subcomplex(unsigned int subcomplex_id_new) { // constructor 1, simple
@@ -382,6 +417,7 @@ public:
     /// Grains
     void Set_grains_sequence(std::vector <unsigned int> new_sub_grains_sequence){
         sub_grains_sequence = new_sub_grains_sequence; }
+
     std::vector <unsigned int> Get_grains_sequence(unsigned int subcomplex_id){
         if(sub_grains_sequence.size() != 0)
             return sub_grains_sequence; }
@@ -421,11 +457,12 @@ public:
             return sub_faces_sequence; }
     } */
 
-    void Set_sfaces_sequence(std::vector <unsigned int> ssub_faces_sequence){
+    void Set_sfaces_sequence(std::vector <unsigned int> const &ssub_faces_sequence){
         s_sub_faces_sequence = ssub_faces_sequence;
     }
     std::vector <unsigned int> Get_sfaces_sequence(unsigned int  subcomplex_id){
-        return s_sub_faces_sequence;
+        if(s_sub_faces_sequence.size() > 0) return s_sub_faces_sequence;
+        else cout << "Caution! s_sub_faces_sequence = 0! Please add it to the corresponding subcomplex/crack"s << endl;
     }
 
     void Set_cfaces_sequence(std::vector <unsigned int> csub_faces_sequence){
@@ -442,21 +479,32 @@ public:
     std::vector<tuple<double, double, double>> Get_common_faces_coordinates(unsigned int subcomplex_id){
         return common_faces_coordinates; }
 
-    subcomplex Get_half_plane(subcomplex plane_cut, double crack_length){
-        vector<tuple<double, double, double>> grain_coordinates = grain_coordinates_vector;
+    subcomplex Get_half_plane(subcomplex new_sub, double crack_length, std::vector<unsigned int> const &half_sub_sfaces_sequence){
+//        vector<tuple<double, double, double>> grain_coordinates = grain_coordinates_vector;
+//REPAIR        cout << " grain_coordinates_vector " << grain_coordinates.size() << endl;
+        //cout << "Xmin " << get<0>(minmax_tuple.at(0)) << " Ymin " <<get<1>(minmax_tuple.at(0)) << " Zmin " << get<2>(minmax_tuple.at(0)) << endl;
         vector<tuple<double, double, double>> face_coordinates = face_coordinates_vector;
+//REPAIR        cout << " face_coordinates_vector " << face_coordinates.size() << endl;
 
-        subcomplex half_plane_cut(0);
-        std::vector<unsigned int> half_sub_grains_sequence, half_common_faces_sequence, half_sub_sfaces_sequence;
-        std::vector<unsigned int> sub_grains_sequence = half_plane_cut.Get_grains_sequence(0);
-        std::vector<unsigned int> sub_common_face_sequence = half_plane_cut.Get_common_faces_sequence(0);
-        std::vector<unsigned int> sub_sfaces_sequence = half_plane_cut.Get_sfaces_sequence(0);
-        std::vector<tuple<double, double, double>> sub_common_face_coordinates = half_plane_cut.Get_common_faces_coordinates(0);
-
+        subcomplex half_plane_cut(1);
+        std::vector<unsigned int> half_sub_grains_sequence, half_common_faces_sequence;
+//        std::vector<unsigned int> sub_grains_sequence = half_sub.Get_grains_sequence(0);
+//TEMPORARILY        std::vector<unsigned int> sub_common_face_sequence = half_plane_cut.Get_common_faces_sequence(0);
+//TEMPORARILY        std::vector<unsigned int> sub_sfaces_sequence = half_plane_cut.Get_sfaces_sequence(0);
+//TEMPORARILY         std::vector<tuple<double, double, double>> sub_common_face_coordinates = half_plane_cut.Get_common_faces_coordinates(0);
+/* ARCHIVE
         for (auto  itr = grain_coordinates.begin(); itr != grain_coordinates.end(); ++itr)
             if (std::find(sub_grains_sequence.begin(), sub_grains_sequence.end(), distance(grain_coordinates.begin(),itr)) != sub_grains_sequence.end()
                     && get<0>(*itr) < crack_length) half_sub_grains_sequence.push_back(distance(grain_coordinates.begin(),itr));
-
+*/
+//REPAIR cout << "half_sub.Get_grains_sequence(0) " << half_sub.Get_grains_sequence(0).size() << endl;
+        for (auto half_grains : new_sub.Get_grains_sequence(0)) {
+            if (get<1>(grain_coordinates_vector.at(half_grains)) < crack_length) {
+//REPAIR                cout << " half_grains " << half_grains << " half_grain_coordinates " << get<0>(grain_coordinates_vector.at(half_grains)) << " crack_length " << crack_length << endl;
+                half_sub_grains_sequence.push_back(half_grains); //// get<0> ->> only along X now!!!
+            }
+            }
+        /* TEMPORARILY!!!
         for (auto  itr2 = face_coordinates.begin(); itr2 != face_coordinates.end(); ++itr2)
             if (std::find(sub_common_face_sequence.begin(), sub_common_face_sequence.end(), distance(face_coordinates.begin(),itr2)) != sub_common_face_sequence.end()
                     && get<0>(*itr2) < crack_length) half_common_faces_sequence.push_back(distance(face_coordinates.begin(),itr2));
@@ -464,14 +512,14 @@ public:
         for (auto  itr3 = face_coordinates.begin(); itr3 != face_coordinates.end(); ++itr3)
             if (std::find(sub_sfaces_sequence.begin(), sub_sfaces_sequence.end(), distance(face_coordinates.begin(),itr3)) != sub_sfaces_sequence.end()
                 && get<0>(*itr3) < crack_length) half_sub_sfaces_sequence.push_back(distance(face_coordinates.begin(),itr3));
-
+*/
         half_plane_cut.Set_grains_sequence(half_sub_grains_sequence); // all grains before cut
-        half_plane_cut.Set_common_faces_sequence(half_common_faces_sequence); // common faces
+ ///       half_plane_cut.Set_common_faces_sequence(half_common_faces_sequence); // common faces
         half_plane_cut.Set_sfaces_sequence(half_sub_sfaces_sequence); //special faces
         //half_plane_cut.Set_common_faces_coordinates(common_faces_coordinates);
         //half_plane_cut.Set_sub_grain_coordinates(subcomplex_grain_coordinates);
         //half_plane_cut.Set_cfaces_sequence(c_sub_faces_sequence); //cracked (induced) faces
-        sub_length = crack_length;
+        half_plane_cut.sub_length = crack_length;
 
         return half_plane_cut;
     }
@@ -501,32 +549,15 @@ private:
     double c_n;
     double D_plane;
     double crack_length;
+    double real_crack_length;
+    vector<double> crack_plane = {a_n, b_n, c_n, D_plane};
 
 public:
     int crack_id = 0;
-    double stress_concentrators_energy;
-    double bridging_elastic_energy;
-/*
-    //1
-    macrocrack(int crack_id_new) { // standard simple constructor 1
-        crack_id = crack_id_new;
-        a_n = 0.0;
-        b_n = 0.0;
-        c_n = 1.0;
-        D_plane = 0.0;
-        crack_length = 0.0;
-    }
-
-    //2
-    macrocrack(int crack_id_new, double a_coeff, double b_coeff, double c_coeff, double D_coeff, double crack_length_new) { // constructor 2, more specific
-        crack_id = crack_id_new;
-        a_n = a_coeff;
-        b_n = b_coeff;
-        c_n = c_coeff;
-        D_plane = D_coeff;
-        crack_length = crack_length_new;
-    }
-*/
+    double surface_energy = 0;
+    double bridging_energy = 0;
+    double multiple_cracking_energy = 0;
+    double stress_concentrators_energy = 0;
 
     //3
     macrocrack(int crack_id_new, subcomplex &half_plane_sub) : half_plane_subcomplex(0) { // constructor 3, with a subcomplex
@@ -539,12 +570,34 @@ public:
         return crack_length;
     }
 
-    subcomplex Get_subcomplex(int crack_id_new) {
-        return half_plane_subcomplex;
+    void Set_real_crack_length(double sample_size) {
+        real_crack_length = half_plane_subcomplex.sub_length * sample_size;
+    }
+    double Get_real_crack_length() {
+        if (real_crack_length > 0.0) return real_crack_length;
+        else cout << "Caution! real_crack_length = 0! Please use Set_real_crack_length(double sample_size) before!"s << endl;
     }
 
-    std::vector <unsigned int> Get_faces_sequence(unsigned int  crack_id){
+    void Set_crack_plane() {
+        crack_plane = {half_plane_subcomplex.a_n, half_plane_subcomplex.b_n, half_plane_subcomplex.c_n, half_plane_subcomplex.D_plane};
+    }
+    vector<double> Get_crack_plane() {
+        if (crack_plane.size() > 0.0) return crack_plane;
+        else cout << "Caution! crack_plane.size() = 0! Please update first {half_plane_subcomplex.a_n, half_plane_subcomplex.b_n, half_plane_subcomplex.c_n, half_plane_subcomplex.D_plane} in the corresponding subcomplex!"s << endl;
+    }
+
+    void Set_multiple_cracking_energy(double total_energy) {
+        multiple_cracking_energy = total_energy;
+    }
+    double Get_multiple_cracking_energy() {
+        return multiple_cracking_energy;
+    }
+
+    std::vector <unsigned int> Get_faces_sequence(){
             return half_plane_subcomplex.Get_faces_sequence(crack_id); }
+
+    std::vector <unsigned int> Get_sfaces_sequence(){
+        return half_plane_subcomplex.Get_sfaces_sequence(0); }
 
     std::vector <tuple<double,double,double>> Get_common_faces_coordinates(unsigned int  crack_id){
         return half_plane_subcomplex.Get_common_faces_coordinates(crack_id); }

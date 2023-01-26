@@ -7,46 +7,79 @@
 string odir = output_folder;
 //char* odir = const_cast<char*>(output_folder.c_str());
 
-int DCC_subcomplex_Writer(int plane_id, subcomplex &sub_plane, int half_plane_id, subcomplex &half_plane, std::vector<unsigned int> &sfaces_sequence) {
-    ofstream Outplane_file, Outhalfplane_file, OutCommonGBs_file, OutInclusionGBs_file;
+int DCC_subcomplex_Writer(int plane_id, subcomplex &sub_plane, int half_plane_id, subcomplex &half_plane, std::vector<unsigned int> const &sfaces_sequence, std::vector<unsigned int> const &kface_sequence, macrocrack &large_crack, double const &external_vonMizes_stress) {
+    ofstream Outplane_file, Outhalfplane_file, OutCommonGBs_file, OutInclusionGBs_file, OutKineticFaces_file, OutKineticFaceCoords_file;
     int output_counter = 0; // temporarily here
 
     /// Grains output
-    Outplane_file.open(output_folder + (char) plane_id + "Subcomplex_Plane_grains.txt"s, ios::trunc);
+    Outplane_file.open(output_folder + "Subcomplex_Plane_grains.txt"s, ios::trunc);
     if (Outplane_file) { //        OutSGBfile << "Global numbers (in DCC) of special grain boundaries with the fraction " << special_faces_sequence.size()/ CellNumbs.at(2) << endl;
         for (auto rvit: sub_plane.Get_grains_sequence(plane_id))
-            Outplane_file << rvit << endl;
+            Outplane_file << rvit + 1 << endl;
         cout <<"("<<output_counter++<<")  "<< "Subcomplex plain grain IDs has been successfully written in " << output_folder + "Subcomplex_Plane_grains**.txt"s << endl;
         Outplane_file.close();
-    } else cout << "Error: No such a directory for\t" << output_folder << "Subcomplex_Plane_grains**.txt"s << endl;
+    } else cout << "Error: No such a directory for\t" << output_folder << (char) plane_id + "Subcomplex_Plane_grains.txt"s << endl;
 
     /// Grain half-plane output
-    Outhalfplane_file.open(output_folder + (char) half_plane_id + "Subcomplex_half_plane_grains.txt"s, ios::trunc);
+    Outhalfplane_file.open(output_folder + "Subcomplex_half_plane_grains.txt"s, ios::trunc);
     if (Outhalfplane_file) {
         for (auto rvit: half_plane.Get_grains_sequence(half_plane_id))
-            Outhalfplane_file << rvit << endl;
+            Outhalfplane_file << rvit+1 << endl;
         cout <<"("<<output_counter++<<")  "<< "Subcomplex half_plain grain IDs has been successfully written in " << output_folder + "Subcomplex_half_plane_grains**.txt"s << endl;
         Outhalfplane_file.close();
     } else cout << "Error: No such a directory for\t" << output_folder << "Subcomplex_half_plane_grains**.txt"s << endl;
 
+    /*
     /// Common faces in half-plane output
-    OutCommonGBs_file.open(output_folder + (char) half_plane_id + "Subcomplex_common_faces_hp.txt"s, ios::trunc);
+    OutCommonGBs_file.open(output_folder + "Subcomplex_common_faces_hp.txt"s, ios::trunc);
     if (OutCommonGBs_file) {
         for (auto rvit: half_plane.Get_common_faces_sequence(half_plane_id))
-            OutCommonGBs_file << rvit << endl;
+            OutCommonGBs_file << rvit + 1 << endl;
         cout <<"("<<output_counter++<<")  "<< "Subcomplex half_plain grain IDs has been successfully written in " << output_folder + "Subcomplex_common_faces_hp**.txt"s << endl;
         OutCommonGBs_file.close();
-    } else cout << "Error: No such a directory for\t" << output_folder << "Subcomplex_common_faces_hp**.txt"s << endl;
-
+    } else cout << "Error: No such a directory for\t" << output_folder << (char) half_plane_id + "Subcomplex_common_faces_hp.txt"s << endl;
+*/
     /// GBs with inclusions in plane
-    OutInclusionGBs_file.open(output_folder + (char) plane_id + "rGO_inplane_faces.txt"s, ios::trunc);
+    OutInclusionGBs_file.open(output_folder + "rGO_inplane_faces.txt"s, ios::trunc);
     if (OutInclusionGBs_file) { //        OutSGBfile << "Global numbers (in DCC) of special grain boundaries with the fraction " << special_faces_sequence.size()/ CellNumbs.at(2) << endl;
-        for (auto rvit: sub_plane.Get_common_faces_sequence(half_plane_id))
-            if(std::find(sfaces_sequence.begin(), sfaces_sequence.end(), rvit) != sfaces_sequence.end())
-                    OutInclusionGBs_file << rvit << endl;
+        for (auto rvit: sub_plane.Get_sfaces_sequence(plane_id))
+       //     if(std::find(sfaces_sequence.begin(), sfaces_sequence.end(), rvit) != sfaces_sequence.end())
+                    OutInclusionGBs_file << rvit + 1 << endl;
         cout <<"("<<output_counter++<<")  "<< "GBs with inclusions in plane has been successfully written in " << output_folder + "rGO_inplane_faces**.txt"s << endl;
         OutInclusionGBs_file.close();
-    } else cout << "Error: No such a directory for\t" << output_folder << "rGO_inplane_faces**.txt"s << endl;
+    } else cout << "Error: No such a directory for\t" << output_folder << (char) plane_id + "rGO_inplane_faces.txt"s << endl;
+
+    /// kfaces sequence writer
+    OutKineticFaces_file.open(output_folder + "kinetic_faces.txt"s, ios::trunc);
+    if (OutKineticFaces_file) { //        OutSGBfile << "Global numbers (in DCC) of special grain boundaries with the fraction " << special_faces_sequence.size()/ CellNumbs.at(2) << endl;
+        for (auto rvit: kface_sequence)
+            //     if(std::find(sfaces_sequence.begin(), sfaces_sequence.end(), rvit) != sfaces_sequence.end())
+            OutKineticFaces_file << rvit + 1 << endl;
+        cout <<"("<<output_counter++<<")  "<< "kfaces sequence has been successfully written in " << output_folder + "kinetic_faces.txt"s << endl;
+        OutKineticFaces_file.close();
+    } else cout << "Error: No such a directory for\t" << output_folder << (char) plane_id + "kinetic_faces.txt"s << endl;
+
+    /// Fractured faces coordinates writer
+    OutKineticFaceCoords_file.open(output_folder + "kinetic_faces_coordinates.txt"s, ios::trunc);
+    if (OutKineticFaceCoords_file) { //        OutSGBfile << "Global numbers (in DCC) of special grain boundaries with the fraction " << special_faces_sequence.size()/ CellNumbs.at(2) << endl;
+        for (auto  itr = kface_sequence.begin(); itr != kface_sequence.end(); ++itr)
+            OutKineticFaceCoords_file << get<0>(face_coordinates_vector.at(distance(kface_sequence.begin(),itr))) << " " << get<1>(face_coordinates_vector.at(distance(kface_sequence.begin(),itr))) << " " << get<2>(face_coordinates_vector.at(distance(kface_sequence.begin(),itr))) << endl;
+        cout <<"("<<output_counter++<<")  "<< "Factured faces coordinates has been successfully written in " << output_folder + "kinetic_faces_coordinates.txt"s << endl;
+        OutKineticFaceCoords_file.close();
+    } else cout << "Error: No such a directory for\t" << output_folder << (char) plane_id + "kinetic_faces_coordinates.txt"s << endl;
+
+
+    /// Energies statistics for cracks
+    double crack_fraction = kface_sequence.size() / (double) CellNumbs.at(2);
+    double sfaces_fraction = sfaces_sequence.size() / (double) CellNumbs.at(2);
+//    OutCrackEnergies_file.open(output_folder + "Crack_energies.txt"s, ios::app);
+    if (OutCrackEnergies_file) {
+        cout << "(1) sfaces fraction" << "  " << "(2) Crack length ratio" << "  " << "(3) external vonMizes stress" << "  " << "(4) macro_crack.surface_energy" << "  " << "(5) macro_crack.bridging_energy" << "  " << "(6) multiple_cracking_energy" << "  " << "(7) crack_fraction" << endl;
+        cout << sfaces_fraction << "  " << large_crack.Get_crack_length(0) << "  " << external_vonMizes_stress << "  " << large_crack.surface_energy << "  " << large_crack.bridging_energy << "  " << large_crack.Get_multiple_cracking_energy() << "  " << crack_fraction << endl;
+            OutCrackEnergies_file << sfaces_fraction << "  " << large_crack.Get_crack_length(0) << "  " << external_vonMizes_stress << "  " << large_crack.surface_energy << "  " << large_crack.bridging_energy << "  " << large_crack.Get_multiple_cracking_energy() << "  " << crack_fraction << endl;
+        cout <<"("<<output_counter++<<")  "<< "Crack_energies has been successfully written in " << output_folder + "Crack_energies.txt"s << endl;
+//        OutCrackEnergies_file.close();
+    } else cout << "Error: No such a directory for\t" << output_folder << (char) plane_id + "Crack_energies.txt"s << endl;
 
     return 0;
 }

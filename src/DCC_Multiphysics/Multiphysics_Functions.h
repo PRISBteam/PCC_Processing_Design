@@ -21,24 +21,38 @@ int sign(TP x) {
     return sign(x, std::is_signed<TP>());
 }
 //------------------------------------------------------------------------///
-void crack_modes_stress_field(std::vector <double> &face_energies, int crack_mode, double new_crack_length, double external_vonMizes_stress, vector<tuple<double, double, double>> const &face_coordinates, double Puasson_coeff = 0.3, double Young_modulus = 215.0*pow(10.0,9)) {
+void crack_modes_stress_field(std::vector <double> &face_energies, int crack_mode, double new_crack_length, double external_vonMizes_stress, double Puasson_coeff = 0.3, double Young_modulus = 215.0*pow(10.0,9)) {
     double nu = Puasson_coeff;
     double GB_width = 3.0*pow(10.0,-9);
     double Len = new_crack_length;
     double Sigm = external_vonMizes_stress;
     double Sxx = 0.0, Syy = 0.0, Szz = 0.0, Sxy = 0.0;
 
-    for (unsigned int itr = 0; itr < face_coordinates.size(); ++itr) { // loop over all GBs and their barycentic coordinates
-        double x = get<0>(face_coordinates.at(itr));
-        double y = get<1>(face_coordinates.at(itr));
-        double z = get<2>(face_coordinates.at(itr));
+    for (unsigned int itr = 0; itr < face_coordinates_vector.size()-1; ++itr) { // loop over all GBs and their barycentic coordinates
+        double z = get<0>(face_coordinates_vector.at(itr))*sample_size_vector.at(0);
+        double x = get<1>(face_coordinates_vector.at(itr))*sample_size_vector.at(1);
+        double y = get<2>(face_coordinates_vector.at(itr))*sample_size_vector.at(2);
 
         switch (crack_mode) {
             case 1: { // crack mode I
                 /// The first crack mode (Syy only!) ::
+                double r2p = pow(x, 2.0) + pow(y, 2.0);
+                double r2m = pow(x, 2.0) - pow(y, 2.0);
+                double x2p = pow(x, 2.0) + pow(Len, 2.0);
+                double x2m = pow(x, 2.0) - pow(Len, 2.0);
+                double y2p = pow(x, 2.0) + pow(Len, 2.0);
+                double y2m = pow(x, 2.0) - pow(Len, 2.0);
+                double Pp = std::sqrt(pow(r2m, 2.0) + 4.0*pow(x, 2.0)*pow((y - Len),2));
+                double Qp = std::sqrt(Pp + r2m);
+                double Qm = std::sqrt(Pp - r2m);
+                Sxx = Sigm * (Pp*r2p*(abs(y) * Qm - abs(x) * Qp) - abs(x) * Qp*( pow(y, 4.0) - 2.0*x2p*pow(y, 2.0) - 3.0*pow(x2m, 2.0) ) + abs(y) * Qm*( pow(y, 4.0) + 6.0*x2p*pow(y, 2.0) + 5.0*pow(x2m, 2.0) ) ) / (2.0 * std::sqrt(2.0) * pow(Pp, 3.0));
+                Syy = Sigm * (Pp*r2p*(abs(x) * Qp - abs(y) * Qm) + abs(x) * Qp*( 5.0*pow(y, 4.0) + 6.0*x2p*pow(y, 2.0) + pow(x2m, 2.0) ) + abs(y) * Qm*( 3.0*pow(y, 4.0) + 2.0*x2p*pow(y, 2.0) - pow(x2m, 2.0) ) ) / (2.0 * std::sqrt(2.0) * pow(Pp, 3.0));
+                Sxy = Sigm * sign(x*y) * (Pp*r2p*(abs(x) * Qm + abs(y) * Qp) - abs(x) * Qm*( 3.0*pow(y, 4.0) + 2.0*x2p*pow(y, 2.0) - pow(x2m, 2.0) ) + abs(y) * Qp*( pow(y, 4.0) - 2.0*x2p*pow(y, 2.0) - 3.0*pow(x2m, 2.0) ) ) / (2.0 * std::sqrt(2.0) * pow(Pp, 3.0));
+/*
                 double Pp = std::sqrt(pow(x, 2.0) - pow(y, 2.0) - pow(pow(Len, 2) / 4.0, 2.0) + 4.0 * pow(x, 2.0) * pow(y, 2.0));
                 double Qp = std::sqrt(Pp + (pow(x, 2.0) - pow(y, 2.0) - pow(Len, 2.0) / 4.0));
                 double Qm = std::sqrt(Pp - (pow(x, 2.0) - pow(y, 2.0) - pow(Len, 2.0) / 4.0));
+
                 Sxx = Sigm * (
                         Pp * (pow(x, 2.0) + pow(y, 2.0) - pow(Len, 2.0) / 4.0) * (abs(y) * Qm - abs(x) * Qp) -
                         abs(x) * Qp * (pow(y, 4.0) - 2.0 * (pow(x, 2.0) + pow(Len, 2.0) / 4.0) * pow(y, 2.0) -
@@ -63,6 +77,8 @@ void crack_modes_stress_field(std::vector <double> &face_energies, int crack_mod
                               abs(y) * Qp * (pow(y, 4.0) - 2.0 * (pow(x, 2.0) + pow(Len, 2.0) / 4.0) * pow(y, 2.0) -
                                              3.0 * pow((pow(x, 2.0) - pow(Len, 2.0) / 4.0), 2.0))
                              ) / (2.0 * std::sqrt(2.0) * pow(Pp, 3.0));
+                cout << " Young_modulus: " << pow(x, 2.0) - pow(y, 2.0) - pow(pow(Len, 2) / 4.0, 2.0) + 4.0 * pow(x, 2.0) * pow(y, 2.0) << " face_energies.at(itr): " << face_energies.at(itr) << endl;
+*/
             }
         case 2: { // crack mode II
     /// The second and the third (Sxy only) crack modes ::
@@ -90,7 +106,9 @@ void crack_modes_stress_field(std::vector <double> &face_energies, int crack_mod
             else res_vonMizes_stress = std::sqrt(0.5 * (pow((Sxx - Syy),2.0) + pow((Sxx - Szz),2.0) + pow((Syy - Szz),2.0) + 6 * pow(Sxy,2.0)));
 
         /// von Mizes energies
-        face_energies.at(itr) = pow(res_vonMizes_stress,2)*face_areas_vector.at(itr)*GB_width/Young_modulus;
+        /// (1) sample_size_vector.at(1) now!
+        if (res_vonMizes_stress >  0.0) face_energies.at(itr) = pow(res_vonMizes_stress,2)*face_areas_vector.at(itr)*pow(sample_size_vector.at(1),2.0)*GB_width/Young_modulus;
+//REPAIR        cout << " itr: " << itr << " face_energies.at(itr): " << face_energies.at(itr) << endl;
 
     } // end of for( itr )
 

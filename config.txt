@@ -28,7 +28,7 @@ P	    | Calculation type ('P' - plane cut, 'H' - half-plane cut with length a)		
 ================================	Initial parameters for DCC_Processing Tool	 ====================================================
 =====================================================================================================================================
 
-DCC_Processing SWITCHED OFF
+DCC_Processing SWITCHED ON
 			| Switch on/off the whole DCC_Processing tool from the calculation. Only "DCC_Processing SWITCH XX" is allowed here.
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -44,9 +44,9 @@ R	    | Calculation type ('R', 'RW', 'S', 'F', 'I' or 'X')		| & |
 -------------------------------------------------------------------------------------------------------------------------------------
 0.99 	| MAX fraction of Special faces (calculation limit)				| ? | 	2
 -------------------------------------------------------------------------------------------------------------------------------------
-/Users/user/Dropbox/OFFICE/NEPER/Voronoi_10k/Voronoi/                 | Input folder		| ~ |
+/Users/user/Dropbox/OFFICE/NEPER/Voronoi_1k/Voronoi/                | Input folder		| ~ |
 -------------------------------------------------------------------------------------------------------------------------------------
-/Users/user/Dropbox/OFFICE/NEPER/resultsOctober2022/V10k/ 	 	   | Output folder	| $ |
+/Users/user/Dropbox/OFFICE/NEPER/resultsJanuary2023/v1k/	 	   | Output folder	| $ |
 -------------------------------------------------------------------------------------------------------------------------------------
 * Slash ../ at the end is essential here
 

@@ -18,7 +18,7 @@ typedef pair<double, double> Pr; // Eigen library class
 #include "Kinetic_Functions.h"
 ///-------------------------------------
 
-std::vector <unsigned int> DCC_Kinetic(std::vector<double> &face_elastic_energies, std::vector<unsigned int> &s_faces_sequence, string K_type) {
+std::vector <unsigned int> DCC_Kinetic(std::vector<double> &face_elastic_energies, std::vector<unsigned int> &s_faces_sequence, macrocrack &large_crack, string K_type) {
 
 /// Output vector of the "very special" faces as the result of the module work
     std::vector <unsigned int> face_sequence;
@@ -77,7 +77,7 @@ std::vector <unsigned int> DCC_Kinetic(std::vector<double> &face_elastic_energie
     /// #2# Kinetic type FRACTURE (CRACKING)
     if (cktype == 'F' ) { // Fracture
         //face_sequence = DCC_Kinetic_cracking(s_faces_sequence, AFS, FES);
-        face_sequence = DCC_Kinetic_energy_cracking(face_elastic_energies, s_faces_sequence, AFS, FES);
+        face_sequence = DCC_Kinetic_energy_cracking(face_elastic_energies, s_faces_sequence, large_crack, AFS, FES);
     } ///End of 'Fracture' type simulations
 
     /// #2# Kinetic type WEAR

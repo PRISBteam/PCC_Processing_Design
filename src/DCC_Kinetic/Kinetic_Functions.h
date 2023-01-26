@@ -5,7 +5,7 @@
 ///================================================================================================================================///
 
 /// #1# Kinetic function for multiple cracking
-std::vector <unsigned int> DCC_Kinetic_energy_cracking(std::vector <double> &face_elastic_energies, std::vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const& AFS, Eigen::SparseMatrix<double> const& FES) {
+std::vector <unsigned int> DCC_Kinetic_energy_cracking(std::vector <double> &face_elastic_energies, std::vector<unsigned int> &frac_sfaces_sequence, macrocrack &large_crack, Eigen::SparseMatrix<double> const& AFS, Eigen::SparseMatrix<double> const& FES) {
 
     std::vector <unsigned int> crack_faces_sequence, S_crackVector(CellNumbs.at(2), 0); // sequence of the cracked Faces and State vector for cracks
     vector<int> TJsTypes(CellNumbs.at(1), 0), TJsCrackTypes(CellNumbs.at(1), 0); // calculations of TJs related to inclusions and cracks
@@ -21,11 +21,11 @@ std::vector <unsigned int> DCC_Kinetic_energy_cracking(std::vector <double> &fac
     double  lsc_rGO = 4.0*sface_energy_rGO, lsc_crack = 2.0*sface_energy_rGO; // energy values related with the stress concentrators //    double kB = 1.3807*pow(10,-23); // Boltzmann constant
 
     /// Initial energies of special faces
-    for (unsigned int i = 0; i < CellNumbs.at(2); ++i) Face_energy.at(i) = sface_energy_matrix*face_areas_vector.at(i); // assignments of the matrix surface energies
-    for (auto ks : s_faces_sequence) Face_energy.at(ks) = sface_energy_rGO*face_areas_vector.at(ks); // assignments of the rGO defect surface energies
+    for (unsigned int i = 0; i < CellNumbs.at(2); ++i) Face_energy.at(i) = sface_energy_matrix*face_areas_vector.at(i)*sample_size_vector.at(0)*sample_size_vector.at(1); // assignments of the matrix surface energies
+    for (auto ks : frac_sfaces_sequence) Face_energy.at(ks) = sface_energy_rGO*face_areas_vector.at(ks)*sample_size_vector.at(0)*sample_size_vector.at(1); // assignments of the rGO defect surface energies
 
     ///Calculation of the TJs types
-    TJsTypes = EdgesTypesCalc(CellNumbs, s_faces_sequence, FES);
+    TJsTypes = EdgesTypesCalc(CellNumbs, frac_sfaces_sequence, FES);
 
     /// GB_indices calculation
     for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn) {
@@ -44,8 +44,8 @@ std::vector <unsigned int> DCC_Kinetic_energy_cracking(std::vector <double> &fac
             if (AFS.coeff( l, i) == 1) Face_weight.at(i)++;
 
     // Energies
-    for (unsigned int j = 0; j < CellNumbs.at(2); ++j) lsc_rGO_energy.at(j) = lsc_rGO*face_areas_vector.at(j)*(Face_rGO_index.at(j)/Face_weight.at(j));
-    for (unsigned int k = 0; k < CellNumbs.at(2); ++k) lsc_crack_energy.at(k) = lsc_crack*face_areas_vector.at(k)*(Face_crack_index.at(k)/Face_weight.at(k));
+    for (unsigned int j = 0; j < CellNumbs.at(2); ++j) lsc_rGO_energy.at(j) = lsc_rGO*face_areas_vector.at(j)*sample_size_vector.at(0)*sample_size_vector.at(1)*(Face_rGO_index.at(j)/Face_weight.at(j));
+    for (unsigned int k = 0; k < CellNumbs.at(2); ++k) lsc_crack_energy.at(k) = lsc_crack*face_areas_vector.at(k)*sample_size_vector.at(0)*sample_size_vector.at(1)*(Face_crack_index.at(k)/Face_weight.at(k));
 
     /// Final surface energy - a single calculation of Bl concentrators effect on face energies
     for (unsigned int i = 0; i < CellNumbs.at(2); ++i) Face_energy.at(i) -= lsc_rGO_energy.at(i);
@@ -58,13 +58,14 @@ std::vector <unsigned int> DCC_Kinetic_energy_cracking(std::vector <double> &fac
     /// "Infinite" loop before there are new fractured faces
     bool is_fractured = 1; // id signifying that some GBs was fractured - the infinite loop stops when no one no crack is appeared during an iteration
     do {
+        is_fractured = 0; // initial assumption
 
         double NewCrackNumb = 0;
         /// Loop over all faces in PCC
         for (unsigned int i = 0; i < CellNumbs.at(2); ++i) { // crack loop over all the GBs
             // Update for local stress concentrators (Cl) and related energies
             for (unsigned int k = 0; k < CellNumbs.at(2); ++k)
-                lsc_crack_energy.at(k) = lsc_crack*face_areas_vector.at(k)*(Face_crack_index.at(k) / Face_weight.at(k));
+                lsc_crack_energy.at(k) = lsc_crack*face_areas_vector.at(k)*sample_size_vector.at(0)*sample_size_vector.at(1)*(Face_crack_index.at(k) / Face_weight.at(k));
 
             /// Current GB energies
             /// New surface energy - calculation of Cl concentrators effect on face energies
@@ -80,10 +81,11 @@ std::vector <unsigned int> DCC_Kinetic_energy_cracking(std::vector <double> &fac
             /// if the face is not already fractured and its full energy less than 0 (including the "-" full external elastic energy)
             if (S_crackVector.at(NewCrackNumb) != 1 && Face_current_energy.at(NewCrackNumb) < 0) {
                 crack_faces_sequence.push_back(NewCrackNumb); // if the element is not in the sequence - add
+                is_fractured = 1; // there is at least one fractured GB
                 S_crackVector.at(NewCrackNumb) = 1;
-                if (find(s_faces_sequence.begin(), s_faces_sequence.end(), NewCrackNumb) == s_faces_sequence.end()) // is matrix boundary without inclusion
-                    Face_energy.at(NewCrackNumb) = 2.0*sface_energy_matrix;
-                    else Face_energy.at(NewCrackNumb) = 2.0*sface_energy_rGO;
+                if (find(frac_sfaces_sequence.begin(), frac_sfaces_sequence.end(), NewCrackNumb) == frac_sfaces_sequence.end()) // is matrix boundary without inclusion
+                    Face_energy.at(NewCrackNumb) = 2.0*sface_energy_matrix*face_areas_vector.at(NewCrackNumb)*sample_size_vector.at(0)*sample_size_vector.at(1);
+                    else Face_energy.at(NewCrackNumb) = 2.0*sface_energy_rGO*face_areas_vector.at(NewCrackNumb)*sample_size_vector.at(0)*sample_size_vector.at(1);
 
                 /// Update for total surface energy of all the fractured GBs
                 total_crack_energies += Face_energy.at(NewCrackNumb);
@@ -112,11 +114,12 @@ std::vector <unsigned int> DCC_Kinetic_energy_cracking(std::vector <double> &fac
             } /// end if (S_crackVector.at(NewCrackNumb) != 1 && Face_current_energy.at(NewCrackNumb) < 0)
 
             crack_fraction = crack_faces_sequence.size() / (double) CellNumbs.at(2);
-//REPAIR
-cout << "crack_fraction = " << crack_fraction <<"  " << "Total crack surfaces energy = " << total_crack_energies << endl;
+//REPAIR    cout << "crack_fraction = " << crack_fraction <<"  " << "Total crack surfaces energy = " << total_crack_energies << endl;
         } // end for ( i < CellNumbs.at(2) )
 
     } while (is_fractured);
+
+    large_crack.Set_multiple_cracking_energy(total_crack_energies); //Set_multiple_cracking_energy(double total_energy)
 
     return crack_faces_sequence;
 } /// end of Kinetic_cracking

@@ -25,36 +25,37 @@ std::vector<unsigned int> DCC_Plane_cut (double a_coeff, double b_coeff, double 
     AGS = 0.5 * (AGS + SparseMatrix<double>(AGS.transpose()));
 
     /// Grains
-    vector<grain3D> grains_list; // vector of grains (class grain3D)
+    vector<grain3D> grains_list(CellNumbs.at(3),0); // vector of grains (class grain3D)
 
 #pragma omp parallel for // parallel execution by OpenMP
     for(unsigned int m = 0; m < CellNumbs.at(3); m++) {// each Grain
         grain3D new_grain = grain3D(m);
 //        cout << new_grain.grain_id << endl;
-        grains_list.push_back(new_grain);
+        grains_list.at(m) = new_grain;
+//        cout <<  "grains_list: " << grains_list.size() << endl;
 //        cout << GFS.cols() << "  " << CellNumbs.at(3) << endl;
         grains_list.at(m).Set_node_ids(m, GFS, FES, ENS);
 //        cout << grains_list.at(m).grain_id << endl;
+//        cout << "m = " << m << " grain list: " << grains_list.at(m).Get_node_ids(m).size() << endl;
         grains_list.at(m).Set_node_coordinates(m);
+//                cout << grains_list.at(m).grain_id << endl;
     } // end of for(unsigned int m = 0; m < CellNumbs.at(3); m++) - Grains
 
     /// For each grain minmax_coord vector grain_coordinate_extremums of two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}
 #pragma omp parallel for // parallel execution by OpenMP
     for(unsigned int m = 0; m < CellNumbs.at(3); m++) {// each Grain
-        vector<tuple<double, double, double>> grain_coordinate_extremums = grains_list.at(m).Get_minmax_node_coordinates(m);
-// get<0>(grain_coordinate_extremums.at(0)) -> MIN X coordinate, get<1>(grain_coordinate_extremums.at(0)) -> MIN Y coordinate, get<0>(grain_coordinate_extremums.at(1)) -> MAX X coordinate, etc..
-
-        ///MinMax condition:
-        // a_coeff*X + b_coeff*Y + c_coeff*Z = D
-        if(D_coeff >= a_coeff*get<0>(grain_coordinate_extremums.at(0)) + b_coeff*get<1>(grain_coordinate_extremums.at(0)) + c_coeff*get<2>(grain_coordinate_extremums.at(0)) &&
-           D_coeff <= a_coeff*get<0>(grain_coordinate_extremums.at(1)) + b_coeff*get<1>(grain_coordinate_extremums.at(1)) + c_coeff*get<2>(grain_coordinate_extremums.at(1)) )
-
-            planecut_grains.push_back(m);
+        vector<tuple<double, double, double>> grain_coordinate_extremums = grains_list.at(m).Get_minmax_node_coordinates(m); // get<0>(grain_coordinate_extremums.at(0)) -> MIN X coordinate, get<1>(grain_coordinate_extremums.at(0)) -> MIN Y coordinate, get<0>(grain_coordinate_extremums.at(1)) -> MAX X coordinate, etc..
+//REPAIR cout <<" gain # : " << m << " " << grains_list.at(m).grain_id << endl;
+//REPAIR cout << "Xmin " << get<0>(grain_coordinate_extremums.at(0)) << " Ymin " <<get<1>(grain_coordinate_extremums.at(0)) << " Zmin " << get<2>(grain_coordinate_extremums.at(0)) << endl;
+//REPAIR cout << "Xmax " << get<0>(grain_coordinate_extremums.at(1)) << " Ymax " <<get<1>(grain_coordinate_extremums.at(1)) << " Zmax " << get<2>(grain_coordinate_extremums.at(1)) << endl;
+        ///MinMax condition: / a_coeff*X + b_coeff*Y + c_coeff*Z = D
+        if(a_coeff*get<0>(grain_coordinate_extremums.at(0)) + b_coeff*get<1>(grain_coordinate_extremums.at(0)) + c_coeff*get<2>(grain_coordinate_extremums.at(0)) < D_coeff  &&
+           a_coeff*get<0>(grain_coordinate_extremums.at(1)) + b_coeff*get<1>(grain_coordinate_extremums.at(1)) + c_coeff*get<2>(grain_coordinate_extremums.at(1)) > D_coeff ) // simultaneously: z_min < D < z_max
+                planecut_grains.push_back(m);
     } // end of for(unsigned int m = 0; m < CellNumbs.at(3); m++) {// each Grain
 //a,b,c,d
 
-    for (auto gid : planecut_grains)
-                 cout << gid << endl;
+//REPAIR    for (auto gid : planecut_grains)         cout << gid << endl;
 
     return planecut_grains;
 }

@@ -54,16 +54,18 @@ vector<tuple<double, double, double>> vertex_coordinates_vector, face_coordinate
 //std::vector<tuple<double, double, double>> vertex_coordinates, grain_barycenter_coordinates, face_barycenter_coordinates;
 // Complex size: (lengths) Lx, Ly, Lz
 double Lx_size = 1.0, Ly_size = 1.0, Lz_size = 1.0; // initial values, then they can be read from file
+//double Lx_size = pow(10.0,-6.0), Ly_size = pow(10.0,-6.0), Lz_size = pow(10.0,-6.0); // initial values, then they can be read from file
 
 /// Measures
 std::vector<double> grain_volumes_vector, face_areas_vector, edge_lengths_vector;
+std::vector<double> sample_size_vector = {1.0, 1.0, 1.0}; // L_x [m], L_y [m],L_z [m]
 
 /// PCC Complex Energies ::
 std::vector <double> face_elastic_energies;
 std::vector<double> GB_SE_vector, GB_EEE_vector, GB_CIE_vector, GB_BLE_vector, GB_CLE_vector;
 
 /// All global OFFSTREAMS
-ofstream OutFLfile, OutJFile, OutJ2File, OutSFile, OutS2File, OutPowersADistributions, OutAvLengthsADistributions, OutAgglStatistics, OutElCondfile;
+ofstream OutFLfile, OutJFile, OutJ2File, OutSFile, OutS2File, OutPowersADistributions, OutAvLengthsADistributions, OutAgglStatistics, OutElCondfile, OutCrackEnergies_file;
 //(-)vector<bool> SChar_config; // Characterisation module configuration
 
 /// Declaration of FUNCTIONS, please see the function bodies at the end of the main file
@@ -172,44 +174,49 @@ int main() {
     char* GCpath = const_cast<char*>(GCpath_string.c_str());
     vector<tuple<double, double, double>> grain_coordinates(CellNumbs.at(3));
     grain_coordinates = TuplesReader(GCpath);
+    /// Set grain_vector_coordinates
+    for(auto grain_coord_tuple : grain_coordinates)
+        grain_coordinates_vector.push_back(grain_coord_tuple);
+
 //REPAIR    cout << "Size of grain_seeds: " << gs_size << " CellNumbs.at(3): " << CellNumbs.at(3) << endl;
 
     /// All face coordinates /// LONG CALCULATION HERE
     string FSpath_string = input_folder + "face_seeds.txt"s;
     char* FSpath = const_cast<char*>(FSpath_string.c_str());
-    face_coordinates_vector.resize(CellNumbs.at(2));
+    face_coordinates_vector.clear();
+    face_coordinates_vector.resize(CellNumbs.at(2), make_tuple(0,0,0));
+//REPAIR    cout << "face vector size: " << face_coordinates_vector.size() << endl;
 
     if (is_file_exists(FSpath_string)) {
         face_coordinates_vector = TuplesReader(FSpath);
     }
     else {
         cout << "Calculation of face coordinates started now by find_aGBseed function" << endl;
-        for (unsigned int fnumber = 0; fnumber < CellNumbs.at(2); ++fnumber) {
+        for (unsigned int fnumber = 0; fnumber < CellNumbs.at(2)-1; ++fnumber) {
             face_coordinates_vector.at(fnumber) = find_aGBseed(fnumber, paths, CellNumbs, grain_coordinates);
 //REPAIR
-     if(fnumber % 100 == 0)  cout << "Total # of faces " << CellNumbs.at(2)<< " face # " << fnumber << " "<< get<0>(face_coordinates_vector.at(fnumber)) << " "
+     if(fnumber % 10 == 0)  cout << "Total # of faces " << CellNumbs.at(2)<< " face # " << fnumber << " "<< get<0>(face_coordinates_vector.at(fnumber)) << " "
                  << get<1>(face_coordinates_vector.at(fnumber)) << " " << get<2>(face_coordinates_vector.at(fnumber)) << endl;
         }
+        cout << "Calculations was done!" << endl;
         ofstream OutFaceCoord; OutFaceCoord.open(FSpath, ios::trunc);
         if(OutFaceCoord.is_open())
             for (auto fcoord : face_coordinates_vector)
                 OutFaceCoord << get<0>(fcoord) << " " << get<1>(fcoord) << " " << get<2>(fcoord) << endl;
     }
-//    cout << "I am here now!" << endl; exit(0);
 
     /// All vertex coordinates
-    string VCpath_string = input_folder + "voro_seeds.txt"s;
+    string VCpath_string = input_folder + "vertex_seeds.txt"s;
     char* VCpath = const_cast<char*>(VCpath_string.c_str());
-    vector<tuple<double, double, double>> vertex_coordinates_vector(CellNumbs.at(0));
+    vertex_coordinates_vector.resize(CellNumbs.at(0), make_tuple(0,0,0));
     vertex_coordinates_vector = TuplesReader(VCpath);
-    cout << "I am here now!" << endl;
-    exit(0);
+//REPAIR    cout << "vertex_coordinates_vector size: " << vertex_coordinates_vector.size() << endl; //exit(0); exit(0);
+
     /// All grain volumes
     string GVpath_string = input_folder + "grain_volumes.txt"s;
     char* GVpath = const_cast<char*>(GVpath_string.c_str());
     grain_volumes_vector.resize(CellNumbs.at(3));
     grain_volumes_vector = dVectorReader(GVpath);
-
 
     /// All face areas
     string GBApath_string = input_folder + "face_areas.txt"s;
@@ -230,6 +237,7 @@ int main() {
 /// The PRIMAL DATA STRUCTURES and concepts - special (SFS) and ordinary (OFS) face sequences, defect state vectors (DSVs) and defect configurations (DCs)
     // Order of newly generated special faces | Process time
     std::vector <unsigned int> special_faces_sequence, ordinary_faces_sequence, current_sfaces_sequence, current_ofaces_sequence, crack_faces_sequence, current_cracks_sequence; // Variable sequences (in order of their generation) of special and ordinary Faces and Cracks
+    vector<unsigned int> sub_sfaces_sequence, frac_sfaces_sequence;
     // State vector | Special faces IDs
     vector <unsigned int> State_sVector(CellNumbs.at(2), 0), current_State_sVector(CellNumbs.at(2), 0), State_cVector(CellNumbs.at(2), 0), current_State_cVector(CellNumbs.at(2), 0);
     // MAX fraction of special Faces | Calculation limit
@@ -249,193 +257,309 @@ int main() {
 //REPAIR    OfStreams_trancator();
     special_face_design.clear(); // clearing file
 
-    cout << "I am here now!" << endl;
-    exit(0);
+    /// THE CURRENT TASKS ARE PLACED HERE ///
+/// ==========================================================================================================================================
+
+//#include "tasks/task_macrocrack.cpp"
+
+/// ==========================================================================================================================================
+
+/// I: DCC_Processing module
+//    if (ProcessingON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
+    cout << "START of the DCC Processing module" << endl;
+/*        if (P_type != "L") {
+            special_face_design = DCC_Processing(special_faces_sequence, State_sVector, P_type);
+        } else { // Vector of sfaces strips generated by RW
+            for (int mu = 5; mu < 6; mu++) { //mu_f_max = 20
+                mu_f = (double) mu;
+                for (int sigm = 3; sigm < 4 ; sigm++) { //sigm_f_max = 0.7
+                    sigm_f = (1.0 / (double) sigm) * 0.9;
+                    special_face_design = DCC_Processing(special_faces_sequence, State_sVector, P_type, mu_f, sigm_f, RW_series_vector);
+                } //  for (int sigm = 1; sigm < 10 ; sigm++)
+            } // for (int mu = 2; mu < 3; mu++)
+        }*/
+
+    special_face_design = DCC_Processing(special_faces_sequence, State_sVector, "R");
+
+/// ===== Elapsing time Processing ================
+//        if (ProcessingON(confpath, time_step_one)) {
+    unsigned int Processing_time = clock();
+    P_time = (double) Processing_time;
+    cout << "Processing time is equal to  " << P_time / pow(10.0, 6.0) << "  seconds" << endl;
+    cout << "-------------------------------------------------------" << endl;
+//       } // end if(ProcessingON(confpath))
+
+/// Cut special face sequence
+    double s_fraction = 0.4; // variable parameter
+    frac_sfaces_sequence.clear(); // part of sequence with certain fraction
+    for (unsigned int utr = 0; utr < special_faces_sequence.size()*s_fraction; ++utr) {
+        frac_sfaces_sequence.push_back(special_faces_sequence.at(utr));
+    }
+    cout << "frac_sfaces_sequence size:  " << frac_sfaces_sequence.size() << endl;
+
+/// 0: DCC_Subcomplex module
+//    if (SubcomplexON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
+    cout << "START of the DCC Subcomplex module" << endl;
+    unsigned int subcomplex_id_new = 0;
+    subcomplex new_Cut(subcomplex_id_new);
+//       if (S_type == "P") { // subcomplex type  "plane cut"
+    new_Cut = subcomplex(subcomplex_id_new);
+    double a_p = 0.0, b_p = 0.0, c_p = 1.0, D_p = 0.6; /// Must be the same as in the DCC_Subcomplex!!!
+    DCC_Subcomplex(new_Cut, frac_sfaces_sequence, sub_sfaces_sequence, crack_faces_sequence, a_p, b_p, c_p, D_p);
+//            }
+//    } // end of if (SubcomplexON(confpath, time_step_one))
+
+    cout << "plane_cut by DCC_Subcomplex was successfully created!" << endl;
+/// ===== Elapsing time Subcomplex ================
+    unsigned int Subcomplex_time = clock();
+    double Sub_time = (double) Subcomplex_time - P_time;
+    cout << "Subcomplex time is equal to  " << Sub_time / pow(10.0, 6.0) << "  seconds" << endl;
+    cout << "-------------------------------------------------------" << endl;
+
+    ///////////////// LOOP over crack steps /////////////////////
+    OutCrackEnergies_file.open(output_folder + "Crack_energies.txt"s, ios::trunc); // ofstream for crack energies
+    OutCrackEnergies_file << "(1) sfaces fraction" << "  " << "(2) Crack length ratio" << "  " << "(3) external vonMizes stress" << "  " << "(4) macro_crack.surface_energy" << "  " << "(5) macro_crack.bridging_energy" << "  " << "(6) multiple_cracking_energy" << "  " << "(7) crack_fraction" << endl;
+
+    int crack_id_new = 0;
+    int nsteps = 3;
+    int initial_step = 2;
+    for (int crack_length_number = initial_step; crack_length_number < nsteps; ++crack_length_number) {
+
+/// Half-plane subcomplex
+    subcomplex half_plane_cut(new_Cut);
+    half_plane_cut.a_n = a_p; half_plane_cut.b_n = b_p; half_plane_cut.c_n = c_p; half_plane_cut.D_plane = D_p;
+    double length_ratio = (1.0/(double) nsteps) * (double) crack_length_number;
+    double crack_length = length_ratio; //* Lx_size; // Lx_size here Lx only now!!!
+    int half_subcomplex_id_new = 0;
+// half_plane_cut
+
+    /// Half plane
+    half_plane_cut = new_Cut.Get_half_plane(new_Cut, crack_length, sub_sfaces_sequence); // half-plane method for a subcomplex
+
+///News
+    cout << "half_plane_cut by Get_half_plane(plane_cut, crack_length) \"subcomplex\" class method was successfully created!" << endl;
+    unsigned int HalfPlane_time = clock();
+    double HP_time = (double) HalfPlane_time - Sub_time;
+    cout << "half plane cut takes time: " << HP_time/ pow(10.0, 6.0) << " s" << endl;
+
+/// Multiphysics module : Macrocrack and the vector of macrocracks
+
+/// number of "steps" in a crack growth path
+    ++crack_id_new; // new crack id
+    // vector of macro-cracks as a PCC objects
+    large_cracks_vector.push_back(macrocrack(crack_id_new, half_plane_cut));
+    large_cracks_vector.at(crack_length_number-initial_step).Set_crack_plane(); // subcomplex based
+
+    ///current crack
+    macrocrack large_crack = large_cracks_vector.at(crack_length_number-initial_step);
+
+    /// External stress value
+    double external_vonMizes_stress = 0.5 * pow(10.0, 8.0); // 50 MPa
+    face_elastic_energies.resize(CellNumbs.at(2), 0.0);
+
+    face_elastic_energies = DCC_Multiphysics(large_crack, external_vonMizes_stress);
+
+    ///News
+    cout << "face_elastic_energies vector by DCC_Multiphysics module was successfully calculated!" << endl;
+    unsigned int MultiPhys = clock();
+    double MP_time = (double) MultiPhys - HP_time;
+    cout << "DCC_Multiphysics module takes time: " << MP_time / pow(10.0, 6.0) << " s" << endl;
+
+/// III: DCC_Kinetic module
+//if (KineticON(confpath, time_step_one)) { // if DCC_Kinetic is SWITCH ON in the config.txt file
+
+    cout << "START of the DCC Kinetic module" << endl;
+    kface_sequence = DCC_Kinetic(face_elastic_energies, frac_sfaces_sequence, large_crack, "F"s);
+
+/// ===== Elapsing time Kinetic ================
+    unsigned int Kinetic_time = clock();
+    K_time = (double) Kinetic_time - MP_time;
+    cout << "Kinetic time is equal to  " << K_time / pow(10.0, 6.0) << "  seconds" << endl;
+    cout << "-------------------------------------------------------" << endl;
+//}// end if(KineticON(confpath))
+
+    cout << "START of the DCC Writer module" << endl;
+// DCC_Writer(special_faces_sequence, kface_sequence, State_sVector, mu_f, sigm_f, RW_series_vector, P_type);
+//DCC_subcomplex_Writer(subcomplex_id_new, plane_cut, half_subcomplex_id_new, half_plane_cut, special_faces_sequence);
+    DCC_subcomplex_Writer(0, new_Cut, 1, half_plane_cut, frac_sfaces_sequence, kface_sequence, large_crack,
+                          external_vonMizes_stress);
+
+/// ===== Elapsing time Writer ================
+    unsigned int Writer_time = clock();
+    W_time = (double) Writer_time - K_time;
+//    W_time = (double) Writer_time - K_time - MP_time - HP_time - Sub_time - P_time;
+    cout << "------" << endl;
+    cout << "Writer time is equal to  " << W_time / pow(10.0, 6.0) << "  seconds" << endl;
+
+} // end of for loop over crack lengths
+    OutCrackEnergies_file.close();
 
 
-    /// 0: DCC_Subcomplex module
-    if (SubcomplexON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
-        cout << "START of the DCC Subcomplex module" << endl;
-        if (S_type == "P") { // subcomplex type  "plane cut"
-            /// specific parameters for a subcomplex PLANE CUT !!!
-            double a_p = 0.0, b_p = 0.0, c_p = 1.0, D_p = 0.5;
-            unsigned int subcomplex_id_new = 0;
-            subcomplex new_Cut = subcomplex(subcomplex_id_new);
-            DCC_Subcomplex(new_Cut, special_faces_sequence, crack_faces_sequence);
-
-            }
-    } // end of if (SubcomplexON(confpath, time_step_one))
-
-    /// ===== Elapsing time Subcomplex ================
-        unsigned int Subcomplex_time = clock();
-        double Sub_time = (double) Subcomplex_time;
-        cout << "Subcomplex time is equal to  " << Sub_time / pow(10.0, 6.0) << "  seconds" << endl;
-        cout << "-------------------------------------------------------" << endl;
-
-        if ( SIMULATION_MODE(confpath) == "SIMULATION MODE(LIST)"s) { /// SIMULATION MODE: #LIST
+    /*
+    if ( SIMULATION_MODE(confpath) == "SIMULATION MODE(LIST)"s) { /// SIMULATION MODE: #LIST
 // Clear S_Vector //std::fill(S_Vector.begin(), S_Vector.end(), 0);
 
 /// I: DCC_Processing module
-        if (ProcessingON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
-            cout << "START of the DCC Processing module" << endl;
-            if (P_type != "L") {
-                special_face_design = DCC_Processing(special_faces_sequence, State_sVector, P_type);
-                } else { // Vector of sfaces strips generated by RW
-                for (int mu = 5; mu < 6; mu++) { //mu_f_max = 20
-                    mu_f = (double) mu;
-                    for (int sigm = 3; sigm < 4 ; sigm++) { //sigm_f_max = 0.7
-                        sigm_f = (1.0 / (double) sigm) * 0.9;
-                        special_face_design = DCC_Processing(special_faces_sequence, State_sVector, P_type, mu_f, sigm_f, RW_series_vector);
-                    } //  for (int sigm = 1; sigm < 10 ; sigm++)
-                } // for (int mu = 2; mu < 3; mu++)
-            }
+    if (ProcessingON(confpath, time_step_one)) { // if DCC_Processing is SWITCH ON in the config.txt file
+        cout << "START of the DCC Processing module" << endl;
+        if (P_type != "L") {
+            special_face_design = DCC_Processing(special_faces_sequence, State_sVector, P_type);
+            } else { // Vector of sfaces strips generated by RW
+            for (int mu = 5; mu < 6; mu++) { //mu_f_max = 20
+                mu_f = (double) mu;
+                for (int sigm = 3; sigm < 4 ; sigm++) { //sigm_f_max = 0.7
+                    sigm_f = (1.0 / (double) sigm) * 0.9;
+                    special_face_design = DCC_Processing(special_faces_sequence, State_sVector, P_type, mu_f, sigm_f, RW_series_vector);
+                } //  for (int sigm = 1; sigm < 10 ; sigm++)
+            } // for (int mu = 2; mu < 3; mu++)
+        }
 
 /// ===== Elapsing time Processing ================
-            if (ProcessingON(confpath, time_step_one)) {
-                unsigned int Processing_time = clock();
-                P_time = (double) Processing_time;
-                cout << "Processing time is equal to  " << P_time / pow(10.0, 6.0) << "  seconds" << endl;
-                cout << "-------------------------------------------------------" << endl;
-            } // end if(ProcessingON(confpath))
+        if (ProcessingON(confpath, time_step_one)) {
+            unsigned int Processing_time = clock();
+            P_time = (double) Processing_time;
+            cout << "Processing time is equal to  " << P_time / pow(10.0, 6.0) << "  seconds" << endl;
+            cout << "-------------------------------------------------------" << endl;
+        } // end if(ProcessingON(confpath))
 
-            /// Loop over special_faces_sequence with the step = Face_fraction/ number_of_fsteps
-            long number_of_fsteps = 100, number_of_csteps = 1; /// NUMBER OF STEPS for loops over the fractions of special Faces and Cracks
-            double Face_fraction = 0.01, Crack_fraction = 0.00; /// INITIAL fractions of special Faces and Cracks
-            double dp = 0, df = 0; //increments (dp - special Faces fraction, df - cracked faces fraction)
+        /// Loop over special_faces_sequence with the step = Face_fraction/ number_of_fsteps
+        long number_of_fsteps = 100, number_of_csteps = 1; /// NUMBER OF STEPS for loops over the fractions of special Faces and Cracks
+        double Face_fraction = 0.01, Crack_fraction = 0.00; /// INITIAL fractions of special Faces and Cracks
+        double dp = 0, df = 0; //increments (dp - special Faces fraction, df - cracked faces fraction)
 
-            /// Writer on the screen
-            cout << "************** ======== LOOPS OVER SPECIAL AND CRACKE FACES ======== **************"s << endl;
-            cout << "Number of steps over Special Faces loop = " << number_of_fsteps << endl;
-            cout << "Number of steps over Cracked Faces loop = " << number_of_csteps << endl;
-            cout << "Initial fraction of Special Faces in the loop = " << Face_fraction << endl;
-            cout << "Initial fraction of Cracked Faces in the loop = " << Crack_fraction << endl;
-            cout << "Maximal fraction of Special Faces in the loop = " << max_sFaces_fraction
-                 << endl; // is taken from config.txt file
-            cout << "Maximal fraction of Cracked Faces in the loop = " << max_cFaces_fraction
-                 << endl; // is taken from config.txt file
-            cout << "==================================================================================="s << endl;
+        /// Writer on the screen
+        cout << "************** ======== LOOPS OVER SPECIAL AND CRACKE FACES ======== **************"s << endl;
+        cout << "Number of steps over Special Faces loop = " << number_of_fsteps << endl;
+        cout << "Number of steps over Cracked Faces loop = " << number_of_csteps << endl;
+        cout << "Initial fraction of Special Faces in the loop = " << Face_fraction << endl;
+        cout << "Initial fraction of Cracked Faces in the loop = " << Crack_fraction << endl;
+        cout << "Maximal fraction of Special Faces in the loop = " << max_sFaces_fraction
+             << endl; // is taken from config.txt file
+        cout << "Maximal fraction of Cracked Faces in the loop = " << max_cFaces_fraction
+             << endl; // is taken from config.txt file
+        cout << "==================================================================================="s << endl;
 
-            /// ofstreams for Face Conductivity and Face Laplacian output are opening again with "app" mode before the loops
-            // all these ofstreams will be sent to the Characterisation function for the specific output
+        /// ofstreams for Face Conductivity and Face Laplacian output are opening again with "app" mode before the loops
+        // all these ofstreams will be sent to the Characterisation function for the specific output
 ///                        OutElCondfile.open(FCond_dir, ios::app);
 
-            /// ======== The first loop over all Face_fraction with the step dp ===========>>>
-            if (max_sFaces_fraction > 0) {
-                for (long i = 0; i < number_of_fsteps; ++i) { // loop over all Face_fraction
-                    Face_fraction += dp;
-                    unsigned int special_Faces_numb = Face_fraction * CellNumbs.at(2);
+        /// ======== The first loop over all Face_fraction with the step dp ===========>>>
+        if (max_sFaces_fraction > 0) {
+            for (long i = 0; i < number_of_fsteps; ++i) { // loop over all Face_fraction
+                Face_fraction += dp;
+                unsigned int special_Faces_numb = Face_fraction * CellNumbs.at(2);
 
-                    /// creation of the current_sfaces_sequence as the part (before special_Faces_numb) of the special_faces_sequence
-                    unsigned int itu = 0;
-                    current_sfaces_sequence.clear();
-                    for (unsigned int sfe: special_faces_sequence) {
-                        if (itu <= special_Faces_numb) current_sfaces_sequence.push_back(sfe);
-                        ++itu;
-                    } // REPAIR for (auto sfe : current_sfaces_sequence) cout << sfe << "\t"; cout << endl;
+                /// creation of the current_sfaces_sequence as the part (before special_Faces_numb) of the special_faces_sequence
+                unsigned int itu = 0;
+                current_sfaces_sequence.clear();
+                for (unsigned int sfe: special_faces_sequence) {
+                    if (itu <= special_Faces_numb) current_sfaces_sequence.push_back(sfe);
+                    ++itu;
+                } // REPAIR for (auto sfe : current_sfaces_sequence) cout << sfe << "\t"; cout << endl;
 
-                    /// creation of the current_State_Vector by current_sfaces_sequence
-                    unsigned int itr = 0;
-                    fill(current_State_sVector.begin(), current_State_sVector.end(), 0);
-                    for (auto sv: current_sfaces_sequence) current_State_sVector.at(sv) = 1;
+                /// creation of the current_State_Vector by current_sfaces_sequence
+                unsigned int itr = 0;
+                fill(current_State_sVector.begin(), current_State_sVector.end(), 0);
+                for (auto sv: current_sfaces_sequence) current_State_sVector.at(sv) = 1;
 
 /// II_: DCC_Multiphysics module and others
 
-                    /// plane subcomplex
-                    unsigned int subcomplex_id_new = 0;
-                    subcomplex plane_cut(subcomplex_id_new);
-                    DCC_Subcomplex(plane_cut, special_faces_sequence, crack_faces_sequence); // output subcomplex type plane_cut
+                /// plane subcomplex
+                unsigned int subcomplex_id_new = 0;
+                subcomplex plane_cut(subcomplex_id_new);
+                DCC_Subcomplex(plane_cut, special_faces_sequence, crack_faces_sequence); // output subcomplex type plane_cut
 
-                    /// News
-                    cout << "plane_cut by DCC_Subcomplex was successfully created!" << endl;
-                    unsigned int s1_time = clock();
-                    s1_time = (double) s1_time - P_time;
-                    cout << "plane_cut takes time: " << s1_time/ pow(10.0, 6.0) << " s" << endl;
+                /// News
+                cout << "plane_cut by DCC_Subcomplex was successfully created!" << endl;
+                unsigned int s1_time = clock();
+                s1_time = (double) s1_time - P_time;
+                cout << "plane_cut takes time: " << s1_time/ pow(10.0, 6.0) << " s" << endl;
 
-                    /// half-plane subcomplex
-                    double length_ratio = 0.1;
-                    double crack_length = length_ratio * Lx_size; // Lx_size here Lx only now!!!
-                    int half_subcomplex_id_new = 0;
-                    subcomplex half_plane_cut(half_subcomplex_id_new);
-                    half_plane_cut = plane_cut.Get_half_plane(plane_cut, crack_length); // half-plane method for a subcomplex
+                /// half-plane subcomplex
+                double length_ratio = 0.1;
+                double crack_length = length_ratio * Lx_size; // Lx_size here Lx only now!!!
+                int half_subcomplex_id_new = 0;
+                subcomplex half_plane_cut(half_subcomplex_id_new);
+                half_plane_cut = plane_cut.Get_half_plane(plane_cut, crack_length); // half-plane method for a subcomplex
 
-                    ///News
-                    cout << "half_plane_cut by Get_half_plane(plane_cut, crack_length) \"subcomplex\" class method was successfully created!" << endl;
-                    unsigned int s2_time = clock();
-                    s2_time = (double) s2_time - s1_time;
-                    cout << "plane_cut takes time: " << s2_time/ pow(10.0, 6.0) << " s" << endl;
+                ///News
+                cout << "half_plane_cut by Get_half_plane(plane_cut, crack_length) \"subcomplex\" class method was successfully created!" << endl;
+                unsigned int s2_time = clock();
+                s2_time = (double) s2_time - s1_time;
+                cout << "plane_cut takes time: " << s2_time/ pow(10.0, 6.0) << " s" << endl;
 
-                    DCC_subcomplex_Writer(subcomplex_id_new, plane_cut, half_subcomplex_id_new, half_plane_cut, special_faces_sequence);
+                DCC_subcomplex_Writer(subcomplex_id_new, plane_cut, half_subcomplex_id_new, half_plane_cut, special_faces_sequence);
 
-                    /// Macrocrack and the vector of macrocracks
-                    int crack_id_new = 0;
-                    // vector of macro-cracs as a PCC objects
-                    large_cracks_vector.push_back(macrocrack(crack_id_new, plane_cut));
+                /// Macrocrack and the vector of macrocracks
+                int crack_id_new = 0;
+                // vector of macro-cracs as a PCC objects
+                large_cracks_vector.push_back(macrocrack(crack_id_new, plane_cut));
 
-                    /// External stress value
-                    double external_vonMizes_stress = pow(10.0,8.0); // 100 MPa
-                    face_elastic_energies = DCC_Multiphysics(large_cracks_vector, external_vonMizes_stress);
+                /// External stress value
+                double external_vonMizes_stress = pow(10.0,8.0); // 100 MPa
+                face_elastic_energies = DCC_Multiphysics(large_cracks_vector, external_vonMizes_stress);
 
-                    ///News
-                    cout << "face_elastic_energies vector by DCC_Multiphysics module was successfully calculated!" << endl;
-                    unsigned int s3_time = clock();
-                    s3_time = (double) s3_time - s2_time;
-                    cout << "plane_cut takes time: " << s3_time/ pow(10.0, 6.0) << " s" << endl;
+                ///News
+                cout << "face_elastic_energies vector by DCC_Multiphysics module was successfully calculated!" << endl;
+                unsigned int s3_time = clock();
+                s3_time = (double) s3_time - s2_time;
+                cout << "plane_cut takes time: " << s3_time/ pow(10.0, 6.0) << " s" << endl;
 
 /// III: DCC_Kinetic module
-                    if (KineticON(confpath, time_step_one)) { // if DCC_Kinetic is SWITCH ON in the config.txt file
+                if (KineticON(confpath, time_step_one)) { // if DCC_Kinetic is SWITCH ON in the config.txt file
 
-                        cout << "START of the DCC Kinetic module" << endl;
-                        kface_sequence = DCC_Kinetic(face_elastic_energies, special_faces_sequence, K_type);
+                    cout << "START of the DCC Kinetic module" << endl;
+                    kface_sequence = DCC_Kinetic(face_elastic_energies, special_faces_sequence, K_type);
 
 /// ===== Elapsing time Kinetic ================
-                        unsigned int Kinetic_time = clock();
-                        K_time = (double) Kinetic_time - P_time;
-                        cout << "Kinetic time is equal to  " << K_time / pow(10.0, 6.0) << "  seconds" << endl;
-                        cout << "-------------------------------------------------------" << endl;
-                    }// end if(KineticON(confpath))
+                    unsigned int Kinetic_time = clock();
+                    K_time = (double) Kinetic_time - P_time;
+                    cout << "Kinetic time is equal to  " << K_time / pow(10.0, 6.0) << "  seconds" << endl;
+                    cout << "-------------------------------------------------------" << endl;
+                }// end if(KineticON(confpath))
 
 /// II: DCC_Characterisation module
-                    if (CharacterisationON(confpath, time_step_one)) {
+                if (CharacterisationON(confpath, time_step_one)) {
 
-                        cout << "--------------------------------" << endl;
-                        cout << "START of the DCC Structure Characterisation module" << endl;
-                        DCC_StructureCharacterisation(State_sVector, special_faces_sequence, crack_faces_sequence,
-                                                      ConfigVector);
-
-/// ===== Elapsing time Writer ================
-                        unsigned int Characterisation_time = clock();
-                        C_time = (double) Characterisation_time - P_time - K_time;
-
-                        cout << "Characterisation time is equal to  " << C_time / pow(10.0, 6.0) << "  seconds"
-                             << endl;
-                        cout << "-------------------------------------------------------" << endl;
-                    }// end if(CharacterisationON(confpath))
-
-                    if (WriterON(confpath,
-                                 time_step_one)) { // simply output ON/OFF for the DCC_Writer module on the screen
-                        cout << "START of the DCC Writer module" << endl;
-                        DCC_Writer(special_faces_sequence, kface_sequence, State_sVector, mu_f, sigm_f, RW_series_vector, P_type);
+                    cout << "--------------------------------" << endl;
+                    cout << "START of the DCC Structure Characterisation module" << endl;
+                    DCC_StructureCharacterisation(State_sVector, special_faces_sequence, crack_faces_sequence,
+                                                  ConfigVector);
 
 /// ===== Elapsing time Writer ================
-                        unsigned int Writer_time = clock();
-                        double W_time = (double) Writer_time - P_time - K_time - C_time;
+                    unsigned int Characterisation_time = clock();
+                    C_time = (double) Characterisation_time - P_time - K_time;
 
-                        cout << "------" << endl;
-                        cout << "Writer time is equal to  " << W_time / pow(10.0, 6.0) << "  seconds" << endl;
-                    } // end if(WriterON(confpath))
+                    cout << "Characterisation time is equal to  " << C_time / pow(10.0, 6.0) << "  seconds"
+                         << endl;
+                    cout << "-------------------------------------------------------" << endl;
+                }// end if(CharacterisationON(confpath))
+
+                if (WriterON(confpath, time_step_one)) { // simply output ON/OFF for the DCC_Writer module on the screen
+                    cout << "START of the DCC Writer module" << endl;
+                    DCC_Writer(special_faces_sequence, kface_sequence, State_sVector, mu_f, sigm_f, RW_series_vector, P_type);
+
+/// ===== Elapsing time Writer ================
+                    unsigned int Writer_time = clock();
+                    double W_time = (double) Writer_time - P_time - K_time - C_time;
+
+                    cout << "------" << endl;
+                    cout << "Writer time is equal to  " << W_time / pow(10.0, 6.0) << "  seconds" << endl;
+                } // end if(WriterON(confpath))
 
 ///                    } // end of for (int mu = 1; mu < 20; mu++)
 ///                } // end of for (int sigm = 1; sigm < 20; sigm++)
-                    //                   }  // end of else -> if(P_type != "L")
+                //                   }  // end of else -> if(P_type != "L")
 
-                    /// Increment of special faces fraction
-                    dp = max_sFaces_fraction / (double) number_of_fsteps; // Face fraction increment
-                } /// END of loop : for (number_of_fsteps)
-            } //if max_sFaces_fraction > 0
-        } //ProcessingON
-        else cout << "WARNING!!! max_sFaces_fraction = 0" << endl;
+                /// Increment of special faces fraction
+                dp = max_sFaces_fraction / (double) number_of_fsteps; // Face fraction increment
+            } /// END of loop : for (number_of_fsteps)
+        } //if max_sFaces_fraction > 0
+///        } //ProcessingON
+    else cout << "WARNING!!! max_sFaces_fraction = 0" << endl;
 
-    } /// end SIMULATION MODE else (LIST)
+} /// end SIMULATION MODE else (LIST)
+*/
 
 /// ===== Elapsing time ================>
     unsigned int end_time = clock();

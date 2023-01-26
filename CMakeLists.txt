@@ -29,4 +29,6 @@ add_executable( PCC_Processing_Design_tool
         # Multiphysics module
         src/DCC_Multiphysics/DCC_Multiphysics.h
         src/DCC_Multiphysics/Multiphysics_Functions.h
+        # Simulation Tasks here
+        #src/tasks/task_macrocrack.cpp
         )
