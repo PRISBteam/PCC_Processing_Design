@@ -76,8 +76,8 @@ std::vector <unsigned int> DCC_Kinetic(std::vector<double> &face_elastic_energie
 
     /// #2# Kinetic type FRACTURE (CRACKING)
     if (cktype == 'F' ) { // Fracture
-        //face_sequence = DCC_Kinetic_cracking(s_faces_sequence, AFS, FES);
-        face_sequence = DCC_Kinetic_energy_cracking(face_elastic_energies, s_faces_sequence, large_crack, AFS, FES);
+        //face_sequence = DCC_Kinematic_cracking(s_faces_sequence, AFS, FES);
+        face_sequence = DCC_Kinetic_cracking(face_elastic_energies, s_faces_sequence, large_crack, AFS, FES);
     } ///End of 'Fracture' type simulations
 
     /// #2# Kinetic type WEAR

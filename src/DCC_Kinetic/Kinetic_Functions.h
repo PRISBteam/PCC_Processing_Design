@@ -5,7 +5,7 @@
 ///================================================================================================================================///
 
 /// #1# Kinetic function for multiple cracking
-std::vector <unsigned int> DCC_Kinetic_energy_cracking(std::vector <double> &face_elastic_energies, std::vector<unsigned int> &frac_sfaces_sequence, macrocrack &large_crack, Eigen::SparseMatrix<double> const& AFS, Eigen::SparseMatrix<double> const& FES) {
+std::vector <unsigned int> DCC_Kinetic_cracking(std::vector <double> &face_elastic_energies, std::vector<unsigned int> &frac_sfaces_sequence, macrocrack &large_crack, Eigen::SparseMatrix<double> const& AFS, Eigen::SparseMatrix<double> const& FES) {
 
     std::vector <unsigned int> crack_faces_sequence, S_crackVector(CellNumbs.at(2), 0); // sequence of the cracked Faces and State vector for cracks
     vector<int> TJsTypes(CellNumbs.at(1), 0), TJsCrackTypes(CellNumbs.at(1), 0); // calculations of TJs related to inclusions and cracks
@@ -125,7 +125,7 @@ std::vector <unsigned int> DCC_Kinetic_energy_cracking(std::vector <double> &fac
 } /// end of Kinetic_cracking
 /// -----------------------------------------------------------------------------------------------------------------///
 
-std::vector <unsigned int> DCC_Kinetic_cracking(std::vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const& AFS, Eigen::SparseMatrix<double> const& FES) {
+std::vector <unsigned int> DCC_Kinematic_cracking(std::vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const& AFS, Eigen::SparseMatrix<double> const& FES) {
 
     std::vector <unsigned int> crack_faces_sequence, S_crackVector(CellNumbs.at(2), 0); // sequence of the cracked Faces
     vector<int> TJsTypes(CellNumbs.at(1), 0), TJsCrackTypes(CellNumbs.at(1), 0);
@@ -399,6 +399,7 @@ vector<Tup> DCC_Kinetic_Plasticity( Eigen::SparseMatrix<double> const& FES)  {
 } /// end of kinetic plasticity function
 /// -----------------------------------------------------------------------------------------------------------------///
 
+//vector<unsigned int> DCC_Metropolis_cracking(vector<vector<double>> &stress_tensor, vector<vector<double>> &norms_vector, vector<vector<double>> &tang_vector, double &Temperature, std::vector<unsigned int> &CellNumbs, long iteration_number, vector<double> &slip_vector, double alpha, double lambda){
 vector<unsigned int> Metropolis(vector<vector<double>> &stress_tensor, vector<vector<double>> &norms_vector, vector<vector<double>> &tang_vector, double &Temperature, std::vector<unsigned int> &CellNumbs, long iteration_number, vector<double> &slip_vector, double alpha, double lambda){
     /// I. Constant initial state initialisation
     //zero vectors required for Processing_Random() input
