@@ -192,6 +192,7 @@ int main() {
     }
     else {
         cout << "Calculation of face coordinates started now by find_aGBseed function" << endl;
+        #pragma omp parallel for // parallel execution by OpenMP
         for (unsigned int fnumber = 0; fnumber < CellNumbs.at(2)-1; ++fnumber) {
             face_coordinates_vector.at(fnumber) = find_aGBseed(fnumber, paths, CellNumbs, grain_coordinates);
 //REPAIR
@@ -201,6 +202,7 @@ int main() {
         cout << "Calculations was done!" << endl;
         ofstream OutFaceCoord; OutFaceCoord.open(FSpath, ios::trunc);
         if(OutFaceCoord.is_open())
+            #pragma omp parallel for // parallel execution by OpenMP
             for (auto fcoord : face_coordinates_vector)
                 OutFaceCoord << get<0>(fcoord) << " " << get<1>(fcoord) << " " << get<2>(fcoord) << endl;
     }

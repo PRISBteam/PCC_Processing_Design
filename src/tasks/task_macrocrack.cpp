@@ -39,7 +39,10 @@ subcomplex new_Cut(subcomplex_id_new);
 //       if (S_type == "P") { // subcomplex type  "plane cut"
 new_Cut = subcomplex(subcomplex_id_new);
 
-//  int D_initial_number = 1, nDsteps = 100;
+//  int D_initial_number = 1;
+//  int nDsteps = 100;
+
+#pragma omp parallel for // parallel execution by OpenMP
 //   for (int Dp_number = D_initial_number; Dp_number < nDsteps; ++ Dp_number) {
 //       double Dp_value = (1.0/(double) nDsteps) * (double) Dp_number;
 //       double a_p = 0.0, b_p = 0.0, c_p = 1.0, D_p = Dp_value;
@@ -64,6 +67,8 @@ OutCrackEnergies_file << "(1) sfaces fraction" << "  " << "(2) Crack length rati
 int crack_id_new = 0;
 int nsteps = 10;
 int initial_step = 1;
+
+#pragma omp parallel for // parallel execution by OpenMP
 for (int crack_length_number = initial_step; crack_length_number < nsteps; ++crack_length_number) {
 
 /// Half-plane subcomplex
