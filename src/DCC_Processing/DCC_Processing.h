@@ -37,9 +37,16 @@ std::vector<vector<unsigned int>> DCC_Processing(std::vector<unsigned int> &spec
     if (simulation_type == 'R') { ///  Random generation case
         Processing_Random(State_sVector, special_faces_sequence, max_sFaces_fraction);
         special_face_design.push_back(special_faces_sequence);
-
     } ///End of 'R' type simulations
 
+    else if (simulation_type == 'S') { // Maximum entropy production
+        Processing_maxEntropy(State_sVector, special_faces_sequence);
+        special_face_design.push_back(special_faces_sequence);
+        cout << "Processing_maxEntropy - successfully finished" << endl;
+
+    } ///End of 'S' type simulations
+
+/*
     else if (simulation_type == 'S' && design_number == 1) { // Maximum entropy production
         Processing_Random(State_sVector, special_faces_sequence, max_sFaces_fraction);
         special_face_design.push_back(special_faces_sequence);
@@ -82,6 +89,7 @@ std::vector<vector<unsigned int>> DCC_Processing(std::vector<unsigned int> &spec
             //int Processing_ipIndex(std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence, int index_type, double ip_index) {
         }
     } ///End of 'S' type simulations
+    */
 
     else cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'S' or 'I'..!" << endl;
 

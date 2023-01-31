@@ -50,8 +50,10 @@ vector<int> NewFacesStrip_RW( int iniFaceNumber, int strip_length, int Leap_friq
     NewStripVector_RW.push_back(iniFaceNumber); // add new element to the NewFacesStrip_RW face vector
 
     /// (2) Loop over strip_length (in the current basket of the strip lengths distribution)
+    #pragma omp parallel for // parallel execution by OpenMP
     for (int strip_length_counter = 0; strip_length_counter < strip_length; strip_length_counter++) {
         // Looking for all the face neighbours
+        #pragma omp parallel for // parallel execution by OpenMP
         for (int k = 0; k < CellNumbs.at(2); ++k) // Loop over all the Faces in the PCC
             if (AFS.coeff(New2CellNumb, k) == 1) neigh_Faces.push_back(k); // set of all the face neighbours
         // new random choice between all the face neighbours
@@ -87,6 +89,7 @@ void Processing_Random(std::vector<unsigned int> &S_Vector,  std::vector<unsigne
     for( unsigned int lit = 0; lit < OrdinaryCellNumbs.size(); lit++) OrdinaryCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces
 
     /// S_Vector with its non-zero elements set any pre-define structure of special element feeding to the function Processing_Random
+    #pragma omp parallel for // parallel execution by OpenMP
     for( unsigned int itr : S_Vector)
         if(itr != 0) OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
 
@@ -96,6 +99,7 @@ void Processing_Random(std::vector<unsigned int> &S_Vector,  std::vector<unsigne
     // If, after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 
 /// ================= Loop over all ordinary Faces before sFaces_fraction = @parameter max_sFaces_fraction fractions of special cells  =======================>
+    #pragma omp parallel do // parallel execution by OpenMP
     do { // do{ ... }while(output_step) loop starting point
         unsigned int New2CellNumb = 0;
         New2CellNumb = NewCellNumb_R(OrdinaryCellNumbs.size()); // advanced random generator of  pecial faces
@@ -114,6 +118,7 @@ void Processing_Random(std::vector<unsigned int> &S_Vector,  std::vector<unsigne
         // Special and Ordinary Faces fraction calculation
         ordinary_faces_fraction = OrdinaryCellNumbs.size() / (double) CellNumbs.at(2);
         special_faces_fraction = 1.0 - ordinary_faces_fraction;
+//REPAIR cout << "special_faces_fraction: \t" << special_faces_fraction << "\t\t" << endl;
 
     } while(special_faces_fraction < max_sFaces_fraction); /// End of the Random generation process
 // Closing and deleting // Remove all elements anf free the memory from the probe OrdinaryCellNumbs vector // OrdinaryCellNumbs.clear(); // OrdinaryCellNumbs.shrink_to_fit();
@@ -231,62 +236,43 @@ int Processing_maxEntropy(std::vector<unsigned int> &S_Vector, std::vector<unsig
     J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2); // containing 2 incident special face
     J3 = std::count(TJsTypes.begin(), TJsTypes.end(), 3); // containing 3 incident special face
     J0 = CellNumbs.at(1) - J1 - J2 - J3; // containing no incident special face (the total amount of TJs = total amount of Edges in DCC = CellNumbs.at(1))
-    Jall = CellNumbs.at(1); // amount of Edges in DCC
+    Jall = (double) CellNumbs.at(1); // amount of Edges in DCC
 
 // Conversion from numbers to fractions
-    j0 = J0 / Jall;
-    j1 = J1 / Jall;
-    j2 = J2 / Jall;
-    j3 = J3 / Jall;
+double l2j0 = 0.0, l2j1 = 0.0, l2j2 = 0.0, l2j3 = 0.0;
+    j0 = (double) J0 / Jall;
+if (j0 > 0) l2j0 = log2(j0);
+    j1 = (double) J1 / Jall;
+if (j1 > 0) l2j1 = log2(j1);
+    j2 = (double) J2 / Jall;
+if (j2 > 0) l2j2 = log2(j2);
+    j3 = (double) J3 / Jall;
+if (j3 > 0) l2j3 = log2(j3);
+
     /// Configuration Entropy related with Faces
     // (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
-    Configuration_Face_Entropy = -(j0 * log2(j0) + j1 * log2(j1) + j2 * log2(j2) + j3 * log2(j3));
-
+//    Configuration_Face_Entropy = -(j0 * log2(j0) + j1 * log2(j1) + j2 * log2(j2) + j3 * log2(j3));
+    Configuration_Face_Entropy = -(j0 * l2j0 + j1 * l2j1 + j2 * l2j2 + j3 * l2j3);
     /// ======== Loop over all Faces ===========>
 ///=============================================================================================================================================////
 /// An initial Entropy Increase List calculation for all the Faces in the given DCC
     vector<double> EntropyIncreaseList(CellNumbs.at(2), 0); // vector with values of configuration entropy increases at conversion of each Face
-    for (unsigned int k = 0; k < CellNumbs.at(2); k++) { /// loop over all Faces in DCC
-        double J00 = 0, J0N = 0, J10 = 0, J1N = 0, J20 = 0, J2N = 0, J30 = 0, J3N = 0, CFace_Entropy = 0, CFace_EntropyIncrease = 0;
-
-        if (S_Vector.at(k) == 0) { // Loop over each still ORDINARY element neighbours
-            J00 = 0, J0N = 0, J10 = 0, J1N = 0, J20 = 0, J2N = 0, J30 = 0, J3N = 0, CFace_EntropyIncrease = 0;
-            /// j_types_neigh_fractions calculation ///***function GBIndex(k, FES, TJsTypes) from DCC_SupportFunctions.h
-            // output in the form j_types_neigh_fractions[0] = #TJsTypes[0] incident to the face with the number face_number, j_types_neigh_fractions[1] = #TJsTypes[1] incident to the face with the number face_number,...
-            vector<double> j_types_neigh_fractions = GBIndex(k, FES, TJsTypes); //Types (up to 100 kinds) of the edges incident to the considered Face
-//REPAIR   for(auto kl : j_types_neigh_fractions) cout << " " <<kl ; cout << endl;
-
-            /// For a particular Face face_number = k (!)
-            /// Values before conversion
-            J00 = j_types_neigh_fractions.at(0);
-            J10 = j_types_neigh_fractions.at(1);
-            J20 = j_types_neigh_fractions.at(2);
-//REPAIR    cout << " J00= " << J00<< " J10= " << J10 << " J20= " << J20 << endl;
-            // Values after conversion
-            J1N = J00;
-            J2N = J10;
-            J3N = J20;
-            // The entropy increase calculation for a given Face
-            CFace_EntropyIncrease = (J0 * log2(J0 + pow(10, -30)) - J00 * log2(J00 + pow(10, -30)))
-                                    + (J1 * log2(J1 + pow(10, -30)) - J10 * log2(J10 + pow(10, -30)) +
-                                       J1N * log2(J1N + pow(10, -30)))
-                                    + (J2 * log2(J2 + pow(10, -30)) - J20 * log2(J20 + pow(10, -30)) +
-                                       J2N * log2(J2N + pow(10, -30)))
-                                    + (J3 * log2(J3 + pow(10, -30)) + J3N * log2(J3N + pow(10,-30)));
-//REPAIR  cout  << "\t\t" <<  CFace_EntropyIncrease << "\t\t" << endl;
-
-/// The result of one iteration (EntropyIncreaseList value for a particular Face face_number = k)
-            EntropyIncreaseList.at(k) = CFace_EntropyIncrease;
-        } // if OrdinaryCells (S_Vector.at(Face) == 0)
-    } // for (..k < CellNumbs.at(2)..)
+    /// Entropy increase list
+    EntropyIncreaseList = Get_EntropyIncreaseList(S_Vector, TJsTypes, FES);
+ //for (auto EIE :   EntropyIncreaseList)
+//     cout << "EIE_ " << EIE << endl;
 
     double New2CellNumb = 0; // Only one possible Face type (binary model)
     /// Number of element giving the maximum increase in configuration entropy at its conversion
     New2CellNumb = std::max_element(std::begin(EntropyIncreaseList), std::end(EntropyIncreaseList)) - std::begin(EntropyIncreaseList); // gives index of the max element
 //old// min  New2CellNumb = std::min_element(std::begin(EntropyIncreaseList), std::end(EntropyIncreaseList)) - std::begin(EntropyIncreaseList); // gives index of the max element
-//REPAIR        cout << s_faces_sequence.size() << "   " << New2CellNumb << endl;
+
+//REPAIR cout << "s_faces_sequence.size(): " << EntropyIncreaseList.size() << " New2CellNumb:  " << New2CellNumb << endl;
+
 /// Form the max_set of the faces with the same value of EntropyIncreaseList
-    vector<unsigned int> max_set; max_set.clear(); max_set.push_back(New2CellNumb);
+    vector<unsigned int> max_set;
+    max_set.clear();
+    max_set.push_back(New2CellNumb);
     for (auto  itr = EntropyIncreaseList.begin(); itr != EntropyIncreaseList.end(); ++itr)
         if (*itr == EntropyIncreaseList.at(New2CellNumb)) max_set.push_back(distance(EntropyIncreaseList.begin(), itr));
     /// Random choice the number of the element in the max_set with the equal Entropy Increase NewCellNumb_R(max_set.size())
@@ -339,6 +325,7 @@ int Processing_maxEntropy(std::vector<unsigned int> &S_Vector, std::vector<unsig
                                         + (J3 * log2(J3 + pow(10, -30)) + J3N * log2(J3N + pow(10,-30)));
                 /// The result of the one iteration
                 EntropyIncreaseList.at(itr) = CFace_EntropyIncrease; // for(auto kl :EntropyIncreaseList) cout << kl << endl;
+// REPAIR                cout << " CFace_EntropyIncrease: "s << CFace_EntropyIncrease << endl;
 
             } // for (auto itr : new_neigh_Faces )
         } //if

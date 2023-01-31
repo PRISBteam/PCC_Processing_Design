@@ -17,7 +17,8 @@
 #include <numeric>
 #include <algorithm>
 #include <thread>
-//#include <execution>
+#include <execution>
+#include "/usr/local/Cellar/libomp/15.0.7/include/omp.h"
 
 ///-------------------------------
 /// Attached user defined C++ libraries (must be copied in the directory for STL):
@@ -186,7 +187,7 @@ int main() {
     face_coordinates_vector.clear();
     face_coordinates_vector.resize(CellNumbs.at(2), make_tuple(0,0,0));
 //REPAIR    cout << "face vector size: " << face_coordinates_vector.size() << endl;
-
+/*
     if (is_file_exists(FSpath_string)) {
         face_coordinates_vector = TuplesReader(FSpath);
     }
@@ -206,6 +207,7 @@ int main() {
             for (auto fcoord : face_coordinates_vector)
                 OutFaceCoord << get<0>(fcoord) << " " << get<1>(fcoord) << " " << get<2>(fcoord) << endl;
     }
+    */
 
     /// All vertex coordinates
     string VCpath_string = input_folder + "vertex_seeds.txt"s;
@@ -259,12 +261,21 @@ int main() {
 //REPAIR    OfStreams_trancator();
     special_face_design.clear(); // clearing file
 
-    /// THE CURRENT TASKS ARE PLACED HERE ///
+/// THE CURRENT TASKS ARE PLACED HERE ///
 /// ==========================================================================================================================================
 
-#include "tasks/task_macrocrack.cpp"
+// # 1 # Simple sfaces processing
+#include "tasks/task_sFacesProcessing.cpp"
+
+// # 2 # Macrocrack growth with multiple cracking simulations
+//#include "tasks/task_macrocrack.cpp"
 
 /// ==========================================================================================================================================
+
+// For experiments
+
+/// ==========================================================================================================================================
+
 
 /// ===== Elapsing time ================>
     unsigned int end_time = clock();

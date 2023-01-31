@@ -3,6 +3,31 @@ project(PCC_Processing_Design_tool)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# added -fopenmp
+include_directories(/usr/local/Cellar/libomp/15.0.7/include/)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -fopenmp")
+
+if(APPLE)
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set(OpenMP_C "${CMAKE_C_COMPILER}" CACHE STRING "" FORCE)
+        set(OpenMP_C_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument" CACHE STRING "" FORCE)
+        set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5" CACHE STRING "" FORCE)
+        set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES} CACHE STRING "" FORCE)
+        set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES} CACHE STRING "" FORCE)
+        set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES} CACHE STRING "" FORCE)
+    endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set(OpenMP_CXX "${CMAKE_CXX_COMPILER}" CACHE STRING "" FORCE)
+        set(OpenMP_CXX_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument" CACHE STRING "" FORCE)
+        set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5" CACHE STRING "" FORCE)
+        set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES} CACHE STRING "" FORCE)
+        set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES} CACHE STRING "" FORCE)
+        set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES} CACHE STRING "" FORCE)
+    endif()
+endif()
+
+find_package(OpenMP REQUIRED)
+
 add_executable( PCC_Processing_Design_tool
         # Management module
         src/main.cpp
@@ -29,6 +54,11 @@ add_executable( PCC_Processing_Design_tool
         # Multiphysics module
         src/DCC_Multiphysics/DCC_Multiphysics.h
         src/DCC_Multiphysics/Multiphysics_Functions.h
-        # Simulation Tasks here
+
+        # Simulation Tasks here SHOULD NOT BE !!!
         #src/tasks/task_macrocrack.cpp
+        #src/tasks/task_sFacesProcessing.cpp
         )
+
+#target_compile_options(PCC_Processing_Design_tool PRIVATE -Wall ${OpenMP_CXX_FLAGS})
+#target_link_libraries(PCC_Processing_Design_tool PRIVATE ${OpenMP_CXX_FLAGS})

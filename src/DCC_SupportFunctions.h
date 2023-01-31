@@ -141,6 +141,68 @@ vector<int> EdgesTypesCalc(std::vector<unsigned int> const &CellNumbs, vector<un
     return TJsTypes;
 }
 
+/// EntropyIncreaseList
+vector<double> Get_EntropyIncreaseList(std::vector<unsigned int> &S_Vector, vector<int> const &TJsTypes, SpMat const &FES) {
+    vector<double> EntropyIncreaseList(CellNumbs.at(2), 0); // vector with values of configuration entropy increases at conversion of each Face
+    /// amounts of TJs of different types
+    double  J1 = std::count(TJsTypes.begin(), TJsTypes.end(), 1); // containing 1 incident special face
+    double J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2); // containing 2 incident special face
+    double  J3 = std::count(TJsTypes.begin(), TJsTypes.end(), 3); // containing 3 incident special face
+    double  J0 = CellNumbs.at(1) - J1 - J2 - J3; // containing no incident special face (the total amount of TJs = total amount of Edges in DCC = CellNumbs.at(1))
+
+    for (unsigned int k = 0; k < CellNumbs.at(2); k++) { /// loop over all Faces in DCC
+        double J00 = 0, J0N = 0, J10 = 0, J1N = 0, J20 = 0, J2N = 0, J30 = 0, J3N = 0, CFace_Entropy = 0, CFace_EntropyIncrease = 0;
+
+        if (S_Vector.at(k) == 0) { // Loop over each still ORDINARY element neighbours
+            J00 = 0, J0N = 0, J10 = 0, J1N = 0, J20 = 0, J2N = 0, J30 = 0, J3N = 0, CFace_EntropyIncrease = 0;
+            /// j_types_neigh_fractions calculation ///***function GBIndex(k, FES, TJsTypes) from DCC_SupportFunctions.h
+            // output in the form j_types_neigh_fractions[0] = #TJsTypes[0] incident to the face with the number face_number, j_types_neigh_fractions[1] = #TJsTypes[1] incident to the face with the number face_number,...
+            vector<double> j_types_neigh_fractions = GBIndex(k, FES, TJsTypes); //Types (up to 100 kinds) of the edges incident to the considered Face
+//REPAIR   for(auto kl : j_types_neigh_fractions) cout << " " <<kl ; cout << endl;
+
+            /// For a particular Face face_number = k (!)
+            /// Values before conversion
+            J00 = j_types_neigh_fractions.at(0);
+            J10 = j_types_neigh_fractions.at(1);
+            J20 = j_types_neigh_fractions.at(2);
+
+ /*
+            Jall = CellNumbs.at(1);
+// Conversion from numbers to fractions
+// (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
+            j0 = J0/Jall; j1 = J1/Jall; j2 = J2/Jall; j3 = J3/Jall;
+            double j0s = j0, j1s = j1, j2s = j2, j3s = j3;
+
+            if (j0s != 0) j0s = j0* log2(j0); if (j1s != 0) j1s = j1* log2(j1); if (j2s != 0) j2s = j2* log2(j2); if (j3s != 0) j3s = j3* log2(j3); //Gives 0 in entropy!
+            /// Configuration Entropy related with Faces
+            Configurational_Face_Entropy = - (j0s + j1s + j2s + j3s);
+
+*/
+
+
+//REPAIR
+cout << " J00= " << J00<< " J10= " << J10 << " J20= " << J20 << endl;
+            // Values after conversion
+            J1N = J00;
+            J2N = J10;
+            J3N = J20;
+            // The entropy increase calculation for a given Face
+            CFace_EntropyIncrease = (J0 * log2(J0 + pow(10, -30)) - J00 * log2(J00 + pow(10, -30)))
+                                    + (J1 * log2(J1 + pow(10, -30)) - J10 * log2(J10 + pow(10, -30)) +
+                                       J1N * log2(J1N + pow(10, -30)))
+                                    + (J2 * log2(J2 + pow(10, -30)) - J20 * log2(J20 + pow(10, -30)) +
+                                       J2N * log2(J2N + pow(10, -30)))
+                                    + (J3 * log2(J3 + pow(10, -30)) + J3N * log2(J3N + pow(10, -30)));
+//REPAIR  cout  << "\t\t" <<  CFace_EntropyIncrease << "\t\t" << endl;
+
+/// The result of one iteration (EntropyIncreaseList value for a particular Face face_number = k)
+            EntropyIncreaseList.at(k) = CFace_EntropyIncrease;
+        } // if OrdinaryCells (S_Vector.at(Face) == 0)
+    } // for (..k < CellNumbs.at(2)..)
+
+    return EntropyIncreaseList;
+}
+
 /// DDRX support function :: GFS matrix reading and calculation of new seeds at the centres of GBs
 tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<char*> const paths, std::vector<unsigned int> & CellNumbs, vector<tuple<double, double, double>> & AllSeeds_coordinates) {
     tuple <double, double, double> res; // find two grain neighbour for fnumber
@@ -194,6 +256,39 @@ bool is_file_exists(const string fileName)
     std::ifstream infile(charfileName);
     return infile.good();
 }
+
+/// Configuration TJs entropy
+double Get_TJsEntropy(vector<unsigned int> special_faces_seq) {
+double TJsEntropy = 0.0;
+
+    double J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
+    double Configurational_Face_Entropy = 0;
+    vector<int> TJsTypes;
+
+    SpMat FES(CellNumbs.at(1), CellNumbs.at(2));
+    FES = SMatrixReader(paths.at(5 + (dim - 3)), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
+
+    TJsTypes = EdgesTypesCalc(CellNumbs, special_faces_seq, FES);
+
+    J1 = std::count(TJsTypes.begin(), TJsTypes.end(), 1);
+    J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2);
+    J3 = std::count(TJsTypes.begin(), TJsTypes.end(), 3);
+    J0 = CellNumbs.at(1) - J1 - J2 - J3;
+    Jall = (double) CellNumbs.at(1);
+
+/// Conversion from numbers to fractions
+// (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
+    j0 = J0/Jall; j1 = J1/Jall; j2 = J2/Jall; j3 = J3/Jall;
+    double j0s = j0, j1s = j1, j2s = j2, j3s = j3;
+
+    /// using values with pow(10,-10) instead of 0s!
+    if (j0s != 0) j0s = j0* log2(j0); if (j1s != 0) j1s = j1* log2(j1); if (j2s != 0) j2s = j2* log2(j2); if (j3s != 0) j3s = j3* log2(j3); //Gives 0 in entropy!
+
+    /// Configuration Entropy related with Faces
+    TJsEntropy = - (j0s + j1s + j2s + j3s);
+
+return TJsEntropy;
+};
 
 /*
  *     double J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
