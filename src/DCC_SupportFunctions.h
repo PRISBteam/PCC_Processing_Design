@@ -290,6 +290,19 @@ double TJsEntropy = 0.0;
 return TJsEntropy;
 };
 
+/// ARCHIVE ///
+//Erase First Occurrence of given  substring from main string
+void eraseSubStr(std::string & mainStr, const std::string & toErase)
+{
+    // Search for the substring in string
+    size_t pos = mainStr.find(toErase);
+    if (pos != std::string::npos)
+    {
+        // If found then erase it from string
+        mainStr.erase(pos, toErase.length());
+    }
+}
+
 /*
  *     double J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
     double Configurational_Face_Entropy = 0, Face_Entropy_Median = 0 , Face_Entropy_Skrew = 0;

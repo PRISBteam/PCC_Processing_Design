@@ -117,9 +117,10 @@ int main() {
 
 /// File path to the configuration profile
 // Still not working in Windows:(
-    using std::__fs::filesystem::current_path; // to obtain current working directory
-    string MainPath = current_path(); // MainPath variables
-    eraseSubStr(MainPath, "cmake-build-debug"s); // to delete .../cmake-build-debug/ from the path
+    //using std::__fs::filesystem::current_path; // to obtain current working directory
+    //string MainPath = current_path(); // MainPath variables
+    //eraseSubStr(MainPath, "cmake-build-debug"s); // to delete .../cmake-build-debug/ from the path
+    string MainPath = "../";
     string config = MainPath + "config.txt"s; char* confpath = const_cast<char*>(config.c_str()); // file path with config.txt
     bool time_step_one = 1; // (technical support variable) id for the first step of iteration MAX fraction of Faces
 
@@ -365,18 +366,6 @@ std::vector<double> confCount(char* config, string &Subcomplex_type, string &Pro
     }
 
     return res;
-}
-
-//Erase First Occurrence of given  substring from main string
-void eraseSubStr(std::string & mainStr, const std::string & toErase)
-{
-    // Search for the substring in string
-    size_t pos = mainStr.find(toErase);
-    if (pos != std::string::npos)
-    {
-        // If found then erase it from string
-        mainStr.erase(pos, toErase.length());
-    }
 }
 
 /// Archive
