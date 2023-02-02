@@ -44,9 +44,9 @@ R	    | Calculation type ('R', 'RW', 'S', 'F', 'I' or 'X')		| & |
 -------------------------------------------------------------------------------------------------------------------------------------
 0.99 	| MAX fraction of Special faces (calculation limit)				| ? | 	2
 -------------------------------------------------------------------------------------------------------------------------------------
-/Users/user/Dropbox/OFFICE/NEPER/Voronoi_10k/Voronoi/                | Input folder		| ~ |
+/Users/user/Dropbox/OFFICE/NEPER/Kinetic_PCC_examples_/Voronoi_1k/Voronoi/                | Input folder		| ~ |
 -------------------------------------------------------------------------------------------------------------------------------------
-/Users/user/Dropbox/OFFICE/NEPER/resultsJanuary2023/v10k_DDRX/	 	   | Output folder	| $ |
+/Users/user/Dropbox/OFFICE/NEPER/resultsFebruary2023/v1k_processing/	 	   | Output folder	| $ |
 -------------------------------------------------------------------------------------------------------------------------------------
 * Slash ../ at the end is essential here
 

@@ -29,9 +29,9 @@ void crack_modes_stress_field(std::vector <double> &face_energies, int crack_mod
     double Sxx = 0.0, Syy = 0.0, Szz = 0.0, Sxy = 0.0;
 
     for (unsigned int itr = 0; itr < face_coordinates_vector.size()-1; ++itr) { // loop over all GBs and their barycentic coordinates
-        double z = get<0>(face_coordinates_vector.at(itr))*sample_size_vector.at(0);
-        double x = get<1>(face_coordinates_vector.at(itr))*sample_size_vector.at(1);
-        double y = get<2>(face_coordinates_vector.at(itr))*sample_size_vector.at(2);
+        double z = get<0>(face_coordinates_vector.at(itr)) * sample_dimensions.at(0);
+        double x = get<1>(face_coordinates_vector.at(itr)) * sample_dimensions.at(1);
+        double y = get<2>(face_coordinates_vector.at(itr)) * sample_dimensions.at(2);
 
         switch (crack_mode) {
             case 1: { // crack mode I
@@ -106,8 +106,8 @@ void crack_modes_stress_field(std::vector <double> &face_energies, int crack_mod
             else res_vonMizes_stress = std::sqrt(0.5 * (pow((Sxx - Syy),2.0) + pow((Sxx - Szz),2.0) + pow((Syy - Szz),2.0) + 6 * pow(Sxy,2.0)));
 
         /// von Mizes energies
-        /// (1) sample_size_vector.at(1) now!
-        if (res_vonMizes_stress >  0.0) face_energies.at(itr) = pow(res_vonMizes_stress,2)*face_areas_vector.at(itr)*pow(sample_size_vector.at(1),2.0)*GB_width/Young_modulus;
+        /// (1) sample_dimensions.at(1) now!
+        if (res_vonMizes_stress >  0.0) face_energies.at(itr) = pow(res_vonMizes_stress,2) * face_areas_vector.at(itr) * pow(sample_dimensions.at(1), 2.0) * GB_width / Young_modulus;
 //REPAIR        cout << " itr: " << itr << " face_energies.at(itr): " << face_energies.at(itr) << endl;
 
     } // end of for( itr )
