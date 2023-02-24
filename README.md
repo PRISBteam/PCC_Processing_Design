@@ -1,4 +1,4 @@
-<h1>Discrete Processing Design tool (DPD code)</h1>
+<h1>Discrete Processing Design (DPD code)</h1>
 
 Manual version: 0.3.0 <br>
 First manual release date: 21/09/2022 <br>
