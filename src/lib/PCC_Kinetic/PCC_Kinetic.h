@@ -15,7 +15,7 @@ typedef pair<double, double> Pr; // Eigen library class
 
 /// Attached user defined C++ libraries:
 ///-------------------------------------
-#include "Kinetic_Functions.h"
+#include "Kinetic_functions.h"
 ///-------------------------------------
 
 std::vector<double> sample_dimensions = {1.0, 1.0, 1.0}; // L_x [m], L_y [m],L_z [m]
@@ -32,7 +32,7 @@ ofstream OutElCondfile, OutCrackEnergies_file;
 bool KineticON(char* config, bool time_step_one); // Check the Kinetic module status (On/Off) in the config.txt file
 
 /// ConfigVector contains all the control variables of the program readed from the config.txt
-vector<double> ConfigVector = confCount(confpath, S_type, K_type, input_dir, output_dir);
+vector<double> ConfigVector = confCount(confpath, S_type, K_type, source_dir, output_dir);
 
 // MAX fraction of special Faces | Calculation limit
 double max_cFaces_fraction = ConfigVector.at(3); // maximum fractions of induced (cracked) faces (2-cells)
@@ -96,7 +96,7 @@ std::vector <unsigned int> DCC_Kinetic(std::vector<double> &face_elastic_energie
     /// #2# Kinetic type FRACTURE (CRACKING)
     if (cktype == 'F' ) { // Fracture
         //face_sequence = DCC_Kinematic_cracking(s_faces_sequence, AFS, FES);
-        face_sequence = DCC_Kinetic_cracking(face_elastic_energies, s_faces_sequence, large_crack, AFS, FES);
+        face_sequence = PCC_Kinetic_cracking(face_elastic_energies, s_faces_sequence, large_crack, AFS, FES);
     } ///End of 'Fracture' type simulations
 
     /// #2# Kinetic type WEAR

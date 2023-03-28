@@ -1,8 +1,8 @@
-///================================ A part of the DCC Processing module =============================================================///
+///================================ A part of the PCC Processing module =============================================================///
 ///=================================================================================================================================///
-/** The library contains random and non-random functions for choice and generation of new identifications for k-Cells               *
- *  in the PCC Processing module. It makes them "special" and takes out of the set of "ordinary" k-Cells.                            **/
-///================================================================================================================================///
+/** The library contains random and non-random functions for choice and generation of new identifiers for k-Cells, k={0,1,2,3}     **/
+/**  in the PCC Processing module. It makes them "special" and takes out of the set of "ordinary" k-Cells.                        **/
+///==============================================================================================================================///
 
 ///------------------------------
 /// Two basic function first (choosing of a/the particular face(s))

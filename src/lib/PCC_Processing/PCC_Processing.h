@@ -9,9 +9,34 @@
 
 /// Attached user-defined C++ libraries:
 // Here a Processing_Functions.h library of C++ functions for advanced random and non-random generations of special chains of PCC elements
-///-------------------------------------
-#include "Processing_Functions.h"
-///-------------------------------------
+///-----------------------------------------------------
+#include "functions/Processing_Assignment_functions.h"
+#include "functions/Processing_Imposed_functions.h"
+#include "functions/Procesing_Induced_functions.h"
+///-----------------------------------------------------
+
+///* ========================================================= PCC PROCESSING FUNCTION ======================================================= *///
+///* ========================================================================================================================================= *///
+
+// ARCHIVE sface_design :: A list of special_faces_sequence as an output of the module. // It can be any sequence specified in the "processing_task" file, but normally the first line here is the random case (zero-design), then following S_max (1-sequence) and Sd_min (Smin), and then all the designs in between S_max and S_min
+// Material :: quadruple points, triple junctions, grain boundaries, and grains
+// Tessellation :: points, lines, polygones, and polytopes
+// PCC :: nodes, edges, faces, and volumes
+// IDEA special_cells_design - vector of vectors containing :: (1) snodes_sequence, (2) sedges_sequence, (3) sfaces_sequence, and (4) svolumes_sequence
+/*!
+ * @param special_faces_sequence // base object - a sequence of generated 2-cell numbers
+ * @param State_sVector
+ *  @param P_type
+ * @return special_cells_design
+ */
+std::vector<vector<unsigned int>> DCC_Processing(std::vector<unsigned int> &special_faces_sequence, vector<unsigned int> &State_sVector, const string P_type) {
+// CellNumbs :: vector components: [0] - Nodes number, [1] - Edges number, [2] - Faces number, [3] - Grains number
+// Maximal fraction (max_sFaces_fraction) for simulation loop max_sFaces_fraction = [0,1]
+// State_Vector in the form : [Element index] - > [Type] = kind of a code related to the microstructure of PCC
+
+// Type of the Processing tool from config.txt (const_cast<char*> for processing type)
+    char* stype = const_cast<char*>(P_type.c_str());
+    char simulation_type = *stype;
 
 string SIMULATION_MODE(char* config); // Check the SIMULATION MODE type in the config.txt file
 
@@ -23,21 +48,6 @@ string S_type; // 'P' or 'H' :: This char define the subsection type: 'P' for th
 /// User-defined function definitions
 bool ProcessingON(char* config, bool time_step_one); // Check the Processing module status (On/Off) in the config.txt file
 
-///* ========================================================= PCC PROCESSING FUNCTION ======================================================= *///
-///* ========================================================================================================================================= *///
-
-// ARCHIVE sface_design :: A list of special_faces_sequence as an output of the module. // It can be any sequence specified in the "processing_task" file, but normally the first line here is the random case (zero-design), then following S_max (1-sequence) and Sd_min (Smin), and then all the designs in between S_max and S_min
-// material :: quadruple points, triple junctions, grain boundaries, and grains
-// tessellation :: points, lines, polygones, and polytopes
-// PCC :: nodes, edges, faces, and volumes
-// IDEA special_cells_design - vector of vectors containing :: (1) snodes_sequence, (2) sedges_sequence, (3) sfaces_sequence, and (4) svolumes_sequence
-/*!
- * @param special_faces_sequence // base object - a sequence of generated 2-cell numbers
- * @param State_sVector
- *  @param P_type
- * @return special_cells_design
- */
-
 /// Off-streams :
 ofstream OutFLfile, OutJFile, OutJ2File, OutSFile, OutS2File, OutPowersADistributions, OutAvLengthsADistributions, OutAgglStatistics;
 
@@ -46,15 +56,6 @@ vector<double> ConfigVector = confCount(confpath, S_type, P_type, input_dir, out
 
 // MAX fraction of special Faces | Calculation limit
 double max_sFaces_fraction = ConfigVector.at(2); // maximum fractions of special (defect) faces (2-cells)
- 
-std::vector<vector<unsigned int>> DCC_Processing(std::vector<unsigned int> &special_faces_sequence, vector<unsigned int> &State_sVector, const string P_type) {
-// CellNumbs :: vector components: [0] - Nodes number, [1] - Edges number, [2] - Faces number, [3] - Grains number
-// Maximal fraction (max_sFaces_fraction) for simulation loop max_sFaces_fraction = [0,1]
-// State_Vector in the form : [Element index] - > [Type] = kind of a code related to the microstructure of PCC
-
-// Type of the Processing tool from config.txt (const_cast<char*> for processing type)
-    char* stype = const_cast<char*>(P_type.c_str());
-    char simulation_type = *stype;
 
 /// Cases for Processing types
     if (simulation_type == 'R') { ///  Random generation case
@@ -184,7 +185,7 @@ bool ProcessingON(char* config, bool time_step_one) {
     return isProcessingON;
 }
 
-/// Heap
+/// * Heap * ///
 // bool time_step_one = 1; // (technical support variable) special ID for the first step of iteration MAX fraction of Faces
 
 /*     /// Ordinary face sequence (!!works!!)
