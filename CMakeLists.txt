@@ -33,9 +33,9 @@ add_executable( PCC_Processing_Design
         # 1 Simulation environment and management module
         src/main.cpp
         # 2 Various support functions
-        src/lib/PCC_SupportFunctions.h
+#        src/lib/PCC_SupportFunctions.h
         # 3 C++  class for PCC and related sets of special elements
-        src/lib/PCC_Objects.h
+#        src/lib/PCC_Objects.h
         # 4 Processing module
 #        src/PCC_Processing/PCC_Processing.h
 #        src/PCC_Processing/Processing_Functions.h
@@ -60,7 +60,9 @@ add_executable( PCC_Processing_Design
         #src/tasks/task_macrocrack.cpp
         #src/tasks/task_sFacesProcessing.cpp
         #src/tasks/task_StripsProcessingDesign.cpp
-        src/lib/PCC_Processing/functions/Procesing_Induced_functions.h src/lib/PCC_Characterisation/Characterisation_Indexing_functions.h src/lib/PCC_Processing/functions/Processing_Imposed_functions.h)
+
+        #src/lib/PCC_Processing/functions/Procesing_Induced_functions.h src/lib/PCC_Characterisation/Characterisation_Indexing_functions.h src/lib/PCC_Processing/functions/Processing_Imposed_functions.h
+        )
 
 #target_compile_options(PCC_Processing_Design PRIVATE -Wall ${OpenMP_CXX_FLAGS})
 #target_link_libraries(PCC_Processing_Design PRIVATE ${OpenMP_CXX_FLAGS})

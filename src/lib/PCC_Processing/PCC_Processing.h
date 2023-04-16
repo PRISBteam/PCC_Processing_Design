@@ -11,64 +11,139 @@
 // Here a Processing_Functions.h library of C++ functions for advanced random and non-random generations of special chains of PCC elements
 ///-----------------------------------------------------
 #include "functions/Processing_Assignment_functions.h"
-#include "functions/Processing_Imposed_functions.h"
-#include "functions/Procesing_Induced_functions.h"
+//#include "functions/Processing_Imposed_functions.h"
+//#include "functions/Procesing_Induced_functions.h"
 ///-----------------------------------------------------
 
 ///* ========================================================= PCC PROCESSING FUNCTION ======================================================= *///
 ///* ========================================================================================================================================= *///
-
-// ARCHIVE sface_design :: A list of special_faces_sequence as an output of the module. // It can be any sequence specified in the "processing_task" file, but normally the first line here is the random case (zero-design), then following S_max (1-sequence) and Sd_min (Smin), and then all the designs in between S_max and S_min
-// Material :: quadruple points, triple junctions, grain boundaries, and grains
-// Tessellation :: points, lines, polygones, and polytopes
-// PCC :: nodes, edges, faces, and volumes
-// IDEA special_cells_design - vector of vectors containing :: (1) snodes_sequence, (2) sedges_sequence, (3) sfaces_sequence, and (4) svolumes_sequence
-/*!
- * @param special_faces_sequence // base object - a sequence of generated 2-cell numbers
- * @param State_sVector
- *  @param P_type
- * @return special_cells_design
+// special_cells_design - vector of vectors containing :: (1) snodes_sequence, (2) sedges_sequence, (3) sfaces_sequence, and (4) svolumes_sequence
+/*! processing.ini
+ * @param P_type
+ * @param Configuration_State [not mandatory - only is there is some "non-zero" initial state]
+ * @return cells_design
  */
-std::vector<vector<unsigned int>> DCC_Processing(std::vector<unsigned int> &special_faces_sequence, vector<unsigned int> &State_sVector, const string P_type) {
+CellsDesign PCC_Processing(vector<vector<int>> &Configuration_State) {
+// CellNumbs :: vector components: [0] - Nodes number, [1] - Edges number, [2] - Faces number, [3] - Grains number
+// Maximal fraction (max_sFaces_fraction) for simulation loop max_sFaces_fraction \in [0,1]
+/// Main output of the module
+CellsDesign CD;
+
+/// The PRIMAL DATA STRUCTURES and concepts - special (SFS) and ordinary (OFS) face sequences, defect state vectors (DSVs) and defect configurations (DCs)
+// Processing vector variables
+//special_n_Sequence, special_e_Sequence, special_f_Sequence, special_p_Sequence & special_cells_design
+// State_p_vector, State_f_vector, State_e_vector, State_n_vector & Configuration_State
+///
+std::vector <unsigned int> special_x_sequence, current_sx_sequence; // variable sequences (in order of their generation) of special and ordinary k-cells
+// State vector | Special faces IDs
+//////vector <unsigned int> State_sVector(CellNumbs.at(2), 0), current_State_sVector(CellNumbs.at(2), 0), State_cVector(CellNumbs.at(2), 0), current_State_cVector(CellNumbs.at(2), 0);
+cout << "=========================================================================" << endl << "\t\t\t\t\t[\tStart of the PCC Processing Tool\t]\t\t\t\t\t" << endl << "-------------------------------------------------------------------------" << endl;
+Out_logfile_stream << "==============================================================================================================================================================" << endl << "\t\t\t\t\t[\tStart of the PCC Processing Tool\t]\t\t\t\t\t" << endl << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+
+/// Read configuration from processing.ini file :: the number of special cell types and calculation parameters.
+double mu = 1.0, sigma = 0.0; // mean and dispersion for a distribution
+std::vector<vector<double>> max_fractions_vectors(4); // [0][..] - nodes, [1][..] - edges, [2][..] - faces, [3][..] - polyhedrons
+std::vector<string> ptype_vector(4); // vector of strings corresponding to the processing types from file processing.ini :
+std::vector<double> pindex_vector(4); // vector of indeces of the Processing module: S(p_index = 1) - Smax, S(p_index = 0) - Smin, I(p_index = x.x) - Index mode
+// in both vectors: [0] - nodes, [1] - edges, [2] - faces, [3] - polyhedrons
+config_reader_processing(source_path, max_fractions_vectors, mu, sigma, ptype_vector, pindex_vector, Out_logfile_stream); // void
+
+/// Cases for Processing types
+// cell type k :: 0 - nodes, 1 - edges, 2 - faces, 3 -polyhedrons - must coincide with the indexing of the CellNumbs.at(cell_type) vector (!)
+for (int cell_type = 3; cell_type >= 0; --cell_type) { /// loop over all types of k-Cells in the complex
+// both for 2D and 3D cases
+    special_x_sequence = {0};
+    if (ptype_vector.at(cell_type) == "R" && max_fractions_vectors.at(cell_type).size() > 0) { //  Random generation case
+        cout << "Random processing in operation: cell_type : "s << cell_type << endl;
+        Out_logfile_stream << "Random processing in operation: cell_type : "s << cell_type << endl;
+        special_x_sequence = Processing_Random(cell_type, Configuration_State, max_fractions_vectors);
+//        special_cells_design.push_back(special_x_sequence);
+    } ///End of 'R' type simulations
+
+    else if (ptype_vector.at(cell_type) == "S" && max_fractions_vectors[cell_type].size() > 0) { // Maximum entropy production
+        if (pindex_vector.at(cell_type) == 1) {
+            /// Processing_maxEntropy(cell_type, Configuration_State, max_fractions_vectors);
+//            special_cells_design.push_back(special_x_sequence);
+//            CD.Set_sequence(special_x_sequence, cell_type); // (sequence, id)
+            cout << "Processing_maxEntropy - successfully finished" << endl;
+        } else if (pindex_vector.at(cell_type) == 0) {
+            ///  Processing_minEntropy(cell_type, Configuration_State, max_fractions_vectors);
+//            special_cells_design.push_back(special_x_sequence);
+//            CD.Set_sequence(special_x_sequence, cell_type); // (sequence, id)
+            cout << "Processing_minEntropy - successfully finished" << endl;
+        }
+
+    } // End of 'S' type simulations (elseif)
+    else cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'S' or 'I'..!" << endl;
+
+    CD.Set_sequence(special_x_sequence, cell_type); // (sequence, id)
+    CD.Set_design(Configuration_State.at(cell_type), cell_type); // (design, id) - design vector with types
+
+    } // end of for(cell_type = 0; cell_type < dim+1; ++cell_type)
+
+    cout << "p-sequence size: " << CD.Get_p_sequence().size() << endl;
+    cout << "f-sequence size: " << CD.Get_f_sequence().size() << endl;
+    cout << "e-sequence size: " << CD.Get_e_sequence().size() << endl;
+    cout << "n-sequence size: " << CD.Get_n_sequence().size() << endl;
+
+// Updates CD vector based on the special_cells_design
+
+    return CD;
+} /// The end of Processing()
+
+/*
+ * /// Off-streams :
+ofstream OutFLfile, OutJFile, OutJ2File, OutSFile, OutS2File, OutPowersADistributions, OutAvLengthsADistributions, OutAgglStatistics;
+
+ *
+ * std::vector<vector<unsigned int>> DCC_Processing(std::vector<unsigned int>  &special_faces_sequence, vector<unsigned int> &State_sVector, const string P_type, double &mu_f, double &sigm_f, vector<vector<int>> &RW_series_vector) {
+/// sface_design :: A list of special_faces_sequence as an output of the module. The first line here is always the random case (zero-design), then following Smax (1-sequence) and Smin (2-sequence), and then all the designs in between Smax and Smin
 // CellNumbs :: vector components: [0] - Nodes number, [1] - Edges number, [2] - Faces number, [3] - Grains number
 // Maximal fraction (max_sFaces_fraction) for simulation loop max_sFaces_fraction = [0,1]
-// State_Vector in the form : [Element index] - > [Type] = kind of a code related to the microstructure of PCC
+// State_Vector in the form : [Element index] - > [Type]
+///vector<unsigned int> State_sVector(CellNumbs.at(2),0); // State vector filling with zeros
 
-// Type of the Processing tool from config.txt (const_cast<char*> for processing type)
+/// Used functions
+    std::vector<double>  Log_normal_distribution(double &mu_f, double &sigm_f, int baskets);
+
+/// Type of the Processing tool from config.txt (const_cast for processing type; const_cast for output directory)
     char* stype = const_cast<char*>(P_type.c_str());
     char simulation_type = *stype;
 
-string SIMULATION_MODE(char* config); // Check the SIMULATION MODE type in the config.txt file
+    //// Cases for Processing types ////
 
-/// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen
-// The source directory and simulation type from file config_processing.txt
-string S_type; // 'P' or 'H' :: This char define the subsection type: 'P' for the whole Plane cut, 'H' for the half-plane cut like a crack
-
-
-/// User-defined function definitions
-bool ProcessingON(char* config, bool time_step_one); // Check the Processing module status (On/Off) in the config.txt file
-
-/// Off-streams :
-ofstream OutFLfile, OutJFile, OutJ2File, OutSFile, OutS2File, OutPowersADistributions, OutAvLengthsADistributions, OutAgglStatistics;
-
-/// ConfigVector contains all the control variables of the program readed from the config.txt
-vector<double> ConfigVector = confCount(confpath, S_type, P_type, input_dir, output_dir);
-
-// MAX fraction of special Faces | Calculation limit
-double max_sFaces_fraction = ConfigVector.at(2); // maximum fractions of special (defect) faces (2-cells)
-
-/// Cases for Processing types
-    if (simulation_type == 'R') { ///  Random generation case
+    if (simulation_type == 'R') { //  Random generation case
         Processing_Random(State_sVector, special_faces_sequence, max_sFaces_fraction);
         special_cells_design.push_back(special_faces_sequence);
+
     } ///End of 'R' type simulations
 
-    else if (simulation_type == 'S') { // Maximum entropy production
-        Processing_maxEntropy(State_sVector, special_faces_sequence);
-        special_cells_design.push_back(special_faces_sequence);
-        cout << "Processing_maxEntropy - successfully finished" << endl;
+    else if (simulation_type == 'L') { //  Random lengthy strips generation case
+        // Probability density function
+//REPAIR        cout << "ATTENTION: mu and sigm" << endl; cout << mu_f << "  " << sigm_f << endl;
+        std::vector<double> strip_lenght_distribution = Log_normal_distribution(mu_f, sigm_f,30);
 
-    } ///End of 'S' type simulations
+        // From fractions to number of Faces:
+        face_strip_distribution.clear(); // clearing file
+        for (auto  itr = strip_lenght_distribution.begin(); itr != strip_lenght_distribution.end(); ++itr)
+//        face_strip_distribution.push_back(*itr); //           face_strip_distribution.push_back(max_sFaces_fraction * CellNumbs.at(2) * (*itr));
+            face_strip_distribution.push_back(max_sFaces_fraction * CellNumbs.at(2) * (*itr)/ (distance(strip_lenght_distribution.begin(), itr) + 1.0));
+
+        /// Generation of special Faces structure
+        RW_series_vector = RStrips_Distribution(face_strip_distribution, State_sVector, special_faces_sequence);
+        special_cells_design.push_back(special_faces_sequence);
+
+    } ///End of 'L' type simulations
+
+    else cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'S' or 'I'..!" << endl;
+
+    return special_cells_design;
+} /// The end of HAGBsProbability3D()
+*/
+
+
+/// * Heap * ///
+// Related functions
 
 /*
     else if (simulation_type == 'S') { // Maximum entropy production
@@ -115,58 +190,15 @@ double max_sFaces_fraction = ConfigVector.at(2); // maximum fractions of special
     } ///End of 'S' type simulations
     */
 
-    else cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'S' or 'I'..!" << endl;
 
-    return special_cells_design;
-} /// The end of HAGBsProbability3D()
+/*
+/// For L mode only !
+// PCC special structures
+    std::vector<unsigned int> face_strip_distribution; // a vector containing length distribution of special faces chains (strips)
+//    double mu_f = 0, sigm_f = 0; // only for L type simulations (!)
+    vector<vector<int>> RW_series_vector; // only for L type simulations (!)
 
-std::vector<vector<unsigned int>> DCC_Processing(std::vector<unsigned int>  &special_faces_sequence, vector<unsigned int> &State_sVector, const string P_type, double &mu_f, double &sigm_f, vector<vector<int>> &RW_series_vector) {
-/// sface_design :: A list of special_faces_sequence as an output of the module. The first line here is always the random case (zero-design), then following Smax (1-sequence) and Smin (2-sequence), and then all the designs in between Smax and Smin
-// CellNumbs :: vector components: [0] - Nodes number, [1] - Edges number, [2] - Faces number, [3] - Grains number
-// Maximal fraction (max_sFaces_fraction) for simulation loop max_sFaces_fraction = [0,1]
-// State_Vector in the form : [Element index] - > [Type]
-///vector<unsigned int> State_sVector(CellNumbs.at(2),0); // State vector filling with zeros
-
-/// Used functions
-    std::vector<double>  Log_normal_distribution(double &mu_f, double &sigm_f, int baskets);
-
-/// Type of the Processing tool from config.txt (const_cast for processing type; const_cast for output directory)
-    char* stype = const_cast<char*>(P_type.c_str());
-    char simulation_type = *stype;
-
-    //// Cases for Processing types ////
-
-    if (simulation_type == 'R') { //  Random generation case
-        Processing_Random(State_sVector, special_faces_sequence, max_sFaces_fraction);
-        special_cells_design.push_back(special_faces_sequence);
-
-    } ///End of 'R' type simulations
-
-    else if (simulation_type == 'L') { //  Random lengthy strips generation case
-        // Probability density function
-//REPAIR        cout << "ATTENTION: mu and sigm" << endl; cout << mu_f << "  " << sigm_f << endl;
-        std::vector<double> strip_lenght_distribution = Log_normal_distribution(mu_f, sigm_f,30);
-
-        // From fractions to number of Faces:
-        face_strip_distribution.clear(); // clearing file
-        for (auto  itr = strip_lenght_distribution.begin(); itr != strip_lenght_distribution.end(); ++itr)
-//        face_strip_distribution.push_back(*itr); //           face_strip_distribution.push_back(max_sFaces_fraction * CellNumbs.at(2) * (*itr));
-            face_strip_distribution.push_back(max_sFaces_fraction * CellNumbs.at(2) * (*itr)/ (distance(strip_lenght_distribution.begin(), itr) + 1.0));
-
-        /// Generation of special Faces structure
-        RW_series_vector = RStrips_Distribution(face_strip_distribution, State_sVector, special_faces_sequence);
-        special_cells_design.push_back(special_faces_sequence);
-
-    } ///End of 'L' type simulations
-
-    else cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'S' or 'I'..!" << endl;
-
-    return special_cells_design;
-} /// The end of HAGBsProbability3D()
-
-/// * Related functions * ///
-// 4
-bool ProcessingON(char* config, bool time_step_one) {
+ * bool ProcessingON(char* config, bool time_step_one) {
     std::string line;
     ifstream inConf(config);
     bool isProcessingON = 0;
@@ -174,18 +206,18 @@ bool ProcessingON(char* config, bool time_step_one) {
     if (inConf) { //If the file was successfully open, then
         while(getline(inConf, line, '\n'))
 // REPAIR            cout << line << endl;
-            if (!line.compare("DCC_Processing SWITCHED ON"s)) {
+            if (!line.compare("PCC_Processing SWITCHED ON"s)) {
                 isProcessingON = 1;
-                if (time_step_one == 1) cout << "ON    | DCC_Processing"s << endl;
+                if (time_step_one == 1) cout << "ON    | PCC_Processing"s << endl;
                 return isProcessingON;
             }
     } else cout << "ProcessingON() error: The file " << config << " cannot be read" << endl; // If something goes wrong
 
-    if (time_step_one == 1) cout << "OFF    | DCC_Processing"s << endl;
+    if (time_step_one == 1) cout << "OFF    | PCC_Processing"s << endl;
     return isProcessingON;
 }
+*/
 
-/// * Heap * ///
 // bool time_step_one = 1; // (technical support variable) special ID for the first step of iteration MAX fraction of Faces
 
 /*     /// Ordinary face sequence (!!works!!)

@@ -1,4 +1,4 @@
-/// DCC_Processing
+/// PCC_Processing
 string P_type_here = "R"s;
 cout << "------" << endl; cout << "START of the DCC Processing module" << endl; Out_logfile_stream << "------" << endl; Out_logfile_stream << "START of the DCC Processing module" << endl;
 //special_cells_design = DCC_Processing(special_faces_sequence, State_sVector, P_type_here);

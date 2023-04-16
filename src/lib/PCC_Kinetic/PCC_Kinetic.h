@@ -24,6 +24,8 @@ std::vector<double> sample_dimensions = {1.0, 1.0, 1.0}; // L_x [m], L_y [m],L_z
 // The source directory and simulation type from file config_kinetic.txt
 string K_type; // 'F' :: This char define the Kinetic process type: 'F' for the Ising-like model of Fracture /// In the plans 'W' or 'P' :: 'W' for the 3D one-layer film, 'P' for the Ising-like model of Plasticity
 
+std::vector<double> config_reader_main(char* config, string &Subcomplex_type, string &Processing_type, string &Kinetic_type, string &source_dir, string &output_dir); // Read and output the initial configuration from the config.txt file
+vector<double> ConfigVector = config_reader_main(confpath, S_type, P_type, K_type, source_dir, output_dir);
 
 /// Offstreams
 ofstream OutElCondfile, OutCrackEnergies_file;

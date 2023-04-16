@@ -186,7 +186,7 @@ The principal files, modules and concepts of the project are
 <ol>
 <li> the ‘main.cpp’ where all functions launching and the data reading from files occur </li>
 and three libraries (or modules) with related functions:
-<li> DCC_Processing </li>
+<li> PCC_Processing </li>
 <li> DCC_Characterisation </li>
 <li>  DCC_Writer </li>
 </ol>

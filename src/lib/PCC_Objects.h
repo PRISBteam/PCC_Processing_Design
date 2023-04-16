@@ -5,7 +5,7 @@
 #ifndef subcomplex_H
 #define subcomplex_H
 
-/// #0# The class of Grain Boundaries in a PCC
+/// # 0 # The class of Grain Boundaries in a PCC
 class grain_boundary{
 
 public:
@@ -240,7 +240,7 @@ if(node_ids.size()>0) {
 
 }; // end of class grain3D
 
-/// #3# The class of Agglomeration of defects in one special face element of a PCC
+/// # 3 # The class of Agglomeration of defects in one special face element of a PCC
 class agglomeration {
     double adhesion_energy = 0;
     double surface_energy = 0;
@@ -343,7 +343,7 @@ public:
 
 }; // end of class agglomeration
 
-/// #4# The class of stress concentrators related to defects in one special face element of a PCC
+/// # 4 # The class of stress concentrators related to defects in one special face element of a PCC
 
 class face_concentrator {
     double total_elastic_energy = 0;
@@ -380,7 +380,7 @@ public:
 
 
 
-/// #5# The class of a SUBCOMPLEX
+/// # 5 # The class of a SUBCOMPLEX
 class subcomplex {
 
 private:
@@ -538,7 +538,7 @@ public:
 }; /// end of class SUBCOMPLEX
 
 
-/// #6# The class of a MACROCRACK
+/// # 6 # The class of a MACROCRACK
 class macrocrack {
     double total_fracture_energy = 0;
     subcomplex half_plane_subcomplex; // geometry part
@@ -612,6 +612,77 @@ public:
 */
 
 }; /// end of class MACROCRACK
+
+
+/// # 7 # The class of a CELLS_DESIGN
+class CellsDesign {
+// std::vector<unsigned int> Sequence_n_vector, Sequence_e_vector, Sequence_f_vector, Sequence_p_vector; // are sequences Sequence_<*>_vector of special cells, including Sequence_n_vector, Sequence_e_vector, Sequence_f_vector and Sequence_p_vector
+
+private:
+    std::vector<unsigned int> p_sequence, f_sequence, e_sequence, n_sequence;
+    std::vector<int> p_design, f_design, e_design, n_design;
+
+public:
+    /// Set variables
+
+    void Set_sequences(std::vector<unsigned int> psequence, std::vector<unsigned int> fsequence, std::vector<unsigned int> esequence, std::vector<unsigned int> nsequence){
+        p_sequence = psequence; f_sequence = fsequence; e_sequence = esequence; n_sequence = nsequence;
+    }
+
+    void Set_designes(std::vector<int> pdesign, std::vector<int> fdesign, std::vector<int> edesign, std::vector<int> ndesign){
+        p_design = pdesign; f_design = fdesign; e_design = edesign; n_design = ndesign;
+    }
+
+    void Set_sequence(std::vector<unsigned int> sequence, int id){
+        if (id == 3) p_sequence = sequence;
+        else if (id == 2 ) f_sequence = sequence;
+        else if (id == 1 ) e_sequence = sequence;
+        else if (id == 0 ) n_sequence = sequence;
+    }
+    void Set_design(std::vector<int> design, int id){
+        if (id == 3) p_design = design;
+        else if (id == 2 ) f_design = design;
+        else if (id == 1 ) e_design = design;
+        else if (id == 0 ) n_design = design;
+
+    }
+
+    // Get
+    std::vector<unsigned int> Get_p_sequence(){
+        if (p_sequence.size() == 0) cout << "WARNING: p_sequence did not set!" << endl; else
+        return p_sequence;
+    }
+    std::vector<unsigned int> Get_f_sequence(){
+        if (f_sequence.size() == 0) cout << "WARNING: f_sequence did not set!" << endl; else
+        return f_sequence;
+    }
+    std::vector<unsigned int> Get_e_sequence(){
+        if (e_sequence.size() == 0) cout << "WARNING: e_sequence did not set!" << endl; else
+        return e_sequence;
+    }
+    std::vector<unsigned int> Get_n_sequence(){
+        if (n_sequence.size() == 0) cout << "WARNING: n_sequence did not set!" << endl; else
+        return n_sequence;
+    }
+
+    std::vector<int> Get_p_design(){
+        if (p_design.size() == 0) cout << "WARNING: p_design did not set!" << endl; else
+            return p_design;
+    }
+    std::vector<int> Get_f_design(){
+        if (f_design.size() == 0) cout << "WARNING: f_design did not set!" << endl; else
+            return f_design;
+    }
+    std::vector<int> Get_e_design(){
+        if (e_design.size() == 0) cout << "WARNING: e_design did not set!" << endl; else
+            return e_design;
+    }
+    std::vector<int> Get_n_design(){
+        if (n_design.size() == 0) cout << "WARNING: n_design did not set!" << endl; else
+            return n_design;
+    }
+}; /// end of class CELLS_DESIGN
+
 
 #endif
 #endif

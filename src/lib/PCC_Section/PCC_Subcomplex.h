@@ -2,17 +2,20 @@
 ///-------------------------------------
 #include "Planecut_Functions.h"
 ///-------------------------------------
-/// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen
-// The source directory and simulation type from file config.txt
-string S_type; // 'P' or 'H' :: This char define the subsection type: 'P' for the whole Plane cut, 'H' for the half-plane cut like a crack
-
-
-bool SubcomplexON(char* config, bool time_step_one); // Check the Subcomplex (Section) module status (On/Off) in the config.txt file
-
 //std::vector <unsigned int> DCC_Subcomplex(subcomplex new_cut, std::vector<unsigned int> const &s_faces_sequence, std::vector<unsigned int> const &c_faces_sequence) {
 subcomplex DCC_Subcomplex(subcomplex &new_cut, std::vector<unsigned int> const &s_faces_sequence, std::vector<unsigned int> &sub_faces_sequence, std::vector<unsigned int> const &c_faces_sequence, double a_coeff = 0.0, double b_coeff = 0.0, double c_coeff = 1.0, double D_coeff = 0.6) {
 // sub_grains_sequence - all grains in the subcomplex, sub_faces_sequence - all faces in the subcomplex, common_faces_sequence - all faces common for two grains in the subcomplex, s_sub_faces_sequence - special faces, c_sub_faces_sequence - induced (fractured, for instance) faces
-std::vector <unsigned int>  sub_grains_sequence, common_faces_sequence, s_sub_faces_sequence, c_sub_faces_sequence;
+
+/// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen
+// The source directory and simulation type from file config.txt
+    string S_type; // 'P' or 'H' :: This char define the subsection type: 'P' for the whole Plane cut, 'H' for the half-plane cut like a crack
+    std::vector<double> config_reader_main(char* config, string &Subcomplex_type, string &Processing_type, string &Kinetic_type, string &source_dir, string &output_dir); // Read and output the initial configuration from the config.txt file
+    vector<double> ConfigVector = config_reader_main(confpath, S_type, P_type, K_type, source_dir, output_dir);
+
+
+    bool SubcomplexON(char* config, bool time_step_one); // Check the Subcomplex (Section) module status (On/Off) in the config.txt file
+
+    std::vector <unsigned int>  sub_grains_sequence, common_faces_sequence, s_sub_faces_sequence, c_sub_faces_sequence;
 
     SpMat GFS = SMatrixReader(paths.at(6 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
     SpMat AGS = SMatrixReader(paths.at(3 + (dim - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Volumes

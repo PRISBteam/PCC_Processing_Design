@@ -19,6 +19,17 @@ using namespace std;
 std::vector <double> DCC_Multiphysics(macrocrack &large_crack, double external_vonMizes_stress) { // std::vector<unsigned int> &s_faces_sequence, string K_type
     std::vector <double> new_face_energies(CellNumbs.at(2),0.0); // initial values 0.0
 
+    /// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen
+// The source directory and simulation type from file config.txt
+    string S_type; // 'P' or 'H' :: This char define the subsection type: 'P' for the whole Plane cut, 'H' for the half-plane cut like a crack
+    std::vector<double> config_reader_main(char* config, string &Subcomplex_type, string &Processing_type, string &Kinetic_type, string &source_dir, string &output_dir); // Read and output the initial configuration from the config.txt file
+    vector<double> ConfigVector = config_reader_main(confpath, S_type, P_type, K_type, source_dir, output_dir);
+
+
+    bool SubcomplexON(char* config, bool time_step_one); // Check the Subcomplex (Section) module status (On/Off) in the config.txt file
+
+
+
     int set_crack_mode = 1;
     double Puasson_coeff = 0.3;
     /// Set global sample size vector here (!)

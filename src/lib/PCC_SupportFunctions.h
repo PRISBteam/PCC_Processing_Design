@@ -93,9 +93,10 @@ vector<tuple<double, double, double>> dTuplesReader(char* SMpath, unsigned int &
 }
 
 /// Creation int std::Vector from file
-std::vector<unsigned int> VectorReader(char* FilePath) {
+std::vector<unsigned int> VectorIReader(char* FilePath) {
     std::vector<unsigned int> res;
-    unsigned int i=0;
+    unsigned int i = 0;
+
     ifstream inCellNumbers(FilePath);
     if (inCellNumbers.is_open()) { //If the file was successfully open, then
         while(inCellNumbers >> i) res.push_back(i);
