@@ -683,6 +683,20 @@ public:
     }
 }; /// end of class CELLS_DESIGN
 
+class ProcessedComplex { /// Essential for Characterisation module
+// PCC processed with all its characteristics and design sequences
+
+private:
+
+public:
+    /// Set variables
+    CellsDesign pcc_design;
+
+    void Set_design(CellsDesign processed_pcc_design){
+        pcc_design = pcc_design;
+    }
+
+}; /// end of class ProcessedComplex
 
 #endif
 #endif

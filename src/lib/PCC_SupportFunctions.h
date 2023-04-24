@@ -1,7 +1,8 @@
 /// Creation Eigen::Sparse_Matrix from file
 Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsigned int Cols) {
-
+    /// function output
     Eigen::SparseMatrix<double> res(Rows, Cols);
+
     typedef Eigen::Triplet<double> Tr; // Eigen library class
     std::vector<Tr> tripletList; // Probe vector of triplets
 
@@ -11,9 +12,9 @@ Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsig
         while(!inAN.eof()) {
             inAN >> i >> j >> value;
             tripletList.push_back(Tr(i, j, value));
-            // cout << i << "\t" << j << "\t" << value << endl;
+// REPAIR cout << i << "\t" << j << "\t" << value << endl;
         }
-    } else cout << "The file " << SMpath << " cannot be read" << endl; //If something goes wrong
+    } else cout << "WARNING: The file " << SMpath << " cannot be read" << endl; //If something goes wrong
 //Sparse AB matrix
     res.setFromTriplets(tripletList.begin(), tripletList.end());
 
@@ -130,7 +131,7 @@ vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> con
     return res;
 }
 
-/// * Function calculates the vector<int> "TJsTypes" of types TJs in the DCC using its FES incidence matrix and special faces sequence (s_faces_sequence) * ///
+/// * Function calculates the vector<int> "TJsTypes" of types TJs in the PCC using its FES incidence matrix and special faces sequence (s_faces_sequence) * ///
 /// *                                                                                                                                                    * ///
 vector<double> EdgesTypesCalc(std::vector<unsigned int> const &CellNumbs, vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const &FES)
 {
@@ -236,6 +237,30 @@ vector<double> Get_EntropyIncreaseList(std::vector<unsigned int> &S_Vector, vect
 
     return EntropyIncreaseList;
 }
+
+std::vector<vector<int>> Get_cases_list(std::vector<int> const &S_Vector, std::vector<int> const &EdgeTypes, double const &p_index) {
+    std::vector<vector<int>> cases_list; // in every case its own TJs vector
+
+    // Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file paths.at(5 + (dim - 3))
+    SpMat FES = SMatrixReader(paths.at(5 + (dim - 3)), CellNumbs.at(1), CellNumbs.at(2)); // Edges-Faces sparse incidence matrix
+    vector<int> NewEdgeTypes = EdgeTypes;
+
+    if (p_index == 0) { // cases: direct assigment of special faces one by one
+
+        for (unsigned int f = 0; f < CellNumbs.at(2 + (dim - 3)); ++f) { // loop over all Faces in PCC
+            if (S_Vector.at(f) == 0) { // Loop over each still ORDINARY element neighbours
+                    for(int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
+                        if (FES.coeff(e, f) == 1) NewEdgeTypes.at(e)++;
+            }
+            cases_list.push_back(NewEdgeTypes);
+        } // end for (unsigned int f = 0; f < CellNumbs.at(2); ++f)
+    } else if (p_index == 1) { // cases: crystallographic restrictions with "grain rotations"
+
+    }
+
+    return cases_list;
+}
+
 
 /// DDRX support function :: GFS matrix reading and calculation of new seeds at the centres of GBs
 tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<char*> const paths, std::vector<unsigned int> & CellNumbs, vector<tuple<double, double, double>> & AllSeeds_coordinates) {

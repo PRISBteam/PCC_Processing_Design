@@ -10,8 +10,9 @@
 /// Attached user-defined C++ libraries:
 // Here a Processing_Functions.h library of C++ functions for advanced random and non-random generations of special chains of PCC elements
 ///-----------------------------------------------------
+#include "functions/measures.h"
+#include "functions/Processing_Imposed_functions.h"
 #include "functions/Processing_Assignment_functions.h"
-//#include "functions/Processing_Imposed_functions.h"
 //#include "functions/Procesing_Induced_functions.h"
 ///-----------------------------------------------------
 
@@ -57,36 +58,40 @@ for (int cell_type = 3; cell_type >= 0; --cell_type) { /// loop over all types o
         cout << "Random processing in operation: cell_type : "s << cell_type << endl;
         Out_logfile_stream << "Random processing in operation: cell_type : "s << cell_type << endl;
         special_x_sequence = Processing_Random(cell_type, Configuration_State, max_fractions_vectors);
-//        special_cells_design.push_back(special_x_sequence);
     } ///End of 'R' type simulations
 
-    else if (ptype_vector.at(cell_type) == "S" && max_fractions_vectors[cell_type].size() > 0) { // Maximum entropy production
-        if (pindex_vector.at(cell_type) == 1) {
-            /// Processing_maxEntropy(cell_type, Configuration_State, max_fractions_vectors);
-//            special_cells_design.push_back(special_x_sequence);
-//            CD.Set_sequence(special_x_sequence, cell_type); // (sequence, id)
-            cout << "Processing_maxEntropy - successfully finished" << endl;
-        } else if (pindex_vector.at(cell_type) == 0) {
-            ///  Processing_minEntropy(cell_type, Configuration_State, max_fractions_vectors);
-//            special_cells_design.push_back(special_x_sequence);
-//            CD.Set_sequence(special_x_sequence, cell_type); // (sequence, id)
-            cout << "Processing_minEntropy - successfully finished" << endl;
-        }
+    else if (ptype_vector.at(cell_type) == "F" && max_fractions_vectors[cell_type].size() > 0) { // Maximum <functional> production
+//        if (pindex_vector.at(cell_type) == 0) {
+// processing index :: 0 - direct special faces assignment;  1 - crystallographic ; 2 - configurational TJs-based entropy (deviatoric);
+            cout << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
+            Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
+            special_x_sequence = Processing_maxFunctional(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
+            // cell type = 2 -> faces
 
-    } // End of 'S' type simulations (elseif)
-    else cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'S' or 'I'..!" << endl;
+//        } else if (pindex_vector.at(cell_type) == 1) {
+//            cout << "MaxFunctional = Configuration Entropy processing in operation: cell_type : "s << cell_type << endl;
+//            special_x_sequence =  Processing_maxFunctional(cell_type, Configuration_State, max_fractions_vectors, pindex_vector.at(cell_type));
+//        }
+
+    } // End of 'F' type simulations (elseif)
+    else cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'F' or 'I'..!" << endl;
 
     CD.Set_sequence(special_x_sequence, cell_type); // (sequence, id)
     CD.Set_design(Configuration_State.at(cell_type), cell_type); // (design, id) - design vector with types
 
     } // end of for(cell_type = 0; cell_type < dim+1; ++cell_type)
 
-    cout << "p-sequence size: " << CD.Get_p_sequence().size() << endl;
-    cout << "f-sequence size: " << CD.Get_f_sequence().size() << endl;
-    cout << "e-sequence size: " << CD.Get_e_sequence().size() << endl;
-    cout << "n-sequence size: " << CD.Get_n_sequence().size() << endl;
-
-// Updates CD vector based on the special_cells_design
+    cout << endl; Out_logfile_stream << endl;
+    cout << "p-sequence size: " << CD.Get_p_sequence().size() << endl; Out_logfile_stream << "p-sequence size: " << CD.Get_p_sequence().size() << endl;
+    cout << "f-sequence size: " << CD.Get_f_sequence().size() << endl; Out_logfile_stream << "f-sequence size: " << CD.Get_f_sequence().size() << endl;
+    cout << "e-sequence size: " << CD.Get_e_sequence().size() << endl; Out_logfile_stream << "e-sequence size: " << CD.Get_e_sequence().size() << endl;
+    cout << "n-sequence size: " << CD.Get_n_sequence().size() << endl; Out_logfile_stream << "n-sequence size: " << CD.Get_n_sequence().size() << endl;
+    cout << endl; Out_logfile_stream << endl;
+    cout << "p-design vector size: " << CD.Get_p_design().size() << endl; Out_logfile_stream << "p-design vector size: " << CD.Get_p_design().size() << endl;
+    cout << "f-design vector size: " << CD.Get_f_design().size() << endl; Out_logfile_stream << "f-design vector size: " << CD.Get_f_design().size() << endl;
+    cout << "e-design vector size: " << CD.Get_e_design().size() << endl;  Out_logfile_stream << "e-design vector size: " << CD.Get_e_design().size() << endl;
+    cout << "n-design vector size: " << CD.Get_n_design().size() << endl; Out_logfile_stream << "n-design vector size: " << CD.Get_n_design().size() << endl;
+    cout << endl; Out_logfile_stream << endl;
 
     return CD;
 } /// The end of Processing()

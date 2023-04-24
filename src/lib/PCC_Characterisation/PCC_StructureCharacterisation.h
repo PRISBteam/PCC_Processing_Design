@@ -6,17 +6,18 @@
 ///-------------------------------------
 
 ///Structure characterisation tool
-int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> &c_faces_sequence, std::vector<double> configuration) {
-
-
-/// Local functions
-    bool CharacterisationON(char* config, bool time_step_one); // Check the Structure Characterisation module status (On/Off) in the config.txt file
+ProcessedComplex PCC_StructureCharacterisation(CellsDesign const &new_cells_design) {
+//int DCC_StructureCharacterisation(std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> &c_faces_sequence, std::vector<double> configuration) {
 
 /// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen
 // The source directory and simulation type from file config.txt
-    string S_type; // 'P' or 'H' :: This char define the subsection type: 'P' for the whole Plane cut, 'H' for the half-plane cut like a crack
-    std::vector<double> config_reader_main(char* config, string &Subcomplex_type, string &Processing_type, string &Kinetic_type, string &source_dir, string &output_dir); // Read and output the initial configuration from the config.txt file
-    vector<double> ConfigVector = config_reader_main(confpath, S_type, P_type, K_type, source_dir, output_dir);
+//    string S_type; // 'P' or 'H' :: This char define the subsection type: 'P' for the whole Plane cut, 'H' for the half-plane cut like a crack
+//    std::vector<double> config_reader_main(char* config, string &Subcomplex_type, string &Processing_type, string &Kinetic_type, string &source_dir, string &output_dir); // Read and output the initial configuration from the config.txt file
+
+    std::vector<double> ConfigVector = config_reader_characterisation(source_path, Out_logfile_stream); // vector<double> (!) from ini_readers.h library
+
+
+    config_reader_main(confpath, S_type, P_type, K_type, source_dir, output_dir);
 
 
     bool SubcomplexON(char* config, bool time_step_one); // Check the Subcomplex (Section) module status (On/Off) in the config.txt file

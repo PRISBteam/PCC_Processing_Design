@@ -129,9 +129,7 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
 
 
 
-/// ================== # 2 # Initial configuration - reading and output ==================
-
-
+/// ================== # 2 # Initial PROCESSING module configuration - reading and output ==================
 void config_reader_processing(std::string &source_path, std::vector<vector<double>> &max_fractions_vectors, double &mu, double &sigma, std::vector<string> &ptype_vector, std::vector<double> &pindex_vector, std::ofstream &Out_logfile_stream) {
     // ini files reader - external (MIT license) library
     mINI::INIFile file(source_path + "processing.ini"s);
@@ -418,3 +416,63 @@ vector<double> max_fractions_output(3, 0); // temporary vector serving as an out
 
     return;
 } /// END of config_reader_processing function
+
+std::vector<double> config_reader_characterisation(std::string const &source_path, std::ofstream c&Out_logfile_stream) {
+    std::vector<double> config_characterisation_vector;
+
+
+
+    return config_characterisation_vector;
+}
+
+/// ================== # 6 # Initial WRITER module configuration - reading and output ==================
+
+void config_reader_writer(std::string &source_path, std::vector<int> writer_specifications, std::ofstream &Out_logfile_stream) {
+/// writer_specifications vector ::
+int    isSequencesOutput;      // - >     [0]
+int    isDesignvectorsOutput;  // - >     [1]
+
+// ini files reader - external (MIT license) library
+    mINI::INIFile file(source_path + "writer.ini"s);
+    mINI::INIStructure writer_ini;
+    file.read(writer_ini);
+
+// I
+// sequences and designs output
+    if (writer_ini.has("sequences")) {
+        auto& collection = writer_ini["sequences"];
+        if (collection.has("isSequencesOutput"))
+        {
+            isSequencesOutput = stoi(writer_ini.get("sequences").get("isSequencesOutput"));
+        } }
+        writer_specifications.push_back(isSequencesOutput); // [0]
+
+    if (writer_ini.has("sequences")) {
+        auto& collection = writer_ini["sequences"];
+        if (collection.has("isDesignvectorsOutput"))
+        {
+            isDesignvectorsOutput = stoi(writer_ini.get("sequences").get("isDesignvectorsOutput"));
+        } }
+        writer_specifications.push_back(isDesignvectorsOutput); // [1]
+
+// II
+/// Output to the screen/console
+//    cout << endl;
+//    cout<< "______________________________________________________________________________________" << endl;
+    cout << "The Writer module specifications:\t\t" << endl;
+//    cout << endl;
+    cout << "Sequences output \t\t\t"s << isSequencesOutput << endl;
+    cout << "Design vectors output \t\t"s << isDesignvectorsOutput << endl;
+    cout << endl;
+
+/// Output into .log file
+//    Out_logfile_stream << endl;
+//    Out_logfile_stream<< "______________________________________________________________________________________" << endl;
+    Out_logfile_stream << "The Writer module specifications:\t\t" << endl;
+//    Out_logfile_stream << endl;
+    Out_logfile_stream << "Sequences output :\t"s << isSequencesOutput << endl;
+    Out_logfile_stream << "Design vectors output :\t"s << isDesignvectorsOutput << endl;
+    Out_logfile_stream << endl;
+
+    return;
+} /// END of config_reader_writer function
