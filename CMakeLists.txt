@@ -62,7 +62,7 @@ add_executable( PCC_Processing_Design
         #src/tasks/task_StripsProcessingDesign.cpp
 
         #src/lib/PCC_Processing/functions/Procesing_Induced_functions.h src/lib/PCC_Characterisation/Characterisation_Indexing_functions.h src/lib/PCC_Processing/functions/Processing_Imposed_functions.h
-        src/lib/PCC_Processing/functions/measures.h)
+        src/lib/measures.h)
 
 #target_compile_options(PCC_Processing_Design PRIVATE -Wall ${OpenMP_CXX_FLAGS})
 #target_link_libraries(PCC_Processing_Design PRIVATE ${OpenMP_CXX_FLAGS})
