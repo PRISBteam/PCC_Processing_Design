@@ -3,9 +3,13 @@
 Manual version: 0.1.0 <br>
 Current manual release date: 25 April 2023 <br>
 
-<p>  <i> PCC Processing Design  (DPD code)</i>  or   <i> Discrete Processing Design  (DPD code)</i> is a software aimed to provide a wholly discrete representation of defect microstructure evolution during the materials processing. The code is an effective tool both for studies microstructure network evolution during the materials processing and for design of advanced microstructures in composite polycrystalline materials. Its key feature is the usage of polyhedral cell complexes (PCCs) as objects of algebraic topology  [1], which provide a convenient discrete space for large-scale design of realistic material defect structures of different dimensions (line defects, surface defects, different volumetric phases). Such PCCs can be constructed based on the 2D/3D space tessellation with the convex polyhedron’s such as the Voronoi tessellation of space realistically imitating a polycrystalline material.
+<p>  <i> PCC Processing Design  (DPD code)</i>  or   <i> Discrete Processing Design  (DPD code)</i> is a software aimed to provide a wholly discrete representation of defect microstructure evolution during the materials processing. The code is an effective tool both for studies microstructure network evolution during the materials processing and for design of advanced microstructures in composite polycrystalline materials. Its key feature is the usage of polyhedral cell complexes (PCCs) as objects of algebraic topology [1], which provide a convenient discrete space for large-scale design of realistic material defect structures of different dimensions (line defects, surface defects, different volumetric phases). Such PCCs can be constructed based on the 2D/3D space tessellation with the convex polyhedron’s such as the Voronoi tessellation of space realistically imitating a polycrystalline material.
 
 The two following introductory sections discuss the basics of the PCCs theory needed for understanding the code input and output and the practical ways to obtain different PCCs as the sets of sparse matrices of their operators. </p>
+
+<ol>
+<li> K. Berbatov, P.D. Boom, A.L. Hazel, A.P. Jivkov, Applied Mathematical Modelling 110 (2022) 172-192. </li>
+</ol>
 
 <h2>Some necessary definitions</h2>
 
@@ -41,7 +45,7 @@ The Voronoi tesselation provided by Neper supposed to be a <i>dual</i> complex a
 Please, see more <a href="https://neper.info/doc/neper_t.html#examples" target="_blank"> examples </a> on the Neper webpage.
 
 
-<h3> DCC Generator Tool </h3>
+<h3> PCC Generator Tool </h3>
 
 Based on the Poisson-Voronoi tessellation of space provided by the <a href="https://neper.info" target=”_blank”> Neper </a> software the code creates discrete (combinatorial) cell complex (DCC) as the set of sparse matrices. The  DCC Generator Tool generates a sparse representation of matrices: for any matrix element _a_(_i_, _j_) = _c_, the files of the matrices contain the list of triplets in the form (_i_, _j_, _c_). The enumeration of indices starts from 0, and, for instance, the line "5, 7, 1" in the adjacency matrix A<sub>k</sub> means that the _k_-cell #6 is the neighbour of the _k_-cell #8. For any incidence matrices B<sub>k</sub>,  the same triplet "5, 7, 1" means that the (_k_-1)-cell #6 is on the boundary of the _k_-cell #8, and their orientations coincide (_c_ = -1 for the opposite orientations). 
 
@@ -54,10 +58,7 @@ The latest release of the code can be downloaded from the <a href="[https://gith
 The package DCC_Structure contains Python modules to build a discrete cell complex (DCC) based on the slip planes of crystal nanostructures (simple cubic, FCC, BCC; HCP not yet available). The script execute.py is a summarised execution of the whole package. It takes as input:
 …
 
-<h2> DSD code Tutorial </h2>
-…
-
-<h2> Applications of DSD tool </h2>
+<h2> Applications of DPD code </h2>
 <ol>
 <li> S. Zhu, E. Borodin, A. P. Jivkov, Topological phase transitions of grain boundary networks during severe plastic deformations of copper alloys. Acta Materialia (Under review), 2023.</li>
 <li> E.N. Borodin, A.P. Jivkov, A.G. Sheinerman, M.Yu. Gutkin, 2021. Optimisation of rGO-enriched nanoceramics by combinatorial analysis. Materials & Design 212, 110191. [doi: 10.1016/j.matdes.2021.110191.](https://doi.org/10.1016/j.matdes.2021.110191) </li>
