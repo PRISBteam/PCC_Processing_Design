@@ -75,4 +75,4 @@ Distributed under the GNU General Public License v3.0. See LICENSE.txt for more 
 
 
 <h2> Contacts </h2>
-Please feel free <a mailto: “Elijah.Borodin@icloud.com”> e-mail </a> to Dr Elijah Borodin (Research Fellow in Materials Physics at the University of Manchester, Department of Solids and Structures) any queries relating with the code.
+Please feel free <a href = “mailto: Elijah.Borodin@icloud.com”> e-mail </a> to Dr Elijah Borodin (Research Fellow in Materials Physics at the University of Manchester, Department of Solids and Structures) any queries relating with the code.
