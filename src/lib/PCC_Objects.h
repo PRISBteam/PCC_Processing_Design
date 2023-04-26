@@ -648,36 +648,36 @@ public:
     }
 
     // Get
-    std::vector<unsigned int> Get_p_sequence(){
+    std::vector<unsigned int> Get_p_sequence(void){
         if (p_sequence.size() == 0) cout << "WARNING: p_sequence did not set!" << endl; else
         return p_sequence;
     }
-    std::vector<unsigned int> Get_f_sequence(){
+    std::vector<unsigned int> Get_f_sequence(void){
         if (f_sequence.size() == 0) cout << "WARNING: f_sequence did not set!" << endl; else
         return f_sequence;
     }
-    std::vector<unsigned int> Get_e_sequence(){
+    std::vector<unsigned int> Get_e_sequence(void){
         if (e_sequence.size() == 0) cout << "WARNING: e_sequence did not set!" << endl; else
         return e_sequence;
     }
-    std::vector<unsigned int> Get_n_sequence(){
+    std::vector<unsigned int> Get_n_sequence(void){
         if (n_sequence.size() == 0) cout << "WARNING: n_sequence did not set!" << endl; else
         return n_sequence;
     }
 
-    std::vector<int> Get_p_design(){
+    std::vector<int> Get_p_design(void){
         if (p_design.size() == 0) cout << "WARNING: p_design did not set!" << endl; else
             return p_design;
     }
-    std::vector<int> Get_f_design(){
+    std::vector<int> Get_f_design(void){
         if (f_design.size() == 0) cout << "WARNING: f_design did not set!" << endl; else
             return f_design;
     }
-    std::vector<int> Get_e_design(){
+    std::vector<int> Get_e_design(void){
         if (e_design.size() == 0) cout << "WARNING: e_design did not set!" << endl; else
             return e_design;
     }
-    std::vector<int> Get_n_design(){
+    std::vector<int> Get_n_design(void){
         if (n_design.size() == 0) cout << "WARNING: n_design did not set!" << endl; else
             return n_design;
     }
@@ -695,6 +695,16 @@ public:
     void Set_design(CellsDesign processed_pcc_design){
         pcc_design = pcc_design;
     }
+
+    std::vector<vector<unsigned int>> face_process_seq;
+    std::vector<vector<int>> face_process_state;
+
+    std::vector<double> e_entropy_mean_vector;
+    std::vector<double> e_entropy_skrew_vector;
+    std::vector<double> e_entropy_full_vector;
+
+    std::vector<vector<double>> je_fractions_vector;
+    std::vector<vector<double>> de_fractions_vector;
 
 }; /// end of class ProcessedComplex
 

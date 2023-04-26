@@ -8,7 +8,7 @@
 #include "Writer_Functions.h"
 //#include "DCC_Writer/Writer_Functions.h"
 ///-------------------------------------
-void PCC_Writer(CellsDesign new_cells_design) {
+void PCC_Writer(CellsDesign &new_cells_design, ProcessedComplex &pcc_processed) {
 // Read PCC Writer specifications from the writer.ini file and output of the current configuration to the screen and .log file
 std::vector<int> writer_specifications; // vector<int> containing writer specifications and formats
 config_reader_writer(source_path, writer_specifications, Out_logfile_stream); // Read and output the initial configuration from the writer.ini file
@@ -17,6 +17,7 @@ int output_counter = 0; // special counter for output numeration
 
     /// Output special and ordinary face sequences to the output directory specified in config.txt
     PCC_CellSequences_Writer(new_cells_design, output_counter);
+    PCC_Entropic_Writer(pcc_processed, output_counter);
 
 /*
        char* stype = const_cast<char*>(P_type.c_str()); // Processing type variable

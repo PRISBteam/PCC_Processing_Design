@@ -643,6 +643,7 @@ void config_reader_writer(std::string &source_path, std::vector<int> writer_spec
 /// writer_specifications vector ::
 int    isSequencesOutput;      // - >     [0]
 int    isDesignvectorsOutput;  // - >     [1]
+int isEdgeConfEntropy = 0, isEdgeFractions = 0, isDegreeEdgeFractions = 0; // [2], [3], [4]
 
 // ini files reader - external (MIT license) library
     mINI::INIFile file(source_path + "writer.ini"s);
@@ -667,14 +668,41 @@ int    isDesignvectorsOutput;  // - >     [1]
         } }
         writer_specifications.push_back(isDesignvectorsOutput); // [1]
 
-// II
+// II Entropic
+    if (writer_ini.has("entropic_edges")) {
+        auto& collection = writer_ini["entropic_edges"];
+        if (collection.has("isConfEntropy"))
+        {
+            isEdgeConfEntropy = stoi(writer_ini.get("entropic_edges").get("isConfEntropy"));
+        } }
+    writer_specifications.push_back(isEdgeConfEntropy); // [2]
+
+    if (writer_ini.has("entropic_edges")) {
+        auto& collection = writer_ini["entropic_edges"];
+        if (collection.has("isFractions"))
+        {
+            isEdgeFractions = stoi(writer_ini.get("entropic_edges").get("isFractions"));
+        } }
+    writer_specifications.push_back(isEdgeFractions); // [3]
+
+    if (writer_ini.has("entropic_edges")) {
+        auto& collection = writer_ini["entropic_edges"];
+        if (collection.has("isDegreeFractions"))
+        {
+            isDegreeEdgeFractions = stoi(writer_ini.get("entropic_edges").get("isDegreeFractions"));
+        } }
+    writer_specifications.push_back(isDegreeEdgeFractions); // [4]
+
 /// Output to the screen/console
 //    cout << endl;
 //    cout<< "______________________________________________________________________________________" << endl;
     cout << "The Writer module specifications:\t\t" << endl;
 //    cout << endl;
-    cout << "Sequences output \t\t\t"s << isSequencesOutput << endl;
-    cout << "Design vectors output \t\t"s << isDesignvectorsOutput << endl;
+    cout << "Sequences output \t\t\t"s << writer_specifications.at(0) << endl;
+    cout << "Design vectors output \t\t"s << writer_specifications.at(1) << endl;
+    cout << "Configuration Edges entropy \t\t\t"s << writer_specifications.at(2) << endl;
+    cout << "Special Edge fractions \t\t\t"s << writer_specifications.at(3) << endl;
+    cout << "Special Edge degree fractions \t\t\t"s << writer_specifications.at(4) << endl;
     cout << endl;
 
 /// Output into .log file
@@ -682,8 +710,11 @@ int    isDesignvectorsOutput;  // - >     [1]
 //    Out_logfile_stream<< "______________________________________________________________________________________" << endl;
     Out_logfile_stream << "The Writer module specifications:\t\t" << endl;
 //    Out_logfile_stream << endl;
-    Out_logfile_stream << "Sequences output :\t"s << isSequencesOutput << endl;
-    Out_logfile_stream << "Design vectors output :\t"s << isDesignvectorsOutput << endl;
+    Out_logfile_stream << "Sequences output \t\t\t"s << writer_specifications.at(0) << endl;
+    Out_logfile_stream << "Design vectors output \t\t"s << writer_specifications.at(1) << endl;
+    Out_logfile_stream << "Configuration Edges entropy \t\t\t"s << writer_specifications.at(2) << endl;
+    Out_logfile_stream << "Special Edge fractions \t\t\t"s << writer_specifications.at(3) << endl;
+    Out_logfile_stream << "Special Edge degree fractions \t\t\t"s << writer_specifications.at(4) << endl;
     Out_logfile_stream << endl;
 
     return;

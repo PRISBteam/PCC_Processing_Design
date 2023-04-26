@@ -6,19 +6,48 @@
 ///-------------------------------------
 
 ///Structure characterisation tool
-ProcessedComplex PCC_StructureCharacterisation(CellsDesign const &new_cells_design) {
+ProcessedComplex PCC_StructureCharacterisation(CellsDesign &new_cells_design) {
     ProcessedComplex PCC_characteristics; // module output
-
 /// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen
     std::vector<int> charlabs_polyhedrons, charlabs_faces, charlabs_edges, charlabs_nodes;
     std::vector<double> ConfigVector = config_reader_characterisation(source_path, charlabs_polyhedrons, charlabs_faces, charlabs_edges, charlabs_nodes, Out_logfile_stream); // vector<double> (!) from ini_readers.h library
 
-    for (int i = 0; i < 4; ++i) {
-     //   std::vector<double> j_fractions_vector(vector<int> const &TJsTypes){ // based on Edges vector
-     //       std::vector<double> d_fractions_vector(vector<int> const &TJsTypes){ // based on Edges vector
-     //           std::tuple<double, double> Configuration_Entropy_tuple(std::vector<double> const &j_fractions){ // based on Edges fraction vector
-     //               return std::make_tuple(Face_Entropy_Median, Face_Entropy_Skrew);
-        } // end for (int i = 0; i < 4; ++i)
+/// creation of the State Vectors
+// Faces
+    std::vector<unsigned int> face_sequences_vector; // number of different sequences based on the face design vector
+    std::vector<int> face_states_vector;
+
+    for (auto seq : new_cells_design.Get_f_sequence()) {
+        face_sequences_vector.push_back(seq);
+        if ( face_sequences_vector.size() % (int) (2.0*std::log(new_cells_design.Get_f_sequence().size())) == 0) { // only some values - each 2.0*std::log(*.size()) - are written in the face_sequences_vector
+            PCC_characteristics.face_process_seq.push_back(face_sequences_vector);
+        }
+    } // end for()
+
+    for (int i = 0; i < 4; ++i) { // for all types of cells
+
+    /// Measures: fractions and entropies
+        if(i == 1 && charlabs_edges.at(0) == 1) { // Edges lab
+            vector<int> EdgeTypes_char(CellNumbs.at(1 + (dim - 3)), 0); // vector<int> in the form [ 0 2 3 3 2 1 ...] with the TJs type ID as its values
+            std::vector<double> j_edge_fractions(dim+1,0), d_edge_fractions(dim,0); // fractions of (1) edges of different types and (2) edges of different degrees
+
+            /// for each state:
+            tuple<double,double> conf_entropy_t;
+            for (auto current_seq : PCC_characteristics.face_process_seq) {
+                EdgeTypes_char.clear();
+                EdgeTypes_char = Edge_types_byFaces(CellNumbs, current_seq, j_edge_fractions, d_edge_fractions);
+
+                conf_entropy_t = Configuration_Entropy_tuple(j_edge_fractions); // conf entropy
+                PCC_characteristics.e_entropy_mean_vector.push_back(std::get<0>(conf_entropy_t)); // std::tuple<double, double> Configuration_Entropy_tuple(std::vector<double> const &j_fractions) based on Edges fraction vector
+                PCC_characteristics.e_entropy_skrew_vector.push_back(std::get<1>(conf_entropy_t)); // tuple
+                //// MUST BE IMPROVED (!) :
+                PCC_characteristics.e_entropy_full_vector.push_back( std::get<0>(conf_entropy_t) + std::get<1>(conf_entropy_t));
+
+                PCC_characteristics.je_fractions_vector.push_back(j_edge_fractions);
+                PCC_characteristics.de_fractions_vector.push_back(d_edge_fractions);
+            }
+        } //         if(i == 1 && charlabs_edges.at(0) == 1) { // Edges lab
+    } // end for (int i = 0; i < 4; ++i)
 
     return PCC_characteristics;
 }

@@ -349,6 +349,15 @@ double TJsEntropy = 0.0;
 return TJsEntropy;
 };
 
+std::vector<int> state_vector_by_sequence(std::vector<unsigned int> const &cell_sequence, int cell_type) { // cell_type: 0 -nodes, 1 - edges, 2 - faces, 3 - polyhedrons
+    std::vector<int> state_vector(CellNumbs.at(cell_type + (dim - 3)), 0); // including 2D case
+
+    for(auto cs : cell_sequence)
+        state_vector.at(cs) = 1;
+
+    return state_vector;
+}
+
 /// ARCHIVE ///
 //Erase First Occurrence of given  substring from main string
 void eraseSubStr(std::string & mainStr, const std::string & toErase)

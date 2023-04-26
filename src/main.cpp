@@ -267,11 +267,12 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
         } // end if(ProcessingON)
 
 // III: DCC_Characterisation module
+        ProcessedComplex pcc_processed;
         if (ConfigVector.at(3) == 1) {
             cout << "START of the PCC Structure Characterisation module" << endl;
             Out_logfile_stream << "START of the PCC Structure Characterisation module" << endl;
 
-            ProcessedComplex pcc_processed = PCC_StructureCharacterisation(new_cells_design);
+            pcc_processed = PCC_StructureCharacterisation(new_cells_design);
 
 // ===== Elapsing time DCC_Characterisation ================
             unsigned int Characterisation_time = clock();
@@ -311,8 +312,7 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
 /// VI: PCC_Writing module
         if (ConfigVector.at(6) == 1) { // simply output ON/OFF for the PCC_Writer module on the screen
             cout << "START of the DCC Writer module" << endl;
-
-            PCC_Writer(new_cells_design);
+            PCC_Writer(new_cells_design, pcc_processed);
 
 /// ===== Elapsing time Writer ================
             unsigned int Writer_time = clock();
