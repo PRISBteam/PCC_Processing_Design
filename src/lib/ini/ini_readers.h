@@ -502,28 +502,35 @@ std::vector<double> config_reader_characterisation(std::string const &source_pat
         auto& collection = char_ini["edges_lab"];
         if (collection.has("el_active"))
         {
-            charlabs_edges.push_back(stoi(char_ini.get("edges_lab").get("el_active")));
+            charlabs_edges.push_back(stoi(char_ini.get("edges_lab").get("el_active"))); // [0]
         } }
 
     if (char_ini.has("edges_lab")) {
         auto& collection = char_ini["edges_lab"];
         if (collection.has("config_entropy"))
         {
-            charlabs_edges.push_back(stoi(char_ini.get("edges_lab").get("config_entropy")));
+            charlabs_edges.push_back(stoi(char_ini.get("edges_lab").get("config_entropy"))); // [1]
         } }
 
     if (char_ini.has("edges_lab")) {
         auto& collection = char_ini["edges_lab"];
         if (collection.has("S_mean"))
         {
-            charlabs_edges.push_back(stoi(char_ini.get("edges_lab").get("S_mean")));
+            charlabs_edges.push_back(stoi(char_ini.get("edges_lab").get("S_mean"))); // [2]
         } }
 
     if (char_ini.has("edges_lab")) {
         auto& collection = char_ini["edges_lab"];
         if (collection.has("S_skew"))
         {
-            charlabs_edges.push_back(stoi(char_ini.get("edges_lab").get("S_skew")));
+            charlabs_edges.push_back(stoi(char_ini.get("edges_lab").get("S_skew"))); // [3]
+        } }
+
+    if (char_ini.has("edges_lab")) {
+        auto& collection = char_ini["edges_lab"];
+        if (collection.has("analytical"))
+        {
+            charlabs_edges.push_back(stoi(char_ini.get("edges_lab").get("analytical"))); // [4]
         } }
 
 /// Nodes
@@ -581,8 +588,11 @@ if(charlabs_polyhedrons.at(0) == 1) { // Polyhedrons
     } // if(charlabs_faces.at(0) == 1)
     if(charlabs_edges.at(0) == 1) { // Edges
         cout << "Edges configuration entropy:\t"s << charlabs_edges.at(0) << "\t\t" << endl;
-        cout << "Conf entropy mean part:\t"s << charlabs_edges.at(1) << "\t\t" << endl;
-        cout << "Conf entropy skew part:\t"s << charlabs_edges.at(2) << "\t\t" << endl;
+        cout << "Conf entropy Mean (-) Skew:\t"s << charlabs_edges.at(1) << "\t\t" << endl;
+        cout << "Conf entropy mean part:\t"s << charlabs_edges.at(2) << "\t\t" << endl;
+        cout << "Conf entropy skew part:\t"s << charlabs_edges.at(3) << "\t\t" << endl;
+        cout << "Analytical solutions :\t"s << charlabs_edges.at(4) << "\t\t" << endl;
+
         cout << endl;
     } // if(charlabs_edges.at(0) == 1)
     if(charlabs_nodes.at(0) == 1) { // Nodes
@@ -643,7 +653,7 @@ void config_reader_writer(std::string &source_path, std::vector<int> writer_spec
 /// writer_specifications vector ::
 int    isSequencesOutput;      // - >     [0]
 int    isDesignvectorsOutput;  // - >     [1]
-int isEdgeConfEntropy = 0, isEdgeFractions = 0, isDegreeEdgeFractions = 0; // [2], [3], [4]
+int isEdgeConfEntropy = 0, isEdgeFractions = 0, isDegreeEdgeFractions = 0, isEdgeAnFractions = 0, isEdgeAnConfEntropies = 0; // [2], [3], [4], [5], [6]
 
 // ini files reader - external (MIT license) library
     mINI::INIFile file(source_path + "writer.ini"s);
@@ -693,6 +703,23 @@ int isEdgeConfEntropy = 0, isEdgeFractions = 0, isDegreeEdgeFractions = 0; // [2
         } }
     writer_specifications.push_back(isDegreeEdgeFractions); // [4]
 
+    if (writer_ini.has("entropic_analytical")) {
+        auto& collection = writer_ini["entropic_analytical"];
+        if (collection.has("isEdgeFractions"))
+        {
+            isEdgeAnFractions = stoi(writer_ini.get("entropic_analytical").get("isEdgeFractions"));
+        } }
+    writer_specifications.push_back(isEdgeAnFractions); // [5]
+
+    if (writer_ini.has("entropic_analytical")) {
+        auto& collection = writer_ini["entropic_analytical"];
+        if (collection.has("isEdgeConfEntropies"))
+        {
+            isEdgeAnConfEntropies = stoi(writer_ini.get("entropic_analytical").get("isEdgeConfEntropies"));
+        } }
+    writer_specifications.push_back(isEdgeAnConfEntropies); // [6]
+
+
 /// Output to the screen/console
 //    cout << endl;
 //    cout<< "______________________________________________________________________________________" << endl;
@@ -703,6 +730,9 @@ int isEdgeConfEntropy = 0, isEdgeFractions = 0, isDegreeEdgeFractions = 0; // [2
     cout << "Configuration Edges entropy \t\t\t"s << writer_specifications.at(2) << endl;
     cout << "Special Edge fractions \t\t\t"s << writer_specifications.at(3) << endl;
     cout << "Special Edge degree fractions \t\t\t"s << writer_specifications.at(4) << endl;
+    cout << "Analytical Edge fractions \t\t\t"s << writer_specifications.at(5) << endl;
+    cout << "Analytical Edge degree fractions \t\t\t"s << writer_specifications.at(5) << endl;
+    cout << "Analytical configuration Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
     cout << endl;
 
 /// Output into .log file
@@ -715,6 +745,10 @@ int isEdgeConfEntropy = 0, isEdgeFractions = 0, isDegreeEdgeFractions = 0; // [2
     Out_logfile_stream << "Configuration Edges entropy \t\t\t"s << writer_specifications.at(2) << endl;
     Out_logfile_stream << "Special Edge fractions \t\t\t"s << writer_specifications.at(3) << endl;
     Out_logfile_stream << "Special Edge degree fractions \t\t\t"s << writer_specifications.at(4) << endl;
+    Out_logfile_stream << "Analytical Edge fractions \t\t\t"s << writer_specifications.at(5) << endl;
+    Out_logfile_stream << "Analytical Edge degree fractions \t\t\t"s << writer_specifications.at(5) << endl;
+    Out_logfile_stream << "Analytical configuration Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
+
     Out_logfile_stream << endl;
 
     return;

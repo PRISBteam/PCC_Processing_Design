@@ -3,6 +3,7 @@
 ///-------------------------------------
 // #include "TJsLab.h"
 // #include "LaplaciansLab.h"
+#include "analytical_solutions.h"
 ///-------------------------------------
 
 ///Structure characterisation tool
@@ -46,7 +47,22 @@ ProcessedComplex PCC_StructureCharacterisation(CellsDesign &new_cells_design) {
                 PCC_characteristics.je_fractions_vector.push_back(j_edge_fractions);
                 PCC_characteristics.de_fractions_vector.push_back(d_edge_fractions);
             }
-        } //         if(i == 1 && charlabs_edges.at(0) == 1) { // Edges lab
+
+            if(charlabs_edges.at(4) == 1) { // analytical
+            /// Measures: Analytical solutions for edge fractions and configuration entropies
+                std::vector<tuple<double, double>> AnalyticalRandEntropies, AnalyticalCrystEntropies;
+                PCC_characteristics.j_analytical_rand_vector = TJsAnalytics_random(CellNumbs.at(2 + (dim - 3)), AnalyticalRandEntropies);
+                PCC_characteristics.AnRandEntropies_vector = AnalyticalRandEntropies;
+
+                PCC_characteristics.j_analytical_cryst_vector = TJsAnalytics_crystallography(CellNumbs.at(2 + (dim - 3)), AnalyticalCrystEntropies);
+                PCC_characteristics.AnCrystEntropies_vector = AnalyticalCrystEntropies;
+
+                // analytical edge degree fractions
+                PCC_characteristics.d_analytical_rand_vector = TJDsAnalytics_random(CellNumbs.at(2 + (dim - 3)));
+                PCC_characteristics.d_analytical_cryst_vector = TJDsAnalytics_crystallography(CellNumbs.at(2 + (dim - 3)));
+            } // enf if(charlabs_edges.at(4) == 1)
+
+            } //         if(i == 1 && charlabs_edges.at(0) == 1) { // Edges lab
     } // end for (int i = 0; i < 4; ++i)
 
     return PCC_characteristics;

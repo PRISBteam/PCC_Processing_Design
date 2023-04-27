@@ -1,39 +1,14 @@
 #ifndef PCC_PROCESSING_DESIGN_ANALYTICAL_SOLUTIONS_H
 #define PCC_PROCESSING_DESIGN_ANALYTICAL_SOLUTIONS_H
 
-int TJsAnalytics(long HGBnumber, char* output_dir) {
-    // HGBnumber - Number of points in a graph
-    unsigned int HGBnumb = HGBnumber; // Number of points on a graph
+std::vector<vector<double>> TJsAnalytics_random(unsigned int HGBnumber, std::vector<tuple<double, double>> &ConfEntropies) {
+    std::vector<vector<double>> j_random_vector; // main function output {p, jj0, jj1, jj2, jj3}
+    //    vector<tuple<double, double>> ConfEntropies: a vector of tuples containing [0] -> Face_Entropy_Median, [1] -> Face_Entropy_Skrew
+
     double P00=0, P11=0, P22=0, P10=0, P20=0, P21=0, p=0, q=0, J0=0, J1=0, J2=0, J3=0, Jall=0;
+    double dp = 1.0/ (double) HGBnumber;
 
-    ofstream OutJFile;
-    ofstream OutJ2File;
-    ofstream OutSFile;
-    ofstream OutS2File;
-    OutJFile.open(output_dir + "TJp_random_theory.txt"s, ios::trunc);
-    //OutJFile <<"p" << "    "<< "   J0" << "         "<< " J1" << "          " << "J2" << "          " << "J3" << endl;
-    OutJ2File.open(output_dir + "TJp_crystalline_theory.txt"s, ios::trunc);
-    //OutJ2File <<"p" << "    "<< "   J0" << "         "<< " J1" << "          " << "J2" << "          " << "J3" << endl;
-    OutJFile.open(output_dir + "Sp_random_theory.txt"s, ios::trunc);
-    //OutJFile <<"p" << "    "<< "   J0" << "         "<< " J1" << "          " << "J2" << "          " << "J3" << endl;
-    OutJ2File.open(output_dir + "Sp_crystalline_theory.txt"s, ios::trunc);
-    //OutJ2File <<"p" << "    "<< "   J0" << "         "<< " J1" << "          " << "J2" << "          " << "J3" << endl;
-
-    OutJFile.close();
-    OutJ2File.close();
-    OutJFile.open(output_dir + "TJp_random_theory.txt"s, ios::app);
-    OutJ2File.open(output_dir + "TJp_crystalline_theory.txt"s, ios::app);
-    OutSFile.close();
-    OutS2File.close();
-    OutSFile.open(output_dir + "Sp_random_theory.txt"s, ios::app);
-    OutS2File.open(output_dir + "Sp_crystalline_theory.txt"s, ios::app);
-
-
-    double dp = 1.0/ (double) HGBnumb;
-    for (unsigned int k = 0; k < HGBnumb; ++k) {
-// REPAIR        cout << p << endl;
-
-        //1 случай: случайное распределение без учета кристаллографии
+    for (unsigned int k = 0; k < HGBnumber; ++k) {
         P00 = p; P11 = p; P22 = p; P10 = p; P20 = p; P21 = p; P22 = p;
 
         J0 = (1.0 - P00) * (1.0 - P10) * (1.0 - P20);
@@ -44,15 +19,17 @@ int TJsAnalytics(long HGBnumber, char* output_dir) {
 
         // Conversion from numbers to fractions
         double  jj0 = J0/Jall, jj1 = J1/Jall, jj2 = J2/Jall, jj3 = J3/Jall, j0s = jj0, j1s = jj1, j2s = jj2, j3s = jj3;
-        double Configurational_Face_Entropy = 0.0;
         if (j0s != 0) j0s = jj0* log2(jj0); if (j1s != 0) j1s = jj1* log2(jj1); if (j2s != 0) j2s = jj2* log2(jj2); if (j3s != 0) j3s = jj3* log2(jj3); //Gives 0 in entropy!
         /// Configuration Entropy related with Faces
-        Configurational_Face_Entropy = - (j0s + j1s + j2s + j3s);
+        // Median part in the entropy decomposition
+        double Configurational_Face_Entropy = 0.0, Face_Entropy_Median = 0.0, Face_Entropy_Skrew = 0.0;
 
-        /// Median part in the entropy decomposition
-        double Face_Entropy_Median = 0.0, Face_Entropy_Skrew = 0.0;
+//        Configurational_Face_Entropy = - (j0s + j1s + j2s + j3s);
 
-        vector<double> j_types_fractions = {jj0, jj1, jj2, jj3}; /// using values with pow(10,-10) instead of 0s!
+        std::vector<double> j_types_fractions = {jj0, jj1, jj2, jj3};
+        /// add to the output vector
+        j_random_vector.push_back({p, jj0, jj1, jj2, jj3});
+
         if (j0s!=0 && j1s!=0 && j2s!=0 && j3s!=0) {
             Face_Entropy_Median = -(1.0 / j_types_fractions.size()) * log2(jj0 * jj1 * jj2 * jj3);
         } else Face_Entropy_Median = 0.0;
@@ -66,10 +43,133 @@ int TJsAnalytics(long HGBnumber, char* output_dir) {
                             log2(j_types_fractions[i] / j_types_fractions[j]);
                 } else Face_Entropy_Skrew += 0.0;
 
-        OutSFile << p << "    " << Configurational_Face_Entropy << "    " << Face_Entropy_Median << "    " << Face_Entropy_Skrew << endl;
-        OutJFile << p << "    " << J0 << "    " << J1 << "    " << J2 << "    " << J3 << endl;
+        /// add to the output
+        ConfEntropies.push_back(make_tuple(Face_Entropy_Median, Face_Entropy_Skrew));
 
-        //2 случай: с учетом ограничений кристаллографии
+        /// Increment of p fraction
+        p += dp;
+
+    } // end of for ( k < HGBnumb )
+
+    return j_random_vector;
+} // END of TJsAnalytics_random()
+
+std::vector<vector<double>> TJsAnalytics_crystallography(unsigned int HGBnumber, std::vector<tuple<double, double>> &ConfEntropies) {
+    std::vector<vector<double>> j_crystallography_vector; // main function output {p, jj0, jj1, jj2, jj3}
+    //    vector<tuple<double, double>> ConfEntropies: a vector of tuples containing [0] -> Face_Entropy_Median, [1] -> Face_Entropy_Skrew
+
+    double P00=0, P11=0, P22=0, P10=0, P20=0, P21=0, p=0, q=0, J0=0, J1=0, J2=0, J3=0, Jall=0;
+    double dp = 1.0/ (double) HGBnumber;
+
+    for (unsigned int k = 0; k < HGBnumber; ++k) {
+        q = 1.0 - p;
+
+        P00 = p;
+        if (p <= 0.75) {
+            P10 = (1.0 - 6.0 * pow(q, (1.0 / 2.0)) + 15.0 * q - 10.0 * pow(q, (3.0 / 2.0))) / (3.0 * q);
+            P20 = (2.0 - 12.0 * pow(q, (1.0 / 2.0)) + 24.0 * q - 14.0 * pow(q, (3.0 / 2.0))) /
+                  (-1.0 + 6.0 * pow(q, (1.0 / 2.0)) - 12.0 * q + 10.0 * pow(q, (3.0 / 2.0)));
+            P11 = (2.0 + 8.0 * pow(q, (1.0 / 2.0)) - 10.0 * q) / (3.0 + 3.0 * pow(q, (1.0 / 2.0)));
+            P21 = (1.0 - 5.0 * pow(q, (1.0 / 2.0)) + 4.0 * q) / (-1.0 + 5.0 * pow(q, (1.0 / 2.0)) - 10.0 * q);
+            P22 = (3.0 + 6.0 * pow(q, (1.0 / 2.0))) / (2.0 + 10.0 * pow(q, (1.0 / 2.0)));
+        }
+        if (p > 0.75) {
+            P10 = (3.0 - 2.0 * pow(q, (1.0 / 2.0))) / 3.0;
+            P20 = 1.0;
+            P11 = (3.0 - 6.0 * q + 2.0 * pow(q, (3.0 / 2.0))) / (3.0 - 3.0 * q);
+            P21 = (3.0 - 4.0 * pow(q, (1.0 / 2.0))) / (3.0 - 2.0 * pow(q, (1.0 / 2.0)));
+            P22 = (3.0 - 9.0 * q + 6.0 * pow(q, (3.0 / 2.0))) / (3.0 - 6.0 * q + 2.0 * pow(q, (3.0 / 2.0)));
+        }
+
+        J0 = (1.0 - P00) * (1.0 - P10) * (1.0 - P20);
+        J1 = P00 * (1.0 - P11) * (1.0 - P21) + (1.0 - P00) * P10 * (1.0 - P21) + (1.0 - P00) * (1.0 - P10) * P20;
+        J2 = P00 * P11 * (1.0 - P22) + P00 * (1.0 - P11) * P21 + (1.0 - P00) * P10 * P21;
+        J3 = P00 * P11 * P22;
+        Jall = J0 + J1 + J2 + J3;
+
+        // Conversion from numbers to fractions
+
+        /// Median part in the entropy decomposition
+        double Configurational_Face_Entropy = 0.0, Face_Entropy_Median = 0.0, Face_Entropy_Skrew = 0.0;
+
+// Conversion from numbers to fractions
+        double jj0 = J0/Jall, jj1 = J1/Jall, jj2 = J2/Jall, jj3 = J3/Jall, j0s = jj0, j1s = jj1, j2s = jj2, j3s = jj3;
+        Configurational_Face_Entropy = 0.0;
+        if (j0s != 0) j0s = jj0* log2(jj0); if (j1s != 0) j1s = jj1* log2(jj1); if (j2s != 0) j2s = jj2* log2(jj2); if (j3s != 0) j3s = jj3* log2(jj3); //Gives 0 in entropy!
+        /// Configuration Entropy related with Faces
+        Configurational_Face_Entropy = - (j0s + j1s + j2s + j3s);
+
+        /// Median part in the entropy decomposition
+        Face_Entropy_Median = 0.0, Face_Entropy_Skrew = 0.0;
+
+        std::vector<double> j_types_fractions = {jj0, jj1, jj2, jj3}; /// using values with pow(10,-10) instead of 0s!
+/// add to the output vector
+        j_crystallography_vector.push_back({p, jj0, jj1, jj2, jj3});
+
+        if (j0s!=0 && j1s!=0 && j2s!=0 && j3s!=0) {
+            Face_Entropy_Median = -(1.0 / j_types_fractions.size()) * log2(jj0 * jj1 * jj2 * jj3);
+        } else Face_Entropy_Median = 0.0;
+
+        /// Screw part (divergence from the uniform distribution -> S_max) in the entropy decomposition
+        for (int j = 0; j < j_types_fractions.size(); j++)
+            for (int i = 0; i < j; i++)
+                if (j_types_fractions[i]!=0 && j_types_fractions[j]!=0) {
+                    Face_Entropy_Skrew +=
+                            -(1.0 / j_types_fractions.size()) * (j_types_fractions[i] - j_types_fractions[j]) *
+                            log2(j_types_fractions[i] / j_types_fractions[j]);
+                } else Face_Entropy_Skrew += 0.0;
+
+        /// add to the output
+        ConfEntropies.push_back(make_tuple(Face_Entropy_Median, Face_Entropy_Skrew));
+
+        /// Increment of p fraction
+        p += dp;
+
+    } // end of for ( k < HGBnumb )
+
+    return j_crystallography_vector;
+}
+
+std::vector<vector<double>> TJDsAnalytics_random(unsigned int HGBnumber) {
+    std::vector<vector<double>> d_random_vector; // main function output {p, dd1, dd2, dd3}
+
+    double P00=0, P11=0, P22=0, P10=0, P20=0, P21=0, p=0, q=0, J0=0, J1=0, J2=0, J3=0, Jall=0;
+    double dp = 1.0/ (double) HGBnumber;
+
+    for (unsigned int k = 0; k < HGBnumber; ++k) {
+        P00 = p; P11 = p; P22 = p; P10 = p; P20 = p; P21 = p; P22 = p;
+
+        J0 = (1.0 - P00) * (1.0 - P10) * (1.0 - P20);
+        J1 = P00 * (1.0 - P11) * (1.0 - P21) + (1.0 - P00) * P10 * (1.0 - P21) + (1.0 - P00) * (1.0 - P10) * P20;
+        J2 = P00 * P11 * (1.0 - P22) + P00 * (1.0 - P11) * P21 + (1.0 - P00) * P10 * P21;
+        J3 = P00 * P11 * P22;
+        Jall = J0 + J1 + J2 + J3;
+
+        // Conversion from numbers to fractions
+        double  jj0 = J0/Jall, jj1 = J1/Jall, jj2 = J2/Jall, jj3 = J3/Jall, j0s = jj0, j1s = jj1, j2s = jj2, j3s = jj3;
+
+        std::vector<double> d_types_fractions;
+        if (jj0 != 1.0) d_types_fractions = {jj0/(1.0 - jj0), jj1/(1.0 - jj0), jj2/(1.0 - jj0), jj3/(1.0 - jj0)};
+            else d_types_fractions = {0, 0, 0, 0};
+
+        /// add to the output vector
+        d_random_vector.push_back({p, d_types_fractions.at(0), d_types_fractions.at(1),d_types_fractions.at(2)});
+
+        /// Increment of p fraction
+        p += dp;
+
+    } // end of for ( k < HGBnumb )
+
+    return d_random_vector;
+}
+
+std::vector<vector<double>> TJDsAnalytics_crystallography(unsigned int HGBnumber) {
+    std::vector<vector<double>> d_crystallography_vector; // main function output
+
+    double P00=0, P11=0, P22=0, P10=0, P20=0, P21=0, p=0, q=0, J0=0, J1=0, J2=0, J3=0, Jall=0;
+    double dp = 1.0/ (double) HGBnumber;
+
+    for (unsigned int k = 0; k < HGBnumber; ++k) {
         q = 1.0 - p;
 
         P00 = p;
@@ -95,46 +195,24 @@ int TJsAnalytics(long HGBnumber, char* output_dir) {
         J3 = P00 * P11 * P22;
         Jall = J0 + J1 + J2 + J3;
 // Conversion from numbers to fractions
-        jj0 = J0/Jall, jj1 = J1/Jall, jj2 = J2/Jall, jj3 = J3/Jall, j0s = jj0, j1s = jj1, j2s = jj2, j3s = jj3;
-        Configurational_Face_Entropy = 0.0;
-        if (j0s != 0) j0s = jj0* log2(jj0); if (j1s != 0) j1s = jj1* log2(jj1); if (j2s != 0) j2s = jj2* log2(jj2); if (j3s != 0) j3s = jj3* log2(jj3); //Gives 0 in entropy!
-        /// Configuration Entropy related with Faces
-        Configurational_Face_Entropy = - (j0s + j1s + j2s + j3s);
+        // Conversion from numbers to fractions
+        double  jj0 = J0/Jall, jj1 = J1/Jall, jj2 = J2/Jall, jj3 = J3/Jall, j0s = jj0, j1s = jj1, j2s = jj2, j3s = jj3;
+        std::vector<double> d_types_fractions;
+        if (jj0 != 1.0) d_types_fractions = {jj0/(1.0 - jj0), jj1/(1.0 - jj0), jj2/(1.0 - jj0), jj3/(1.0 - jj0)};
+            else d_types_fractions = {0, 0, 0, 0};
 
-        /// Median part in the entropy decomposition
-        Face_Entropy_Median = 0.0, Face_Entropy_Skrew = 0.0;
+    /// add to the output vector
+        d_crystallography_vector.push_back({p, d_types_fractions.at(0), d_types_fractions.at(1),d_types_fractions.at(2)});
 
-        j_types_fractions = {jj0, jj1, jj2, jj3}; /// using values with pow(10,-10) instead of 0s!
-        if (j0s!=0 && j1s!=0 && j2s!=0 && j3s!=0) {
-            Face_Entropy_Median = -(1.0 / j_types_fractions.size()) * log2(jj0 * jj1 * jj2 * jj3);
-        } else Face_Entropy_Median = 0.0;
-
-        /// Screw part (divergence from the uniform distribution -> S_max) in the entropy decomposition
-        for (int j = 0; j < j_types_fractions.size(); j++)
-            for (int i = 0; i < j; i++)
-                if (j_types_fractions[i]!=0 && j_types_fractions[j]!=0) {
-                    Face_Entropy_Skrew +=
-                            -(1.0 / j_types_fractions.size()) * (j_types_fractions[i] - j_types_fractions[j]) *
-                            log2(j_types_fractions[i] / j_types_fractions[j]);
-                } else Face_Entropy_Skrew += 0.0;
-
-        OutS2File << p << "    " << Configurational_Face_Entropy << "    " << Face_Entropy_Median << "    " << Face_Entropy_Skrew << endl;
-        OutJ2File << p << "    " << J0 << "    " << J1 << "    " << J2 << "    " << J3 << endl;
-
-        /// Increment of p fraction
+    /// Increment of p fraction
         p += dp;
 
     } // end of for ( k < HGBnumb )
 
-    // Closing of the ofstreams
-    OutJ2File.close();
-    OutJFile.close();
-    OutSFile.close();
-    OutS2File.close();
-
-    return 0;
+    return d_crystallography_vector;
 }
 
+/*
 int TJsAnalytics_indices(double Smax, double Smin, double Srand) {
     double j0 = 0, j1 = 0, j2 = 0, j3 = 0, j0s = 0, j1s = 0, j2s = 0, j3s = 0;
     unsigned int HGBnumber = 100;     // HGBnumber^3 is the Number of calculation points
@@ -257,6 +335,6 @@ int TJsAnalytics_indices(double Smax, double Smin, double Srand) {
 
     return 0;
 } /// End of TJsAnalytics_indices() function
-
+*/
 
 #endif //PCC_PROCESSING_DESIGN_ANALYTICAL_SOLUTIONS_H

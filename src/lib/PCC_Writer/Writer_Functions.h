@@ -110,6 +110,60 @@ void PCC_Entropic_Writer(ProcessedComplex &pcc_processed, int &output_counter) {
     return;
 }
 
+/// # 3 # Analytical distributions writer
+
+void PCC_AnalyticalFractions_Writer(ProcessedComplex &pcc_processed, int &output_counter) {
+// Offstreams
+    ofstream OutJRFile, OutJCFile, OutJDRFile, OutJDCFile, OutCERFile, OutCECFile; // Analytical fractions output
+    string antjsrand_odir = output_dir + "analytical_TJs_random.txt"s; // output directory
+    string antjscryst_odir = output_dir + "analytical_TJs_crystalline.txt"s; // output directory
+    string antjdsrand_odir = output_dir + "analytical_TJDs_random.txt"s; // output directory
+    string antjdscryst_odir = output_dir + "analytical_TJDs_crystalline.txt"s; // output directory
+    string anentropiesrand_odir = output_dir + "analytical_EdgeConfEntropy_random.txt"s; // output directory
+    string anentropiescryst_odir = output_dir + "analytical_EdgeConfEntropy_crystalline.txt"s; // output directory
+
+// j and jd fractions of edges
+//random
+    OutJRFile.open(antjsrand_odir, ios::trunc);
+        for (unsigned int i = 0; i < pcc_processed.j_analytical_rand_vector.size(); ++i)
+            OutJRFile << pcc_processed.j_analytical_rand_vector[i][0] << " " << pcc_processed.j_analytical_rand_vector[i][1] << "    " << pcc_processed.j_analytical_rand_vector[i][2] << "    " << pcc_processed.j_analytical_rand_vector[i][3] << "    " << pcc_processed.j_analytical_rand_vector[i][4] << endl;
+    OutJRFile.close();
+//crystalline
+    OutJCFile.open(antjscryst_odir, ios::trunc);
+    for (unsigned int i = 0; i < pcc_processed.j_analytical_cryst_vector.size(); ++i)
+        OutJCFile << pcc_processed.j_analytical_cryst_vector[i][0] << " " << pcc_processed.j_analytical_cryst_vector[i][1] << "    " << pcc_processed.j_analytical_cryst_vector[i][2] << "    " << pcc_processed.j_analytical_cryst_vector[i][3] << "    " << pcc_processed.j_analytical_cryst_vector[i][4] << endl;
+    OutJCFile.close();
+
+//random
+    OutJDRFile.open(antjdsrand_odir, ios::trunc);
+    for (unsigned int i = 0; i < pcc_processed.d_analytical_rand_vector.size(); ++i)
+        OutJDRFile << pcc_processed.d_analytical_rand_vector[i][0] << " " << pcc_processed.d_analytical_rand_vector[i][1] << "    " << pcc_processed.d_analytical_rand_vector[i][2] << "    " << pcc_processed.d_analytical_rand_vector[i][3] << endl;
+    OutJDRFile.close();
+//crystalline
+    OutJDCFile.open(antjdscryst_odir, ios::trunc);
+    for (unsigned int i = 0; i < pcc_processed.d_analytical_cryst_vector.size(); ++i)
+        OutJDCFile << pcc_processed.d_analytical_cryst_vector[i][0] << " " << pcc_processed.d_analytical_cryst_vector[i][1] << "    " << pcc_processed.d_analytical_cryst_vector[i][2] << "    " << pcc_processed.d_analytical_cryst_vector[i][3] << endl;
+    OutJDCFile.close();
+
+    cout << "(" << output_counter++ << ")  " << "Analytical Special Edges and Special Edges Degree fractions has been successfully written in  " << antjsrand_odir << endl << antjscryst_odir << endl << antjdsrand_odir << endl << antjdscryst_odir << endl;
+    Out_logfile_stream << "(" << output_counter << ")  " << "Analytical Special Edges and Special Edges Degree fractions has been successfully written in  " << antjsrand_odir << endl << antjscryst_odir << endl << antjdsrand_odir << endl << antjdscryst_odir << endl;
+
+// configuration edge entropies vectors
+    OutCERFile.open(anentropiesrand_odir, ios::trunc);
+    for (unsigned int i = 0; i < pcc_processed.AnRandEntropies_vector.size(); ++i)
+        OutCERFile << i/ (double) CellNumbs.at(2 + (dim - 3)) << " " << get<0>(pcc_processed.AnRandEntropies_vector[i]) + get<1>(pcc_processed.AnRandEntropies_vector[i])  << " " << get<0>(pcc_processed.AnRandEntropies_vector[i]) << " " << get<1>(pcc_processed.AnRandEntropies_vector[i]) << endl;
+    OutCERFile.close();
+
+    OutCECFile.open(anentropiescryst_odir, ios::trunc);
+    for (unsigned int i = 0; i < pcc_processed.AnCrystEntropies_vector.size(); ++i)
+        OutCECFile << i/ (double) CellNumbs.at(2 + (dim - 3))<< " " << get<0>(pcc_processed.AnCrystEntropies_vector[i]) + get<1>(pcc_processed.AnCrystEntropies_vector[i])  << " " << get<0>(pcc_processed.AnCrystEntropies_vector[i]) << " " << get<1>(pcc_processed.AnCrystEntropies_vector[i]) << endl;
+    OutCECFile.close();
+
+    cout << "(" << output_counter++ << ")  " << "Analytical Configuration Edge Entropies (random and crystallographic)) has been successfully written in " << anentropiesrand_odir << endl << anentropiescryst_odir << endl;
+    Out_logfile_stream << "(" << output_counter << ")  " << "Analytical Configuration Edge Entropies (random and crystallographic)) has been successfully written in " << anentropiesrand_odir << endl << anentropiescryst_odir << endl;
+
+} // END of PCC_AnalyticalFractions_Writer( )
+
 /// * NEW HEAP * ///
 
 /**

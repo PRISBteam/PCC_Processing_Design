@@ -155,6 +155,9 @@ std::vector<unsigned int> special_cells_sequence; // output of the function
             scell_fractions_vector.at(i) = count(S_Vector.begin(), S_Vector.end(), i + 1) / (double) CellNumbs.at(cell_type); // type (i+1) of special x_cells
 
  //REPAIR cout << "special_faces_fraction: \t" << special_faces_fraction << "\t\t" << endl;
+        /// output calculation progress
+        if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) cout << "special " << cell_type << "-cells fraction:      " <<  special_cells_fraction << endl;
+        if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction:      " <<  special_cells_fraction << endl;
 
     } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
 
@@ -365,7 +368,10 @@ else if(p_index == 1) {
             scell_fractions_vector.at(i) = count(S_Vector.begin(), S_Vector.end(), i + 1) / (double) CellNumbs.at(cell_type); // type (i+1) of special x_cells
 
 //REPAIRS
-if ((int) (10.0*special_cells_fraction) % 4 == 0) cout << special_cells_fraction << endl;
+        /// ca
+        if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "special " << cell_type << "-cells fraction" <<  special_cells_fraction << endl;
+        if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction:      " <<  special_cells_fraction << endl;
+        if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction:      " <<  special_cells_fraction << endl;
     } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 

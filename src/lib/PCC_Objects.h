@@ -644,9 +644,7 @@ public:
         else if (id == 2 ) f_design = design;
         else if (id == 1 ) e_design = design;
         else if (id == 0 ) n_design = design;
-
     }
-
     // Get
     std::vector<unsigned int> Get_p_sequence(void){
         if (p_sequence.size() == 0) cout << "WARNING: p_sequence did not set!" << endl; else
@@ -683,7 +681,8 @@ public:
     }
 }; /// end of class CELLS_DESIGN
 
-class ProcessedComplex { /// Essential for Characterisation module
+/// # 8 # The class of a PROCESSED COMPLEX
+class ProcessedComplex { // Essential for Characterisation module
 // PCC processed with all its characteristics and design sequences
 
 private:
@@ -699,12 +698,14 @@ public:
     std::vector<vector<unsigned int>> face_process_seq;
     std::vector<vector<int>> face_process_state;
 
-    std::vector<double> e_entropy_mean_vector;
-    std::vector<double> e_entropy_skrew_vector;
-    std::vector<double> e_entropy_full_vector;
+    std::vector<double> e_entropy_mean_vector, e_entropy_skrew_vector, e_entropy_full_vector;
 
-    std::vector<vector<double>> je_fractions_vector;
-    std::vector<vector<double>> de_fractions_vector;
+    std::vector<vector<double>> je_fractions_vector, de_fractions_vector;
+
+    // analytical solutions
+    std::vector<vector<double>> j_analytical_rand_vector, d_analytical_rand_vector;
+    std::vector<vector<double>> j_analytical_cryst_vector, d_analytical_cryst_vector;
+    std::vector<tuple<double, double>> AnRandEntropies_vector, AnCrystEntropies_vector;
 
 }; /// end of class ProcessedComplex
 
