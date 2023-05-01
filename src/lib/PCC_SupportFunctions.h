@@ -242,15 +242,16 @@ std::vector<vector<int>> Get_cases_list(std::vector<int> const &S_Vector, std::v
     std::vector<vector<int>> cases_list; // in every case its own TJs vector
 
     // Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file paths.at(5 + (dim - 3))
-    SpMat FES = SMatrixReader(paths.at(5 + (dim - 3)), CellNumbs.at(1), CellNumbs.at(2)); // Edges-Faces sparse incidence matrix
-    vector<int> NewEdgeTypes = EdgeTypes;
+    SpMat FES = SMatrixReader(paths.at(5 + (dim - 3)), CellNumbs.at(1 + (dim - 3)), CellNumbs.at(2 + (dim - 3))); // Edges-Faces sparse incidence matrix
+    std::vector<int> NewEdgeTypes = EdgeTypes;
 
     if (p_index == 0) { // cases: direct assigment of special faces one by one
-
         for (unsigned int f = 0; f < CellNumbs.at(2 + (dim - 3)); ++f) { // loop over all Faces in PCC
-            if (S_Vector.at(f) == 0) { // Loop over each still ORDINARY element neighbours
+            NewEdgeTypes = EdgeTypes; // on each step it is equal to the initial Edge state defined by S_Vector
+           /// only ORDINARY f will be taken in the "cases list" (!) as if they change their type to special
+            if (S_Vector.at(f) == 0) { // Loop over each still ORDINARY cell neighbours
                     for(int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
-                        if (FES.coeff(e, f) == 1) NewEdgeTypes.at(e)++;
+                        if (FES.coeff(e, f) != 0) NewEdgeTypes.at(e)++;
             }
             cases_list.push_back(NewEdgeTypes);
         } // end for (unsigned int f = 0; f < CellNumbs.at(2); ++f)
@@ -259,7 +260,7 @@ std::vector<vector<int>> Get_cases_list(std::vector<int> const &S_Vector, std::v
     }
 
     return cases_list;
-}
+} // END of Get_cases_list()
 
 
 /// DDRX support function :: GFS matrix reading and calculation of new seeds at the centres of GBs

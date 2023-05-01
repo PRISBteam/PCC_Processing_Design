@@ -18,12 +18,13 @@ ProcessedComplex PCC_StructureCharacterisation(CellsDesign &new_cells_design) {
     std::vector<unsigned int> face_sequences_vector; // number of different sequences based on the face design vector
     std::vector<int> face_states_vector;
 
-    for (auto seq : new_cells_design.Get_f_sequence()) {
-        face_sequences_vector.push_back(seq);
-        if ( face_sequences_vector.size() % (int) (2.0*std::log(new_cells_design.Get_f_sequence().size())) == 0) { // only some values - each 2.0*std::log(*.size()) - are written in the face_sequences_vector
+    for (auto fseq : new_cells_design.Get_f_sequence()) {
+        face_sequences_vector.push_back(fseq);
+        /// forming a new vector for characterisation
+        if ( face_sequences_vector.size() % (int) (2.0*std::log(new_cells_design.Get_f_sequence().size())) == 0) // only some values - each 2.0*std::log(*.size()) - are written in the face_sequences_vector
             PCC_characteristics.face_process_seq.push_back(face_sequences_vector);
-        }
-    } // end for()
+
+    } // end for(auto fseq...)
 
     for (int i = 0; i < 4; ++i) { // for all types of cells
 
@@ -36,9 +37,13 @@ ProcessedComplex PCC_StructureCharacterisation(CellsDesign &new_cells_design) {
             tuple<double,double> conf_entropy_t;
             for (auto current_seq : PCC_characteristics.face_process_seq) {
                 EdgeTypes_char.clear();
+                std::fill(j_edge_fractions.begin(), j_edge_fractions.end(),0);
+                std::fill(d_edge_fractions.begin(), d_edge_fractions.end(),0);
+
                 EdgeTypes_char = Edge_types_byFaces(CellNumbs, current_seq, j_edge_fractions, d_edge_fractions);
 
                 conf_entropy_t = Configuration_Entropy_tuple(j_edge_fractions); // conf entropy
+
                 PCC_characteristics.e_entropy_mean_vector.push_back(std::get<0>(conf_entropy_t)); // std::tuple<double, double> Configuration_Entropy_tuple(std::vector<double> const &j_fractions) based on Edges fraction vector
                 PCC_characteristics.e_entropy_skrew_vector.push_back(std::get<1>(conf_entropy_t)); // tuple
                 //// MUST BE IMPROVED (!) :

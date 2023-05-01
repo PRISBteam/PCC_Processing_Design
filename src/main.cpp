@@ -235,12 +235,12 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
             Out_logfile_stream << "Section time is equal to  " << S_time/ pow(10.0,6.0) <<  "  seconds" << endl; Out_logfile_stream << "-------------------------------------------------------" << endl;
         } // end if(SectionON)
 
-// II: PCC_Processing.h module
+/// II: PCC_Processing.h module
         if (ConfigVector.at(2) == 1) { // if PCC_Processing is SWITCH ON in the main.ini file
             cout << " START of the PCC Processing module " << endl;
             Out_logfile_stream << " START of the PCC Processing module " << endl;
             new_cells_design = PCC_Processing(Configuration_State);
-
+/*
             // update global vectors
             if(new_cells_design.Get_p_sequence().size() > 0) {
                 special_p_Sequence = new_cells_design.Get_p_sequence();
@@ -258,6 +258,7 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
                 special_n_Sequence = new_cells_design.Get_n_sequence();
                 special_cells_design.at(0) = special_n_Sequence;
             }
+*/
 
 // ===== Elapsing time Processing ================
             unsigned int Processing_time = clock();
@@ -266,7 +267,7 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
             Out_logfile_stream << "Processing time is equal to  " << P_time/ pow(10.0,6.0) <<  "  seconds" << endl; Out_logfile_stream << "-------------------------------------------------------" << endl;
         } // end if(ProcessingON)
 
-// III: DCC_Characterisation module
+/// III: DCC_Characterisation module
         ProcessedComplex pcc_processed;
         if (ConfigVector.at(3) == 1) {
             cout << "START of the PCC Structure Characterisation module" << endl;
@@ -295,14 +296,14 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
             Out_logfile_stream << "Section time is equal to  " << M_time/ pow(10.0,6.0) <<  "  seconds" << endl; Out_logfile_stream << "-------------------------------------------------------" << endl;
         } // end if(MultiphysicsON)
 
-/// V: DCC_Kinetic module
+// V: DCC_Kinetic module
         if (ConfigVector.at(5) == 1) { // if PCC_Kinetic is SWITCH ON in the main.ini file
             cout << "START of the PCC Kinetic module" << endl;
             Out_logfile_stream << "START of the PCC Kinetic module" << endl;
 
             //kface_sequence = DCC_Kinetic(special_faces_sequence, K_type);
 
-/// ===== Elapsing time Kinetic ================
+// ===== Elapsing time Kinetic ================
             unsigned int Kinetic_time = clock();
             K_time = (double) Kinetic_time - C_time - S_time - P_time - M_time;
             cout << "Kinetic time is equal to  " << K_time/ pow(10.0,6.0) <<  "  seconds" << endl;
@@ -314,7 +315,7 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
             cout << "START of the DCC Writer module" << endl;
             PCC_Writer(new_cells_design, pcc_processed);
 
-/// ===== Elapsing time Writer ================
+// ===== Elapsing time Writer ================
             unsigned int Writer_time = clock();
             double W_time = (double) Writer_time - C_time - S_time - P_time - M_time - K_time;
             cout << "Writer time is equal to  " << W_time/ pow(10.0,6.0) <<  "  seconds" << endl;

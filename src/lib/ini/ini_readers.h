@@ -128,7 +128,6 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
 
 
 
-
 /// ================== # 2 # Initial PROCESSING module configuration - reading and output ==================
 void config_reader_processing(std::string &source_path, std::vector<vector<double>> &max_fractions_vectors, double &mu, double &sigma, std::vector<string> &ptype_vector, std::vector<double> &pindex_vector, std::ofstream &Out_logfile_stream) {
     // ini files reader - external (MIT license) library
@@ -157,7 +156,7 @@ void config_reader_processing(std::string &source_path, std::vector<vector<doubl
     if (processing_ini.has("polyhedrons")) {
         auto& collection = processing_ini["polyhedrons"];
         if (collection.has("polyhedron_types_number"))
-            ptypes_number_string = processing_ini.get("polyhedrons").get("polyhedron_types_number");
+            ptypes_number_string = processing_ini.get("polyhedrons").get("polyhedron_types_number"); // [2]
     }
 
 // fractions
@@ -338,36 +337,50 @@ vector<double> max_fractions_output(3, 0); // temporary vector serving as an out
     cout<< "______________________________________________________________________________________" << endl;
     cout << "The Processing module simulation type and initial parameters:\t\t" << endl;
     cout << endl;
-    cout << "Processing p_type:\t"s << ptype_vector.at(3) << "\twith p_index:\t"s << pindex_vector.at(3) << endl;
-    if (ptype_vector.at(3) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
-    cout << "Number of polyhedron types:\t"s << ptypes_number_string << endl;
-    std::fill(max_fractions_output.begin(), max_fractions_output.end(),0);
-    for (int i = 0; i < 3; ++i)
-        if (max_fractions_vectors[3].size() > 0 && max_fractions_vectors[3][i] > 0) max_fractions_output.at(i) = max_fractions_vectors[3][i];
-    cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1) << "\t\t"<< max_fractions_output.at(2) << "\t\t" << endl;
-    cout << endl;
-    cout << "Processing f_type:\t"s << ptype_vector.at(2) << "\twith f_index:\t"s << pindex_vector.at(2) << endl;
-    if (ptype_vector.at(2) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
-    cout << "Number of face types:\t"s << ftypes_number_string << endl;
+    if (ptypes_number_string != "0") {
+        cout << "Processing p_type:\t"s << ptype_vector.at(3) << "\t with p_index:\t"s << pindex_vector.at(3) << endl;
+        if (ptype_vector.at(3) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
+        cout << "Number of polyhedron types:\t"s << ptypes_number_string << endl;
+        std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
+        for (int i = 0; i < 3; ++i)
+            if (max_fractions_vectors[3].size() > 0 && max_fractions_vectors[3][i] > 0)
+                max_fractions_output.at(i) = max_fractions_vectors[3][i];
+        cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1)
+             << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+        cout << endl;
+    }
+    if (ftypes_number_string != "0") {
+        cout << "Processing f_type:\t"s << ptype_vector.at(2) << "\t with f_index:\t"s << pindex_vector.at(2) << endl;
+        if (ptype_vector.at(2) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
+        cout << "Number of face types:\t"s << ftypes_number_string << endl;
 // refill 0s
-    std::fill(max_fractions_output.begin(), max_fractions_output.end(),0);
-    for (int i = 0; i < 3; ++i)
-        if (max_fractions_vectors[2].size() > 0 && max_fractions_vectors[2][i] > 0) max_fractions_output.at(i) = max_fractions_vectors[2][i];
-    cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1) << "\t\t"<< max_fractions_output.at(2) << "\t\t" << endl;
-    cout << endl;
-    cout << "Processing e_type:\t"s << ptype_vector.at(1) << "\twith e_index:\t"s << pindex_vector.at(1) << endl;
-    if (ptype_vector.at(1) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
-    cout << "Number of edge types:\t"s << etypes_number_string << endl;
+        std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
+        for (int i = 0; i < 3; ++i)
+            if (max_fractions_vectors[2].size() > 0 && max_fractions_vectors[2][i] > 0)
+                max_fractions_output.at(i) = max_fractions_vectors[2][i];
+        cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1)
+             << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+        cout << endl;
+    }
+    if (etypes_number_string != "0") {
+        cout << "Processing e_type:\t"s << ptype_vector.at(1) << "\twith e_index:\t"s << pindex_vector.at(1) << endl;
+        if (ptype_vector.at(1) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
+        cout << "Number of edge types:\t"s << etypes_number_string << endl;
 // refill 0s
-    std::fill(max_fractions_output.begin(), max_fractions_output.end(),0);
-    for (int i = 0; i < 3; ++i)
-        if (max_fractions_vectors[1].size() > 0 && max_fractions_vectors[1][i] > 0) max_fractions_output.at(i) = max_fractions_vectors[1][i];
-    cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1) << "\t\t"<< max_fractions_output.at(2) << "\t\t" << endl;
-    cout << endl;
-    cout << "Processing n_type:\t"s << ptype_vector.at(0) << "\twith n_index:\t"s << pindex_vector.at(0) << endl;
-    if (ptype_vector.at(0) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
-    cout << "Number of node types:\t"s << ntypes_number_string << endl;
-// refill 0s
+        std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
+        for (int i = 0; i < 3; ++i)
+            if (max_fractions_vectors[1].size() > 0 && max_fractions_vectors[1][i] > 0)
+                max_fractions_output.at(i) = max_fractions_vectors[1][i];
+        cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1)
+             << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+        cout << endl;
+    }
+    if (ntypes_number_string != "0") {
+        cout << "Processing n_type:\t"s << ptype_vector.at(0) << "\twith n_index:\t"s << pindex_vector.at(0) << endl;
+        if (ptype_vector.at(0) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
+        cout << "Number of node types:\t"s << ntypes_number_string << endl;
+    }
+    // refill 0s
     std::fill(max_fractions_output.begin(), max_fractions_output.end(),0);
     for (int i = 0; i < 3; ++i)
         if (max_fractions_vectors[0].size() > 0 && max_fractions_vectors[0][i] > 0) max_fractions_output.at(i) = max_fractions_vectors[0][i];

@@ -1,3 +1,6 @@
+/// * Function calculates the vector<int> "EdgeTypes" of types Edges in the PCC using its FES incidence matrix and special faces sequence (special_faces_sequence) * ///
+/// *                                                                                                                                                    * ///
+
 std::vector<double> j_fractions_vector(vector<int> const &TJsTypes){ // based on Edges vector
     std::vector<double> j_fractions_vector(4); // Function output: TJs fractions
 
@@ -6,14 +9,14 @@ std::vector<double> j_fractions_vector(vector<int> const &TJsTypes){ // based on
     J1 = std::count(TJsTypes.begin(), TJsTypes.end(), 1); // containing 1 incident special face
     J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2); // containing 2 incident special face
     J3 = std::count(TJsTypes.begin(), TJsTypes.end(), 3); // containing 3 incident special face
-    J0 = CellNumbs.at(1) - J1 - J2 - J3; // containing no incident special face (the total amount of TJs = total amount of Edges in DCC = CellNumbs.at(1))
-    Jall = (double) CellNumbs.at(1); // amount of Edges in DCC
+    J0 = CellNumbs.at(1 + (dim - 3)) - J1 - J2 - J3; // containing no incident special face (the total amount of TJs = total amount of Edges in DCC = CellNumbs.at(1))
+    Jall = (double) CellNumbs.at(1 + (dim - 3)); // amount of Edges in DCC
 
 // Conversion from numbers to fractions
     j_fractions_vector.at(0) = (double) J0 / Jall;
 // (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
     j_fractions_vector.at(1) = (double) J1 / Jall;
-    j_fractions_vector.at(2) / Jall;
+    j_fractions_vector.at(2) = (double) J2 / Jall;
     j_fractions_vector.at(3) = (double) J3 / Jall;
 
     return j_fractions_vector;
@@ -42,7 +45,7 @@ double Configuration_Entropy(vector<int> const &TJsTypes){ // based on Edges vec
     J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2); // containing 2 incident special face
     J3 = std::count(TJsTypes.begin(), TJsTypes.end(), 3); // containing 3 incident special face
     J0 = CellNumbs.at(1) - J1 - J2 - J3; // containing no incident special face (the total amount of TJs = total amount of Edges in DCC = CellNumbs.at(1))
-    Jall = (double) CellNumbs.at(1); // amount of Edges in DCC
+    Jall = (double) CellNumbs.at(1 + (dim - 3)); // amount of Edges in DCC
 
 // Conversion from numbers to fractions
     double l2j0 = 0.0, l2j1 = 0.0, l2j2 = 0.0, l2j3 = 0.0;
@@ -104,8 +107,8 @@ std::tuple<double, double> Configuration_Entropy_tuple(std::vector<double> const
     } else Face_Entropy_Median = 0.0;
 
     /// Screw part (divergence from the uniform distribution -> S_max) in the entropy decomposition
-    for (int j = 0; j < j_types_fractions.size(); j++)
-        for (int i = 0; i < j; i++)
+    for (int j = 0; j < j_types_fractions.size(); ++j)
+        for (int i = 0; i < j; ++i)
             if (j_types_fractions[i]!=0 && j_types_fractions[j]!=0) {
                 Face_Entropy_Skrew +=
                         -(1.0 / j_types_fractions.size()) * (j_types_fractions[i] - j_types_fractions[j]) *
@@ -184,8 +187,6 @@ double Configuration_Entropy_change(std::vector<double> const &j_fractions, vect
         if (j_fractions.at(3) > 0)
             l2j3 = log2(j_fractions.at(3));
 
-        double j0s = j_fractions.at(0), j1s = j_fractions.at(1), j2s = j_fractions.at(2), j3s = j_fractions.at(3);
-
     // initial configuration entropy
     Configuration_Face_Entropy = -(j_fractions.at(0) * l2j0 + j_fractions.at(1) * l2j1 + j_fractions.at(2) * l2j2 + j_fractions.at(3) * l2j3);
 
@@ -198,7 +199,7 @@ double Configuration_Entropy_change(std::vector<double> const &j_fractions, vect
 
 // Conversion from numbers to fractions
     double l2j0n = 0.0, l2j1n = 0.0, l2j2n = 0.0, l2j3n = 0.0;
-    double Jall = (double) CellNumbs.at(1 + (dim -3)); // amount of Edges in DCC
+    double Jall = (double) CellNumbs.at(1 + (dim - 3)); // amount of Edges in DCC
 
     j0n = (double) J0n / Jall;
 // (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
@@ -213,6 +214,8 @@ double Configuration_Entropy_change(std::vector<double> const &j_fractions, vect
     // updated configuration entropy
     Configuration_Face_Entropy_new = -(j0n * l2j0n + j1n * l2j1n + j2n * l2j2n + j3n * l2j3n);
 
-    return Configuration_Face_Entropy_increase = Configuration_Face_Entropy_new - Configuration_Face_Entropy;
+    Configuration_Face_Entropy_increase = Configuration_Face_Entropy_new - Configuration_Face_Entropy;
+
+    return Configuration_Face_Entropy_increase;
 // REPAIR cout << "Configuration_Face_Entropy: " << Configuration_Face_Entropy << endl;
 } // end of Configuration_Entropy()

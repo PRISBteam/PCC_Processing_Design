@@ -51,20 +51,20 @@ config_reader_processing(source_path, max_fractions_vectors, mu, sigma, ptype_ve
 
 /// Cases for Processing types
 // cell type k :: 0 - nodes, 1 - edges, 2 - faces, 3 -polyhedrons - must coincide with the indexing of the CellNumbs.at(cell_type) vector (!)
-for (int cell_type = 3; cell_type >= 0; --cell_type) { /// loop over all types of k-Cells in the complex
+for (int cell_type = dim; cell_type >= 0; --cell_type) { /// loop over all types of k-Cells in the complex
 // both for 2D and 3D cases
     special_x_sequence = {0};
-    if (ptype_vector.at(cell_type) == "R" && max_fractions_vectors.at(cell_type).size() > 0) { //  Random generation case
+    if (ptype_vector.at(cell_type + (dim - 3)) == "R" && max_fractions_vectors.at(cell_type + (dim - 3)).size() > 0) { //  Random generation case
         cout << "Random processing in operation: cell_type : "s << cell_type << endl;
-        Out_logfile_stream << "Random processing in operation: cell_type : "s << cell_type << endl;
+        Out_logfile_stream << "Random processing in operation: cell_type : "s << cell_type  + (dim - 3) << endl;
         special_x_sequence = Processing_Random(cell_type, Configuration_State, max_fractions_vectors);
     } ///End of 'R' type simulations
 
-    else if (ptype_vector.at(cell_type) == "F" && max_fractions_vectors[cell_type].size() > 0) { // Maximum <functional> production
+    else if (ptype_vector.at(cell_type + (dim - 3)) == "F" && max_fractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
 //        if (pindex_vector.at(cell_type) == 0) {
 // processing index :: 0 - direct special faces assignment;  1 - crystallographic ; 2 - configurational TJs-based entropy (deviatoric);
             cout << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
-            Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
+            Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type + (dim - 3) << endl;
             special_x_sequence = Processing_maxFunctional(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
             // cell type = 2 -> faces
 
@@ -76,8 +76,8 @@ for (int cell_type = 3; cell_type >= 0; --cell_type) { /// loop over all types o
     } // End of 'F' type simulations (elseif)
     else cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'F' or 'I'..!" << endl;
 
-    CD.Set_sequence(special_x_sequence, cell_type); // (sequence, id)
-    CD.Set_design(Configuration_State.at(cell_type), cell_type); // (design, id) - design vector with types
+    CD.Set_sequence(special_x_sequence, cell_type + (dim - 3)); // (sequence, id)
+    CD.Set_design(Configuration_State.at(cell_type + (dim - 3)), cell_type + (dim - 3)); // (design, id) - design vector with types
 
     } // end of for(cell_type = 0; cell_type < dim+1; ++cell_type)
 
