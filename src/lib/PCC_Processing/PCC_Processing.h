@@ -74,6 +74,15 @@ for (int cell_type = dim; cell_type >= 0; --cell_type) { /// loop over all types
 //        }
 
     } // End of 'F' type simulations (elseif)
+
+    else if (ptype_vector.at(cell_type + (dim - 3)) == "D" && max_fractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
+        cout << "Min (MAX-deviator) Functional processing in operation: cell_type : "s << cell_type << endl;
+        Out_logfile_stream << "Min (MAX-deviator) Functional processing in operation: cell_type : "s << cell_type + (dim - 3) << endl;
+        special_x_sequence = Processing_minConfEntropy(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
+
+    } // End of 'D' type simulations (elseif)
+
+
     else cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'F' or 'I'..!" << endl;
 
     CD.Set_sequence(special_x_sequence, cell_type + (dim - 3)); // (sequence, id)

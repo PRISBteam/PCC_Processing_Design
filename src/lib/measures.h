@@ -4,7 +4,9 @@
 std::vector<double> j_fractions_vector(vector<int> const &TJsTypes){ // based on Edges vector
     std::vector<double> j_fractions_vector(4); // Function output: TJs fractions
 
-    unsigned int J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
+unsigned int J0 = 0, J1 = 0, J2 = 0, J3 = 0;
+double j0 = 0, j1 = 0, j2 = 0, j3 = 0, Jall = 0;
+
 /// amounts of TJs of different types
     J1 = std::count(TJsTypes.begin(), TJsTypes.end(), 1); // containing 1 incident special face
     J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2); // containing 2 incident special face
@@ -39,7 +41,8 @@ std::vector<double> d_fractions_vector(vector<int> const &TJsTypes){ // based on
 double Configuration_Entropy(vector<int> const &TJsTypes){ // based on Edges vector
     double Configuration_Face_Entropy = 0.0; // Function output: Configuration Entropy related with Faces
 
-    unsigned int J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
+    unsigned int J0 = 0, J1 = 0, J2 = 0, J3 = 0;
+    double j0 = 0, j1 = 0, j2 = 0, j3 = 0, Jall = 0;
 /// amounts of TJs of different types
     J1 = std::count(TJsTypes.begin(), TJsTypes.end(), 1); // containing 1 incident special face
     J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2); // containing 2 incident special face
@@ -124,7 +127,8 @@ std::tuple<double, double> Configuration_Entropy_tuple(std::vector<double> const
 double Configuration_Entropy_change(vector<int> const &TJsTypes, vector<int> const &TJsTypesNew){ // based on Edges vector
     double Configuration_Face_Entropy = 0, Configuration_Face_Entropy_new = 0, Configuration_Face_Entropy_increase = 0.0; // Function output: Configuration Entropy related with Faces
 
-    unsigned int J0 = 0, J1 = 0, J2 = 0, J3 = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
+    unsigned int J0 = 0, J1 = 0, J2 = 0, J3 = 0;
+    double j0 = 0, j1 = 0, j2 = 0, j3 = 0;
 /// amounts of TJs of different types
     J1 = std::count(TJsTypes.begin(), TJsTypes.end(), 1); // containing 1 incident special face
     J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2); // containing 2 incident special face
@@ -147,7 +151,8 @@ double Configuration_Entropy_change(vector<int> const &TJsTypes, vector<int> con
     // initial configuration entropy
     Configuration_Face_Entropy = -(j0 * l2j0 + j1 * l2j1 + j2 * l2j2 + j3 * l2j3);
 
-    unsigned int J0n = 0, J1n = 0, J2n = 0, J3n = 0, j0n = 0, j1n = 0, j2n = 0, j3n = 0;
+    unsigned int J0n = 0, J1n = 0, J2n = 0, J3n = 0;
+    double j0n = 0, j1n = 0, j2n = 0, j3n = 0;
 /// amounts of TJs of different types
     J1n = std::count(TJsTypesNew.begin(), TJsTypesNew.end(), 1); // containing 1 incident special face
     J2n = std::count(TJsTypesNew.begin(), TJsTypesNew.end(), 2); // containing 2 incident special face
@@ -176,7 +181,7 @@ double Configuration_Entropy_change(vector<int> const &TJsTypes, vector<int> con
 double Configuration_Entropy_change(std::vector<double> const &j_fractions, vector<int> const &TJsTypesNew){ // based on Edges vector
     double Configuration_Face_Entropy = 0, Configuration_Face_Entropy_new = 0, Configuration_Face_Entropy_increase = 0.0; // Function output: Configuration Entropy related with Faces
 
-        double l2j0 = 0.0, l2j1 = 0.0, l2j2 = 0.0, l2j3 = 0.0;
+double l2j0 = 0.0, l2j1 = 0.0, l2j2 = 0.0, l2j3 = 0.0;
 // (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
         if (j_fractions.at(0) > 0)
             l2j0 = log2(j_fractions.at(0));
@@ -190,7 +195,8 @@ double Configuration_Entropy_change(std::vector<double> const &j_fractions, vect
     // initial configuration entropy
     Configuration_Face_Entropy = -(j_fractions.at(0) * l2j0 + j_fractions.at(1) * l2j1 + j_fractions.at(2) * l2j2 + j_fractions.at(3) * l2j3);
 
-    unsigned int J0n = 0, J1n = 0, J2n = 0, J3n = 0, j0n = 0, j1n = 0, j2n = 0, j3n = 0;
+unsigned int J0n = 0, J1n = 0, J2n = 0, J3n = 0;
+double j0n = 0, j1n = 0, j2n = 0, j3n = 0;
 /// amounts of TJs of different types
     J1n = std::count(TJsTypesNew.begin(), TJsTypesNew.end(), 1); // containing 1 incident special face
     J2n = std::count(TJsTypesNew.begin(), TJsTypesNew.end(), 2); // containing 2 incident special face
@@ -201,8 +207,8 @@ double Configuration_Entropy_change(std::vector<double> const &j_fractions, vect
     double l2j0n = 0.0, l2j1n = 0.0, l2j2n = 0.0, l2j3n = 0.0;
     double Jall = (double) CellNumbs.at(1 + (dim - 3)); // amount of Edges in DCC
 
+    // (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
     j0n = (double) J0n / Jall;
-// (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
     if (j0n > 0) l2j0n = log2(j0n);
     j1n = (double) J1n / Jall;
     if (j1n > 0) l2j1n = log2(j1n);
@@ -219,3 +225,64 @@ double Configuration_Entropy_change(std::vector<double> const &j_fractions, vect
     return Configuration_Face_Entropy_increase;
 // REPAIR cout << "Configuration_Face_Entropy: " << Configuration_Face_Entropy << endl;
 } // end of Configuration_Entropy()
+
+
+double Configuration_DevEntropy_change(std::vector<double> const &j_fractions, vector<int> const &TJsTypesNew){ // based on Edges vector
+    double Configuration_Edge_DevEntropy_increase = 0.0; // Function output: Configuration Entropy related with Faces
+
+    double l2j0 = 0.0, l2j1 = 0.0, l2j2 = 0.0, l2j3 = 0.0;
+// (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
+    if (j_fractions.at(0) > 0)
+        l2j0 = log2(j_fractions.at(0));
+    if (j_fractions.at(1) > 0)
+        l2j1 = log2(j_fractions.at(1));
+    if (j_fractions.at(2) > 0)
+        l2j2 = log2(j_fractions.at(2));
+    if (j_fractions.at(3) > 0)
+        l2j3 = log2(j_fractions.at(3));
+
+    double Edge_Entropy_Skew = 0;
+    std::vector<double> j_types_fractions = {j_fractions.at(0), j_fractions.at(1), j_fractions.at(2), j_fractions.at(3)};
+    /// Screw part (divergence from the uniform distribution -> S_max) in the entropy decomposition
+    for (int j = 0; j < j_types_fractions.size(); ++j)
+        for (int i = 0; i < j; ++i)
+            if (j_types_fractions[i]!=0 && j_types_fractions[j]!=0) {
+                Edge_Entropy_Skew +=
+                        -(1.0 / j_types_fractions.size()) * (j_types_fractions[i] - j_types_fractions[j]) *
+                        log2(j_types_fractions[i] / j_types_fractions[j]);
+            } else Edge_Entropy_Skew += 0.0;
+
+    unsigned int J0n = 0, J1n = 0, J2n = 0, J3n = 0;
+    double j0n = 0, j1n = 0, j2n = 0, j3n = 0;
+/// amounts of TJs of different types
+    J1n = std::count(TJsTypesNew.begin(), TJsTypesNew.end(), 1); // containing 1 incident special face
+    J2n = std::count(TJsTypesNew.begin(), TJsTypesNew.end(), 2); // containing 2 incident special face
+    J3n = std::count(TJsTypesNew.begin(), TJsTypesNew.end(), 3); // containing 3 incident special face
+    J0n = CellNumbs.at(1) - J1n - J2n - J3n; // containing no incident special face (the total amount of TJs = total amount of Edges in DCC = CellNumbs.at(1))
+
+// Conversion from numbers to fractions
+    double l2j0n = 0.0, l2j1n = 0.0, l2j2n = 0.0, l2j3n = 0.0;
+    double Jall = (double) CellNumbs.at(1 + (dim - 3)); // amount of Edges in DCC
+
+    // (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
+    j0n = (double) J0n / Jall;
+    j1n = (double) J1n / Jall;
+    j2n = (double) J2n / Jall;
+    j3n = (double) J3n / Jall;
+
+    double Edge_Entropy_Skew_new = 0;
+    std::vector<double> j_types_fractions_new = {j0n, j1n, j2n, j3n};
+    /// Screw part (divergence from the uniform distribution -> S_max) in the entropy decomposition
+    for (int j = 0; j < j_types_fractions_new.size(); ++j)
+        for (int i = 0; i < j; ++i)
+            if (j_types_fractions_new[i]!=0 && j_types_fractions_new[j]!=0) {
+                Edge_Entropy_Skew_new +=
+                        -(1.0 / j_types_fractions_new.size()) * (j_types_fractions_new[i] - j_types_fractions_new[j]) *
+                        log2(j_types_fractions_new[i] / j_types_fractions_new[j]);
+            } else Edge_Entropy_Skew_new += 0.0;
+
+    Configuration_Edge_DevEntropy_increase = Edge_Entropy_Skew - Edge_Entropy_Skew_new;
+
+    return Configuration_Edge_DevEntropy_increase;
+// REPAIR cout << "Configuration_Face_Entropy: " << Configuration_Face_Entropy << endl;
+} // end of Configuration_DeviatoricEntropy()

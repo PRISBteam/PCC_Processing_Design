@@ -205,6 +205,13 @@ void config_reader_processing(std::string &source_path, std::vector<vector<doubl
             ftypes_number_string = processing_ini.get("faces").get("face_types_number");
     }
 
+    string fseq_source;
+    if (processing_ini.has("faces")) {
+        auto& collection = processing_ini["faces"];
+        if (collection.has("source"))
+            fseq_source = processing_ini.get("faces").get("source");
+    }
+
 // fractions
     string f1_max, f2_max, f3_max;
     if (processing_ini.has("faces")) {

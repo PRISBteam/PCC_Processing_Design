@@ -238,25 +238,32 @@ vector<double> Get_EntropyIncreaseList(std::vector<unsigned int> &S_Vector, vect
     return EntropyIncreaseList;
 }
 
-std::vector<vector<int>> Get_cases_list(std::vector<int> const &S_Vector, std::vector<int> const &EdgeTypes, double const &p_index) {
+std::vector<vector<int>> Get_cases_list(std::vector<int> const &S_Vector, std::vector<int> const &EdgeTypes, SpMat const &FES, std::map<unsigned int, std::vector<unsigned int>> &cases_to_sfaces, double const &p_index) {
     std::vector<vector<int>> cases_list; // in every case its own TJs vector
 
-    // Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file paths.at(5 + (dim - 3))
-    SpMat FES = SMatrixReader(paths.at(5 + (dim - 3)), CellNumbs.at(1 + (dim - 3)), CellNumbs.at(2 + (dim - 3))); // Edges-Faces sparse incidence matrix
     std::vector<int> NewEdgeTypes = EdgeTypes;
 
     if (p_index == 0) { // cases: direct assigment of special faces one by one
+        unsigned int iter = 0;
         for (unsigned int f = 0; f < CellNumbs.at(2 + (dim - 3)); ++f) { // loop over all Faces in PCC
             NewEdgeTypes = EdgeTypes; // on each step it is equal to the initial Edge state defined by S_Vector
+
            /// only ORDINARY f will be taken in the "cases list" (!) as if they change their type to special
             if (S_Vector.at(f) == 0) { // Loop over each still ORDINARY cell neighbours
                     for(int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
                         if (FES.coeff(e, f) != 0) NewEdgeTypes.at(e)++;
-            }
-            cases_list.push_back(NewEdgeTypes);
+//                cout << " J1: " << std::count(NewEdgeTypes.begin(), NewEdgeTypes.end(), 1)<< " J2: " << std::count(NewEdgeTypes.begin(), NewEdgeTypes.end(), 2) << " J3: " << std::count(NewEdgeTypes.begin(), NewEdgeTypes.end(), 3) << endl; // containing 1 incident special face
+
+                cases_list.push_back(NewEdgeTypes);
+            /// map from the Cases to special Faces set
+            cases_to_sfaces.insert( std::pair<unsigned int, std::vector<unsigned int>> (iter, {f})); // each cases coresponds to the vector with a single element which is the same number of special face
+                // new # in the case_list
+// REPAIR            cout << " case iterator: " <<  iter << "   " << cases_to_sfaces[iter].at(0) << endl;
+                ++iter;
+            } // end of if (S_Vector.at(f) == 0)
         } // end for (unsigned int f = 0; f < CellNumbs.at(2); ++f)
     } else if (p_index == 1) { // cases: crystallographic restrictions with "grain rotations"
-
+            ///...
     }
 
     return cases_list;
