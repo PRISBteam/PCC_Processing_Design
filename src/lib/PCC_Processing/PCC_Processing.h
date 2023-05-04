@@ -24,7 +24,7 @@
  * @param Configuration_State [not mandatory - only is there is some "non-zero" initial state]
  * @return cells_design
  */
-CellsDesign PCC_Processing(vector<vector<int>> &Configuration_State) {
+CellsDesign PCC_Processing(std::vector<std::vector<int>> &Configuration_State) {
 // CellNumbs :: vector components: [0] - Nodes number, [1] - Edges number, [2] - Faces number, [3] - Grains number
 // Maximal fraction (max_sFaces_fraction) for simulation loop max_sFaces_fraction \in [0,1]
 /// Main output of the module
@@ -47,7 +47,8 @@ std::vector<vector<double>> max_fractions_vectors(4); // [0][..] - nodes, [1][..
 std::vector<string> ptype_vector(4); // vector of strings corresponding to the processing types from file processing.ini :
 std::vector<double> pindex_vector(4); // vector of indeces of the Processing module: S(p_index = 1) - Smax, S(p_index = 0) - Smin, I(p_index = x.x) - Index mode
 // in both vectors: [0] - nodes, [1] - edges, [2] - faces, [3] - polyhedrons
-config_reader_processing(source_path, max_fractions_vectors, mu, sigma, ptype_vector, pindex_vector, Out_logfile_stream); // void
+std::vector<string> sequence_source_paths(4); // k-sequence pathes for the reading them from file(s) instead of the new Processing routes
+config_reader_processing(source_path, sequence_source_paths, max_fractions_vectors, mu, sigma, ptype_vector, pindex_vector, Out_logfile_stream); // void
 
 /// Cases for Processing types
 // cell type k :: 0 - nodes, 1 - edges, 2 - faces, 3 -polyhedrons - must coincide with the indexing of the CellNumbs.at(cell_type) vector (!)
@@ -58,7 +59,7 @@ for (int cell_type = dim; cell_type >= 0; --cell_type) { /// loop over all types
         cout << "Random processing in operation: cell_type : "s << cell_type << endl;
         Out_logfile_stream << "Random processing in operation: cell_type : "s << cell_type  + (dim - 3) << endl;
         special_x_sequence = Processing_Random(cell_type, Configuration_State, max_fractions_vectors);
-    } ///End of 'R' type simulations
+    } // End of 'R' type simulations
 
     else if (ptype_vector.at(cell_type + (dim - 3)) == "F" && max_fractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
 //        if (pindex_vector.at(cell_type) == 0) {
@@ -81,14 +82,30 @@ for (int cell_type = dim; cell_type >= 0; --cell_type) { /// loop over all types
         special_x_sequence = Processing_minConfEntropy(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
 
     } // End of 'D' type simulations (elseif)
+    else if (ptype_vector.at(cell_type + (dim - 3)) == "S") {
+        char* kseq_sourcepath = const_cast<char*>(sequence_source_paths.at(cell_type + (dim - 3)).c_str());
+        special_x_sequence = VectorIReader(kseq_sourcepath);
 
+        /// (!) Output +1 like in Neper, so he numbers should be modified back as -1
+        for (auto it = special_x_sequence.begin(); it != special_x_sequence.end(); ++it)
+            special_x_sequence.at(distance(special_x_sequence.begin(), it)) = *it - 1;
 
+        /// Update of the corresponding Configuration State vector
+        Configuration_State[cell_type + (dim - 3)].clear();
+        std::vector<int> State_vector(CellNumbs.at(cell_type + (dim - 3)), 0);
+        for (unsigned int k_cell : special_x_sequence) { // fill state vector from cells_sequence
+            State_vector.at(k_cell) = 1;
+        }
+
+        for (int var : State_vector)
+         Configuration_State[cell_type + (dim - 3)].push_back(var);
+    } // End of 'S' type simulations (elseif)
     else cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'F' or 'I'..!" << endl;
 
     CD.Set_sequence(special_x_sequence, cell_type + (dim - 3)); // (sequence, id)
     CD.Set_design(Configuration_State.at(cell_type + (dim - 3)), cell_type + (dim - 3)); // (design, id) - design vector with types
 
-    } // end of for(cell_type = 0; cell_type < dim+1; ++cell_type)
+    } // for (int cell_type = dim; cell_type >= 0; --cell_type)
 
     cout << endl; Out_logfile_stream << endl;
     cout << "p-sequence size: " << CD.Get_p_sequence().size() << endl; Out_logfile_stream << "p-sequence size: " << CD.Get_p_sequence().size() << endl;

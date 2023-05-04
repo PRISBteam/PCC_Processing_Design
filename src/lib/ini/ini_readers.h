@@ -129,7 +129,7 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
 
 
 /// ================== # 2 # Initial PROCESSING module configuration - reading and output ==================
-void config_reader_processing(std::string &source_path, std::vector<vector<double>> &max_fractions_vectors, double &mu, double &sigma, std::vector<string> &ptype_vector, std::vector<double> &pindex_vector, std::ofstream &Out_logfile_stream) {
+void config_reader_processing(std::string &source_path, std::vector<string> &sequence_source_paths, std::vector<vector<double>> &max_fractions_vectors, double &mu, double &sigma, std::vector<string> &ptype_vector, std::vector<double> &pindex_vector, std::ofstream &Out_logfile_stream) {
     // ini files reader - external (MIT license) library
     mINI::INIFile file(source_path + "processing.ini"s);
     mINI::INIStructure processing_ini;
@@ -144,6 +144,13 @@ void config_reader_processing(std::string &source_path, std::vector<vector<doubl
         {
             ptype_vector.at(3) = processing_ini.get("polyhedrons").get("pp_mode");
         } }
+
+    string pseq_source;
+    if (processing_ini.has("polyhedrons")) {
+        auto& collection = processing_ini["polyhedrons"];
+        if (collection.has("source"))
+            pseq_source = processing_ini.get("polyhedrons").get("source");
+    }
 
     if (processing_ini.has("polyhedrons")) {
         auto& collection = processing_ini["polyhedrons"];
@@ -251,6 +258,13 @@ void config_reader_processing(std::string &source_path, std::vector<vector<doubl
         // R(0) - R, S(1) - Smax, S(0) - Smin, I(x.x) - index mode
     }
 
+    string eseq_source;
+    if (processing_ini.has("edges")) {
+        auto& collection = processing_ini["edges"];
+        if (collection.has("source"))
+            eseq_source = processing_ini.get("edges").get("source");
+    }
+
     string etypes_number_string;
     if (processing_ini.has("edges")) {
         auto& collection = processing_ini["edges"];
@@ -297,6 +311,13 @@ void config_reader_processing(std::string &source_path, std::vector<vector<doubl
         // R(0) - R, S(1) - Smax, S(0) - Smin, I(x.x) - index mode
     }
 
+    string nseq_source;
+    if (processing_ini.has("nodes")) {
+        auto& collection = processing_ini["nodes"];
+        if (collection.has("source"))
+            eseq_source = processing_ini.get("nodes").get("source");
+    }
+
     string ntypes_number_string;
     if (processing_ini.has("nodes")) {
         auto& collection = processing_ini["nodes"];
@@ -339,14 +360,19 @@ void config_reader_processing(std::string &source_path, std::vector<vector<doubl
             sigma = stod(processing_ini.get("distribution").get("sigma"));
     }
 
+    /// sequences
+    sequence_source_paths = {nseq_source, eseq_source, fseq_source, pseq_source};
+
 vector<double> max_fractions_output(3, 0); // temporary vector serving as an output template for max fractions
 /// Output to the screen/console
     cout<< "______________________________________________________________________________________" << endl;
     cout << "The Processing module simulation type and initial parameters:\t\t" << endl;
     cout << endl;
     if (ptypes_number_string != "0") {
+        // polyhedrons
         cout << "Processing p_type:\t"s << ptype_vector.at(3) << "\t with p_index:\t"s << pindex_vector.at(3) << endl;
         if (ptype_vector.at(3) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
+        if (ptype_vector.at(3) == "S") cout << "polyhedron sequence source: "s << pseq_source << endl;
         cout << "Number of polyhedron types:\t"s << ptypes_number_string << endl;
         std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
         for (int i = 0; i < 3; ++i)
@@ -357,8 +383,10 @@ vector<double> max_fractions_output(3, 0); // temporary vector serving as an out
         cout << endl;
     }
     if (ftypes_number_string != "0") {
+        // faces
         cout << "Processing f_type:\t"s << ptype_vector.at(2) << "\t with f_index:\t"s << pindex_vector.at(2) << endl;
         if (ptype_vector.at(2) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
+        if (ptype_vector.at(2) == "S") cout << "face sequence source: "s << fseq_source << endl;
         cout << "Number of face types:\t"s << ftypes_number_string << endl;
 // refill 0s
         std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
@@ -370,8 +398,10 @@ vector<double> max_fractions_output(3, 0); // temporary vector serving as an out
         cout << endl;
     }
     if (etypes_number_string != "0") {
+        //edges
         cout << "Processing e_type:\t"s << ptype_vector.at(1) << "\twith e_index:\t"s << pindex_vector.at(1) << endl;
         if (ptype_vector.at(1) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
+        if (ptype_vector.at(1) == "S") cout << "edges sequence source: "s << eseq_source << endl;
         cout << "Number of edge types:\t"s << etypes_number_string << endl;
 // refill 0s
         std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
@@ -383,8 +413,10 @@ vector<double> max_fractions_output(3, 0); // temporary vector serving as an out
         cout << endl;
     }
     if (ntypes_number_string != "0") {
+        // nodes
         cout << "Processing n_type:\t"s << ptype_vector.at(0) << "\twith n_index:\t"s << pindex_vector.at(0) << endl;
         if (ptype_vector.at(0) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
+        if (ptype_vector.at(0) == "S") cout << "nodes sequence source: "s << nseq_source << endl;
         cout << "Number of node types:\t"s << ntypes_number_string << endl;
     }
     // refill 0s
@@ -398,26 +430,57 @@ vector<double> max_fractions_output(3, 0); // temporary vector serving as an out
     Out_logfile_stream<< "______________________________________________________________________________________" << endl;
     Out_logfile_stream << "The Processing module simulation type and initial parameters:\t\t" << endl;
     Out_logfile_stream << endl;
-    Out_logfile_stream << "Processing p_type:\t"s << ptype_vector.at(3) << "\twith p_index:\t"s << pindex_vector.at(3) << endl;
-    if (ptype_vector.at(3) == "L") cout << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
-    Out_logfile_stream << "Number of polyhedron types:\t"s << ptypes_number_string << endl;
-    std::fill(max_fractions_output.begin(), max_fractions_output.end(),0);
-    for (int i = 0; i < 3; ++i)
-        if (max_fractions_vectors[3].size() > 0 && max_fractions_vectors[3][i] > 0) max_fractions_output.at(i) = max_fractions_vectors[3][i];
-    Out_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1) << "\t\t"<< max_fractions_output.at(2) << "\t\t" << endl;
-    Out_logfile_stream << endl;
-    Out_logfile_stream << "Processing f_type:\t"s << ptype_vector.at(2) << "\twith f_index:\t"s << pindex_vector.at(2) << endl;
-    if (ptype_vector.at(2) == "L") Out_logfile_stream << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
-    Out_logfile_stream << "Number of face types:\t"s << ftypes_number_string << endl;
+    if (ptypes_number_string != "0") {
+        // polyhedrons
+        Out_logfile_stream << "Processing p_type:\t"s << ptype_vector.at(3) << "\t with p_index:\t"s << pindex_vector.at(3) << endl;
+        if (ptype_vector.at(3) == "L") Out_logfile_stream << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
+        if (ptype_vector.at(3) == "S") Out_logfile_stream << "polyhedron sequence source: "s << pseq_source << endl;
+        Out_logfile_stream << "Number of polyhedron types:\t"s << ptypes_number_string << endl;
+        std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
+        for (int i = 0; i < 3; ++i)
+            if (max_fractions_vectors[3].size() > 0 && max_fractions_vectors[3][i] > 0)
+                max_fractions_output.at(i) = max_fractions_vectors[3][i];
+        Out_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1)
+             << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+        Out_logfile_stream << endl;
+    }
+    if (ftypes_number_string != "0") {
+        // faces
+        Out_logfile_stream << "Processing f_type:\t"s << ptype_vector.at(2) << "\t with f_index:\t"s << pindex_vector.at(2) << endl;
+        if (ptype_vector.at(2) == "L") Out_logfile_stream << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
+        if (ptype_vector.at(2) == "S") Out_logfile_stream << "face sequence source: "s << fseq_source << endl;
+        Out_logfile_stream << "Number of face types:\t"s << ftypes_number_string << endl;
 // refill 0s
-    std::fill(max_fractions_output.begin(), max_fractions_output.end(),0);
-    for (int i = 0; i < 3; ++i)
-        if (max_fractions_vectors[2].size() > 0 && max_fractions_vectors[2][i] > 0) max_fractions_output.at(i) = max_fractions_vectors[2][i];
-    Out_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1) << "\t\t"<< max_fractions_output.at(2) << "\t\t" << endl;
-    Out_logfile_stream << endl;
-    Out_logfile_stream << "Processing e_type:\t"s << ptype_vector.at(1) << "\twith e_index:\t"s << pindex_vector.at(1) << endl;
-    if (ptype_vector.at(1) == "L") Out_logfile_stream << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
-    Out_logfile_stream << "Number of edge types:\t"s << etypes_number_string << endl;
+        std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
+        for (int i = 0; i < 3; ++i)
+            if (max_fractions_vectors[2].size() > 0 && max_fractions_vectors[2][i] > 0)
+                max_fractions_output.at(i) = max_fractions_vectors[2][i];
+        Out_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1)
+             << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+        Out_logfile_stream << endl;
+    }
+    if (etypes_number_string != "0") {
+        //edges
+        Out_logfile_stream << "Processing e_type:\t"s << ptype_vector.at(1) << "\twith e_index:\t"s << pindex_vector.at(1) << endl;
+        if (ptype_vector.at(1) == "L") Out_logfile_stream << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
+        if (ptype_vector.at(1) == "S") Out_logfile_stream << "edges sequence source: "s << eseq_source << endl;
+        Out_logfile_stream << "Number of edge types:\t"s << etypes_number_string << endl;
+// refill 0s
+        std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
+        for (int i = 0; i < 3; ++i)
+            if (max_fractions_vectors[1].size() > 0 && max_fractions_vectors[1][i] > 0)
+                max_fractions_output.at(i) = max_fractions_vectors[1][i];
+        Out_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1)
+             << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+        Out_logfile_stream << endl;
+    }
+    if (ntypes_number_string != "0") {
+        // nodes
+        Out_logfile_stream << "Processing n_type:\t"s << ptype_vector.at(0) << "\twith n_index:\t"s << pindex_vector.at(0) << endl;
+        if (ptype_vector.at(0) == "L") Out_logfile_stream << "mu = \t"s << mu << " and " << "sigma = \t"s << sigma << endl;
+        if (ptype_vector.at(0) == "S") Out_logfile_stream << "nodes sequence source: "s << nseq_source << endl;
+        Out_logfile_stream << "Number of node types:\t"s << ntypes_number_string << endl;
+    }
 // refill 0s
     std::fill(max_fractions_output.begin(), max_fractions_output.end(),0);
     for (int i = 0; i < 3; ++i)

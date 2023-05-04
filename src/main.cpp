@@ -27,7 +27,7 @@
 ///* Attached user-defined C++ libraries (must be copied in the directory for STL):
 ///* ------------------------------------------------------------------------------- *
 /// Eigen source: https://eigen.tuxfamily.org/ (2022)
-// #include <Eigen/Core>
+ #include <Eigen/Core>
 // #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 

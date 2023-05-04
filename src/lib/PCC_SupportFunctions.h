@@ -107,16 +107,17 @@ std::vector<unsigned int> VectorIReader(char* FilePath) {
 }
 
 /// Creation double std::Vector from file
-std::vector<double> dVectorReader(char* FilePath) {
-    std::vector<double> res;
+std::vector<double> VectorDReader(char* FilePath) {
+    std::vector<double> res; // function output
     double i = 0.0;
+
     ifstream inCellNumbers(FilePath);
     if (inCellNumbers.is_open()) { //If the file was successfully open, then
         while(inCellNumbers >> i) res.push_back(i);
     } else std:cout << "The file " << FilePath << " cannot be read" << endl; //If something goes wrong
 
     return res;
-}
+} // END of VectorDReader()
 
 /// * The function count the number of Edges possessing with types J0, J1, J2, J3 and J4 for every junction * ///
 /// * Calculation Face-Edge index ::                                                                                                     * ///
@@ -250,7 +251,7 @@ std::vector<vector<int>> Get_cases_list(std::vector<int> const &S_Vector, std::v
 
            /// only ORDINARY f will be taken in the "cases list" (!) as if they change their type to special
             if (S_Vector.at(f) == 0) { // Loop over each still ORDINARY cell neighbours
-                    for(int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
+                    for(unsigned int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
                         if (FES.coeff(e, f) != 0) NewEdgeTypes.at(e)++;
 //                cout << " J1: " << std::count(NewEdgeTypes.begin(), NewEdgeTypes.end(), 1)<< " J2: " << std::count(NewEdgeTypes.begin(), NewEdgeTypes.end(), 2) << " J3: " << std::count(NewEdgeTypes.begin(), NewEdgeTypes.end(), 3) << endl; // containing 1 incident special face
 
@@ -282,7 +283,7 @@ tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<ch
 
     vector<int> Grain_neighbours;
     vector<unsigned int> grainIDs;
-#pragma omp parallel for // parallel execution by OpenMP
+// #pragma omp parallel for // parallel execution by OpenMP
   /*
         grainIDs.clear();
         for (SparseMatrix<double>::InnerIterator it(GFS, facenumb); it; ++it)
