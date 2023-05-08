@@ -695,17 +695,21 @@ public:
         pcc_design = pcc_design;
     }
 
+    // Sequences of special k-cells
     std::vector<vector<unsigned int>> face_process_seq;
     std::vector<vector<int>> face_process_state;
 
+    // Entropic analysis
     std::vector<double> e_entropy_mean_vector, e_entropy_skrew_vector, e_entropy_full_vector;
-
     std::vector<vector<double>> je_fractions_vector, de_fractions_vector;
 
-    // analytical solutions
+    // Analytical solutions
     std::vector<vector<double>> j_analytical_rand_vector, d_analytical_rand_vector;
     std::vector<vector<double>> j_analytical_cryst_vector, d_analytical_cryst_vector;
     std::vector<tuple<double, double>> AnRandEntropies_vector, AnCrystEntropies_vector;
+
+    // Laplacian lab
+    std::vector<std::vector<double>> Betti_vector;
 
 }; /// end of class ProcessedComplex
 

@@ -500,7 +500,7 @@ vector<double> max_fractions_output(3, 0); // temporary vector serving as an out
     return;
 } /// END of config_reader_processing function
 
-std::vector<double> config_reader_characterisation(std::string const &source_path, std::vector<int> &charlabs_polyhedrons, std::vector<int> &charlabs_faces, std::vector<int> &charlabs_edges, std::vector<int> &charlabs_nodes, std::ofstream &Out_logfile_stream) {
+std::vector<double> config_reader_characterisation(std::string const &source_path, std::vector<int> &charlabs_polyhedrons, std::vector<int> &charlabs_faces, std::vector<int> &charlabs_edges, std::vector<int> &charlabs_nodes, std::vector<int> &charlabs_laplacians, std::ofstream &Out_logfile_stream) {
     std::vector<double> config_characterisation_vector;
 
 // ini files reader - external (MIT license) library
@@ -645,6 +645,21 @@ std::vector<double> config_reader_characterisation(std::string const &source_pat
             charlabs_nodes.push_back(stoi(char_ini.get("nodes_lab").get("S_skew")));
         } }
 
+/// Laplacians
+    if (char_ini.has("spectra_lab")) {
+        auto& collection = char_ini["spectra_lab"];
+        if (collection.has("calc_steps_numb"))
+        {
+            charlabs_laplacians.push_back(stoi(char_ini.get("spectra_lab").get("calc_steps_numb"))); // 0
+        } }
+
+    if (char_ini.has("spectra_lab")) {
+        auto& collection = char_ini["spectra_lab"];
+        if (collection.has("laplacians"))
+        {
+            charlabs_laplacians.push_back(stoi(char_ini.get("spectra_lab").get("laplacians"))); // 1
+        } }
+
     /// Output to the screen/console
     cout<< "______________________________________________________________________________________" << endl;
     cout << "The Characterisation module simulation type and initial parameters:\t\t" << endl;
@@ -675,7 +690,6 @@ if(charlabs_polyhedrons.at(0) == 1) { // Polyhedrons
         cout << "Conf entropy mean part:\t"s << charlabs_edges.at(2) << "\t\t" << endl;
         cout << "Conf entropy skew part:\t"s << charlabs_edges.at(3) << "\t\t" << endl;
         cout << "Analytical solutions :\t"s << charlabs_edges.at(4) << "\t\t" << endl;
-
         cout << endl;
     } // if(charlabs_edges.at(0) == 1)
     if(charlabs_nodes.at(0) == 1) { // Nodes
@@ -685,6 +699,15 @@ if(charlabs_polyhedrons.at(0) == 1) { // Polyhedrons
         cout << endl;
     } // if(charlabs_polyhedrons.at(0) == 1)
 
+    if(charlabs_laplacians.at(0) > 0) { // Laplacians lab
+        cout << "Laplacians: number of calculation steps \t"s << charlabs_laplacians.at(0) << "\t\t" << endl;
+        cout << endl;
+    } // if(charlabs_laplacians.at(0) == 1)
+
+    if(charlabs_laplacians.at(1) == 1) { // Laplacians lab
+        cout << "Special cell Laplacians:\t"s << charlabs_laplacians.at(1) << "\t\t" << endl;
+        cout << endl;
+    } // if(charlabs_laplacians.at(0) == 1)
     cout<< "______________________________________________________________________________________" << endl;
 
 /// Output into .log file
@@ -724,8 +747,16 @@ if(charlabs_polyhedrons.at(0) == 1) { // Polyhedrons
         Out_logfile_stream << endl;
     } // if(charlabs_polyhedrons.at(0) == 1)
 
-    Out_logfile_stream<< "______________________________________________________________________________________" << endl;
+    if(charlabs_laplacians.at(0) > 0) { // Laplacians lab
+        Out_logfile_stream << "Laplacians: number of calculation steps \t"s << charlabs_laplacians.at(0) << "\t\t" << endl;
+        Out_logfile_stream << endl;
+    } // if(charlabs_laplacians.at(0) == 1)
 
+    if(charlabs_laplacians.at(1) == 1) { // Laplacians lab
+        Out_logfile_stream << "Special cell Laplacians:\t"s << charlabs_laplacians.at(1) << "\t\t" << endl;
+        Out_logfile_stream << endl;
+    } // if(charlabs_laplacians.at(0) == 1)
+    Out_logfile_stream<< "______________________________________________________________________________________" << endl;
 
     return config_characterisation_vector;
 }
@@ -737,6 +768,7 @@ void config_reader_writer(std::string &source_path, std::vector<int> writer_spec
 int    isSequencesOutput;      // - >     [0]
 int    isDesignvectorsOutput;  // - >     [1]
 int isEdgeConfEntropy = 0, isEdgeFractions = 0, isDegreeEdgeFractions = 0, isEdgeAnFractions = 0, isEdgeAnConfEntropies = 0; // [2], [3], [4], [5], [6]
+int isBetti = 0; // Laplacians lab
 
 // ini files reader - external (MIT license) library
     mINI::INIFile file(source_path + "writer.ini"s);
@@ -802,6 +834,14 @@ int isEdgeConfEntropy = 0, isEdgeFractions = 0, isDegreeEdgeFractions = 0, isEdg
         } }
     writer_specifications.push_back(isEdgeAnConfEntropies); // [6]
 
+// III Laplacians
+    if (writer_ini.has("component_analysis")) {
+        auto& collection = writer_ini["component_analysis"];
+        if (collection.has("isBetti"))
+        {
+            isBetti = stoi(writer_ini.get("component_analysis").get("isBetti"));
+        } }
+    writer_specifications.push_back(isBetti); // [7]
 
 /// Output to the screen/console
 //    cout << endl;
@@ -816,6 +856,7 @@ int isEdgeConfEntropy = 0, isEdgeFractions = 0, isDegreeEdgeFractions = 0, isEdg
     cout << "Analytical Edge fractions \t\t\t"s << writer_specifications.at(5) << endl;
     cout << "Analytical Edge degree fractions \t\t\t"s << writer_specifications.at(5) << endl;
     cout << "Analytical configuration Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
+    cout << "Laplacians and Betti numbers \t\t\t"s << writer_specifications.at(7) << endl;
     cout << endl;
 
 /// Output into .log file
@@ -831,7 +872,7 @@ int isEdgeConfEntropy = 0, isEdgeFractions = 0, isDegreeEdgeFractions = 0, isEdg
     Out_logfile_stream << "Analytical Edge fractions \t\t\t"s << writer_specifications.at(5) << endl;
     Out_logfile_stream << "Analytical Edge degree fractions \t\t\t"s << writer_specifications.at(5) << endl;
     Out_logfile_stream << "Analytical configuration Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
-
+    Out_logfile_stream << "Laplacians and Betti numbers \t\t\t"s << writer_specifications.at(7) << endl;
     Out_logfile_stream << endl;
 
     return;

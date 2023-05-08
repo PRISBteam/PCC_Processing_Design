@@ -175,6 +175,19 @@ void PCC_AnalyticalFractions_Writer(ProcessedComplex &pcc_processed, int &output
 
 } // END of PCC_AnalyticalFractions_Writer( )
 
+void PCC_Laplacians_Writer(ProcessedComplex &pcc_processed, int &output_counter) {
+    ofstream OutBettiFile; // Betti numbers output
+    string betti_odir = output_dir + "Betti numbers.txt"s; // output directory
+
+    for (auto BV : pcc_processed.Betti_vector)
+        OutBettiFile << BV.at(0) << "  " << BV.at(1) << "  " << BV.at(2) << "  " << BV.at(3) << endl;
+
+    OutBettiFile.close();
+
+    cout << "(" << output_counter++ << ")  " << "Betti numbers of the special cell structure evolution has been successfully written in " << betti_odir << endl;
+    Out_logfile_stream << "(" << output_counter << ")  " << "Betti numbers of the special cell structure evolution has been successfully written in " << betti_odir << endl;
+} // END of PCC_Laplacians_Writer()
+
 /// * NEW HEAP * ///
 
 /**

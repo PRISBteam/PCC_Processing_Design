@@ -16,9 +16,14 @@ config_reader_writer(source_path, writer_specifications, Out_logfile_stream); //
 int output_counter = 0; // special counter for output numeration
 
     /// Output special and ordinary face sequences to the output directory specified in config.txt
-    PCC_CellSequences_Writer(new_cells_design, output_counter);
-    PCC_Entropic_Writer(pcc_processed, output_counter);
-    PCC_AnalyticalFractions_Writer(pcc_processed, output_counter); // analytical solutions
+    if (writer_specifications.at(0) == 1)
+        PCC_CellSequences_Writer(new_cells_design, output_counter);
+    if (writer_specifications.at(2) == 1)
+        PCC_Entropic_Writer(pcc_processed, output_counter);
+    if (writer_specifications.at(5) == 1)
+        PCC_AnalyticalFractions_Writer(pcc_processed, output_counter); // analytical solutions
+    if(writer_specifications.at(7) == 1)
+        PCC_Laplacians_Writer(pcc_processed, output_counter);
 
 /*
        char* stype = const_cast<char*>(P_type.c_str()); // Processing type variable
