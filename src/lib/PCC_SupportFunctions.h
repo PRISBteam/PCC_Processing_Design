@@ -270,6 +270,275 @@ std::vector<vector<int>> Get_cases_list(std::vector<int> const &S_Vector, std::v
     return cases_list;
 } // END of Get_cases_list()
 
+std::vector<double> dq_upleft(std::vector<double> const &grain_q_coord, double dq_step) { // function 1
+    std::vector<double> grain_upleft_qcoord = grain_q_coord;
+
+    double new_grain_q_coord;
+// x - 2dx
+    new_grain_q_coord = grain_q_coord.at(0) - 2.0* dq_step;
+    if (new_grain_q_coord >= 0 && new_grain_q_coord <= 1)
+        grain_upleft_qcoord.at(0) = new_grain_q_coord;
+    else return grain_q_coord;
+// y + 2dy
+    new_grain_q_coord = grain_q_coord.at(1) + 2.0* dq_step;
+    if (new_grain_q_coord >= 0 && new_grain_q_coord <= 1)
+        grain_upleft_qcoord.at(1) = new_grain_q_coord;
+    else return grain_q_coord;
+
+    return grain_upleft_qcoord;
+}
+
+std::vector<double> dq_upright(vector<double> const &grain_q_coord, double dq_step) { // function 2
+    std::vector<double> grain_upright_qcoord = grain_q_coord;
+
+    double new_grain_q_coord;
+// y + 2dy
+    new_grain_q_coord = grain_q_coord.at(1) + 2.0* dq_step;
+    if (new_grain_q_coord >= 0 && new_grain_q_coord <= 1)
+        grain_upright_qcoord.at(1) = new_grain_q_coord;
+    else return grain_q_coord;
+// z - 2dz
+    new_grain_q_coord = grain_q_coord.at(2) - 2.0* dq_step;
+    if (new_grain_q_coord >= 0 && new_grain_q_coord <= 1)
+        grain_upright_qcoord.at(2) = new_grain_q_coord;
+    else return grain_q_coord;
+
+    return grain_upright_qcoord;
+}
+
+std::vector<double> dq_down(vector<double> const &grain_q_coord, double dq_step) { // function 3
+    std::vector<double> grain_down_qcoord = grain_q_coord;
+
+    double new_grain_q_coord;
+// x + 2dx
+    new_grain_q_coord = grain_q_coord.at(0) + 2.0* dq_step;
+    if (new_grain_q_coord >= 0 && new_grain_q_coord <= 1)
+    grain_down_qcoord.at(0) = new_grain_q_coord;
+    else return grain_q_coord;
+
+// y - 3dy
+    new_grain_q_coord = grain_q_coord.at(1) - 3.0* dq_step;
+    if (new_grain_q_coord >= 0 && new_grain_q_coord <= 1)
+    grain_down_qcoord.at(1) = new_grain_q_coord;
+    else return grain_q_coord;
+
+// z + 2dz
+    new_grain_q_coord = grain_q_coord.at(2) + 2.0* dq_step;
+    if (new_grain_q_coord >= 0 && new_grain_q_coord <= 1)
+        grain_down_qcoord.at(2) = new_grain_q_coord;
+    else return grain_q_coord;
+
+    return grain_down_qcoord;
+}
+
+/// Crystallographic BCC disorientations
+double Get_2grains_BCCdisorientation(std::vector<double> &grain_quaternion, std::vector<double> &new_grain_quaternion){
+    double disorienation_GBs_angle;
+
+    Cubic_symmetry=[ 0    0    0    1
+    1    0    0    0
+    0    1    0    0
+    0    0    1    0
+    1/sqrt(2)    0    0   1/sqrt(2)
+    0   1/sqrt(2)     0   1/sqrt(2)
+    0    0   1/sqrt(2)    1/sqrt(2)
+                          -1/sqrt(2)    0    0   1/sqrt(2)
+    0   -1/sqrt(2)    0   1/sqrt(2)
+    0    0   -1/sqrt(2)   1/sqrt(2)
+    1/sqrt(2)    1/sqrt(2)    0    0
+                                   -1/sqrt(2)    1/sqrt(2)    0    0
+    0   1/sqrt(2)    1/sqrt(2)    0
+    0  -1/sqrt(2)    1/sqrt(2)    0
+    1/sqrt(2)    0   1/sqrt(2)    0
+                                  -1/sqrt(2)    0   1/sqrt(2)    0
+    0.5  0.5  0.5  0.5
+                   -0.5 -0.5 -0.5  0.5
+    0.5 -0.5  0.5  0.5
+                   -0.5  0.5 -0.5  0.5
+                                   -0.5  0.5  0.5  0.5
+    0.5 -0.5 -0.5  0.5
+                   -0.5 -0.5  0.5  0.5
+    0.5  0.5 -0.5  0.5];
+
+    mis_edge1=[];
+    mis_edge2=[];
+    disorientaion=[];
+
+//for jj=1:1:size(face_edge,2)
+    //   face_cal=find(abs(face_edge(:,jj))==1); // ids two n grains
+    if size(face_cal,1)>1
+    mis_edge1(jj,:)=[quaternion1(1), quaternion1(2),  quaternion1(3), quaternion(face_cal(1,1),4) ;
+                            -quaternion(face_cal(1,1),2),  quaternion(face_cal(1,1),1),  quaternion(face_cal(1,1),4), -quaternion(face_cal(1,1),3);
+                            -quaternion(face_cal(1,1),3),  -quaternion(face_cal(1,1),4),  quaternion(face_cal(1,1),1), quaternion(face_cal(1,1),2);
+                            -quaternion(face_cal(1,1),4),  quaternion(face_cal(1,1),3),   -quaternion(face_cal(1,1),2), quaternion(face_cal(1,1),1)]*[quaternion(face_cal(2,1),1) quaternion(face_cal(2,1),2) quaternion(face_cal(2,1),3) quaternion(face_cal(2,1),4)]';
+    mis_edge2(jj,:)=[quaternion2(1), quaternion2(2),  quaternion(face_cal(2,1),3), quaternion(face_cal(2,1),4) ;
+                            -quaternion(face_cal(2,1),2),  quaternion(face_cal(2,1),1),  quaternion(face_cal(2,1),4), -quaternion(face_cal(2,1),3);
+                            -quaternion(face_cal(2,1),3),  -quaternion(face_cal(2,1),4),  quaternion(face_cal(2,1),1), quaternion(face_cal(2,1),2);
+                            -quaternion(face_cal(2,1),4),  quaternion(face_cal(2,1),3),   -quaternion(face_cal(2,1),2), quaternion(face_cal(2,1),1)]*[quaternion(face_cal(1,1),1) quaternion(face_cal(1,1),2) quaternion(face_cal(1,1),3) quaternion(face_cal(1,1),4)]';
+
+    else
+
+    mis_edge1(jj,:)=[0 0 0 0];
+    mis_edge2(jj,:)=[0 0 0 0];
+    %         mis_angle(jj,:)=2*acosd(mis_face(jj,1));
+    %         mis_angle(jj,:)=2*atan2(norm(mis_face(jj,2:4)),mis_face(jj,1))
+    end
+            end
+
+    symmetry_angle=[];
+
+    for kk=1:size(mis_edge1,1)
+    min_angle=180; %
+
+    for ii=1:24
+    sym_1=[Cubic_symmetry(ii,1), -Cubic_symmetry(ii,2), -Cubic_symmetry(ii,3), -Cubic_symmetry(ii,4) ;
+                  Cubic_symmetry(ii,2), Cubic_symmetry(ii,1), -Cubic_symmetry(ii,4), Cubic_symmetry(ii,3);
+                  Cubic_symmetry(ii,3), Cubic_symmetry(ii,4), Cubic_symmetry(ii,1), -Cubic_symmetry(ii,2);
+                  Cubic_symmetry(ii,4), -Cubic_symmetry(ii,3), Cubic_symmetry(ii,2), Cubic_symmetry(ii,1)]* mis_edge1(kk,:)';
+    sym_11=[Cubic_symmetry(ii,1), -Cubic_symmetry(ii,2), -Cubic_symmetry(ii,3), -Cubic_symmetry(ii,4) ;
+                   Cubic_symmetry(ii,2), Cubic_symmetry(ii,1), -Cubic_symmetry(ii,4), Cubic_symmetry(ii,3);
+                   Cubic_symmetry(ii,3), Cubic_symmetry(ii,4), Cubic_symmetry(ii,1), -Cubic_symmetry(ii,2);
+                   Cubic_symmetry(ii,4), -Cubic_symmetry(ii,3), Cubic_symmetry(ii,2), Cubic_symmetry(ii,1)]* mis_edge2(kk,:)';
+    sym_1=sym_1';
+    sym_11=sym_11';
+
+    for jj=1:24
+    sym_2=[sym_1(1,1), -sym_1(1,2), -sym_1(1,3), -sym_1(1,4);
+                  sym_1(1,2), sym_1(1,1), -sym_1(1,4), sym_1(1,3);
+                  sym_1(1,3), sym_1(1,4), sym_1(1,1), -sym_1(1,2);
+                  sym_1(1,4), -sym_1(1,3), sym_1(1,2), sym_1(1,1)]* [Cubic_symmetry(jj,1) -Cubic_symmetry(jj,2) -Cubic_symmetry(jj,3) -Cubic_symmetry(jj,4)]';
+    sym_22=[sym_11(1,1), -sym_11(1,2), -sym_11(1,3), -sym_11(1,4);
+                   sym_11(1,2), sym_11(1,1), -sym_11(1,4), sym_11(1,3);
+                   sym_11(1,3), sym_11(1,4), sym_11(1,1), -sym_11(1,2);
+                   sym_11(1,4), -sym_11(1,3), sym_11(1,2), sym_11(1,1)]* [Cubic_symmetry(jj,1) -Cubic_symmetry(jj,2) -Cubic_symmetry(jj,3) -Cubic_symmetry(jj,4)]';
+    sym_2=sym_2';
+    sym_22=sym_22';
+
+    angle1=2*acosd(sym_2(1,1));
+    angle2=2*acosd(sym_22(1,1));
+    disorientaion=min(angle1,angle2);
+
+    if disorientaion<min_angle
+    min_angle=disorientaion;
+    end
+
+            end
+    end
+
+    symmetry_angle(kk,:)=min_angle;
+
+//end
+
+    disorientaion=symmetry_angle;
+    disorientaion(disorientaion==180)=-1; % set boundary GB as -1
+
+    end
+
+    return disorienation_GBs_angle;
+} // END of Get_2grains_BCCdisorientation ()
+
+/// isHAGB checker
+isHAGB(std::vector<double> &grain_quaternion, std::vector<double> &new_grain_quaternion, double &threshold){
+bool isHAGB = 0;
+
+// Obtain disorientation
+    double angle = Get_2grains_BCCdisorientation(grain_quaternion, new_grain_quaternion);
+// Check the threshold
+    if(angle < threshold)
+        isHAGB = 1;
+
+return isHAGB;
+} // END of isHAGB()
+
+std::vector<vector<int>> Get_crystallographic_cases_list(std::vector<vector<double>> &grain_quaternions_list, std::map<unsigned int, std::vector<unsigned int>> &g_gbs_map, double &dq, double &HAGBs_threshold, std::vector<int> const &S_Vector, std::vector<int> const &EdgeTypes, SpMat &GFS, SpMat &FES, std::map<unsigned int, std::vector<unsigned int>> &cases_to_sfaces, double const &p_index) {
+std::vector<vector<int>> cryst_cases_list; // function output
+
+/// Assighment NEW orientations and related 3-cases
+std::vector<int> NewEdgeTypes = EdgeTypes;
+
+std::vector<double> new_grain_triangle_quaternions(4);
+std::vector<unsigned int> gb_special_set_1, gb_special_set_2, gb_special_set_3;
+std::vector<double> grain_q_quaternion(3), new_grain_q_quaternion(3), new_grain_quaternion(4);
+double q0_coord, new_q0_coord;
+
+/// Studying cases - through the whole quaternion list
+
+unsigned int iter = 0; // count CASES
+for (auto  g_itr = grain_quaternions_list.begin(); g_itr != grain_quaternions_list.end(); ++g_itr) {
+
+    gb_special_set_1.clear(); gb_special_set_2.clear(); gb_special_set_3.clear();
+        std::vector<double> gql = *g_itr; // a grain (or case) full quaternion from the list
+        q0_coord = gql.at(0);
+    grain_q_quaternion = {gql.at(1)/std::sqrt(1.0 - pow(q0_coord,2)), gql.at(2)/std::sqrt(1.0 - pow(q0_coord,2)), gql.at(3)/std::sqrt(1.0 - pow(q0_coord,2))};
+
+/// GBs set for a grain
+    std::vector<unsigned int> gb_set = g_gbs_map[distance(grain_quaternions_list.begin(),g_itr)];
+
+    /// Three cases
+    // case 1 dq_down - function 3
+    new_grain_q_quaternion = dq_upleft(grain_q_quaternion, dq);
+    new_q0_coord = std::sqrt(1.0 - pow(new_grain_q_quaternion[0],2) - pow(new_grain_q_quaternion[1],2) - pow(new_grain_q_quaternion[2],2));
+    new_grain_quaternion = {new_q0_coord, new_grain_q_quaternion.at(1)/std::sqrt(1.0 - pow(new_q0_coord,2)), new_grain_q_quaternion.at(2)/std::sqrt(1.0 - pow(new_q0_coord,2)), new_grain_q_quaternion.at(3)/std::sqrt(1.0 - pow(new_q0_coord,2))};
+    for(unsigned int ngb : gb_set) // all the special GBs related with the rotated grain
+        if(isHAGB(grain_q_quaternion, new_grain_quaternion, HAGBs_threshold))
+            gb_special_set_1.push_back(ngb);
+    // case 2
+    new_grain_q_quaternion = dq_upright(grain_q_quaternion, dq);
+    new_q0_coord = std::sqrt(1.0 - pow(new_grain_q_quaternion[0],2) - pow(new_grain_q_quaternion[1],2) - pow(new_grain_q_quaternion[2],2));
+    new_grain_quaternion = {new_q0_coord, new_grain_q_quaternion.at(1)/std::sqrt(1.0 - pow(new_q0_coord,2)), new_grain_q_quaternion.at(2)/std::sqrt(1.0 - pow(new_q0_coord,2)), new_grain_q_quaternion.at(3)/std::sqrt(1.0 - pow(new_q0_coord,2))};
+    for(unsigned int ngb : gb_set) // all the special GBs related with the rotated grain
+            if(isHAGB(grain_q_quaternion, new_grain_quaternion, HAGBs_threshold))
+                gb_special_set_2.push_back(ngb);
+    // case 3
+    new_grain_q_quaternion = dq_down(grain_q_quaternion, dq);
+    new_q0_coord = std::sqrt(1.0 - pow(new_grain_q_quaternion[0],2) - pow(new_grain_q_quaternion[1],2) - pow(new_grain_q_quaternion[2],2));
+    new_grain_quaternion = {new_q0_coord, new_grain_q_quaternion.at(1)/std::sqrt(1.0 - pow(new_q0_coord,2)), new_grain_q_quaternion.at(2)/std::sqrt(1.0 - pow(new_q0_coord,2)), new_grain_q_quaternion.at(3)/std::sqrt(1.0 - pow(new_q0_coord,2))};
+    for(unsigned int ngb : gb_set) // all the special GBs related with the rotated grain
+            if(isHAGB(grain_q_quaternion, new_grain_quaternion, HAGBs_threshold))
+                gb_special_set_3.push_back(ngb);
+
+/// New State Vectors for Edges
+// case 1
+        NewEdgeTypes = EdgeTypes;
+        for(unsigned int gb : gb_special_set_1) // loop over all Edges
+            if (S_Vector.at(gb) == 0) { // ORDINARY faces only
+                for(unsigned int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
+                    if (FES.coeff(e, gb) != 0) NewEdgeTypes.at(e)++;
+} // end of if (S_Vector.at(gb) == 0)
+
+        cryst_cases_list.push_back(NewEdgeTypes);
+/// map from the Cases to special Faces set
+        cases_to_sfaces.insert( std::pair<unsigned int, std::vector<unsigned int>> (iter++, gb_special_set_1)); // each cases coresponds to the vector with a single element which is the same number of special face
+
+// case 2
+        NewEdgeTypes = EdgeTypes;
+        for(unsigned int gb : gb_special_set_2) // loop over all Edges
+            if (S_Vector.at(gb) == 0) { // ORDINARY faces only
+                for(unsigned int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
+                 if (FES.coeff(e, gb) != 0) NewEdgeTypes.at(e)++;
+} // end of if (S_Vector.at(gb) == 0)
+
+        cryst_cases_list.push_back(NewEdgeTypes);
+/// map from the Cases to special Faces set
+        cases_to_sfaces.insert( std::pair<unsigned int, std::vector<unsigned int>> (iter++, gb_special_set_2)); // each cases coresponds to the vector with a single element which is the same number of special face
+
+// case 3
+        NewEdgeTypes = EdgeTypes;
+        for(unsigned int gb : gb_special_set_3) // loop over all Edges
+            if (S_Vector.at(gb) == 0) { // ORDINARY faces only
+              for(unsigned int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
+                if (FES.coeff(e, gb) != 0) NewEdgeTypes.at(e)++;
+} // end of if (S_Vector.at(gb) == 0)
+
+        cryst_cases_list.push_back(NewEdgeTypes);
+/// map from the Cases to special Faces set
+        cases_to_sfaces.insert( std::pair<unsigned int, std::vector<unsigned int>> (iter++, gb_special_set_3)); // each cases coresponds to the vector with a single element which is the same number of special face
+
+} // end of for (auto  g_itr = grain_quaternions_list.begin(); g_itr != grain_quaternions_list.end(); ++g_itr)
+
+return cryst_cases_list; // function output
+} // END of Get_crystallographic_cases_list()
+
 
 /// DDRX support function :: GFS matrix reading and calculation of new seeds at the centres of GBs
 tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<char*> const paths, std::vector<unsigned int> & CellNumbs, vector<tuple<double, double, double>> & AllSeeds_coordinates) {

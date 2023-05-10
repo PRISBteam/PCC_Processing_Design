@@ -119,7 +119,7 @@ ProcessedComplex PCC_StructureCharacterisation(CellsDesign &new_cells_design) {
         std::vector<unsigned int> Betti_calc_time;
 
 #pragma omp parallel for // parallel execution by OpenMP
-        for (unsigned int i = 10; i <= number_of_steps; ++i) {
+        for (unsigned int i = 12; i <= number_of_steps; ++i) {
             new_current_seq = PCC_characteristics.face_process_seq.at(i*d_seq);
             cout << "---------------------------------------------------------------------------" << endl;
             cout << "[CHAR] Current special faces fraction: " << new_current_seq.size()/ (double) CellNumbs.at(2 + (dim - 3)) << endl;

@@ -81,7 +81,18 @@ for (int cell_type = dim; cell_type >= 0; --cell_type) { /// loop over all types
         Out_logfile_stream << "Min (MAX-deviator) Functional processing in operation: cell_type : "s << cell_type + (dim - 3) << endl;
         special_x_sequence = Processing_minConfEntropy(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
 
-    } // End of 'D' type simulations (elseif)
+    } // End of 'D' [S min] type simulations (elseif)
+    else if (ptype_vector.at(cell_type + (dim - 3)) == "Cm" && max_fractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
+        cout << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
+        Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type + (dim - 3) << endl;
+        special_x_sequence = Processing_maxF_crystallographic(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
+        // cell type = 2 -> faces
+    } // End of 'Cm' type simulations (elseif)
+    else if (ptype_vector.at(cell_type + (dim - 3)) == "Cr" && max_fractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
+        cout << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
+        Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type + (dim - 3) << endl;
+        special_x_sequence = Processing_Random_crystallographic(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
+    } // End of 'Cr' type simulations (elseif)
     else if (ptype_vector.at(cell_type + (dim - 3)) == "S") {
         char* kseq_sourcepath = const_cast<char*>(sequence_source_paths.at(cell_type + (dim - 3)).c_str());
         special_x_sequence = VectorIReader(kseq_sourcepath);
@@ -99,7 +110,8 @@ for (int cell_type = dim; cell_type >= 0; --cell_type) { /// loop over all types
 
         for (int var : State_vector)
          Configuration_State[cell_type + (dim - 3)].push_back(var);
-    } // End of 'S' type simulations (elseif)
+    } // End of 'S' [reading from file] type simulations (elseif)
+
     else cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'F' or 'I'..!" << endl;
 
     CD.Set_sequence(special_x_sequence, cell_type + (dim - 3)); // (sequence, id)
