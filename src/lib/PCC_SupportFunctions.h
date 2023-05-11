@@ -332,113 +332,135 @@ std::vector<double> dq_down(vector<double> const &grain_q_coord, double dq_step)
 }
 
 /// Crystallographic BCC disorientations
-double Get_2grains_BCCdisorientation(std::vector<double> &grain_quaternion, std::vector<double> &new_grain_quaternion){
+double Get_2grains_BCCdisorientation(std::vector<double> &grain_quaternion1, std::vector<double> &grain_quaternion2){
     double disorienation_GBs_angle;
 
-    Cubic_symmetry=[ 0    0    0    1
-    1    0    0    0
-    0    1    0    0
-    0    0    1    0
-    1/sqrt(2)    0    0   1/sqrt(2)
-    0   1/sqrt(2)     0   1/sqrt(2)
-    0    0   1/sqrt(2)    1/sqrt(2)
-                          -1/sqrt(2)    0    0   1/sqrt(2)
-    0   -1/sqrt(2)    0   1/sqrt(2)
-    0    0   -1/sqrt(2)   1/sqrt(2)
-    1/sqrt(2)    1/sqrt(2)    0    0
-                                   -1/sqrt(2)    1/sqrt(2)    0    0
-    0   1/sqrt(2)    1/sqrt(2)    0
-    0  -1/sqrt(2)    1/sqrt(2)    0
-    1/sqrt(2)    0   1/sqrt(2)    0
-                                  -1/sqrt(2)    0   1/sqrt(2)    0
-    0.5  0.5  0.5  0.5
-                   -0.5 -0.5 -0.5  0.5
-    0.5 -0.5  0.5  0.5
-                   -0.5  0.5 -0.5  0.5
-                                   -0.5  0.5  0.5  0.5
-    0.5 -0.5 -0.5  0.5
-                   -0.5 -0.5  0.5  0.5
-    0.5  0.5 -0.5  0.5];
+        Eigen::MatrixXd<double, 24, 4> Cubic_symmetry { {0, 0, 0, 1}
+                {1, 0, 0, 0},
+                {0, 1, 0, 0},
+                {0, 0, 1, 0},
+                {1.0/sqrt(2.0), 0, 0, 1.0/sqrt(2.0)},
+                {0, 1.0/sqrt(2.0), 0, 1.0/sqrt(2.0)},
+                {0, 0, 1.0/sqrt(2.0), 1.0/sqrt(2.0)},
+                {-1.0/sqrt(2.0), 0, 0, 1.0/sqrt(2.0)},
+                {0, -1.0/sqrt(2.0), 0, 1.0/sqrt(2.0)},
+                {0, 0, -1.0/sqrt(2.0), 1.0/sqrt(2.0)},
+                {1.0/sqrt(2.0), 1.0/sqrt(2.0), 0, 0},
+                {-1.0/sqrt(2.0), 1.0/sqrt(2.0), 0, 0},
+                {0, 1.0/sqrt(2.0), 1.0/sqrt(2.0), 0},
+                {0, -1.0/sqrt(2.0), 1.0/sqrt(2.0), 0},
+                {1.0/sqrt(2.0), 0, 1.0/sqrt(2.0), 0},
+                {-1.0/sqrt(2.0), 0, 1.0/sqrt(2.0), 0},
+                {0.5, 0.5, 0.5, 0.5},
+                {-0.5, -0.5, -0.5, 0.5},
+                {0.5, -0.5, 0.5, 0.5},
+                {-0.5, 0.5, -0.5, 0.5},
+                {-0.5, 0.5, 0.5, 0.5},
+                {0.5, -0.5, -0.5, 0.5},
+                {-0.5, -0.5, 0.5, 0.5},
+                {0.5, 0.5, -0.5, 0.5}
+        };
 
-    mis_edge1=[];
-    mis_edge2=[];
-    disorientaion=[];
+        Eigen::MatrixXd<double, 4, 4> face_misorientations_mat1 {
+                {grain_quaternion1.at(0), grain_quaternion1.at(1),  grain_quaternion1.at(2), grain_quaternion1.at(3)},
+                {-grain_quaternion1.at(1),  grain_quaternion1.at(0),  grain_quaternion1.at(3), -grain_quaternion1.at(2)},
+                {-grain_quaternion1.at(2),  -grain_quaternion1.at(3), grain_quaternion1.at(0), grain_quaternion1.at(1)},
+                {-grain_quaternion1.at(3),  grain_quaternion1.at(2), -grain_quaternion1.at(1), grain_quaternion1.at(0)}
+        };
+//
+        Eigen::VectorXd<double, 4> qat2 { // coloumn vector
+                quaternion2.at(0),
+                quaternion2.at(1),
+                quaternion2.at(2),
+                quaternion2.at(3)
+        }
+        Eigen::VectorXd<double, 4> face_misorientations_vect1 = face_misorientations_mat1 * qat2;
+//qadd_vect.transpose(); ///*[]'; ??
 
-//for jj=1:1:size(face_edge,2)
-    //   face_cal=find(abs(face_edge(:,jj))==1); // ids two n grains
-    if size(face_cal,1)>1
-    mis_edge1(jj,:)=[quaternion1(1), quaternion1(2),  quaternion1(3), quaternion(face_cal(1,1),4) ;
-                            -quaternion(face_cal(1,1),2),  quaternion(face_cal(1,1),1),  quaternion(face_cal(1,1),4), -quaternion(face_cal(1,1),3);
-                            -quaternion(face_cal(1,1),3),  -quaternion(face_cal(1,1),4),  quaternion(face_cal(1,1),1), quaternion(face_cal(1,1),2);
-                            -quaternion(face_cal(1,1),4),  quaternion(face_cal(1,1),3),   -quaternion(face_cal(1,1),2), quaternion(face_cal(1,1),1)]*[quaternion(face_cal(2,1),1) quaternion(face_cal(2,1),2) quaternion(face_cal(2,1),3) quaternion(face_cal(2,1),4)]';
-    mis_edge2(jj,:)=[quaternion2(1), quaternion2(2),  quaternion(face_cal(2,1),3), quaternion(face_cal(2,1),4) ;
-                            -quaternion(face_cal(2,1),2),  quaternion(face_cal(2,1),1),  quaternion(face_cal(2,1),4), -quaternion(face_cal(2,1),3);
-                            -quaternion(face_cal(2,1),3),  -quaternion(face_cal(2,1),4),  quaternion(face_cal(2,1),1), quaternion(face_cal(2,1),2);
-                            -quaternion(face_cal(2,1),4),  quaternion(face_cal(2,1),3),   -quaternion(face_cal(2,1),2), quaternion(face_cal(2,1),1)]*[quaternion(face_cal(1,1),1) quaternion(face_cal(1,1),2) quaternion(face_cal(1,1),3) quaternion(face_cal(1,1),4)]';
+        Eigen::MatrixXd<double, 4, 4> face_misorientations_mat2 {
+                {grain_quaternion2.at(0), grain_quaternion2.at(1),  grain_quaternion2.at(2), grain_quaternion2.at(3)},
+                {-grain_quaternion2.at(1),  grain_quaternion2.at(0),  grain_quaternion2.at(3), -grain_quaternion2.at(2)},
+                {-grain_quaternion2.at(2),  -grain_quaternion2.at(3), grain_quaternion2.at(0), grain_quaternion2.at(1)},
+                {-grain_quaternion2.at(3),  grain_quaternion2.at(2), -grain_quaternion2.at(1), grain_quaternion2.at(0)}
+        };
+//
+        Eigen::VectorXd<double, 4> qat1 { // coloumn vector
+                quaternion1.at(0),
+                quaternion1.at(1),
+                quaternion1.at(2),
+                quaternion1.at(3)
+        }
 
-    else
+        Eigen::VectorXd<double, 4> face_misorientations_vect2 = face_misorientations_mat2 * qat1;
+// qadd_vect.transpose(); /// *[]'; ??
 
-    mis_edge1(jj,:)=[0 0 0 0];
-    mis_edge2(jj,:)=[0 0 0 0];
-    %         mis_angle(jj,:)=2*acosd(mis_face(jj,1));
-    %         mis_angle(jj,:)=2*atan2(norm(mis_face(jj,2:4)),mis_face(jj,1))
-    end
-            end
+        Eigen::MatrixXd<double, 4, 4> sym_1m, sym_11m;
+        Eigen::VectorXd<double, 4> sym_1v, sym_11v, ym_2v, sym_22v;
 
-    symmetry_angle=[];
+        double disorienation_GBs_angle = 180.0;
+/// loop over all BCC symmetries
+        for(i = 0; i < 24; ++i) {
+            sym_1m {
+                    {Cubic_symmetry(i,0), -Cubic_symmetry(i,1), -Cubic_symmetry(i,2), -Cubic_symmetry(i,3)},
+                    {Cubic_symmetry(i,1), Cubic_symmetry(i,0), -Cubic_symmetry(i,3), Cubic_symmetry(i,2)},
+                    {Cubic_symmetry(i,2), Cubic_symmetry(i,3), Cubic_symmetry(i,0), -Cubic_symmetry(i,1)},
+                    {Cubic_symmetry(i,3), -Cubic_symmetry(i,2), Cubic_symmetry(i,1), Cubic_symmetry(i,0)}
+            };
 
-    for kk=1:size(mis_edge1,1)
-    min_angle=180; %
+            sym_1v = sym_1m * face_misorientations_vect1;
 
-    for ii=1:24
-    sym_1=[Cubic_symmetry(ii,1), -Cubic_symmetry(ii,2), -Cubic_symmetry(ii,3), -Cubic_symmetry(ii,4) ;
-                  Cubic_symmetry(ii,2), Cubic_symmetry(ii,1), -Cubic_symmetry(ii,4), Cubic_symmetry(ii,3);
-                  Cubic_symmetry(ii,3), Cubic_symmetry(ii,4), Cubic_symmetry(ii,1), -Cubic_symmetry(ii,2);
-                  Cubic_symmetry(ii,4), -Cubic_symmetry(ii,3), Cubic_symmetry(ii,2), Cubic_symmetry(ii,1)]* mis_edge1(kk,:)';
-    sym_11=[Cubic_symmetry(ii,1), -Cubic_symmetry(ii,2), -Cubic_symmetry(ii,3), -Cubic_symmetry(ii,4) ;
-                   Cubic_symmetry(ii,2), Cubic_symmetry(ii,1), -Cubic_symmetry(ii,4), Cubic_symmetry(ii,3);
-                   Cubic_symmetry(ii,3), Cubic_symmetry(ii,4), Cubic_symmetry(ii,1), -Cubic_symmetry(ii,2);
-                   Cubic_symmetry(ii,4), -Cubic_symmetry(ii,3), Cubic_symmetry(ii,2), Cubic_symmetry(ii,1)]* mis_edge2(kk,:)';
-    sym_1=sym_1';
-    sym_11=sym_11';
+            sym_11m{
+                    {Cubic_symmetry(i,0), -Cubic_symmetry(i,1), -Cubic_symmetry(i,2), -Cubic_symmetry(i,3)},
+                    {Cubic_symmetry(i,1), Cubic_symmetry(i,0), -Cubic_symmetry(i,3), Cubic_symmetry(i,2)},
+                    {Cubic_symmetry(i,2), Cubic_symmetry(i,3), Cubic_symmetry(i,0), -Cubic_symmetry(i,1)},
+                    {Cubic_symmetry(i,3), -Cubic_symmetry(i,2), Cubic_symmetry(i,1), Cubic_symmetry(i,0)}
+            };
 
-    for jj=1:24
-    sym_2=[sym_1(1,1), -sym_1(1,2), -sym_1(1,3), -sym_1(1,4);
-                  sym_1(1,2), sym_1(1,1), -sym_1(1,4), sym_1(1,3);
-                  sym_1(1,3), sym_1(1,4), sym_1(1,1), -sym_1(1,2);
-                  sym_1(1,4), -sym_1(1,3), sym_1(1,2), sym_1(1,1)]* [Cubic_symmetry(jj,1) -Cubic_symmetry(jj,2) -Cubic_symmetry(jj,3) -Cubic_symmetry(jj,4)]';
-    sym_22=[sym_11(1,1), -sym_11(1,2), -sym_11(1,3), -sym_11(1,4);
-                   sym_11(1,2), sym_11(1,1), -sym_11(1,4), sym_11(1,3);
-                   sym_11(1,3), sym_11(1,4), sym_11(1,1), -sym_11(1,2);
-                   sym_11(1,4), -sym_11(1,3), sym_11(1,2), sym_11(1,1)]* [Cubic_symmetry(jj,1) -Cubic_symmetry(jj,2) -Cubic_symmetry(jj,3) -Cubic_symmetry(jj,4)]';
-    sym_2=sym_2';
-    sym_22=sym_22';
+            sym_11v = sym_11m * face_misorientations_vect2;
 
-    angle1=2*acosd(sym_2(1,1));
-    angle2=2*acosd(sym_22(1,1));
-    disorientaion=min(angle1,angle2);
+            sym_1v = sym_1v.transpose();
+            sym_11v = sym_11v.transpose();
 
-    if disorientaion<min_angle
-    min_angle=disorientaion;
-    end
+///
+            Eigen::MatrixXd<double, 4, 4> sym_2_const {
+                    {sym_1v(0), -sym_1v(1), -sym_1v(2), -sym_1v(3)},
+                    {sym_1v(1), sym_1v(0), -sym_1v(3), sym_1v(2)},
+                    {sym_1v(2), sym_1v(3), sym_1v(0), -sym_1v(1)},
+                    {sym_1v(3), -sym_1v(2), sym_1v(1), sym_1v(0)}
+            }
+            Eigen::MatrixXd<double, 4, 4> sym_22_const {
+                    {sym_11v(0), -sym_11v(1), -sym_11v(2), -sym_11v(3)},
+                    {sym_11v(1), sym_11v(0), -sym_11v(3), sym_11v(2)},
+                    {sym_11v(2), sym_11v(3), sym_11v(0), -sym_11v(1)},
+                    {sym_11v(3), -sym_11v(2), sym_11v(1), sym_11v(0)}
+            }
+/// another loop over all BCC symmetries
+            for(j = 0; j < 24; ++j) {
+                Eigen::VectorXd<double, 4> sym_csj {
+                        Cubic_symmetry(j,0),
+                        -Cubic_symmetry(j,1),
+                        -Cubic_symmetry(j,2),
+                        -Cubic_symmetry(j,3)
+                };
 
-            end
-    end
+                sym_2v = sym_2_const * sym_csj;
+                sym_22v = sym_22_const * sym_csj;
 
-    symmetry_angle(kk,:)=min_angle;
+                double disorientaion = std::min(2.0*acos(sym_2v(0)), 2.0*acos(sym_22v(0)));
+                if(disorientaion < disorienation_GBs_angle)
+                    disorienation_GBs_angle = disorientaion;
 
-//end
+            } // end of for(i = 0; i < 24; ++i)
+        } // end of for(j = 0; j < 24; ++j)
 
-    disorientaion=symmetry_angle;
-    disorientaion(disorientaion==180)=-1; % set boundary GB as -1
-
-    end
+        return disorienation_GBs_angle;
+    } // END of double Get_2grains_BCCdisorientation()
 
     return disorienation_GBs_angle;
 } // END of Get_2grains_BCCdisorientation ()
 
 /// isHAGB checker
-isHAGB(std::vector<double> &grain_quaternion, std::vector<double> &new_grain_quaternion, double &threshold){
+bool isHAGB(std::vector<double> &grain_quaternion, std::vector<double> &new_grain_quaternion, double &threshold){
 bool isHAGB = 0;
 
 // Obtain disorientation
