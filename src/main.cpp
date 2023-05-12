@@ -37,7 +37,8 @@
 #include <Spectra/SymEigsSolver.h>
 
 /// Open MP library https://www.openmp.org/resources/openmp-compilers-tools/
-#include "/usr/local/Cellar/libomp/15.0.7/include/omp.h"
+// #include "/usr/local/Cellar/libomp/15.0.7/include/omp.h"
+#include <omp.h>
 
 /// Simple reader (library) for .ini files and specific DPD code-related functions for reading its .ini files
 #include "lib/ini/ini.h"
