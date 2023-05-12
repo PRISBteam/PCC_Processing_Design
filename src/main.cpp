@@ -27,8 +27,8 @@
 ///* Attached user-defined C++ libraries (must be copied in the directory for STL):
 ///* ------------------------------------------------------------------------------- *
 /// Eigen source: https://eigen.tuxfamily.org/ (2022)
- #include <Eigen/Core>
-// #include <Eigen/Dense>
+#include <Eigen/Core>
+#include <Eigen/Dense>
 #include <Eigen/SparseCore>
 
 /// Spectra source: https://spectralib.org/ (2022)
@@ -55,6 +55,7 @@ using namespace Spectra; //Spectra namespace
 /// Eigen library based Triplets class containing objects in the form T = T(i, j, value), where i and j are element's a(i, j) indices in the corresponding dense matrix and the third variable is its value
 typedef Triplet<double> Tr; // <Eigen library class> Declares a triplet's type with name - Tr
 typedef SparseMatrix<double> SpMat; // <Eigen library class> Declares a column-major sparse matrix type of doubles with name - SpMat
+typedef MatrixXd DMat; // <Eigen library class> Declares a column-major sparse matrix type of doubles with name - SpMat
 
 /// * ------------------------------------------------------------------------------- -------------------------- *
 /// * ============================================ GLOBAL VARIABLES ============================================ * ///

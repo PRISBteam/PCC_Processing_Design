@@ -212,6 +212,85 @@ std::vector<vector<double>> TJDsAnalytics_crystallography(unsigned int HGBnumber
     return d_crystallography_vector;
 }
 
+/// # ? # plot Mackenzie distribution for grain boundary disorientations
+std::vector<double> Mackenzie_distribution(void) {
+    std::vector<double> disorientations;
+
+    SpMat AGS = SMatrixReader(paths.at(3 + (dim - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Faces
+    AGS = 0.5 * (AGS + SparseMatrix<double>(AGS.transpose())); // Full matrix instead of triagonal
+/// ==============================================
+
+    std::vector<vector<double>> grain_quaternions(CellNumbs.at(3 + (dim - 3)), std::vector<double>(4)),
+            grain_triangle_quaternions(CellNumbs.at(3 + (dim - 3)), std::vector<double>(3)); // grain orientations 2-quaternions and 3-quternions
+    double HAGBs_threshold = 15.0; // treshold for the definition of the "high-angle" disorientations
+
+/// Initial TRIANGLE LATTICE
+// q1 \in [0, 1], q2 \in [0, 1], q3 \in [0, 1]
+// n_grains - number of points, dq - "lattice parameter"
+    int n_lattice_points = 100; // is an arbitrary user-defined parameter here (!)
+    double  dq = 1.0 / (double) n_lattice_points;
+
+    std::vector<vector<double>> q_coord_vector; // grain rotation lattice
+    for(int qi = 0; qi <= n_lattice_points; ++qi) // 1
+        for(int qk = 0; qk <= (n_lattice_points - qi); ++qk) // 2
+            q_coord_vector.push_back({qi*dq, qk*dq, 1.0 - qi*dq - qk*dq});
+// REPAIR    for(auto gtq : q_coord_vector)
+//        cout << "q_coord_vector " << gtq.at(0) << " " << gtq.at(1) << " " << gtq.at(2) << " "<< gtq.at(0) + gtq.at(1) + gtq.at(2) << endl;
+
+/// Assigning of the INITIAL grain orientations for each grain in the PCC
+    double q0_coord = 0;
+    unsigned int new_grain_triangle_coords = 0;
+    grain_triangle_quaternions.clear();
+    grain_quaternions.clear();
+
+    for (int i = 0; i < CellNumbs.at(3 + (dim - 3)); ++i) {
+
+// random choice of a point in a triangle coordinate space
+        new_grain_triangle_coords = NewCellNumb_R(q_coord_vector.size());
+
+        std::vector<double> grain_q_quaternion(3), grain_full_quaternion(4);
+/// triangle Q3-quaternions
+        grain_q_quaternion.at(0) = q_coord_vector[new_grain_triangle_coords][0];
+        grain_q_quaternion.at(1) = q_coord_vector[new_grain_triangle_coords][1];
+        grain_q_quaternion.at(2) = q_coord_vector[new_grain_triangle_coords][2];
+
+        grain_triangle_quaternions.push_back({grain_q_quaternion.at(0), grain_q_quaternion.at(1), grain_q_quaternion.at(2)});
+// REPAIR        cout << "grain_triangle_quaternions " << grain_triangle_quaternions.back().at(0) << " " << grain_triangle_quaternions.back().at(1) << " " << grain_triangle_quaternions.back().at(2) << " "<< grain_triangle_quaternions.back().at(0) + grain_triangle_quaternions.back().at(1) + grain_triangle_quaternions.back().at(2) << endl;
+
+/// full grain quaternions
+        /// angle - an additional random generation
+        q0_coord = rand() / (RAND_MAX + 1.0); //        q0_coord = std::sqrt(1.0 - pow(grain_full_quaternion.at(0),2) - pow(grain_full_quaternion.at(1),2) - pow(grain_full_quaternion.at(2),2));
+        // axis
+        grain_full_quaternion.at(0) = std::sqrt(grain_q_quaternion.at(0)*(1.0 - pow(q0_coord,2)));
+        grain_full_quaternion.at(1) = std::sqrt(grain_q_quaternion.at(1)*(1.0 - pow(q0_coord,2)));
+        grain_full_quaternion.at(2) = std::sqrt(grain_q_quaternion.at(2)*(1.0 - pow(q0_coord,2)));
+
+// full grain quaternions vector
+        grain_quaternions.push_back({q0_coord, grain_full_quaternion.at(0), grain_full_quaternion.at(1), grain_full_quaternion.at(2)});
+// REPAIR        cout << "full grain quaternions " << grain_quaternions.back().at(0) << " " << grain_quaternions.back().at(1) << " " << grain_quaternions.back().at(2) << " " << grain_quaternions.back().at(3) << "  " << pow(grain_quaternions.back().at(0),2) + pow(grain_quaternions.back().at(1),2) + pow(grain_quaternions.back().at(2),2) + pow(grain_quaternions.back().at(3),2)<< endl;
+    } // end for (int i = 0; i < CellNumbs.at(3 + (dim - 3)); ++i)
+
+// REPAIR   for(auto gtq : grain_triangle_quaternions)
+//        cout << "triangle Q3-quaternions " << gtq.at(0) << " " << gtq.at(1) << " " << gtq.at(2) << " "<< gtq.at(0) + gtq.at(1) + gtq.at(2) << endl;
+
+// REPAIR    for(auto gq : grain_quaternions)
+//        cout << "full grain quaternions " << gq.at(0) << " " << gq.at(1) << " " << gq.at(2) << " " << gq.at(3) << "  " << pow(gq.at(0),2) + pow(gq.at(1),2) + pow(gq.at(2),2) + pow(gq.at(3),2)<< endl;
+
+/// Mackenzie check
+    std::vector<double> disorientations_vector;
+    for(unsigned int gr = 0; gr < CellNumbs.at(3 - (dim -3)); ++gr)
+        for(unsigned int grn = 0; grn < gr; ++grn)
+            if(AGS.coeff(gr,grn) != 0) {
+                //        cout << "coeff " << AGS.coeff(gr,grn) << endl;
+                disorientations_vector.push_back(Get_2grains_FCCdisorientation(grain_quaternions.at(gr), grain_quaternions.at(grn)));
+                cout << disorientations_vector.back()*57.3 << endl;
+
+            }
+
+    return disorientations;
+} // END of Mackenzie_distribution(void)
+
+
 /*
 int TJsAnalytics_indices(double Smax, double Smin, double Srand) {
     double j0 = 0, j1 = 0, j2 = 0, j3 = 0, j0s = 0, j1s = 0, j2s = 0, j3s = 0;
