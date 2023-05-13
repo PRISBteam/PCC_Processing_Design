@@ -363,7 +363,7 @@ double case_chosen = 0;
     if(max_set.size() > 1)
         case_chosen = max_set.at(NewCellNumb_R(max_set.size()));
 //        cout << "place 5" << endl;
-        /////////////////////////////////////////////////////////
+
     for (unsigned int itr : cases_to_sfaces [case_chosen]) {
 //        cout << " cases_to_sfaces [case_chosen]:  " << itr << endl;
         S_Vector.at(itr) = 1; // Replace the chosen element with 1 (special) instead of 0 (ordinary) in the State Faces vector
@@ -666,7 +666,7 @@ std::vector<unsigned int> Processing_Random_crystallographic(int cell_type, std:
 /// Initial TRIANGLE LATTICE
 // q1 \in [0, 1], q2 \in [0, 1], q3 \in [0, 1]
 // n_grains - number of points, dq - "lattice parameter"
-    int n_lattice_points = 50; // is an arbitrary user-defined parameter here (!)
+    int n_lattice_points = 10; // is an arbitrary user-defined parameter here (!)
     double  dq = 1.0 / (double) n_lattice_points;
 
     std::vector<vector<double>> q_coord_vector; // grain rotation lattice
@@ -744,7 +744,7 @@ std::vector<unsigned int> Processing_Random_crystallographic(int cell_type, std:
         EdgeTypes = Edge_types_byFaces(CellNumbs, special_cells_sequence, j_fractions, d_fractions);
 
         cases_list.clear(); cases_to_sfaces.clear();
-        cases_list = Get_crystallographic_cases_list(grain_quaternions, g_gbs_map, dq, HAGBs_threshold, S_Vector, EdgeTypes, GFS, FES, cases_to_grains, cases_to_sfaces, cases_to_new_quaternions, p_index);
+        cases_list = Get_crystallographic_cases_random_list(grain_quaternions, g_gbs_map, dq, HAGBs_threshold, S_Vector, EdgeTypes, GFS, FES, cases_to_grains, cases_to_sfaces, cases_to_new_quaternions, p_index);
         /// WARNING: Only one possible Face type (binary model) (!)
 
 //    cout << "place 1" << endl;
@@ -752,13 +752,16 @@ std::vector<unsigned int> Processing_Random_crystallographic(int cell_type, std:
         j_fractions = j_fractions_vector(EdgeTypes);
 
 // cout << "Current Conf Edges Entropy:   " << get<0>(Configuration_Entropy_tuple(j_fractions)) + get<1>(Configuration_Entropy_tuple(j_fractions)) << "  Configuration_Entropy: " << Configuration_Entropy(EdgeTypes) <<endl;
-        cout << "  Configuration_Entropy: " << Configuration_Entropy(EdgeTypes) <<endl;
+//        cout << "  Configuration_Entropy: " << Configuration_Entropy(EdgeTypes) <<endl;
         EntropyIncreaseList.clear();
 //        cout << "place 2" << endl;
 /// Configuration_Entropy_change function here (!)
-        for (auto NewEdgeTypes : cases_list) {
-            EntropyIncreaseList.push_back(std::count(NewEdgeTypes.begin(),NewEdgeTypes.end(),1)/CellNumbs.at(cell_type + (dim - 3)));
-//        cout << "EntropyIncreaseList: "  << EntropyIncreaseList.back() << endl;
+//        for (auto NewEdgeTypes : cases_list) {
+        for (auto cltr = cases_list.begin(); cltr != cases_list.end(); ++cltr) {
+            EntropyIncreaseList.push_back(std::count(cltr->begin(), cltr->end(), 1)/ (double) CellNumbs.at(2 - (dim - 3)));
+// REPAIR cout << "EElist  " <<  EntropyIncreaseList.back() << endl;
+//            EntropyIncreaseList.push_back(cases_to_sfaces[distance(cases_list.begin(),cltr)].size());
+///        cout << "EntropyIncreaseList: "  << EntropyIncreaseList.back() << endl;
         }
 // REPAIR for (auto EIE :   EntropyIncreaseList)  cout << "EIList " << EIE << endl;  exit(0);
 //        cout << "place 3" << endl;
@@ -766,7 +769,9 @@ std::vector<unsigned int> Processing_Random_crystallographic(int cell_type, std:
         double case_chosen = 0;
         // the very first special element with S_max
         case_chosen = std::max_element(std::begin(EntropyIncreaseList), std::end(EntropyIncreaseList)) - std::begin(EntropyIncreaseList); // gives index of the max element
-//REPAIR cout << "s_faces_sequence.size(): " << EntropyIncreaseList.size() << " New2CellNumb:  " << New2CellNumb << endl;
+//REPAIR
+cout << "s_faces.size(): " << cases_to_sfaces[case_chosen].size() << " case_chosen:  " << case_chosen << endl;
+
 //        cout << "place 4" << endl;
 /// Form the max_set of the faces with the same value of EntropyIncreaseList
         std::vector<unsigned int> max_set; // possible set of element with equal values of the entropy increase
@@ -783,8 +788,12 @@ std::vector<unsigned int> Processing_Random_crystallographic(int cell_type, std:
 //        cout << "place 5" << endl;
 
 /// New MAPS-related changes (!): grain_quaternions update
+//REPAIR cout << " check_0 " << case_chosen << "  " <<  cases_to_sfaces[case_chosen].size() << endl;
+//cout << " check_1 " << grain_quaternions.at(cases_to_grains[case_chosen]).at(0) << "  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(1) << "  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(2) << "  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(3) << endl;
+//cout << " check_2 " << cases_to_new_quaternions[case_chosen].at(0) << "  " << cases_to_new_quaternions[case_chosen].at(1) <<  "  " << cases_to_new_quaternions[case_chosen].at(2) <<  "  " << cases_to_new_quaternions[case_chosen].at(3) << endl;
         grain_quaternions.at(cases_to_grains[case_chosen]) = cases_to_new_quaternions[case_chosen];
-
+//cout << " check_3 " << grain_quaternions.at(cases_to_grains[case_chosen]).at(0) << "  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(1) <<"  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(2) <<"  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(3) << endl;
+//exit(0);
 // new special faces
         for (unsigned int itr : cases_to_sfaces [case_chosen]) {
 //        cout << " cases_to_sfaces [case_chosen]:  " << itr << endl;
@@ -808,14 +817,14 @@ std::vector<unsigned int> Processing_Random_crystallographic(int cell_type, std:
 
         } // end for(unsigned int c = 0; c < cases_list.size(); ++c)
 
-        //        cout << "place 7" << endl;
+//                cout << "place 7" << endl;
 /// Special and Ordinary Faces fraction calculation
 // Special and Ordinary Faces fraction recalculation
         ordinary_cells_fraction = OrdinaryCellNumbs.size()/ (double) CellNumbs.at(cell_type + (dim - 3));
         special_cells_fraction = 1.0 - ordinary_cells_fraction; // special face vecror definition based on the ordinary face vector
         for (int i = 0; i < max_fractions_vectors[cell_type + (dim - 3)].size(); ++i)
             scell_fractions_vector.at(i) = std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type + (dim - 3)); // type (i+1) of special x_cells
-        //       cout << "place 8" << endl;
+//               cout << "place 8" << endl;
 //REPAIRS
         /// ca
 // REPAIR        if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "  SV: " << S_Vector.size() << "  ctf: " << cases_to_sfaces.size() << "  ms :  " <<  max_set.size() << "  eel: " << EntropyIncreaseList.size() << "  sss :" << special_cells_sequence.size() << " OCN:  " << OrdinaryCellNumbs.size() << endl;
