@@ -618,31 +618,6 @@ std::vector<unsigned int> Processing_Random_crystallographic(int cell_type, std:
     }
 // REPAIR cout << "s_faces_sequence.size(): " << s_faces_sequence.size() / (double) CellNumbs.at(2) << endl;
 
-    std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(cell_type + (dim - 3)), 1); // Vector of the size equal to the total number of faces in PCC initialised with '1's
-    // (!) all the cell Numbers start with 0, not 1 like in Neper, Matlab, Fortran and many other software
-    for( unsigned int lit = 0; lit < OrdinaryCellNumbs.size(); lit++)
-        OrdinaryCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces
-
-    for (unsigned int itr : special_cells_sequence)
-        S_Vector.at(itr) = 1; // Replace the chosen element with 1 (special) instead of 0 (ordinary) in the State Faces vector
-
-    for(auto itr : S_Vector)
-        if(itr != 0) OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
-
-    // initial fractions of special cells
-    double ordinary_cells_fraction = OrdinaryCellNumbs.size()/ (double) CellNumbs.at(cell_type + (dim - 3));
-    double special_cells_fraction = 1.0 - ordinary_cells_fraction; // special face vecror definition based on the ordinary face vector
-
-    vector<double> scell_fractions_vector; // vector for all different types of special cells
-    for (int i = 0; i < max_fractions_vectors[cell_type + (dim - 3)].size(); ++i) {
-        scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type + (dim - 3))); // type (i+1) of special x_cells
-        if (special_cells_fraction >= total_max_sCell_fraction) {
-            cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-            Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-            return special_cells_sequence;
-        }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
-    } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
-
 // number of cell types
     int number_of_types = std::count_if(max_fractions_vectors[cell_type + (dim - 3)].begin(), max_fractions_vectors[cell_type + (dim - 3)].end(), [](int c){return c > 0;});
 
@@ -732,6 +707,44 @@ std::vector<unsigned int> Processing_Random_crystallographic(int cell_type, std:
         g_gbs_map.insert(std::pair<unsigned int, std::vector<unsigned int>> (g, gb_set));
     } // end of for (unsigned int g = 0; g < CellNumbs.at(3 + (dim - 3)); ++g)
 
+/// Initial Faces State_Vector
+    fill(S_Vector.begin(),S_Vector.end(),0); /// Zeroing S-vector (!)
+    for (int g = 0; g < CellNumbs.at(3 + (dim - 3)); ++g) { // grains
+        for(unsigned int ngb : g_gbs_map[g]) { // all the special GBs related with the rotated grain
+            for (int g2 = 0; g2 < CellNumbs.at(3 + (dim - 3)); ++g2) { // grains
+                if (GFS.coeff(ngb, g2) != 0 && g2 != g) {
+                    if (isHAGB(grain_quaternions.at(g), grain_quaternions.at(g2), HAGBs_threshold))
+                        S_Vector.at(ngb) = 1;
+                } // end if()
+            } // end if()
+        } // end of for(unsigned int ngb : g_gbs_map[g]) {
+    } // end of for (int g = 0; g < CellNumbs.at(3 + (dim - 3)); ++g) { // grains
+
+    std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(cell_type + (dim - 3)), 1); // Vector of the size equal to the total number of faces in PCC initialised with '1's
+    // (!) all the cell Numbers start with 0, not 1 like in Neper, Matlab, Fortran and many other software
+    for( unsigned int lit = 0; lit < OrdinaryCellNumbs.size(); lit++)
+        OrdinaryCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces
+
+///    for (unsigned int itr : special_cells_sequence)
+///        S_Vector.at(itr) = 1; // Replace the chosen element with 1 (special) instead of 0 (ordinary) in the State Faces vector
+
+    for(auto itr : S_Vector)
+        if(itr != 0) OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
+
+    // initial fractions of special cells
+    double ordinary_cells_fraction = OrdinaryCellNumbs.size()/ (double) CellNumbs.at(cell_type + (dim - 3));
+    double special_cells_fraction = 1.0 - ordinary_cells_fraction; // special face vecror definition based on the ordinary face vector
+
+    vector<double> scell_fractions_vector; // vector for all different types of special cells
+    for (int i = 0; i < max_fractions_vectors[cell_type + (dim - 3)].size(); ++i) {
+        scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type + (dim - 3))); // type (i+1) of special x_cells
+        if (special_cells_fraction >= total_max_sCell_fraction) {
+            cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+            Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+            return special_cells_sequence;
+        }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
+    } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
+
 /// ================ Loop over all Faces ===================
     do { // do{ ... }while(output_step) loop starting point
 
@@ -794,12 +807,14 @@ cout << "s_faces.size(): " << cases_to_sfaces[case_chosen].size() << " case_chos
         grain_quaternions.at(cases_to_grains[case_chosen]) = cases_to_new_quaternions[case_chosen];
 //cout << " check_3 " << grain_quaternions.at(cases_to_grains[case_chosen]).at(0) << "  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(1) <<"  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(2) <<"  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(3) << endl;
 //exit(0);
-// new special faces
-        for (unsigned int itr : cases_to_sfaces [case_chosen]) {
+
+/// new special faces
+        S_Vector = cases_list[case_chosen];
+        for (unsigned int sface : cases_to_sfaces [case_chosen]) {
 //        cout << " cases_to_sfaces [case_chosen]:  " << itr << endl;
-            S_Vector.at(itr) = 1; // Replace the chosen element with 1 (special) instead of 0 (ordinary) in the State Faces vector
+//            S_Vector.at(itr) = 1; // Replace the chosen element with 1 (special) instead of 0 (ordinary) in the State Faces vector
 //        cout << "place 5.1 " << endl;
-            OrdinaryCellNumbs.erase(std::remove(OrdinaryCellNumbs.begin(), OrdinaryCellNumbs.end(), itr), OrdinaryCellNumbs.end());
+            OrdinaryCellNumbs.erase(std::remove(OrdinaryCellNumbs.begin(), OrdinaryCellNumbs.end(), sface), OrdinaryCellNumbs.end());
 
             //     auto o_iterator = find(OrdinaryCellNumbs.begin(), OrdinaryCellNumbs.end(), itr);
             //    cout << "place 5.2 " << endl;
@@ -810,8 +825,8 @@ cout << "s_faces.size(): " << cases_to_sfaces[case_chosen].size() << " case_chos
             //    }
 //    cout << "place 6" << endl;
             /// Add the new element to s_faces_sequence if it is still not here
-            if (std::find(special_cells_sequence.begin(), special_cells_sequence.end(), itr) == special_cells_sequence.end())
-                special_cells_sequence.push_back(itr);
+            if (std::find(special_cells_sequence.begin(), special_cells_sequence.end(), sface) == special_cells_sequence.end())
+                special_cells_sequence.push_back(sface);
 
             EntropyIncreaseList.at(case_chosen) = 0.0; // zero entropy increase for this element
 
@@ -844,7 +859,6 @@ cout << "s_faces.size(): " << cases_to_sfaces[case_chosen].size() << " case_chos
 
     return special_cells_sequence;
 } // END of Random_crystallographic
-
 
 
 /// (y) Maximum Functional crystallographic based generation process
@@ -882,31 +896,6 @@ std::vector<unsigned int> Processing_maxF_crystallographic(int cell_type, std::v
         special_cells_sequence = Processing_Random(cell_type, Configuration_State, seed_fractions_vector);
     }
 // REPAIR cout << "s_faces_sequence.size(): " << s_faces_sequence.size() / (double) CellNumbs.at(2) << endl;
-
-    std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(cell_type + (dim - 3)), 1); // Vector of the size equal to the total number of faces in PCC initialised with '1's
-    // (!) all the cell Numbers start with 0, not 1 like in Neper, Matlab, Fortran and many other software
-    for( unsigned int lit = 0; lit < OrdinaryCellNumbs.size(); lit++)
-        OrdinaryCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces
-
-    for (unsigned int itr : special_cells_sequence)
-        S_Vector.at(itr) = 1; // Replace the chosen element with 1 (special) instead of 0 (ordinary) in the State Faces vector
-
-    for(auto itr : S_Vector)
-        if(itr != 0) OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
-
-    // initial fractions of special cells
-    double ordinary_cells_fraction = OrdinaryCellNumbs.size()/ (double) CellNumbs.at(cell_type + (dim - 3));
-    double special_cells_fraction = 1.0 - ordinary_cells_fraction; // special face vecror definition based on the ordinary face vector
-
-    vector<double> scell_fractions_vector; // vector for all different types of special cells
-    for (int i = 0; i < max_fractions_vectors[cell_type + (dim - 3)].size(); ++i) {
-        scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type + (dim - 3))); // type (i+1) of special x_cells
-        if (special_cells_fraction >= total_max_sCell_fraction) {
-            cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-            Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-            return special_cells_sequence;
-        }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
-    } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
 
 // number of cell types
     int number_of_types = std::count_if(max_fractions_vectors[cell_type + (dim - 3)].begin(), max_fractions_vectors[cell_type + (dim - 3)].end(), [](int c){return c > 0;});
@@ -1011,6 +1000,44 @@ std::vector<unsigned int> Processing_maxF_crystallographic(int cell_type, std::v
         g_gbs_map.insert(std::pair<unsigned int, std::vector<unsigned int>> (g, gb_set));
     } // end of for (unsigned int g = 0; g < CellNumbs.at(3 + (dim - 3)); ++g)
 
+    /// Initial Faces State_Vector
+    fill(S_Vector.begin(),S_Vector.end(),0); /// Zeroing S-vector (!)
+    for (int g = 0; g < CellNumbs.at(3 + (dim - 3)); ++g) { // grains
+        for(unsigned int ngb : g_gbs_map[g]) { // all the special GBs related with the rotated grain
+            for (int g2 = 0; g2 < CellNumbs.at(3 + (dim - 3)); ++g2) { // grains
+                if (GFS.coeff(ngb, g2) != 0 && g2 != g) {
+                    if (isHAGB(grain_quaternions.at(g), grain_quaternions.at(g2), HAGBs_threshold))
+                        S_Vector.at(ngb) = 1;
+                } // end if()
+            } // end if()
+        } // end of for(unsigned int ngb : g_gbs_map[g]) {
+    } // end of for (int g = 0; g < CellNumbs.at(3 + (dim - 3)); ++g) { // grains
+
+    std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(cell_type + (dim - 3)), 1); // Vector of the size equal to the total number of faces in PCC initialised with '1's
+    // (!) all the cell Numbers start with 0, not 1 like in Neper, Matlab, Fortran and many other software
+    for( unsigned int lit = 0; lit < OrdinaryCellNumbs.size(); lit++)
+        OrdinaryCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces
+
+///    for (unsigned int itr : special_cells_sequence)
+///        S_Vector.at(itr) = 1; // Replace the chosen element with 1 (special) instead of 0 (ordinary) in the State Faces vector
+
+    for(auto itr : S_Vector)
+        if(itr != 0) OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
+
+    // initial fractions of special cells
+    double ordinary_cells_fraction = OrdinaryCellNumbs.size()/ (double) CellNumbs.at(cell_type + (dim - 3));
+    double special_cells_fraction = 1.0 - ordinary_cells_fraction; // special face vecror definition based on the ordinary face vector
+
+    vector<double> scell_fractions_vector; // vector for all different types of special cells
+    for (int i = 0; i < max_fractions_vectors[cell_type + (dim - 3)].size(); ++i) {
+        scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type + (dim - 3))); // type (i+1) of special x_cells
+        if (special_cells_fraction >= total_max_sCell_fraction) {
+            cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+            Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+            return special_cells_sequence;
+        }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
+    } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
+
 /// ================ Loop over all Faces ===================
     do { // do{ ... }while(output_step) loop starting point
 
@@ -1114,10 +1141,6 @@ std::vector<unsigned int> Processing_maxF_crystallographic(int cell_type, std::v
 
     return special_cells_sequence;
 } // END of S_max_crystallographic
-
-
-
-
 
 /*
 /// (4) i(p) index govern processed

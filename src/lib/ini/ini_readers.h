@@ -763,7 +763,7 @@ if(charlabs_polyhedrons.at(0) == 1) { // Polyhedrons
 
 /// ================== # 6 # Initial WRITER module configuration - reading and output ==================
 
-void config_reader_writer(std::string &source_path, std::vector<int> writer_specifications, std::ofstream &Out_logfile_stream) {
+void config_reader_writer(std::string &source_path, std::vector<int> &writer_specifications, std::ofstream &Out_logfile_stream) {
 /// writer_specifications vector ::
 int    isSequencesOutput;      // - >     [0]
 int    isDesignvectorsOutput;  // - >     [1]

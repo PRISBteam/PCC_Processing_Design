@@ -126,7 +126,7 @@ vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> con
     vector<double> res(100,0); /// Up to 100 types of possible TJs types
 
     for (unsigned int l = 0; l < FES.rows(); l++) // Loop over all Edges
-        if (FES.coeff(l,face_number) == 1) res[TJsTypes.at(l)]++;
+       if (FES.coeff(l,face_number) == 1) res[TJsTypes.at(l)]++;
     // output in the form res[0] = #TJsTypes[0] incident to the face with the number face_number, res[1] = #TJsTypes[1] incident to the face with the number face_number,...
 
     return res;
