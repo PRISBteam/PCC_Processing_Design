@@ -20,8 +20,8 @@
 #include <tuple>
 #include <numeric>
 #include <algorithm>
-#include <thread>
-#include <execution>
+// #include <thread> // Require C++ 17 and above
+// #include <execution> // Require C++ 17 and above
 #include <cmath>
 
 ///* ------------------------------------------------------------------------------- *

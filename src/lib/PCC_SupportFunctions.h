@@ -612,8 +612,6 @@ for (auto  g_itr = grain_quaternions_list.begin(); g_itr != grain_quaternions_li
 //    cout << "quaternions new " << pow(new_grain_quaternion.at(0),2) + pow(new_grain_quaternion.at(1),2) + pow(new_grain_quaternion.at(2),2) + pow(new_grain_quaternion.at(3),2) << "  " << new_grain_quaternion.at(0) << "  " << new_grain_quaternion.at(1) << "  " << new_grain_quaternion.at(2) << "  " << new_grain_quaternion.at(3) <<endl;
 
 /// New State Vectors for Edges
-    NewEdgeTypes = EdgeTypes;
-
 if (gb_special_set_1.size() != 0 || gb_special_set_2.size() != 0 || gb_special_set_3.size() != 0 || gb_special_set_4.size() != 0) {
 // case 1
     NewEdgeTypes = EdgeTypes;
@@ -663,7 +661,7 @@ return cryst_cases_list; // function output
 } // END of Get_crystallographic_cases_list()
 
 std::vector<vector<int>> Get_crystallographic_cases_random_list(std::vector<vector<double>> &grain_quaternions_list, std::map<unsigned int, std::vector<unsigned int>> &g_gbs_map, double &dq, double &HAGBs_threshold, std::vector<int> const &S_Vector, std::vector<int> const &EdgeTypes, SpMat &GFS, SpMat &FES, std::map<unsigned int, unsigned int> &cases_to_grains, std::map<unsigned int, std::vector<unsigned int>> &cases_to_sfaces, std::map<unsigned int, std::vector<double>> &cases_to_new_quaternions, double const &p_index) {
-    std::vector<vector<int>> cryst_cases_list; // function output
+std::vector<vector<int>> cryst_cases_list; // function output
 
 /// Assighment NEW orientations and related 3-cases
     std::vector<int> NewSpecialFaces = S_Vector;

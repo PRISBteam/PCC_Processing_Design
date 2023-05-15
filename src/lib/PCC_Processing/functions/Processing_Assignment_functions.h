@@ -9,7 +9,7 @@
 ///------------------------------
 /// Standard C++ libraries (STL):
 #include <random> // Require C++ 11 and above
-#include <execution> // Require C++ 17 and above
+// #include <execution> // Require C++ 17 and above
 
 /// (1) Quasi-random choice of the element with # New2CellNumb from the list of numbers {0 to OCellsNumb}
 /*!
@@ -641,7 +641,7 @@ std::vector<unsigned int> Processing_maxP_crystallographic(int cell_type, std::v
 /// Initial TRIANGLE LATTICE
 // q1 \in [0, 1], q2 \in [0, 1], q3 \in [0, 1]
 // n_grains - number of points, dq - "lattice parameter"
-    int n_lattice_points = 10; // is an arbitrary user-defined parameter here (!)
+    int n_lattice_points = 100; // is an arbitrary user-defined parameter here (!)
     double  dq = 1.0 / (double) n_lattice_points;
 
     std::vector<vector<double>> q_coord_vector; // grain rotation lattice
@@ -919,10 +919,10 @@ std::vector<unsigned int> Processing_Random_crystallographic(int cell_type, std:
 /// Initial TRIANGLE LATTICE
 // q1 \in [0, 1], q2 \in [0, 1], q3 \in [0, 1]
 // Number of grains which will be taken from the "EntropyIncreaseList" at each calculation step (!)
-unsigned int grain_set_size = std::floor(0.05*CellNumbs.at(3 + (dim - 3)));
+unsigned int grain_set_size = std::floor(0.03*CellNumbs.at(3 + (dim - 3)));
 
 // n_grains - number of points, dq - "lattice parameter"
-    int n_lattice_points = 1000; // is an arbitrary user-defined parameter here (!)
+    int n_lattice_points = 10; // is an arbitrary user-defined parameter here (!)
     double  dq = 1.0 / (double) n_lattice_points;
 
     std::vector<vector<double>> q_coord_vector; // grain rotation lattice
@@ -1037,12 +1037,14 @@ unsigned int grain_set_size = std::floor(0.05*CellNumbs.at(3 + (dim - 3)));
         /// new EdgeTypes
         EdgeTypes = Edge_types_byFaces(CellNumbs, special_cells_sequence, j_fractions, d_fractions);
 
-        cases_list.clear(); cases_to_sfaces.clear();
+        cases_list.clear();
+        cases_to_sfaces.clear();
         cases_list = Get_crystallographic_cases_random_list(grain_quaternions, g_gbs_map, dq, HAGBs_threshold, S_Vector, EdgeTypes, GFS, FES, cases_to_grains, cases_to_sfaces, cases_to_new_quaternions, p_index);
         /// WARNING: Only one possible Face type (binary model) (!)
 
-//    cout << "place 1" << endl;
-        std::vector<double> EntropyIncreaseList; // vector with values of configuration entropy increases at conversion of each Face
+//    cout << "place 1" << endl; //        cout << cases_list.size() << endl;
+
+std::vector<double> EntropyIncreaseList; // vector with values of configuration entropy increases at conversion of each Face
         j_fractions = j_fractions_vector(EdgeTypes);
 
 // cout << "Current Conf Edges Entropy:   " << get<0>(Configuration_Entropy_tuple(j_fractions)) + get<1>(Configuration_Entropy_tuple(j_fractions)) << "  Configuration_Entropy: " << Configuration_Entropy(EdgeTypes) <<endl;
@@ -1051,9 +1053,9 @@ unsigned int grain_set_size = std::floor(0.05*CellNumbs.at(3 + (dim - 3)));
 //        cout << "place 2" << endl;
 /// Configuration_Entropy_change function here (!)
 //        for (auto NewEdgeTypes : cases_list) {
-        for (auto cltr = cases_list.begin(); cltr != cases_list.end(); ++cltr) {
-            EntropyIncreaseList.push_back(std::count(cltr->begin(), cltr->end(), 1)/ (double) CellNumbs.at(2 - (dim - 3)));
-// REPAIR cout << "EElist  " <<  EntropyIncreaseList.back() << endl;
+            for (auto cltr = cases_list.begin(); cltr != cases_list.end(); ++cltr) {
+                EntropyIncreaseList.push_back(std::count(cltr->begin(), cltr->end(), 1)/ (double) CellNumbs.at(2 - (dim - 3)));
+            // REPAIR cout << "EElist  " <<  EntropyIncreaseList.back() << endl;
 //            EntropyIncreaseList.push_back(cases_to_sfaces[distance(cases_list.begin(),cltr)].size());
 ///        cout << "EntropyIncreaseList: "  << EntropyIncreaseList.back() << endl;
         }
@@ -1068,19 +1070,30 @@ unsigned int grain_set_size = std::floor(0.05*CellNumbs.at(3 + (dim - 3)));
 
 //        cout << "place 4" << endl;
 /// sorting the "EntropyIncreaseList"
-std::sort(EntropyIncreaseList.begin(),EntropyIncreaseList.end());
+// std::sort(EntropyIncreaseList.begin(),EntropyIncreaseList.end());
 
 /// Form the max_set of the faces with the max values of EntropyIncreaseList
-        std::vector<double> EntropyIncreaseList_temp = EntropyIncreaseList;
+//        std::vector<double> EntropyIncreaseList_temp = EntropyIncreaseList;
+        unsigned int new_chosen_case = 0;
         std::vector<unsigned int> case_chosen_set; // possible set of element with equal values of the entropy increase
         case_chosen_set.clear();
-//        for(auto g_iter = EntropyIncreaseList.begin(); g_iter < grain_set_size; ++g_iter) {
+
+        //     EntropyIncreaseList_temp = EntropyIncreaseList;
+        new_chosen_case = 0;
         for(unsigned int g_it = 0; g_it < grain_set_size; ++g_it) {
-            case_chosen_set.push_back(NewCellNumb_R(EntropyIncreaseList_temp.size()));
-            EntropyIncreaseList_temp.erase(EntropyIncreaseList_temp.begin() + case_chosen_set.back());
-        }
+            new_chosen_case = NewCellNumb_R(EntropyIncreaseList.size());
+            if(std::find(case_chosen_set.begin(), case_chosen_set.end(), new_chosen_case) == case_chosen_set.end())
+                case_chosen_set.push_back(new_chosen_case);
+
+//            cout << "ccs  " << new_chosen_case << " " << EntropyIncreaseList.size() << endl;
+
+            //  EntropyIncreaseList_temp.erase(EntropyIncreaseList_temp.begin() + case_chosen_set.back());
+        } // end of for(unsigned int g_it = 0; g_it < grain_set_size; ++g_it)
+
+//        cout << case_chosen_set.size() << endl;
 
 for (auto ccs : case_chosen_set) {
+
 /// New MAPS-related changes (!): grain_quaternions update
 //REPAIR cout << " check_0 " << case_chosen << "  " <<  cases_to_sfaces[case_chosen].size() << endl;
 //cout << " check_1 " << grain_quaternions.at(cases_to_grains[case_chosen]).at(0) << "  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(1) << "  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(2) << "  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(3) << endl;
@@ -1090,8 +1103,16 @@ for (auto ccs : case_chosen_set) {
 //exit(0);
 
 /// new special faces
-        S_Vector = cases_list[ccs];
-        for (unsigned int sface : cases_to_sfaces [ccs]) {
+// set new 1s to S_Vector
+//    cout << S_Vector.size() << endl;
+//    cout << S_Vector.size() << "  " << cases_list.at(ccs).size() << " " << endl;
+
+for (auto sf_iter = cases_list[ccs].begin(); sf_iter != cases_list[ccs].end(); ++sf_iter)
+    if(cases_list[ccs].at(distance(cases_list[ccs].begin(),sf_iter)) != 0 && S_Vector.at(distance(cases_list[ccs].begin(),sf_iter)) == 0)
+        S_Vector.at(distance(cases_list[ccs].begin(),sf_iter)) = 1;
+//    cout << "place 4.5 " << endl;
+
+    for (unsigned int sface : cases_to_sfaces [ccs]) {
 //        cout << " cases_to_sfaces [case_chosen]:  " << itr << endl;
 //            S_Vector.at(itr) = 1; // Replace the chosen element with 1 (special) instead of 0 (ordinary) in the State Faces vector
 //        cout << "place 5.1 " << endl;
@@ -1111,7 +1132,7 @@ for (auto ccs : case_chosen_set) {
                 special_cells_sequence.end())
                 special_cells_sequence.push_back(sface);
 
-            EntropyIncreaseList.at(ccs) = 0.0; // zero entropy increase for this element
+/// (?)            EntropyIncreaseList.at(ccs) = 0.0; // zero entropy increase for this element
 } // end for(unsigned int c = 0; c < cases_list.size(); ++c)
 
 } // end for (auto ccs : case_chosen_set) {
@@ -1203,7 +1224,7 @@ std::vector<unsigned int> Processing_maxF_crystallographic(int cell_type, std::v
 /// Initial TRIANGLE LATTICE
 // q1 \in [0, 1], q2 \in [0, 1], q3 \in [0, 1]
 // n_grains - number of points, dq - "lattice parameter"
-    int n_lattice_points = 100; // is an arbitrary user-defined parameter here (!)
+    int n_lattice_points = 10; // is an arbitrary user-defined parameter here (!)
     double  dq = 1.0 / (double) n_lattice_points;
 
     std::vector<vector<double>> q_coord_vector; // grain rotation lattice
@@ -1347,7 +1368,7 @@ std::vector<unsigned int> Processing_maxF_crystallographic(int cell_type, std::v
 /// Configuration_Entropy_change function here (!)
         for (auto NewEdgeTypes : cases_list) {
             EntropyIncreaseList.push_back(Configuration_Entropy_change(j_fractions, NewEdgeTypes));
-//        cout << "EntropyIncreaseList: "  << EntropyIncreaseList.back() << endl;
+// REPAIR        cout << "EntropyIncreaseList: "  << EntropyIncreaseList.back() << endl;
         }
 // REPAIR for (auto EIE :   EntropyIncreaseList)  cout << "EIList " << EIE << endl;  exit(0);
 //        cout << "place 3" << endl;
@@ -1370,6 +1391,8 @@ std::vector<unsigned int> Processing_maxF_crystallographic(int cell_type, std::v
         if(max_set.size() > 1)
             case_chosen = max_set.at(NewCellNumb_R(max_set.size()));
 //        cout << "place 5" << endl;
+// REPAIR
+        cout << "s_faces.size(): " << cases_to_sfaces[case_chosen].size() << " case_chosen:  " << case_chosen << endl;
 
 /// New MAPS-related changes (!): grain_quaternions update
         grain_quaternions.at(cases_to_grains[case_chosen]) = cases_to_new_quaternions[case_chosen];

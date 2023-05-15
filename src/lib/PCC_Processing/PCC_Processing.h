@@ -91,8 +91,9 @@ for (int cell_type = dim; cell_type >= 0; --cell_type) { /// loop over all types
     else if (ptype_vector.at(cell_type + (dim - 3)) == "Cr" && max_fractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
         cout << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
         Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type + (dim - 3) << endl;
-/// it works!        special_x_sequence = Processing_maxP_crystallographic(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
-        special_x_sequence = Processing_Random_crystallographic(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
+/// it works!
+ special_x_sequence = Processing_maxP_crystallographic(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
+///        special_x_sequence = Processing_Random_crystallographic(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
     } // End of 'Cr' type simulations (elseif)
     else if (ptype_vector.at(cell_type + (dim - 3)) == "S") {
         char* kseq_sourcepath = const_cast<char*>(sequence_source_paths.at(cell_type + (dim - 3)).c_str());
