@@ -582,12 +582,12 @@ std::vector<unsigned int> Processing_minConfEntropy(int cell_type, std::vector<v
     return special_cells_sequence;
 } // end of S_min
 
-/// (q) Maximum Functional crystallographic based generation process
+/// (q) Maximum p crystallographic based generation process
 /*!
  * @param S_Vector
  * @param s_faces_sequence
  */
-std::vector<unsigned int> Processing_Random_crystallographic(int cell_type, std::vector<vector<int>> &Configuration_State, std::vector<vector<double>> const &max_fractions_vectors, double p_index) {
+std::vector<unsigned int> Processing_maxP_crystallographic(int cell_type, std::vector<vector<int>> &Configuration_State, std::vector<vector<double>> const &max_fractions_vectors, double p_index) {
 ///=============================================================================================================================================////
 ///==================================================================== 'F' ===================================================================////
 /// ===============================================>  Maximum functional production process   <================================================////
@@ -858,8 +858,291 @@ cout << "s_faces.size(): " << cases_to_sfaces[case_chosen].size() << " case_chos
         Configuration_State[cell_type + (dim - 3)].push_back(var);
 
     return special_cells_sequence;
-} // END of Random_crystallographic
+} // END of max_p_crystallographic
 
+/// (q) Maximum p crystallographic based generation process
+/*!
+ * @param S_Vector
+ * @param s_faces_sequence
+ */
+std::vector<unsigned int> Processing_Random_crystallographic(int cell_type, std::vector<vector<int>> &Configuration_State, std::vector<vector<double>> const &max_fractions_vectors, double p_index) {
+///=============================================================================================================================================////
+///==================================================================== 'F' ===================================================================////
+/// ===============================================>  Maximum functional production process   <================================================////
+///============================================================================================================================================////
+    std::vector<unsigned int> special_cells_sequence; // output of the function
+
+    // calculation of the total max special cell fraction
+    double total_max_sCell_fraction = 0;
+    for (int j = 0; j < max_fractions_vectors[cell_type + (dim - 3)].size(); ++j)
+        if(max_fractions_vectors[cell_type + (dim - 3)][j] > 0)
+            total_max_sCell_fraction += max_fractions_vectors[cell_type + (dim - 3)][j];
+
+    if (total_max_sCell_fraction > 1.0) {
+        cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+        Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+    }
+    else if ( total_max_sCell_fraction == 0.0) return special_cells_sequence;
+
+    vector<int> S_Vector(CellNumbs.at(cell_type + (dim - 3)), 0); // S_Vector - State Vector for a given type of k-cells
+
+    /// ================> Initial Face seeds - initial state for the MAX Functional production algorithm (!)
+    if (std::count(Configuration_State.at(cell_type + (dim - 3)).begin(), Configuration_State.at(cell_type + (dim - 3)).end(), 1) / (double) CellNumbs.at(cell_type + (dim - 3)) > 0.05)
+        S_Vector = Configuration_State.at(cell_type + (dim - 3)); // initial predefined system, if exists
+    else {
+        ///***function std::vector<unsigned int> Processing_Random(cell_type, &Configuration_State, max_fractions_vectors) from PCC_SupportFunctions.h
+        std::vector<vector<double>> seed_fractions_vector = {{0.05}, {0.05}, {0.05}, {0.05}}; // max fractions for the initial seed
+        special_cells_sequence = Processing_Random(cell_type, Configuration_State, seed_fractions_vector);
+    }
+// REPAIR cout << "s_faces_sequence.size(): " << s_faces_sequence.size() / (double) CellNumbs.at(2) << endl;
+
+// number of cell types
+    int number_of_types = std::count_if(max_fractions_vectors[cell_type + (dim - 3)].begin(), max_fractions_vectors[cell_type + (dim - 3)].end(), [](int c){return c > 0;});
+
+/// Vectors for Edges types and Edges-related configuration entropy
+    vector<int> EdgeTypes(CellNumbs.at(1 + (dim - 3)), 0); // vector<int> in the form [ 0 2 3 3 2 1 ...] with the TJs type ID as its values
+    std::vector<double> j_fractions(dim+1,0), d_fractions(dim,0); // fractions of (1) edges of different types and (2) edges of different degrees
+    EdgeTypes = Edge_types_byFaces(CellNumbs, special_cells_sequence, j_fractions, d_fractions);
+//REPAIR for(auto kl : EdgesTypes) cout << " " <<kl ; cout << endl; exit(10);
+
+    // Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file paths.at(5 + (dim - 3))
+    SpMat FES = SMatrixReader(paths.at(5 + (dim - 3)), CellNumbs.at(1 + (dim - 3)), CellNumbs.at(2 + (dim - 3))); // Edges-Faces sparse incidence matrix
+    SpMat GFS = SMatrixReader(paths.at(6 + (dim - 3)), CellNumbs.at(2 + (dim - 3)), CellNumbs.at(3 + (dim - 3))); // Faces-Grains sparse incidence matrix
+
+    SpMat AGS = SMatrixReader(paths.at(3 + (dim - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Faces
+    AGS = 0.5 * (AGS + SparseMatrix<double>(AGS.transpose())); // Full matrix instead of triagonal
+
+    std::vector<vector<double>> grain_quaternions(CellNumbs.at(3 + (dim - 3)), std::vector<double>(4)),
+            grain_triangle_quaternions(CellNumbs.at(3 + (dim - 3)), std::vector<double>(3)); // grain orientations 2-quaternions and 3-quternions
+    double HAGBs_threshold = 15.0; // treshold for the definition of the "high-angle" disorientations
+
+/// Initial TRIANGLE LATTICE
+// q1 \in [0, 1], q2 \in [0, 1], q3 \in [0, 1]
+// Number of grains which will be taken from the "EntropyIncreaseList" at each calculation step (!)
+unsigned int grain_set_size = std::floor(0.05*CellNumbs.at(3 + (dim - 3)));
+
+// n_grains - number of points, dq - "lattice parameter"
+    int n_lattice_points = 1000; // is an arbitrary user-defined parameter here (!)
+    double  dq = 1.0 / (double) n_lattice_points;
+
+    std::vector<vector<double>> q_coord_vector; // grain rotation lattice
+    for(int qi = 0; qi <= n_lattice_points; ++qi) // 1
+        for(int qk = 0; qk <= (n_lattice_points - qi); ++qk) // 2
+            q_coord_vector.push_back({qi*dq, qk*dq, 1.0 - qi*dq - qk*dq});
+// REPAIR    for(auto gtq : q_coord_vector)
+//        cout << "q_coord_vector " << gtq.at(0) << " " << gtq.at(1) << " " << gtq.at(2) << " "<< gtq.at(0) + gtq.at(1) + gtq.at(2) << endl;
+
+/// Assigning of the INITIAL grain orientations for each grain in the PCC
+    double q0_coord = 0;
+    unsigned int new_grain_triangle_coords = 0;
+    grain_triangle_quaternions.clear();
+    grain_quaternions.clear();
+
+    for (int i = 0; i < CellNumbs.at(3 + (dim - 3)); ++i) {
+
+// random choice of a point in a triangle coordinate space
+        new_grain_triangle_coords = NewCellNumb_R(q_coord_vector.size());
+
+        std::vector<double> grain_q_quaternion(3), grain_full_quaternion(4);
+/// triangle Q3-quaternions
+        grain_q_quaternion.at(0) = q_coord_vector[new_grain_triangle_coords][0];
+        grain_q_quaternion.at(1) = q_coord_vector[new_grain_triangle_coords][1];
+        grain_q_quaternion.at(2) = q_coord_vector[new_grain_triangle_coords][2];
+
+        grain_triangle_quaternions.push_back({grain_q_quaternion.at(0), grain_q_quaternion.at(1), grain_q_quaternion.at(2)});
+// REPAIR        cout << "grain_triangle_quaternions " << grain_triangle_quaternions.back().at(0) << " " << grain_triangle_quaternions.back().at(1) << " " << grain_triangle_quaternions.back().at(2) << " "<< grain_triangle_quaternions.back().at(0) + grain_triangle_quaternions.back().at(1) + grain_triangle_quaternions.back().at(2) << endl;
+
+/// full grain quaternions
+        /// angle - an additional random generation
+        q0_coord = 0.2*rand() / (RAND_MAX + 1.0); //        q0_coord = std::sqrt(1.0 - pow(grain_full_quaternion.at(0),2) - pow(grain_full_quaternion.at(1),2) - pow(grain_full_quaternion.at(2),2));
+        // axis
+        grain_full_quaternion.at(0) = std::sqrt(grain_q_quaternion.at(0)*(1.0 - pow(q0_coord,2)));
+        grain_full_quaternion.at(1) = std::sqrt(grain_q_quaternion.at(1)*(1.0 - pow(q0_coord,2)));
+        grain_full_quaternion.at(2) = std::sqrt(grain_q_quaternion.at(2)*(1.0 - pow(q0_coord,2)));
+
+// full grain quaternions vector
+/// (1) RANDOM ASSIGHMENT (Already Most GBs are HAGBs) (!)
+//        grain_quaternions.push_back({q0_coord, grain_full_quaternion.at(0), grain_full_quaternion.at(1), grain_full_quaternion.at(2)});
+/// (2) Low HAGBs initial ASSIGHMENT (!!)
+//        q0_coord = 0.3;
+//        grain_quaternions.push_back({q0_coord, std::sqrt(0.3*(1.0 - pow(q0_coord,2))), std::sqrt(0.3*(1.0 - pow(q0_coord,2))), std::sqrt(0.4*(1.0 - pow(q0_coord,2)))});
+        grain_quaternions.push_back({q0_coord, std::sqrt(0.1*(1.0 - pow(q0_coord,2))), std::sqrt(0.6*(1.0 - pow(q0_coord,2))), std::sqrt(0.3*(1.0 - pow(q0_coord,2)))});
+// REPAIR cout << "full grain quaternions " << grain_quaternions.back().at(0) << " " << grain_quaternions.back().at(1) << " " << grain_quaternions.back().at(2) << " " << grain_quaternions.back().at(3) << "  " << pow(grain_quaternions.back().at(0),2) + pow(grain_quaternions.back().at(1),2) + pow(grain_quaternions.back().at(2),2) + pow(grain_quaternions.back().at(3),2)<< endl;
+    } // end for (int i = 0; i < CellNumbs.at(3 + (dim - 3)); ++i)
+
+    for(auto gtq : grain_quaternions)
+        grain_triangle_quaternions.push_back({pow(gtq.at(1), 2) / (1.0 - pow(gtq.at(0), 2)), pow(gtq.at(2), 2) / (1.0 - pow(gtq.at(0), 2)), pow(gtq.at(3), 2) / (1.0 - pow(gtq.at(0), 2))});
+
+// REPAIR    for(auto gtq : grain_triangle_quaternions)
+//        cout << gtq.at(0) << "  " << gtq.at(1) << "  " << gtq.at(2) << endl;
+    std::vector<unsigned int> gb_set; // g_set, gb_special_set;
+    std::map<unsigned int, std::vector<unsigned int>> g_gbs_map; // map of grain boundaries for each grain
+
+    g_gbs_map.clear();
+    for (unsigned int g = 0; g < CellNumbs.at(3 + (dim - 3)); ++g) { // loop over all Grains in a PCC
+        gb_set.clear();
+        for(unsigned int f = 0; f < CellNumbs.at(2 + (dim - 3)); ++f)// loop over all Edges
+            if (GFS.coeff(f, g) != 0)
+                gb_set.push_back(f); // for each grain in a PCC
+/// new map g_gb element
+        g_gbs_map.insert(std::pair<unsigned int, std::vector<unsigned int>> (g, gb_set));
+    } // end of for (unsigned int g = 0; g < CellNumbs.at(3 + (dim - 3)); ++g)
+
+/// Initial Faces State_Vector
+    fill(S_Vector.begin(),S_Vector.end(),0); /// Zeroing S-vector (!)
+    for (int g = 0; g < CellNumbs.at(3 + (dim - 3)); ++g) { // grains
+        for(unsigned int ngb : g_gbs_map[g]) { // all the special GBs related with the rotated grain
+            for (int g2 = 0; g2 < CellNumbs.at(3 + (dim - 3)); ++g2) { // grains
+                if (GFS.coeff(ngb, g2) != 0 && g2 != g) {
+                    if (isHAGB(grain_quaternions.at(g), grain_quaternions.at(g2), HAGBs_threshold))
+                        S_Vector.at(ngb) = 1;
+                } // end if()
+            } // end if()
+        } // end of for(unsigned int ngb : g_gbs_map[g]) {
+    } // end of for (int g = 0; g < CellNumbs.at(3 + (dim - 3)); ++g) { // grains
+
+    std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(cell_type + (dim - 3)), 1); // Vector of the size equal to the total number of faces in PCC initialised with '1's
+    // (!) all the cell Numbers start with 0, not 1 like in Neper, Matlab, Fortran and many other software
+    for( unsigned int lit = 0; lit < OrdinaryCellNumbs.size(); lit++)
+        OrdinaryCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces
+
+///    for (unsigned int itr : special_cells_sequence)
+///        S_Vector.at(itr) = 1; // Replace the chosen element with 1 (special) instead of 0 (ordinary) in the State Faces vector
+
+    for(auto itr : S_Vector)
+        if(itr != 0) OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
+
+    // initial fractions of special cells
+    double ordinary_cells_fraction = OrdinaryCellNumbs.size()/ (double) CellNumbs.at(cell_type + (dim - 3));
+    double special_cells_fraction = 1.0 - ordinary_cells_fraction; // special face vecror definition based on the ordinary face vector
+
+    vector<double> scell_fractions_vector; // vector for all different types of special cells
+    for (int i = 0; i < max_fractions_vectors[cell_type + (dim - 3)].size(); ++i) {
+        scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type + (dim - 3))); // type (i+1) of special x_cells
+        if (special_cells_fraction >= total_max_sCell_fraction) {
+            cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+            Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+            return special_cells_sequence;
+        }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
+    } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
+
+/// ================ Loop over all Faces ===================
+    do { // do{ ... }while(output_step) loop starting point
+
+/// An Entropy Increase List calculation for all the Faces in the given DCC
+        std::vector<vector<int>> cases_list;
+        std::map<unsigned int, std::vector<unsigned int>> cases_to_sfaces; // map from cases to special faces (set of special faces for each case from the list)
+        std::map<unsigned int, unsigned int> cases_to_grains; // map from cases to grains
+        std::map<unsigned int, std::vector<double>> cases_to_new_quaternions; // map from cases to their new quaternions
+        /// new EdgeTypes
+        EdgeTypes = Edge_types_byFaces(CellNumbs, special_cells_sequence, j_fractions, d_fractions);
+
+        cases_list.clear(); cases_to_sfaces.clear();
+        cases_list = Get_crystallographic_cases_random_list(grain_quaternions, g_gbs_map, dq, HAGBs_threshold, S_Vector, EdgeTypes, GFS, FES, cases_to_grains, cases_to_sfaces, cases_to_new_quaternions, p_index);
+        /// WARNING: Only one possible Face type (binary model) (!)
+
+//    cout << "place 1" << endl;
+        std::vector<double> EntropyIncreaseList; // vector with values of configuration entropy increases at conversion of each Face
+        j_fractions = j_fractions_vector(EdgeTypes);
+
+// cout << "Current Conf Edges Entropy:   " << get<0>(Configuration_Entropy_tuple(j_fractions)) + get<1>(Configuration_Entropy_tuple(j_fractions)) << "  Configuration_Entropy: " << Configuration_Entropy(EdgeTypes) <<endl;
+//        cout << "  Configuration_Entropy: " << Configuration_Entropy(EdgeTypes) <<endl;
+        EntropyIncreaseList.clear();
+//        cout << "place 2" << endl;
+/// Configuration_Entropy_change function here (!)
+//        for (auto NewEdgeTypes : cases_list) {
+        for (auto cltr = cases_list.begin(); cltr != cases_list.end(); ++cltr) {
+            EntropyIncreaseList.push_back(std::count(cltr->begin(), cltr->end(), 1)/ (double) CellNumbs.at(2 - (dim - 3)));
+// REPAIR cout << "EElist  " <<  EntropyIncreaseList.back() << endl;
+//            EntropyIncreaseList.push_back(cases_to_sfaces[distance(cases_list.begin(),cltr)].size());
+///        cout << "EntropyIncreaseList: "  << EntropyIncreaseList.back() << endl;
+        }
+// REPAIR for (auto EIE :   EntropyIncreaseList)  cout << "EIList " << EIE << endl;  exit(0);
+//        cout << "place 3" << endl;
+/// Number of the cell giving the maximum increase in configuration entropy at its conversion
+//        double case_chosen = 0;
+        // the very first special element with S_max
+//        case_chosen = std::max_element(std::begin(EntropyIncreaseList), std::end(EntropyIncreaseList)) - std::begin(EntropyIncreaseList); // gives index of the max element
+//REPAIR
+  //      cout << "s_faces.size(): " << cases_to_sfaces[case_chosen].size() << " case_chosen:  " << case_chosen << endl;
+
+//        cout << "place 4" << endl;
+/// sorting the "EntropyIncreaseList"
+std::sort(EntropyIncreaseList.begin(),EntropyIncreaseList.end());
+
+/// Form the max_set of the faces with the max values of EntropyIncreaseList
+        std::vector<double> EntropyIncreaseList_temp = EntropyIncreaseList;
+        std::vector<unsigned int> case_chosen_set; // possible set of element with equal values of the entropy increase
+        case_chosen_set.clear();
+//        for(auto g_iter = EntropyIncreaseList.begin(); g_iter < grain_set_size; ++g_iter) {
+        for(unsigned int g_it = 0; g_it < grain_set_size; ++g_it) {
+            case_chosen_set.push_back(NewCellNumb_R(EntropyIncreaseList_temp.size()));
+            EntropyIncreaseList_temp.erase(EntropyIncreaseList_temp.begin() + case_chosen_set.back());
+        }
+
+for (auto ccs : case_chosen_set) {
+/// New MAPS-related changes (!): grain_quaternions update
+//REPAIR cout << " check_0 " << case_chosen << "  " <<  cases_to_sfaces[case_chosen].size() << endl;
+//cout << " check_1 " << grain_quaternions.at(cases_to_grains[case_chosen]).at(0) << "  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(1) << "  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(2) << "  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(3) << endl;
+//cout << " check_2 " << cases_to_new_quaternions[case_chosen].at(0) << "  " << cases_to_new_quaternions[case_chosen].at(1) <<  "  " << cases_to_new_quaternions[case_chosen].at(2) <<  "  " << cases_to_new_quaternions[case_chosen].at(3) << endl;
+        grain_quaternions.at(cases_to_grains[ccs]) = cases_to_new_quaternions[ccs];
+//cout << " check_3 " << grain_quaternions.at(cases_to_grains[case_chosen]).at(0) << "  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(1) <<"  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(2) <<"  " << grain_quaternions.at(cases_to_grains[case_chosen]).at(3) << endl;
+//exit(0);
+
+/// new special faces
+        S_Vector = cases_list[ccs];
+        for (unsigned int sface : cases_to_sfaces [ccs]) {
+//        cout << " cases_to_sfaces [case_chosen]:  " << itr << endl;
+//            S_Vector.at(itr) = 1; // Replace the chosen element with 1 (special) instead of 0 (ordinary) in the State Faces vector
+//        cout << "place 5.1 " << endl;
+            OrdinaryCellNumbs.erase(std::remove(OrdinaryCellNumbs.begin(), OrdinaryCellNumbs.end(), sface),
+                                    OrdinaryCellNumbs.end());
+
+            //     auto o_iterator = find(OrdinaryCellNumbs.begin(), OrdinaryCellNumbs.end(), itr);
+            //    cout << "place 5.2 " << endl;
+            //   if (o_iterator <= OrdinaryCellNumbs.end()) /// ?
+            //{
+            //     cout << " OrdinaryCellNumbs.at(o_iterator):  " << OrdinaryCellNumbs.at(o_iterator) << endl;
+            //    OrdinaryCellNumbs.erase(o_iterator); // !!! Delete its element from the vector decreasing its size
+            //    }
+//    cout << "place 6" << endl;
+            /// Add the new element to s_faces_sequence if it is still not here
+            if (std::find(special_cells_sequence.begin(), special_cells_sequence.end(), sface) ==
+                special_cells_sequence.end())
+                special_cells_sequence.push_back(sface);
+
+            EntropyIncreaseList.at(ccs) = 0.0; // zero entropy increase for this element
+} // end for(unsigned int c = 0; c < cases_list.size(); ++c)
+
+} // end for (auto ccs : case_chosen_set) {
+
+//                cout << "place 7" << endl;
+/// Special and Ordinary Faces fraction calculation
+// Special and Ordinary Faces fraction recalculation
+        ordinary_cells_fraction = OrdinaryCellNumbs.size()/ (double) CellNumbs.at(cell_type + (dim - 3));
+        special_cells_fraction = 1.0 - ordinary_cells_fraction; // special face vecror definition based on the ordinary face vector
+        for (int i = 0; i < max_fractions_vectors[cell_type + (dim - 3)].size(); ++i)
+            scell_fractions_vector.at(i) = std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type + (dim - 3)); // type (i+1) of special x_cells
+//               cout << "place 8" << endl;
+//REPAIRS
+        /// ca
+// REPAIR        if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "  SV: " << S_Vector.size() << "  ctf: " << cases_to_sfaces.size() << "  ms :  " <<  max_set.size() << "  eel: " << EntropyIncreaseList.size() << "  sss :" << special_cells_sequence.size() << " OCN:  " << OrdinaryCellNumbs.size() << endl;
+        if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "special " << cell_type << "-cells fraction:  " <<  special_cells_fraction << endl;
+
+        cout << special_cells_fraction << endl;
+
+        //       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+        //       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+    } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
+//REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
+
+/// Update of the corresponding Configuration State vector
+    Configuration_State[cell_type + (dim - 3)].clear();
+    for (int var : S_Vector )
+        Configuration_State[cell_type + (dim - 3)].push_back(var);
+
+    return special_cells_sequence;
+} // END of Random_crystallographic
 
 /// (y) Maximum Functional crystallographic based generation process
 /*!

@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <thread>
 #include <execution>
+#include <cmath>
 
 ///* ------------------------------------------------------------------------------- *
 ///* Attached user-defined C++ libraries (must be copied in the directory for STL):
