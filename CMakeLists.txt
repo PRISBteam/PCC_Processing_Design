@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 project(PCC_Processing_Design)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 # added -fopenmp
 include_directories(/usr/local/Cellar/libomp/15.0.7/include/)
@@ -62,7 +62,8 @@ add_executable( PCC_Processing_Design
         #src/tasks/task_StripsProcessingDesign.cpp
 
         #src/lib/PCC_Processing/functions/Procesing_Induced_functions.h src/lib/PCC_Characterisation/Characterisation_Indexing_functions.h src/lib/PCC_Processing/functions/Processing_Imposed_functions.h
-        src/lib/measures.h src/lib/PCC_Characterisation/functions/analytical_solutions.h)
+        #src/lib/measures.h src/lib/PCC_Characterisation/functions/analytical_solutions.h
+        )
 
 #target_compile_options(PCC_Processing_Design PRIVATE -Wall ${OpenMP_CXX_FLAGS})
 #target_link_libraries(PCC_Processing_Design PRIVATE ${OpenMP_CXX_FLAGS})

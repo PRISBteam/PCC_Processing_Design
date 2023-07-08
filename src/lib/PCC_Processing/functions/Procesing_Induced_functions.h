@@ -173,10 +173,10 @@ double nrm = 1.0*sface_energy_matrix, nrr = 0, ncm = 2.0*sface_energy_matrix, nc
     } while(fractured_cells_fraction < total_max_cCells_fraction); /// End of the Random generation process
 
 
-/*
+
     for (unsigned int i = 0; i < CellNumbs.at(2); ++i) { // crack loop over all the GBs
         /// New surface energy
-
+/*
         // Local stress concentrators and related energies
         for (unsigned int k = 0; k < CellNumbs.at(2); ++k)
             lsc_crack_energy.at(k) = lsc_crack*(Face_crack_index.at(k)/Face_weight.at(k));
