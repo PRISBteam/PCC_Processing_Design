@@ -159,7 +159,9 @@ public:
 
     vector<unsigned int> Get_GBs_list() {
             if (GBs_list.size() > 0) return GBs_list;
-                else cout << "coution GBs_list.size() = 0! Please Set_GBs_list(unsigned int grain_id, SpMat const &GFS)  first!"s << endl;
+                else { cout << "coution GBs_list.size() = 0! Please Set_GBs_list(unsigned int grain_id, SpMat const &GFS)  first!"s << endl;
+                        return {0};
+                };
             }
 
     /// return - vector of all node (vertices) coordinates of a grain
@@ -420,7 +422,9 @@ public:
 
     std::vector <unsigned int> Get_grains_sequence(unsigned int subcomplex_id){
         if(sub_grains_sequence.size() != 0)
-            return sub_grains_sequence; }
+            return sub_grains_sequence;
+        else return {0};
+    }
 
 
     /// geometry
@@ -441,7 +445,9 @@ public:
     //1
     std::vector <unsigned int>  Get_faces_sequence(unsigned int  subcomplex_id){
         if(sub_faces_sequence.size() != 0)
-            return sub_faces_sequence; }
+            return sub_faces_sequence;
+        else return {0};
+    }
 
     void Set_common_faces_sequence(std::vector <unsigned int> new_common_faces_sequence){
         common_faces_sequence = new_common_faces_sequence; }
@@ -462,7 +468,10 @@ public:
     }
     std::vector <unsigned int> Get_sfaces_sequence(unsigned int  subcomplex_id){
         if(s_sub_faces_sequence.size() > 0) return s_sub_faces_sequence;
-        else cout << "Caution! s_sub_faces_sequence = 0! Please add it to the corresponding subcomplex/crack"s << endl;
+        else {
+            cout << "Caution! s_sub_faces_sequence = 0! Please add it to the corresponding subcomplex/crack"s << endl;
+            return {0};
+        }
     }
 
     void Set_cfaces_sequence(std::vector <unsigned int> csub_faces_sequence){
@@ -575,7 +584,10 @@ public:
     }
     double Get_real_crack_length() {
         if (real_crack_length > 0.0) return real_crack_length;
-        else cout << "Caution! real_crack_length = 0! Please use Set_real_crack_length(double sample_size) before!"s << endl;
+        else {
+            cout << "Caution! real_crack_length = 0! Please use Set_real_crack_length(double sample_size) before!"s << endl;
+            return 0;
+        }
     }
 
     void Set_crack_plane() {
@@ -583,7 +595,10 @@ public:
     }
     vector<double> Get_crack_plane() {
         if (crack_plane.size() > 0.0) return crack_plane;
-        else cout << "Caution! crack_plane.size() = 0! Please update first {half_plane_subcomplex.a_n, half_plane_subcomplex.b_n, half_plane_subcomplex.c_n, half_plane_subcomplex.D_plane} in the corresponding subcomplex!"s << endl;
+        else {
+            cout << "Caution! crack_plane.size() = 0! Please update first {half_plane_subcomplex.a_n, half_plane_subcomplex.b_n, half_plane_subcomplex.c_n, half_plane_subcomplex.D_plane} in the corresponding subcomplex!"s << endl;
+            return {0};
+        }
     }
 
     void Set_multiple_cracking_energy(double total_energy) {
@@ -675,61 +690,87 @@ public:
 
     // Get
     std::vector<unsigned int> Get_p_sequence(void){
-        if (p_sequence.size() == 0) cout << "WARNING: p_sequence did not set!" << endl;
-        else
-           return p_sequence;
+        if (p_sequence.size() == 0) {
+            cout << "WARNING: p_sequence did not set!" << endl;
+            return {0};
+        }
+        else return p_sequence;
     }
     std::vector<unsigned int> Get_f_sequence(void){
-        if (f_sequence.size() == 0) cout << "WARNING: f_sequence did not set!" << endl;
-        else
-          return f_sequence;
+        if (f_sequence.size() == 0) {
+            cout << "WARNING: f_sequence did not set!" << endl;
+            return {0};
+        }
+        else return f_sequence;
     }
     std::vector<unsigned int> Get_e_sequence(void){
-        if (e_sequence.size() == 0) cout << "WARNING: e_sequence did not set!" << endl;
-        else
-          return e_sequence;
+        if (e_sequence.size() == 0) {
+            cout << "WARNING: e_sequence did not set!" << endl;
+            return {0};
+        }
+        else return e_sequence;
     }
     std::vector<unsigned int> Get_n_sequence(void){
-        if (n_sequence.size() == 0) cout << "WARNING: n_sequence did not set!" << endl;
-        else
-            return n_sequence;
+        if (n_sequence.size() == 0) {
+            cout << "WARNING: n_sequence did not set!" << endl;
+            return {0};
+        }
+        else return n_sequence;
     }
 
     std::vector<unsigned int> Get_p_induced_sequence(void) {
-        if (p_induced_sequence.size() == 0) cout << "WARNING: polyhedron induced sequence did not set!" << endl;
-        else
-            return p_induced_sequence;
+        if (p_induced_sequence.size() == 0) {
+            cout << "WARNING: polyhedron induced sequence did not set!" << endl;
+            return {0};
+        }
+        else return p_induced_sequence;
     }
     std::vector<unsigned int> Get_f_induced_sequence(void){
-        if (f_induced_sequence.size() == 0) cout << "WARNING: face induced sequence did not set!" << endl;
-        else
-            return f_induced_sequence;
+        if (f_induced_sequence.size() == 0) {
+            cout << "WARNING: face induced sequence did not set!" << endl;
+            return {0};
+        }
+        else return f_induced_sequence;
     }
     std::vector<unsigned int> Get_e_induced_sequence(void) {
-        if (e_induced_sequence.size() == 0) cout << "WARNING: edge induced sequence did not set!" << endl;
-        else
-            return e_induced_sequence;
+        if (e_induced_sequence.size() == 0) {
+            cout << "WARNING: edge induced sequence did not set!" << endl;
+            return {0};
+        }
+        else return e_induced_sequence;
     }
     std::vector<unsigned int> Get_n_induced_sequence(void) {
-        if (n_induced_sequence.size() == 0) cout << "WARNING: node induced sequence did not set!" << endl;
-        else
-            return n_induced_sequence;
+        if (n_induced_sequence.size() == 0) {
+            cout << "WARNING: node induced sequence did not set!" << endl;
+            return {0};
+        }
+        else return n_induced_sequence;
     }
     std::vector<int> Get_p_design(void){
-        if (p_design.size() == 0) cout << "WARNING: p_design did not set!" << endl; else
-            return p_design;
+        if (p_design.size() == 0) {
+            cout << "WARNING: p_design did not set!" << endl;
+            return {0};
+        }
+        else return p_design;
     }
     std::vector<int> Get_f_design(void){
-        if (f_design.size() == 0) cout << "WARNING: f_design did not set!" << endl; else
-            return f_design;
+        if (f_design.size() == 0) {
+            cout << "WARNING: f_design did not set!" << endl;
+            return {0};
+        } else return f_design;
     }
     std::vector<int> Get_e_design(void){
-        if (e_design.size() == 0) cout << "WARNING: e_design did not set!" << endl; else
-            return e_design;
+        if (e_design.size() == 0) {
+            cout << "WARNING: e_design did not set!" << endl;
+            return {0};
+        } else return e_design;
     }
     std::vector<int> Get_n_design(void){
-        if (n_design.size() == 0) cout << "WARNING: n_design did not set!" << endl; else
-            return n_design;
+        if (n_design.size() == 0) {
+            cout << "WARNING: n_design did not set!" << endl;
+            return {0};
+        }
+        else return n_design;
     }
 }; /// end of class CELLS_DESIGN
 
@@ -744,7 +785,7 @@ public:
     CellsDesign pcc_design;
 
     void Set_design(CellsDesign processed_pcc_design){
-        pcc_design = pcc_design;
+        pcc_design = processed_pcc_design;
     }
 
     // Sequences of special k-cells

@@ -12,6 +12,8 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
 
     // ini files reader - external (MIT license) library
     mINI::INIFile file(source_path + "main.ini"s);
+//    mINI::INIFile file(source_path + "main_2D.ini"s);
+
     mINI::INIStructure main_ini;
     file.read(main_ini);
 
@@ -132,28 +134,30 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
 void config_reader_processing(std::string &source_path, std::vector<string> &sequence_source_paths, std::vector<vector<double>> &max_fractions_vectors, std::vector<vector<double>> &max_cfractions_vectors, double &mu, double &sigma, std::vector<string> &ptype_vector, std::vector<string> &ctype_vector, std::vector<double> &pindex_vector, std::ofstream &Out_logfile_stream) {
     // ini files reader - external (MIT license) library
     mINI::INIFile file(source_path + "processing.ini"s);
+//    mINI::INIFile file(source_path + "processing_2D.ini"s);
     mINI::INIStructure processing_ini;
     file.read(processing_ini);
 
 // I: cell types and max fractions and processing modes
+//if (dim == 3) {
 /// Polyhedrons
 //processing_mode
     if (processing_ini.has("polyhedrons")) {
-        auto& collection = processing_ini["polyhedrons"];
-        if (collection.has("pp_mode"))
-        {
+        auto &collection = processing_ini["polyhedrons"];
+        if (collection.has("pp_mode")) {
             ptype_vector.at(3) = processing_ini.get("polyhedrons").get("pp_mode");
-        } }
+        }
+    }
 
     string pseq_source;
     if (processing_ini.has("polyhedrons")) {
-        auto& collection = processing_ini["polyhedrons"];
+        auto &collection = processing_ini["polyhedrons"];
         if (collection.has("source"))
             pseq_source = processing_ini.get("polyhedrons").get("source");
     }
 
     if (processing_ini.has("polyhedrons")) {
-        auto& collection = processing_ini["polyhedrons"];
+        auto &collection = processing_ini["polyhedrons"];
         if (collection.has("pp_index"))
             pindex_vector.at(3) = stod(processing_ini.get("polyhedrons").get("pp_index"));
         // R(0) - R, S(1) - Smax, S(0) - Smin, I(x.x) - index mode
@@ -161,7 +165,7 @@ void config_reader_processing(std::string &source_path, std::vector<string> &seq
 
     string ptypes_number_string;
     if (processing_ini.has("polyhedrons")) {
-        auto& collection = processing_ini["polyhedrons"];
+        auto &collection = processing_ini["polyhedrons"];
         if (collection.has("polyhedron_types_number"))
             ptypes_number_string = processing_ini.get("polyhedrons").get("polyhedron_types_number"); // [2]
     }
@@ -169,26 +173,26 @@ void config_reader_processing(std::string &source_path, std::vector<string> &seq
 // fractions
     string p1_max, p2_max, p3_max;
     if (processing_ini.has("polyhedrons")) {
-        auto& collection = processing_ini["polyhedrons"];
+        auto &collection = processing_ini["polyhedrons"];
         if (collection.has("pmax_fraction1"))
             p1_max = processing_ini.get("polyhedrons").get("pmax_fraction1");
     }
     if (stoi(ptypes_number_string) > 0) max_fractions_vectors.at(3).push_back(stod(p1_max)); // 3 - polyhedra
 
     if (processing_ini.has("polyhedrons")) {
-        auto& collection = processing_ini["polyhedrons"];
+        auto &collection = processing_ini["polyhedrons"];
         if (collection.has("pmax_fraction2"))
             p2_max = processing_ini.get("polyhedrons").get("pmax_fraction2");
     }
     if (stoi(ptypes_number_string) > 0) max_fractions_vectors.at(3).push_back(stod(p2_max)); // 3 - polyhedra
 
     if (processing_ini.has("polyhedrons")) {
-        auto& collection = processing_ini["polyhedrons"];
+        auto &collection = processing_ini["polyhedrons"];
         if (collection.has("pmax_fraction3"))
             p3_max = processing_ini.get("polyhedrons").get("pmax_fraction3");
     }
     if (stoi(ptypes_number_string) > 0) max_fractions_vectors.at(3).push_back(stod(p3_max)); // 3 - polyhedra
-
+// } // end of dim == 3
 /// Faces
 //processing_mode
     if (processing_ini.has("faces")) {

@@ -10,10 +10,12 @@
 /// Attached user-defined C++ libraries:
 // Here a Processing_Functions.h library of C++ functions for advanced random and non-random generations of special chains of PCC elements
 ///-----------------------------------------------------
-#include "../measures.h"
-#include "functions/Processing_Imposed_functions.h"
-#include "functions/Processing_Assignment_functions.h"
-#include "functions/Procesing_Induced_functions.h"
+
+//#include "PCC_Processing.h"
+
+ #include "functions/Processing_Imposed_functions.h"
+ #include "functions/Processing_Assignment_functions.h"
+ #include "functions/Processing_Induced_functions.h"
 ///-----------------------------------------------------
 
 ///* ========================================================= PCC PROCESSING FUNCTION ======================================================= *///
@@ -53,21 +55,22 @@ config_reader_processing(source_path, sequence_source_paths, max_fractions_vecto
 
 /// Cases for Processing types
 // cell type k :: 0 - nodes, 1 - edges, 2 - faces, 3 -polyhedrons - must coincide with the indexing of the CellNumbs.at(cell_type) vector (!)
-for (int cell_type = dim; cell_type >= 0; --cell_type) { /// loop over all types of k-Cells in the complex
+/// here dim !
+for (int cell_type = (3 - (dim - 3)); cell_type >= 0; --cell_type) { /// loop over all types of k-Cells in the complex
 // both for 2D and 3D cases
     special_x_sequence = {0}; special_c_sequence = {0};
 
-    if (ptype_vector.at(cell_type + (dim - 3)) == "R" && max_fractions_vectors.at(cell_type + (dim - 3)).size() > 0) { //  Random generation case
+    if (ptype_vector.at(cell_type + (3 - 3)) == "R" && max_fractions_vectors.at(cell_type + (3 - 3)).size() > 0) { //  Random generation case
         cout << "Random processing in operation: cell_type : "s << cell_type << endl;
-        Out_logfile_stream << "Random processing in operation: cell_type : "s << cell_type  + (dim - 3) << endl;
+        Out_logfile_stream << "Random processing in operation: cell_type : "s << cell_type  + (3 - 3) << endl;
         special_x_sequence = Processing_Random(cell_type, Configuration_State, max_fractions_vectors);
     } // End of 'R' type simulations
 
-    else if (ptype_vector.at(cell_type + (dim - 3)) == "F" && max_fractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
+    else if (ptype_vector.at(cell_type + (3 - 3)) == "F" && max_fractions_vectors[cell_type + (3 - 3)].size() > 0) { // Maximum <functional> production
 //        if (pindex_vector.at(cell_type) == 0) {
 // processing index :: 0 - direct special faces assignment;  1 - crystallographic ; 2 - configurational TJs-based entropy (deviatoric);
             cout << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
-            Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type + (dim - 3) << endl;
+            Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type + (3 - 3) << endl;
             special_x_sequence = Processing_maxFunctional(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
             // cell type = 2 -> faces
 //        } else if (pindex_vector.at(cell_type) == 1) {
@@ -75,74 +78,73 @@ for (int cell_type = dim; cell_type >= 0; --cell_type) { /// loop over all types
 //            special_x_sequence =  Processing_maxFunctional(cell_type, Configuration_State, max_fractions_vectors, pindex_vector.at(cell_type));
 //        }
     } // End of 'F' type simulations (elseif)
-    else if (ptype_vector.at(cell_type + (dim - 3)) == "D" && max_fractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
+    else if (ptype_vector.at(cell_type + (3 - 3)) == "D" && max_fractions_vectors[cell_type + (3 - 3)].size() > 0) { // Maximum <functional> production
         cout << "Min (MAX-deviator) Functional processing in operation: cell_type : "s << cell_type << endl;
-        Out_logfile_stream << "Min (MAX-deviator) Functional processing in operation: cell_type : "s << cell_type + (dim - 3) << endl;
+        Out_logfile_stream << "Min (MAX-deviator) Functional processing in operation: cell_type : "s << cell_type + (3 - 3) << endl;
     if (max_fractions_vectors.at(cell_type).size() > 0)
         special_x_sequence = Processing_minConfEntropy(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
 
     } // End of 'D' [S min] type simulations (elseif)
-    else if (ptype_vector.at(cell_type + (dim - 3)) == "Cm" && max_fractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
+    else if (ptype_vector.at(cell_type + (3 - 3)) == "Cm" && max_fractions_vectors[cell_type + (3 - 3)].size() > 0) { // Maximum <functional> production
         cout << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
-        Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type + (dim - 3) << endl;
+        Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type + (3 - 3) << endl;
         if (max_fractions_vectors.at(cell_type).size() > 0)
             special_x_sequence = Processing_maxF_crystallographic(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
         // cell type = 2 -> faces
     } // End of 'Cm' type simulations (elseif)
 
-    else if (ptype_vector.at(cell_type + (dim - 3)) == "Cr" && max_fractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
+    else if (ptype_vector.at(cell_type + (3 - 3)) == "Cr" && max_fractions_vectors[cell_type + (3 - 3)].size() > 0) { // Maximum <functional> production
         cout << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
-        Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type + (dim - 3) << endl;
+        Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type + (3 - 3) << endl;
         if (max_fractions_vectors.at(cell_type).size() > 0)
             special_x_sequence = Processing_maxP_crystallographic(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
 ///        special_x_sequence = Processing_Random_crystallographic(2, Configuration_State, max_fractions_vectors, pindex_vector.at(2));
     } // End of 'Cr' type simulations (elseif)
 
-    else if (ptype_vector.at(cell_type + (dim - 3)) == "S") {
-        char* kseq_sourcepath = const_cast<char*>(sequence_source_paths.at(cell_type + (dim - 3)).c_str());
+    else if (ptype_vector.at(cell_type + (3 - 3)) == "S") {
+        char* kseq_sourcepath = const_cast<char*>(sequence_source_paths.at(cell_type + (3 - 3)).c_str());
             special_x_sequence = VectorIReader(kseq_sourcepath);
 
         /// (!) Output +1 like in Neper, so he numbers should be modified back as -1
         for (auto it = special_x_sequence.begin(); it != special_x_sequence.end(); ++it)
             special_x_sequence.at(distance(special_x_sequence.begin(), it)) = *it - 1;
-
-        /// Update of the corresponding Configuration State vector
-        Configuration_State[cell_type + (dim - 3)].clear();
-        std::vector<int> State_vector(CellNumbs.at(cell_type + (dim - 3)), 0);
+/// Update of the corresponding Configuration State vector
+        Configuration_State[cell_type + (3 - 3)].clear();
+        std::vector<int> State_vector(CellNumbs.at(cell_type + (3 - 3)), 0);
         for (unsigned int k_cell : special_x_sequence) // fill state vector from cells_sequence
             State_vector.at(k_cell) = 1;
 
         for (int var : State_vector)
-         Configuration_State[cell_type + (dim - 3)].push_back(var);
+         Configuration_State[cell_type + (3 - 3)].push_back(var);
     } // End of 'S' [reading from file] type simulations (elseif)
-//    else if (ctype_vector.at(cell_type + (dim - 3)) == "Km" && max_cfractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
+//    else if (ctype_vector.at(cell_type + (3 - 3)) == "Km" && max_cfractions_vectors[cell_type + (3 - 3)].size() > 0) { // Maximum <functional> production
     else cout << "ERROR [HAGBsProbability3D] : unknown simulation type - please replace with 'R', 'F' or 'I'..!" << endl;
 
-    if (ctype_vector.at(cell_type + (dim - 3)) == "Km" && max_cfractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
+    if (ctype_vector.at(cell_type + (3 - 3)) == "Km" && max_cfractions_vectors[cell_type + (3 - 3)].size() > 0) { // Maximum <functional> production
         cout << "Induced processing in operation: cell_type : "s << cell_type << endl;
-        Out_logfile_stream << "Induced processing in operation: cell_type : "s << cell_type + (dim - 3) << endl;
+        Out_logfile_stream << "Induced processing in operation: cell_type : "s << cell_type + (3 - 3) << endl;
         if (max_cfractions_vectors.at(cell_type).size() > 0)
             special_c_sequence = PCC_Kinematic_cracking(cell_type, special_x_sequence, Configuration_cState, max_cfractions_vectors);
         // cell type = 2 -> faces
     } // End of 'Km' type simulations (elseif)
 
-    else if (ptype_vector.at(cell_type + (dim - 3)) == "Kn" && max_cfractions_vectors[cell_type + (dim - 3)].size() > 0) { // Maximum <functional> production
+    else if (ptype_vector.at(cell_type + (3 - 3)) == "Kn" && max_cfractions_vectors[cell_type + (3 - 3)].size() > 0) { // Maximum <functional> production
         cout << "Induced processing in operation: cell_type : "s << cell_type << endl;
-        Out_logfile_stream << "Induced processing in operation: cell_type : "s << cell_type + (dim - 3) << endl;
+        Out_logfile_stream << "Induced processing in operation: cell_type : "s << cell_type + (3 - 3) << endl;
 //        if (max_cfractions_vectors.at(cell_type).size() > 0)
         //        special_c_sequence = PCC_Kinetic_cracking(Configuration_State, face_elastic_energies, large_crack);
     } // End of 'Km' type simulations (elseif)
     else cout << "ERROR [HAGBsProbability3D] : unknown induced simulation type - please replace with 'Km' or 'Kn'..!" << endl;
 
-//REPAIR    cout << "ctype_vector " << ctype_vector.at(cell_type + (dim - 3)) << "  " << max_cfractions_vectors[cell_type + (dim - 3)].size() << endl;
+//REPAIR    cout << "ctype_vector " << ctype_vector.at(cell_type + (3 - 3)) << "  " << max_cfractions_vectors[cell_type + (3 - 3)].size() << endl;
 
 /// Assigned sequences:
-    CD.Set_sequence(special_x_sequence, cell_type + (dim - 3)); // (sequence, id)
-    CD.Set_design(Configuration_State.at(cell_type + (dim - 3)), cell_type + (dim - 3)); // (design, id) - design vector with types
+    CD.Set_sequence(special_x_sequence, cell_type + (3 - 3)); // (sequence, id)
+    CD.Set_design(Configuration_State.at(cell_type + (3 - 3)), cell_type + (3 - 3)); // (design, id) - design vector with types
 /// Induced sequences:
-    CD.Set_induced_sequence(special_c_sequence, cell_type + (dim - 3)); // (sequence, ctype)
+    CD.Set_induced_sequence(special_c_sequence, cell_type + (3 - 3)); // (sequence, ctype)
 
-    } // for (int cell_type = dim; cell_type >= 0; --cell_type)
+    } // for (int cell_type = 3; cell_type >= 0; --cell_type)
 
     cout << endl; Out_logfile_stream << endl;
     cout << "p-sequence size: " << CD.Get_p_sequence().size() << endl; Out_logfile_stream << "p-sequence size: " << CD.Get_p_sequence().size() << endl;

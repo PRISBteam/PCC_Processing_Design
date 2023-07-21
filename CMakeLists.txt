@@ -33,12 +33,16 @@ add_executable( PCC_Processing_Design
         # 1 Simulation environment and management module
         src/main.cpp
         # 2 Various support functions
-#        src/lib/PCC_SupportFunctions.h
+        #        src/lib/PCC_SupportFunctions.cpp
+        #        src/lib/measures.cpp
         # 3 C++  class for PCC and related sets of special elements
-#        src/lib/PCC_Objects.h
+        #               src/lib/PCC_Objects.h
         # 4 Processing module
-#        src/PCC_Processing/PCC_Processing.h
-#        src/PCC_Processing/Processing_Functions.h
+        #          src/lib/PCC_Processing/PCC_Processing.cpp
+        #                src/lib/PCC_Processing/functions/Processing_Induced_functions.cpp
+        #                src/lib/PCC_Processing/functions/Processing_Assignment_functions.cpp
+        #                src/lib/PCC_Processing/functions/Processing_Imposed_functions.cpp
+
         # 5 Kinetic module
 #        src/PCC_Kinetic/PCC_Kinetic.h
 #        src/PCC_Kinetic/Kinetic_Functions.h

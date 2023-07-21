@@ -1,3 +1,6 @@
+///
+//#include "measures.h"
+
 /// * Function calculates the vector<int> "EdgeTypes" of types Edges in the PCC using its FES incidence matrix and special faces sequence (special_faces_sequence) * ///
 /// *                                                                                                                                                    * ///
 
@@ -11,8 +14,8 @@ double j0 = 0, j1 = 0, j2 = 0, j3 = 0, Jall = 0;
     J1 = std::count(TJsTypes.begin(), TJsTypes.end(), 1); // containing 1 incident special face
     J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2); // containing 2 incident special face
     J3 = std::count(TJsTypes.begin(), TJsTypes.end(), 3); // containing 3 incident special face
-    J0 = CellNumbs.at(1 + (dim - 3)) - J1 - J2 - J3; // containing no incident special face (the total amount of TJs = total amount of Edges in DCC = CellNumbs.at(1))
-    Jall = (double) CellNumbs.at(1 + (dim - 3)); // amount of Edges in DCC
+    J0 = CellNumbs.at(1 + (dim0 - 3)) - J1 - J2 - J3; // containing no incident special face (the total amount of TJs = total amount of Edges in DCC = CellNumbs.at(1))
+    Jall = (double) CellNumbs.at(1 + (dim0 - 3)); // amount of Edges in DCC
 
 // Conversion from numbers to fractions
     j_fractions_vector.at(0) = (double) J0 / Jall;
@@ -48,7 +51,7 @@ double Configuration_Entropy(vector<int> const &TJsTypes){ // based on Edges vec
     J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2); // containing 2 incident special face
     J3 = std::count(TJsTypes.begin(), TJsTypes.end(), 3); // containing 3 incident special face
     J0 = CellNumbs.at(1) - J1 - J2 - J3; // containing no incident special face (the total amount of TJs = total amount of Edges in DCC = CellNumbs.at(1))
-    Jall = (double) CellNumbs.at(1 + (dim - 3)); // amount of Edges in DCC
+    Jall = (double) CellNumbs.at(1 + (dim0 - 3)); // amount of Edges in DCC
 
 // Conversion from numbers to fractions
     double l2j0 = 0.0, l2j1 = 0.0, l2j2 = 0.0, l2j3 = 0.0;
@@ -134,7 +137,7 @@ double Configuration_Entropy_change(vector<int> const &TJsTypes, vector<int> con
     J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2); // containing 2 incident special face
     J3 = std::count(TJsTypes.begin(), TJsTypes.end(), 3); // containing 3 incident special face
     J0 = CellNumbs.at(1) - J1 - J2 - J3; // containing no incident special face (the total amount of TJs = total amount of Edges in DCC = CellNumbs.at(1))
-    double Jall = (double) CellNumbs.at(1 + (dim -3)); // amount of Edges in DCC
+    double Jall = (double) CellNumbs.at(1 + (dim0 - 3)); // amount of Edges in DCC
 
 // Conversion from numbers to fractions
     double l2j0 = 0.0, l2j1 = 0.0, l2j2 = 0.0, l2j3 = 0.0;
@@ -205,7 +208,7 @@ double j0n = 0, j1n = 0, j2n = 0, j3n = 0;
 
 // Conversion from numbers to fractions
     double l2j0n = 0.0, l2j1n = 0.0, l2j2n = 0.0, l2j3n = 0.0;
-    double Jall = (double) CellNumbs.at(1 + (dim - 3)); // amount of Edges in DCC
+    double Jall = (double) CellNumbs.at(1 + (dim0 - 3)); // amount of Edges in DCC
 
     // (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
     j0n = (double) J0n / Jall;
@@ -262,7 +265,7 @@ double Configuration_DevEntropy_change(std::vector<double> const &j_fractions, v
 
 // Conversion from numbers to fractions
     double l2j0n = 0.0, l2j1n = 0.0, l2j2n = 0.0, l2j3n = 0.0;
-    double Jall = (double) CellNumbs.at(1 + (dim - 3)); // amount of Edges in DCC
+    double Jall = (double) CellNumbs.at(1 + (dim0 - 3)); // amount of Edges in DCC
 
     // (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
     j0n = (double) J0n / Jall;

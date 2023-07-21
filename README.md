@@ -23,7 +23,7 @@ The last component of the proposed approach is a function or <i>map</i> relating
 Such a framework allows to describe and analyse space ordering inside a real materials by the well-developed tools of topology, statistics and graph theory.   </p>
 
 <p> This is a C++ based software project consisting of several modules working with pre-created Polyhedral Cell Complex (PCC) as the set of its incidence and adjacency matrices represented in a sparse matrix form. The code contains 4 main modules (Processing, Characterisation and Writer), the library of Simulation tasks and the Main module merging everything together, reading configurations and data files,  and launching all the other modules.
-The code works both with 3-complexes (3D) and 2-complexes (2D) BUT - to make results consistent with 2D/3D EBSD scans - it assumes that the grains are 3-cells in the 3D, 2-cells in the 2D case, and so on for grain boundaries and other element types. So it actually replaces definitions of k-cells with ( k + (dim - 3) )-cells, where dim = {2, 3} is the dimension of the problem. In such a way 2-cells are ALWAYS associated with grain boundaries on EBSD maps and are edges for 2D case! </p>
+The code works both with 3-complexes (3D) and 2-complexes (2D) BUT - to make results consistent with 2D/3D EBSD scans - it assumes that the grains are 3-cells in the 3D, 2-cells in the 2D case, and so on for grain boundaries and other element types. So it actually replaces definitions of k-cells with ( k + (dim0 - 3) )-cells, where dim0 = {2, 3} is the dimension of the problem. In such a way 2-cells are ALWAYS associated with grain boundaries on EBSD maps and are edges for 2D case! </p>
   
 <h2>General specifications</h2>
   

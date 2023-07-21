@@ -1,3 +1,6 @@
+///
+//#include "PCC_SupportFunctions.h"
+
 /// Creation Eigen::Sparse_Matrix from file
 Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsigned int Cols) {
     /// function output
@@ -246,12 +249,12 @@ std::vector<vector<int>> Get_cases_list(std::vector<int> const &S_Vector, std::v
 
     if (p_index == 0) { // cases: direct assigment of special faces one by one
         unsigned int iter = 0;
-        for (unsigned int f = 0; f < CellNumbs.at(2 + (dim - 3)); ++f) { // loop over all Faces in PCC
+        for (unsigned int f = 0; f < CellNumbs.at(2 + (dim0 - 3)); ++f) { // loop over all Faces in PCC
             NewEdgeTypes = EdgeTypes; // on each step it is equal to the initial Edge state defined by S_Vector
 
            /// only ORDINARY f will be taken in the "cases list" (!) as if they change their type to special
             if (S_Vector.at(f) == 0) { // Loop over each still ORDINARY cell neighbours
-                    for(unsigned int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
+                    for(unsigned int e = 0; e < CellNumbs.at(1 + (dim0 - 3)); ++e) // loop over all Edges
                         if (FES.coeff(e, f) != 0) NewEdgeTypes.at(e)++;
 //                cout << " J1: " << std::count(NewEdgeTypes.begin(), NewEdgeTypes.end(), 1)<< " J2: " << std::count(NewEdgeTypes.begin(), NewEdgeTypes.end(), 2) << " J3: " << std::count(NewEdgeTypes.begin(), NewEdgeTypes.end(), 3) << endl; // containing 1 incident special face
 
@@ -617,7 +620,7 @@ if (gb_special_set_1.size() != 0 || gb_special_set_2.size() != 0 || gb_special_s
     NewEdgeTypes = EdgeTypes;
     for (unsigned int gb: gb_special_set_1) // loop over all Edges
         if (S_Vector.at(gb) == 0) { // ORDINARY faces only
-            for (unsigned int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
+            for (unsigned int e = 0; e < CellNumbs.at(1 + (dim0 - 3)); ++e) // loop over all Edges
                 if (FES.coeff(e, gb) != 0) NewEdgeTypes.at(e)++;
         } // end of if (S_Vector.at(gb) == 0)
 
@@ -627,7 +630,7 @@ if (gb_special_set_1.size() != 0 || gb_special_set_2.size() != 0 || gb_special_s
     NewEdgeTypes = EdgeTypes;
     for (unsigned int gb: gb_special_set_2) // loop over all Edges
         if (S_Vector.at(gb) == 0) { // ORDINARY faces only
-            for (unsigned int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
+            for (unsigned int e = 0; e < CellNumbs.at(1 + (dim0 - 3)); ++e) // loop over all Edges
                 if (FES.coeff(e, gb) != 0) NewEdgeTypes.at(e)++;
         } // end of if (S_Vector.at(gb) == 0)
 
@@ -637,7 +640,7 @@ if (gb_special_set_1.size() != 0 || gb_special_set_2.size() != 0 || gb_special_s
     NewEdgeTypes = EdgeTypes;
     for (unsigned int gb: gb_special_set_3) // loop over all Edges
         if (S_Vector.at(gb) == 0) { // ORDINARY faces only
-            for (unsigned int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
+            for (unsigned int e = 0; e < CellNumbs.at(1 + (dim0 - 3)); ++e) // loop over all Edges
                 if (FES.coeff(e, gb) != 0) NewEdgeTypes.at(e)++;
         } // end of if (S_Vector.at(gb) == 0)
 
@@ -647,7 +650,7 @@ if (gb_special_set_1.size() != 0 || gb_special_set_2.size() != 0 || gb_special_s
     NewEdgeTypes = EdgeTypes;
     for (unsigned int gb: gb_special_set_4) // loop over all Edges
         if (S_Vector.at(gb) == 0) { // ORDINARY faces only
-            for (unsigned int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
+            for (unsigned int e = 0; e < CellNumbs.at(1 + (dim0 - 3)); ++e) // loop over all Edges
                 if (FES.coeff(e, gb) != 0) NewEdgeTypes.at(e)++;
         } // end of if (S_Vector.at(gb) == 0)
 
@@ -913,7 +916,7 @@ double TJsEntropy = 0.0;
     vector<double> TJsTypes;
 
     SpMat FES(CellNumbs.at(1), CellNumbs.at(2));
-    FES = SMatrixReader(paths.at(5 + (dim - 3)), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
+    FES = SMatrixReader(paths.at(5 + (dim0 - 3)), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
 
     TJsTypes = EdgesTypesCalc(CellNumbs, special_faces_seq, FES);
 
@@ -938,7 +941,7 @@ return TJsEntropy;
 };
 
 std::vector<int> state_vector_by_sequence(std::vector<unsigned int> const &cell_sequence, int cell_type) { // cell_type: 0 -nodes, 1 - edges, 2 - faces, 3 - polyhedrons
-    std::vector<int> state_vector(CellNumbs.at(cell_type + (dim - 3)), 0); // including 2D case
+    std::vector<int> state_vector(CellNumbs.at(cell_type + (dim0 - 3)), 0); // including 2D case
 
     for(auto cs : cell_sequence)
         state_vector.at(cs) = 1;

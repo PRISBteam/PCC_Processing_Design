@@ -107,7 +107,7 @@ void PCC_Entropic_Writer(ProcessedComplex &pcc_processed, int &output_counter) {
     if (Out_entropies_file) {
         // special cell sequences
             for (unsigned int i = 0; i < pcc_processed.e_entropy_full_vector.size(); ++i)
-                Out_entropies_file << pcc_processed.face_process_seq.at(i).size()/ (double) CellNumbs.at(2 + (dim -3)) << " " << pcc_processed.e_entropy_full_vector.at(i) << " " << pcc_processed.e_entropy_mean_vector.at(i) << " " << pcc_processed.e_entropy_skrew_vector.at(i) << endl;
+                Out_entropies_file << pcc_processed.face_process_seq.at(i).size()/ (double) CellNumbs.at(2 + (dim0 - 3)) << " " << pcc_processed.e_entropy_full_vector.at(i) << " " << pcc_processed.e_entropy_mean_vector.at(i) << " " << pcc_processed.e_entropy_skrew_vector.at(i) << endl;
         cout << "(" << output_counter++ << ")  " << "Configuration edge entropies has been successfully written in " << entropies_odir << endl;
         Out_logfile_stream << "(" << output_counter << ")  " << "Configuration edge entropies has been successfully written in " << entropies_odir << endl;
         Out_entropies_file.close();
@@ -119,7 +119,7 @@ void PCC_Entropic_Writer(ProcessedComplex &pcc_processed, int &output_counter) {
     if (Out_jf_file) {
         // special cell sequences
             for (unsigned int i = 0; i < pcc_processed.je_fractions_vector.size(); ++i)
-                Out_jf_file << pcc_processed.face_process_seq.at(i).size()/ (double) CellNumbs.at(2 + (dim -3)) << " " << pcc_processed.je_fractions_vector[i][0] << " " << pcc_processed.je_fractions_vector[i][1] << " " << pcc_processed.je_fractions_vector[i][2] << " " << pcc_processed.je_fractions_vector[i][3] << endl;
+                Out_jf_file << pcc_processed.face_process_seq.at(i).size()/ (double) CellNumbs.at(2 + (dim0 - 3)) << " " << pcc_processed.je_fractions_vector[i][0] << " " << pcc_processed.je_fractions_vector[i][1] << " " << pcc_processed.je_fractions_vector[i][2] << " " << pcc_processed.je_fractions_vector[i][3] << endl;
         cout << "(" << output_counter++ << ")  " << "Special edge fractions has been successfully written in    " << ffrac_odir << endl;
         Out_logfile_stream << "(" << output_counter << ")  " << "Special edge fractions has been successfully written in   " << ffrac_odir << endl;
         Out_jf_file.close();
@@ -131,7 +131,7 @@ void PCC_Entropic_Writer(ProcessedComplex &pcc_processed, int &output_counter) {
     if (Out_df_file) {
         // special cell sequences
             for (unsigned int i = 0; i < pcc_processed.de_fractions_vector.size(); ++i)
-                Out_df_file << pcc_processed.face_process_seq.at(i).size()/ (double) CellNumbs.at(2 + (dim -3)) << " " << pcc_processed.de_fractions_vector[i][0] << " " << pcc_processed.de_fractions_vector[i][1] << " " << pcc_processed.de_fractions_vector[i][2] << endl;
+                Out_df_file << pcc_processed.face_process_seq.at(i).size()/ (double) CellNumbs.at(2 + (dim0 - 3)) << " " << pcc_processed.de_fractions_vector[i][0] << " " << pcc_processed.de_fractions_vector[i][1] << " " << pcc_processed.de_fractions_vector[i][2] << endl;
         cout << "(" << output_counter++ << ")  " << "Special edge degree fractions has been successfully written in    " << dfrac_odir << endl;
         Out_logfile_stream << "(" << output_counter << ")  " << "Special edge degree fractions has been successfully written in   " << dfrac_odir << endl;
         Out_df_file.close();
@@ -181,12 +181,12 @@ void PCC_AnalyticalFractions_Writer(ProcessedComplex &pcc_processed, int &output
 // configuration edge entropies vectors
     OutCERFile.open(anentropiesrand_odir, ios::trunc);
     for (unsigned int i = 0; i < pcc_processed.AnRandEntropies_vector.size(); ++i)
-        OutCERFile << i/ (double) CellNumbs.at(2 + (dim - 3)) << " " << get<0>(pcc_processed.AnRandEntropies_vector[i]) + get<1>(pcc_processed.AnRandEntropies_vector[i])  << " " << get<0>(pcc_processed.AnRandEntropies_vector[i]) << " " << get<1>(pcc_processed.AnRandEntropies_vector[i]) << endl;
+        OutCERFile << i/ (double) CellNumbs.at(2 + (dim0 - 3)) << " " << get<0>(pcc_processed.AnRandEntropies_vector[i]) + get<1>(pcc_processed.AnRandEntropies_vector[i]) << " " << get<0>(pcc_processed.AnRandEntropies_vector[i]) << " " << get<1>(pcc_processed.AnRandEntropies_vector[i]) << endl;
     OutCERFile.close();
 
     OutCECFile.open(anentropiescryst_odir, ios::trunc);
     for (unsigned int i = 0; i < pcc_processed.AnCrystEntropies_vector.size(); ++i)
-        OutCECFile << i/ (double) CellNumbs.at(2 + (dim - 3))<< " " << get<0>(pcc_processed.AnCrystEntropies_vector[i]) + get<1>(pcc_processed.AnCrystEntropies_vector[i])  << " " << get<0>(pcc_processed.AnCrystEntropies_vector[i]) << " " << get<1>(pcc_processed.AnCrystEntropies_vector[i]) << endl;
+        OutCECFile << i/ (double) CellNumbs.at(2 + (dim0 - 3)) << " " << get<0>(pcc_processed.AnCrystEntropies_vector[i]) + get<1>(pcc_processed.AnCrystEntropies_vector[i]) << " " << get<0>(pcc_processed.AnCrystEntropies_vector[i]) << " " << get<1>(pcc_processed.AnCrystEntropies_vector[i]) << endl;
     OutCECFile.close();
 
     cout << "(" << output_counter++ << ")  " << "Analytical Configuration Edge Entropies (random and crystallographic)) has been successfully written in " << anentropiesrand_odir << endl << anentropiescryst_odir << endl;
@@ -462,7 +462,7 @@ void Agglomerations_Writer(int &output_counter, vector<vector<int>> const &RW_se
 //void OfStreams_trancator() {return;}
 
 //EntIndices(sfaces_sequence, CellNumbs, FES, Face_Entropy_Median, Face_Entropy_Skrew)
-/*vector<int> EntIndices( std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> const& CellNumbs, Eigen::SparseMatrix<double> const& FES, double &Face_Entropy_Median, double &Face_Entropy_Skrew)
+/* vector<int> EntIndices( std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> const& CellNumbs, Eigen::SparseMatrix<double> const& FES, double &Face_Entropy_Median, double &Face_Entropy_Skrew)
 {
     vector<int> TJsTypes(CellNumbs.at(1),0);
     map<unsigned int, unsigned int> res; // Here 100 is an arbitrary number of Edge types

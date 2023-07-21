@@ -76,7 +76,7 @@ ofstream Out_logfile_stream; //log.txt file output for the whole computation pro
 
 /// PCC related variables
 // General
-int dim; // problem dimension (2D or 3D)
+int dim0, dim; // problem dimension (2D or 3D)
 std::vector<unsigned int> CellNumbs; // the vector named CellNumbs with the number of k-cells of different types; will be read from file
 
 // PCC Complex Geometry
@@ -110,6 +110,9 @@ std::vector<vector<int>> Configuration_State, Configuration_cState; //  is the l
 /* Various useful functions (it must be here - first in this list! ) */
 #include "lib/PCC_SupportFunctions.h"
 
+/* Various set measures */
+#include "lib/measures.h"
+
 /* Objects library contains classes of various objects related to PCC substructures and elements (it must be here - second in this list! ) */
 #include "lib/PCC_Objects.h"
 
@@ -124,7 +127,7 @@ std::vector<vector<int>> Configuration_State, Configuration_cState; //  is the l
 #include "lib/PCC_Processing/PCC_Processing.h"
 
 /* Characterisation module calculates various structural characteristics of special substructures defined on the PCC elements */
-#include "lib/PCC_Characterisation/PCC_StructureCharacterisation.h"
+#include "lib/PCC_Characterisation_/PCC_StructureCharacterisation.h"
 
 /* Multiphysics module assign various physical quantities (energies, temperature, electrical conductivity) to the k-Cells of the PCC's subcomplexes */
 //#include "lib/PCC_Multiphysics/PCC_Multiphysics.h"
@@ -156,8 +159,8 @@ int main() {
     string main_type; /// SIMULATION MODE(LIST) or 'SIMULATION MODE(TASK) :: This define the global simulation mode: "LIST" for the "list" of modules implementing one by one (if ON) and "TASK" for the user-defined task scripts with modules and functions from the project's libraries
 // ConfigVector (../config/main.ini) contains all the control variables needed for the program
     vector<int> ConfigVector = config_reader_main(source_path, source_dir, output_dir, main_type, Out_logfile_stream);
-
-        dim = ConfigVector.at(0); // space dimension of the problem (dim = 2 or 3);
+    dim0 = 3; //kind of a "standard" value
+    dim = ConfigVector.at(0); // space dimension of the problem (dim = 2 or 3);
 
 /// Below the file names with the sparse PCC matrices which must already exit in the input_dir and have the same names (!)
 // They can be obtained by the PCC Generator tool (https://github.com/PRISBteam/Voronoi_PCC_Analyser) based on the Neper output (*.tess file) (https://neper.info/) or PCC Structure Generator tool (https://github.com/PRISBteam/PCC_Structure_Generator) for plasticity problems
@@ -192,9 +195,9 @@ int main() {
 
 // Special feature for the 2D case ("grains" -> 2-cells; "faces" -> 1-cells; "triple junctions (lines) -> 0-cells" in 2D):
 /// WARNING: (Very important!) // It needs to make everything similar in the code for 2D and 3D cases with the same output of the PCC Generator tool (https://github.com/PRISBteam/Voronoi_PCC_Analyser) software (the same set of A0, A1..., B2 matrices)
-        if (dim == 2) {
-            CellNumbs.push_back(CellNumbs.at(2)); CellNumbs.at(2) = CellNumbs.at(1); CellNumbs.at(1) = CellNumbs.at(0); CellNumbs.at(0) = NULL;
-        }
+ //       if (dim == 2) {
+ /// it has been changed!           CellNumbs.push_back(CellNumbs.at(2)); CellNumbs.at(2) = CellNumbs.at(1); CellNumbs.at(1) = CellNumbs.at(0); CellNumbs.at(0) = NULL;
+ //       }
 
 /// CellNumbs output
 cout << "=====================================================================================" << endl;  Out_logfile_stream << "==========================================================================================================================================================================" << endl;
@@ -206,8 +209,8 @@ cout << "=======================================================================
     else cout << "ERROR: The file " << source_dir + "voro_Ncells.txt"s << " does not exists (!)" << endl;
 
 /// Initial state::
-State_p_vector.resize(CellNumbs.at(3 + (dim-3)),0); State_f_vector.resize(CellNumbs.at(2 + (dim-3)),0); State_e_vector.resize(CellNumbs.at(1 + (dim-3)),0); State_n_vector.resize(CellNumbs.at(0),0);
-State_pfracture_vector.resize(CellNumbs.at(3 + (dim-3)),0); State_ffracture_vector.resize(CellNumbs.at(2 + (dim-3)),0); State_efracture_vector.resize(CellNumbs.at(1 + (dim-3)),0); State_nfracture_vector.resize(CellNumbs.at(0),0);
+State_p_vector.resize(CellNumbs.at(3 + (dim0 - 3)), 0); State_f_vector.resize(CellNumbs.at(2 + (dim0 - 3)), 0); State_e_vector.resize(CellNumbs.at(1 + (dim0 - 3)), 0); State_n_vector.resize(CellNumbs.at(0), 0);
+State_pfracture_vector.resize(CellNumbs.at(3 + (dim0 - 3)), 0); State_ffracture_vector.resize(CellNumbs.at(2 + (dim0 - 3)), 0); State_efracture_vector.resize(CellNumbs.at(1 + (dim0 - 3)), 0); State_nfracture_vector.resize(CellNumbs.at(0), 0);
 
 Configuration_State.push_back(State_n_vector); Configuration_State.push_back(State_e_vector); Configuration_State.push_back(State_f_vector); Configuration_State.push_back(State_p_vector); // the order here matters!
 Configuration_cState.push_back(State_nfracture_vector); Configuration_cState.push_back(State_efracture_vector); Configuration_cState.push_back(State_ffracture_vector); Configuration_cState.push_back(State_pfracture_vector); // the order here matters!
@@ -280,7 +283,7 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
             cout << "START of the PCC Structure Characterisation module" << endl;
             Out_logfile_stream << "START of the PCC Structure Characterisation module" << endl;
 
-            pcc_processed = PCC_StructureCharacterisation(new_cells_design);
+///////////               pcc_processed = PCC_StructureCharacterisation(new_cells_design);
 
 // ===== Elapsing time DCC_Characterisation ================
             unsigned int Characterisation_time = clock();
@@ -351,8 +354,8 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
     double fulltime = (double) end_time;
     cout << "-------------------------------------------------------------------------" << endl;
     Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
-    cout << dim << "D " << "runtime is equal to  " << fulltime/pow(10.0,6.0) <<  "  seconds" << endl;
-    Out_logfile_stream << dim << "D " << "runtime is equal to  " << fulltime/pow(10.0,6.0) <<  "  seconds" << endl;
+    cout << dim << "D " << "runtime is equal to  " << fulltime / pow(10.0, 6.0) << "  seconds" << endl;
+    Out_logfile_stream << dim << "D " << "runtime is equal to  " << fulltime / pow(10.0, 6.0) << "  seconds" << endl;
     cout << "-------------------------------------------------------------------------" << endl << "\t\t\t\t\t[\tThe end of the PCC Processing\t]\t\t\t\t\t" << endl << "=========================================================================" << endl;
     Out_logfile_stream << "-------------------------------------------------------------------------" << endl << "\t\t\t\t\t[\tThe end of the PCC Processing\t]\t\t\t\t\t" << endl << "=========================================================================" << endl;
 

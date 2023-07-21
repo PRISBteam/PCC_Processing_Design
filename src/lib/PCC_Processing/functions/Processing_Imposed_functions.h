@@ -4,16 +4,18 @@
 /**  of the k-Cells with k > m, in the PCC Processing module. It created an "imposed" structure of m-Cells in a PCC.              **/
 ///==============================================================================================================================///
 
+//#include "Processing_Imposed_functions.h"
+
 vector<int> Edge_types_byFaces(std::vector<unsigned int> const &CellNumbs, std::vector<unsigned int> &special_face_sequence, std::vector<double> &j_fractions, std::vector<double> &d_fractions)
 {
 // Output of the model
-    vector<int> TJsTypes(CellNumbs.at(1 + (dim - 3)),0); // CellNumbs.at(1) is the number of Edges
+    vector<int> TJsTypes(CellNumbs.at(1 + (dim0 - 3)), 0); // CellNumbs.at(1) is the number of Edges
 
 // Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file paths.at(5 + (dim - 3))
-    SpMat FES = SMatrixReader(paths.at(5 + (dim - 3)), CellNumbs.at(1 + (dim - 3)), CellNumbs.at(2 + (dim - 3))); // Edges-Faces sparse incidence matrix
+    SpMat FES = SMatrixReader(paths.at(5 + (dim0 - 3)), CellNumbs.at(1 + (dim0 - 3)), CellNumbs.at(2 + (dim0 - 3))); // Edges-Faces sparse incidence matrix
 
     for (auto f: special_face_sequence) // loop over all Special Faces
-        for(int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
+        for(int e = 0; e < CellNumbs.at(1 + (dim0 - 3)); ++e) // loop over all Edges
             if (FES.coeff(e, f) != 0) TJsTypes.at(e)++;
 
     unsigned int J0 = 0, J1 = 0, J2 = 0, J3 = 0;
@@ -22,7 +24,7 @@ vector<int> Edge_types_byFaces(std::vector<unsigned int> const &CellNumbs, std::
     J1 = std::count(TJsTypes.begin(), TJsTypes.end(), 1); // containing 1 incident special face
     J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2); // containing 2 incident special face
     J3 = std::count(TJsTypes.begin(), TJsTypes.end(), 3); // containing 3 incident special face
-    J0 = CellNumbs.at(1 + (dim - 3)) - J1 - J2 - J3; // containing no incident special face (the total amount of TJs = total amount of Edges in DCC = CellNumbs.at(1))
+    J0 = CellNumbs.at(1 + (dim0 - 3)) - J1 - J2 - J3; // containing no incident special face (the total amount of TJs = total amount of Edges in DCC = CellNumbs.at(1))
 //    Jall = (double) CellNumbs.at(1 + (dim - 3)); // amount of Edges in DCC
     Jall = (double) TJsTypes.size();
 
