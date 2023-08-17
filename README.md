@@ -3,25 +3,25 @@
 Manual version: 0.3.0 <br>
 Current manual release date: 17 August 2023 <br>
 
-<p>  <i> PCC Processing Design </i>  or   <i> Discrete Processing Design  (DPD code)</i> is a software aimed to provide a wholly discrete representation of defect microstructure evolution during the materials processing. The code is an effective tool both for studies microstructure network evolution during the materials processing and for design of advanced microstructures in composite polycrystalline materials. Its key feature is the usage of polyhedral cell complexes (PCCs) as objects of algebraic topology [1], which provide a convenient discrete space for large-scale design of realistic material defect structures of different dimensions (line defects, surface defects, different volumetric phases). Such PCCs can be constructed based on the 2D/3D space tessellation with the convex polyhedron’s such as the Voronoi tessellation of space realistically imitating a polycrystalline material.
+<p>  <i> PCC Processing Design </i>  or   <i> Discrete Processing Design  (DPD code)</i> is a software aimed to provide a wholly discrete representation of defect microstructure evolution during the materials processing. The code is an effective tool both for studies microstructure network evolution during the materials processing and for design of advanced microstructures in composite polycrystalline materials. Its key feature is the usage of polyhedral cell complexes (PCCs) as objects of algebraic topology, which provide a convenient discrete space for large-scale design of realistic material defect microstructures of different dimensions (line defects, surface defects, different volumetric phases). Such PCCs can be created based on the 2D/3D space tessellation with the convex polyhedron’s such as the Voronoi tessellation of space realistically imitating a polycrystalline material.
 
-An excellent simple introduction to the cell complexes with their various applications is given in the <a href="https://link.springer.com/book/10.1007/978-1-84996-290-2" target="_blank"> book </a> of Leo Grady and Jonathan Polimeni <i>Discrete Calculus. Applied Analysis on Graphs for Computational Science. (2010)</i> 
-More mathematically rigorous introduction of the main concepts and methods of combinatorial algebraic topology is given in the <a href="https://doi.org/10.1007/978-3-540-71962-5"> book </a> of Dmitry Kozlov <i> "Combinatorial Algebraic Topology" (2008) </i>. An excellent classical introduction in the graph theory is provided in the classical <a href="https://doi.org/10.1007/978-1-4612-0619-4> book </a> of Béla Bollobás <i> Modern Graph Theory (1998)</i>.
+An excellent simple introduction to the cell complexes with their various applications is given in the <a href="https://link.springer.com/book/10.1007/978-1-84996-290-2" target="_blank"> book </a> of Leo Grady and Jonathan Polimeni <i>"Discrete Calculus. Applied Analysis on Graphs for Computational Science" (2010).</i> 
+More rigorous mathematically introduction of the main concepts and methods of combinatorial algebraic topology is given in the <a href="https://doi.org/10.1007/978-3-540-71962-5"> book </a> of Dmitry Kozlov <i> "Combinatorial Algebraic Topology" (2008) </i>. An excellent classical introduction to the graph theory is provided in the classical <a href="https://doi.org/10.1007/978-1-4612-0619-4> book </a> of Béla Bollobás <i> "Modern Graph Theory" (1998)</i>.
 
-For its effective use, a clear understanding of the basic concepts, such as Polyhedral Cell Complex (PCC), state vectors and special sequences of cells is needed. All these concepts (and much more) are described in the Theoretical Manual. Even more comprehensive discussions with examples can be found in the following publications:
+For effective use of the DPD code, a clear understanding of several basic concepts, such as Polyhedral Cell Complex, state vectors and special sequences of cells is necessary. All these concepts (and much more) are described in the Theoretical Manual. Even more comprehensive discussions of some particular topics with examples can be found in the following publications:
 <ol>
+<br>
 Faces and Edges types and configuration entropy:
 <li> S. Zhu, E.N. Borodin, A.P. Jivkov, 2021. Triple junctions network as the key structure for characterisation of SPD processed copper alloys. Materials & Design 198(24), 109352. doi: 10.1016/j.matdes.2020.109352. </li>
 <li> E. N. Borodin, A. P. Jivkov, 2019. Evolution of triple junctions’ network during severe plastic deformation of copper alloys – a discrete stochastic modelling. Philosophical Magazine 100(4), 467-485. doi: 10.1080/14786435.2019.1695071. </li>
-
+<br>
 Face indices:
 <li> E.N. Borodin, A.P. Jivkov, A.G. Sheinerman, M.Yu. Gutkin, 2021. Optimisation of rGO-enriched nanoceramics by combinatorial analysis. Materials & Design 212, 110191. doi: 10.1016/j.matdes.2021.110191. </li>
 </ol>
 In this Technical Guidance, only the architecture of the code and practical guidance for its effective use with examples are provided. Much other related stuff, including already created PCCs with the corresponding discrete space tessellations are presented on the  <a href="http://materia.team"> Materia</a> software project. 
 </p>
 
-<h2>Some necessary definitions</h2>
-
+<h2>A few necessary definitions</h2>
 <p> All the k-cells with a specific value of k form a PCC <i>skeleton</i>, so that the whole PCC can be thought as an agglomeration of these several skeletons. </br>
 Additionally to the scalar and vector parameters defined on the PCC cells, for each cell can be assigned a label characterising its own type. Hence all k-cells can be divided in two classes of <i>ordinary</i> (without labels or with the labels 0) and <i>special</i> (labelled) cells. </br>
 Inside the class of special cells several types can be defined. The whole set of these labels assigned on the each skeleton form a configuration <i>state</i> which can be expressed by a single <i>state vector</i> encoding all the cell types like the well-known DNA sequences. </br>
