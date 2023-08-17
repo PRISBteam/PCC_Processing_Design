@@ -35,20 +35,20 @@ For successful code execution, both the C++ compiler and CMake software must be 
 The code is written and tested in C++17. It works well with <a href="http://cmake.org" target="_blank"> CMake 3.23 </a>, <a href="http://gcc.gnu.org" target="_blank"> g++ compiler </a> and <a href="http://jetbrains.com/clion" target="_blank"> CLion IDE </a>. It is partly parallelised with the <a href=https://www.openmp.org" target="_blank"> Open MP </a> libraries for its effective execution using simultaneously several cores within one CPU. 
 It is used explicitly the Eigen and Spectra libraries which must be <a href="http://spectralib.org/download.html"> downloaded</a> and copied to the directory containing all the STL C++ libraries on the local PC.
 As an example, to compile the project in a command line tool one needs to change the working directory (cd command in Linux) to the one containing the project CMakeLists.txt file and then launch CMake as:
-'''
+```
 cmake -B buildtree
 cmake --build buildtree
-'''
+```
 With the CLion and other IDEs, everything is straightforward: a new C++ project must be created (if it contains its own main.cpp “Hello world!” file by default, it must be deleted or ignored) and then executed. 
 The computational costs of different calculation types, functions and tasks are hugely different: for instance, the component analysis or Monte-Carlo simulations are a very time consuming procedures, while the random generation of special chains are fast.<\p>
 </p>
   
 <h2>Project files</h2>
 <p>
-The project directory contains several folders:
-\lib — contains all the modules, *.h libraries of the project and the main.cpp file; each of the modules is placed in the polder with the same name, which contains, in their turn, *.h files with the same name as the corresponding module, and a subdirectory named \functions containing *.h libraries with all the functions used in this particular module. Besides, it contains the library Support_functions.h with the additional functions used in several modules and another library Objects.h as the only place in the project containing all the definitions of the code-specific classes. 
-\config — contains all the *.ini files using for the initial definition of parameters governing the execution of the corresponding modules. 
-\data — contains supplementary data files for each of the project modules.
+The project directory contains several folders: <br>
+\lib — contains all the modules, *.h libraries of the project and the main.cpp file; each of the modules is placed in the polder with the same name, which contains, in their turn, *.h files with the same name as the corresponding module, and a subdirectory named \functions containing *.h libraries with all the functions used in this particular module. Besides, it contains the library Support_functions.h with the additional functions used in several modules and another library Objects.h as the only place in the project containing all the definitions of the code-specific classes. <br>
+\config — contains all the *.ini files using for the initial definition of parameters governing the execution of the corresponding modules. <br>
+\data — contains supplementary data files for each of the project modules. <br>
 
 The main part of the “user interface” contains a few *.ini files governing the behaviour of each of the modules. Among them
 1.	Main,
