@@ -34,16 +34,14 @@ For successful code execution, both the C++ compiler and CMake software must be 
  
 The code is written and tested in C++17. It works well with <a href="http://cmake.org" target="_blank"> CMake 3.23 </a>, <a href="http://gcc.gnu.org" target="_blank"> g++ compiler </a> and <a href="http://jetbrains.com/clion" target="_blank"> CLion IDE </a>. It is partly parallelised with the <a href="https://www.openmp.org" target="_blank"> Open MP </a> libraries for its effective execution using simultaneously several cores within one CPU. 
 It is used explicitly the Eigen and Spectra libraries which must be <a href="http://spectralib.org/download.html"> downloaded</a> and copied to the directory containing all the STL C++ libraries on the local PC.
-</p>
 As an example, to compile the project in a command line tool one needs to change the working directory (cd command in Linux) to the one containing the project CMakeLists.txt file and then launch CMake as:
 ```
 cmake -B buildtree
 cmake --build buildtree
 ```
-<p>
 With the CLion and other IDEs, everything is straightforward: a new C++ project must be created (if it contains its own main.cpp “Hello world!” file by default, it must be deleted or ignored) and then executed. 
-The computational costs of different calculation types, functions and tasks are hugely different: for instance, the component analysis or Monte-Carlo simulations are a very time consuming procedures, while the random generation of special chains are fast.<\p>
-</p>
+The computational costs of different calculation types, functions and tasks are hugely different: for instance, the component analysis or Monte-Carlo simulations are a very time consuming procedures, while the random generation of special chains are fast.
+<\p>
   
 <h2>Project files</h2>
 <p>
