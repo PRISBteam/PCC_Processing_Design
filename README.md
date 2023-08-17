@@ -41,7 +41,7 @@ cmake --build buildtree
 ```
 With the CLion and other IDEs, everything is straightforward: a new C++ project must be created (if it contains its own main.cpp “Hello world!” file by default, it must be deleted or ignored) and then executed. 
 The computational costs of different calculation types, functions and tasks are hugely different: for instance, the component analysis or Monte-Carlo simulations are a very time consuming procedures, while the random generation of special chains are fast.
-<\p>
+</p>
   
 <h2>Project files</h2>
 <p>
