@@ -46,18 +46,22 @@ The computational costs of different calculation types, functions and tasks are 
 <h2>Project files</h2>
 <p>
 The project directory contains several folders: <br>
-\lib — contains all the modules, *.h libraries of the project and the main.cpp file; each of the modules is placed in the polder with the same name, which contains, in their turn, *.h files with the same name as the corresponding module, and a subdirectory named \functions containing *.h libraries with all the functions used in this particular module. Besides, it contains the library Support_functions.h with the additional functions used in several modules and another library Objects.h as the only place in the project containing all the definitions of the code-specific classes. <br>
-\config — contains all the *.ini files using for the initial definition of parameters governing the execution of the corresponding modules. <br>
-\data — contains supplementary data files for each of the project modules. <br>
+<ul>
+<li> <i>\lib</i> — contains all the modules, *.h libraries of the project and the main.cpp file; each of the modules is placed in the polder with the same name, which contains, in their turn, *.h files with the same name as the corresponding module, and a subdirectory named \functions containing *.h libraries with all the functions used in this particular module. Besides, it contains the library Support_functions.h with the additional functions used in several modules and another library Objects.h as the only place in the project containing all the definitions of the code-specific classes.</li>
+<li> <i>\config</i> — contains all the *.ini files using for the initial definition of parameters governing the execution of the corresponding modules.</li>
+<li> <i>\task </i> — contains all the additional user-defined tasks written as separate functions and included in the main.cpp file. These functions became active in the mode "TASK" instead of the "LIST" of the [simulation_mode] option in the <i> main.ini</i> file. </li>
+<li> <i>\data</i> — contains supplementary data files for each of the project modules.</li>
+</ul>
 
 The main part of the “user interface” contains a few *.ini files governing the behaviour of each of the modules. Among them
-1.	Main,
-2.	Processing, 
-3.	Characterisation, and 
-4.	Writer <br>
-are essential ones. Some other modules like Multiphysics (stress and energies), Subcomplex (a subdivision of a PCC into subcomplexes), and Kinetic (processes related to state variables and do not determined by changes in the cell types of a PCC) still unfinished and are under active development. 
-Each of the modules is a *.h library of the corresponding functions written in C++ and, in their turn, consists of two sub-modules - one governing the code implementation based on the requests written in the corresponding *.ini file, and another one containing the functions themselves. A couple of other *.h function libraries in the \lib directory like Support_functions.h contain many useful functions exploiting different modules for supplementary tasks like reading from files to matrices and any others. For reading *.ini files the code exploits external <a href="https://github.com/pulzed/mINI"> mINI </a> library. 
-The code works equally good with 3D and 2D tessellations. In the 2D case, there are no 3D polyhedrons (volumes) and 2D polytopes are associated with faces or 2-cells of the corresponding PCC. All the project functions works similarly in these two cases.
+<ol>
+<li> Main </li>
+<li> Processing </li>
+<li> Characterisation, and </li>
+<li> Writer </li>
+</ol>
+are essential ones. Some other modules like Multiphysics (stress and energies), Subcomplex (a subdivision of a PCC into subcomplexes), and Kinetic (processes related to state variables and do not determined by changes in the cell types of a PCC) still unfinished and are under active development. Each of the modules is a *.h library of the corresponding functions written in C++ and, in their turn, consists of two sub-modules - one governing the code implementation based on the requests written in the corresponding *.ini file, and another one containing the functions themselves. A couple of other *.h function libraries in the <i>\lib</i> directory like <i> support_functions.h</i> contain many useful functions exploiting different modules for supplementary tasks like reading from files to matrices and any others. For reading *.ini files the code exploits external <a href="https://github.com/pulzed/mINI"> mINI </a> library. 
+The code works equally good with 3D and 2D tessellations of space. In the 2D case, there are no 3D polyhedrons (volumes) and 2D polytopes are associated with faces or 2-cells of the corresponding PCC. All the project functions works similarly in these two cases.
 </p>
 
 <h2> Project modules and their *.ini files </h2>
