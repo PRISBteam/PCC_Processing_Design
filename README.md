@@ -47,17 +47,18 @@ The computational costs of different calculation types, functions and tasks are 
 <p>
 The project directory contains several folders: <br>
 <ul>
-<li> <i>\src</i> — contains all the modules, *.h libraries of the project and the main.cpp file; each of the modules is placed in the polder with the same name, which contains, in their turn, *.h files with the same name as the corresponding module, and a subdirectory named \functions containing *.h libraries with all the functions used in this particular module. Besides, it contains the library Support_functions.h with the additional functions used in several modules and another library Objects.h as the only place in the project containing all the definitions of the code-specific classes.</li>
+<li> <i>\src</i> — contains all the source files, *.h libraries of the project and the main.cpp file.</li>
 <li> <i>\config</i> — contains all the *.ini files using for the initial definition of parameters governing the execution of the corresponding modules.</li>
 <li> <i>\PCC_examples</i> — contains a few examples of the PCCs created based on the 2D and 3D Voronoi tessellations. A large PCC library is published on the webpage of the <a href="http://materia.team" target="_blank"> Materia</a> software project.</li>
 <li> <i>\data</i> — contains supplementary data files for each of the project modules.</li>
 </ul>
 
-
-<li> <i>\lib</i> — contains all the modules, *.h libraries of the project and the main.cpp file; each of the modules is placed in the polder with the same name, which contains, in their turn, *.h files with the same name as the corresponding module, and a subdirectory named \functions containing *.h libraries with all the functions used in this particular module. Besides, it contains the library Support_functions.h with the additional functions used in several modules and another library Objects.h as the only place in the project containing all the definitions of the code-specific classes.</li>
-<li> <i>\task </i> — contains all the additional user-defined tasks written as separate functions and included in the main.cpp file. These functions became active in the mode "TASK" instead of the "LIST" of the [simulation_mode] option in the <i> main.ini</i> file. </li>
+The "source" directory contains several subfolders with libraries:
+<ul>
+<li> <i>\lib</i> — contains all the *.h project libraries Each of the modules is placed in the folder with the same name as its own. These subdirectories contains, in their turn, *.h files with the same name as the corresponding module, and a subdirectory named \functions containing *.h libraries with all the functions used in this particular module. Besides, it contains the library <i>SupportFunctions.h</i> with the additional functions used in several modules, <i>measures.h</i> with functions for calculations of various structural measures, and another library <i>Objects.h</i> as the only place in the project containing all the definitions of the code-specific classes. </li>
+<li> <i>\task</i> — contains all the additional user-defined tasks written as separate functions and included in the main.cpp file. These functions became active in the mode "TASK" instead of the "LIST" of the [simulation_mode] option in the <i> main.ini</i> file. </li>
 <li> <i>\other</i> — contains additional external libraries such as the simple <a href="https://github.com/pulzed/mINI"> mINI </a> reader of the *.ini files.</li>
-
+</ul>
 
 The main part of the “user interface” contains a few *.ini files governing the behaviour of each of the modules. Among them:
 <ol>
