@@ -14,7 +14,7 @@ For effective use of the DPD code, a clear understanding of several basic concep
 <li> E. N. Borodin, A. P. Jivkov, 2019. Evolution of triple junctions’ network during severe plastic deformation of copper alloys – a discrete stochastic modelling. Philosophical Magazine 100(4), 467-485. doi: 10.1080/14786435.2019.1695071. </li>
 <li> E.N. Borodin, A.P. Jivkov, A.G. Sheinerman, M.Yu. Gutkin, 2021. Optimisation of rGO-enriched nanoceramics by combinatorial analysis. Materials & Design 212, 110191. doi: 10.1016/j.matdes.2021.110191. </li>
 </ol>
-In this Technical Guidance, only the architecture of the code and practical guidance for its effective use with examples are provided. Much other related stuff, including already created PCCs with the corresponding discrete space tessellations are presented on the  <a href="http://materia.team"> Materia</a> software project. 
+In this Technical Guidance, only the architecture of the code and practical guidance for its effective use with examples are provided. Much other related stuff, including already created PCCs with the corresponding discrete space tessellations are presented on the  <a href="http://materia.team" target="_blank"> Materia</a> software project. 
 </p>
 
 <h2>A few necessary definitions</h2>
