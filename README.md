@@ -47,24 +47,31 @@ The computational costs of different calculation types, functions and tasks are 
 <p>
 The project directory contains several folders: <br>
 <ul>
-<li> <i>\lib</i> — contains all the modules, *.h libraries of the project and the main.cpp file; each of the modules is placed in the polder with the same name, which contains, in their turn, *.h files with the same name as the corresponding module, and a subdirectory named \functions containing *.h libraries with all the functions used in this particular module. Besides, it contains the library Support_functions.h with the additional functions used in several modules and another library Objects.h as the only place in the project containing all the definitions of the code-specific classes.</li>
+<li> <i>\src</i> — contains all the modules, *.h libraries of the project and the main.cpp file; each of the modules is placed in the polder with the same name, which contains, in their turn, *.h files with the same name as the corresponding module, and a subdirectory named \functions containing *.h libraries with all the functions used in this particular module. Besides, it contains the library Support_functions.h with the additional functions used in several modules and another library Objects.h as the only place in the project containing all the definitions of the code-specific classes.</li>
 <li> <i>\config</i> — contains all the *.ini files using for the initial definition of parameters governing the execution of the corresponding modules.</li>
-<li> <i>\task </i> — contains all the additional user-defined tasks written as separate functions and included in the main.cpp file. These functions became active in the mode "TASK" instead of the "LIST" of the [simulation_mode] option in the <i> main.ini</i> file. </li>
+<li> <i>\PCC_examples</i> — contains a few examples of the PCCs created based on the 2D and 3D Voronoi tessellations. A large PCC library is published on the webpage of the <a href="http://materia.team" target="_blank"> Materia</a> software project.</li>
 <li> <i>\data</i> — contains supplementary data files for each of the project modules.</li>
 </ul>
 
-The main part of the “user interface” contains a few *.ini files governing the behaviour of each of the modules. Among them
+
+<li> <i>\lib</i> — contains all the modules, *.h libraries of the project and the main.cpp file; each of the modules is placed in the polder with the same name, which contains, in their turn, *.h files with the same name as the corresponding module, and a subdirectory named \functions containing *.h libraries with all the functions used in this particular module. Besides, it contains the library Support_functions.h with the additional functions used in several modules and another library Objects.h as the only place in the project containing all the definitions of the code-specific classes.</li>
+<li> <i>\task </i> — contains all the additional user-defined tasks written as separate functions and included in the main.cpp file. These functions became active in the mode "TASK" instead of the "LIST" of the [simulation_mode] option in the <i> main.ini</i> file. </li>
+<li> <i>\other</i> — contains additional external libraries such as the simple <a href="https://github.com/pulzed/mINI"> mINI </a> reader of the *.ini files.</li>
+
+
+The main part of the “user interface” contains a few *.ini files governing the behaviour of each of the modules. Among them:
 <ol>
 <li> Main </li>
 <li> Processing </li>
 <li> Characterisation, and </li>
 <li> Writer </li>
 </ol>
-are essential ones. Some other modules like Multiphysics (stress and energies), Subcomplex (a subdivision of a PCC into subcomplexes), and Kinetic (processes related to state variables and do not determined by changes in the cell types of a PCC) still unfinished and are under active development. Each of the modules is a *.h library of the corresponding functions written in C++ and, in their turn, consists of two sub-modules - one governing the code implementation based on the requests written in the corresponding *.ini file, and another one containing the functions themselves. A couple of other *.h function libraries in the <i>\lib</i> directory like <i> support_functions.h</i> contain many useful functions exploiting different modules for supplementary tasks like reading from files to matrices and any others. For reading *.ini files the code exploits external <a href="https://github.com/pulzed/mINI"> mINI </a> library. 
+
+Some other modules like Multiphysics (stress and energies), Subcomplex (a subdivision of a PCC into subcomplexes), and Kinetic (processes related to state variables and do not determined by changes in the cell types of a PCC) still unfinished and are under active development. Each of the modules is a *.h library of the corresponding functions written in C++ and, in their turn, consists of two sub-modules - one governing the code implementation based on the requests written in the corresponding *.ini file, and another one containing the functions themselves. A couple of other *.h function libraries in the <i>\lib</i> directory like <i> support_functions.h</i> contain many useful functions exploiting different modules for supplementary tasks like reading from files to matrices and any others. For reading *.ini files the code exploits external <a href="https://github.com/pulzed/mINI"> mINI </a> library. 
 The code works equally good with 3D and 2D tessellations of space. In the 2D case, there are no 3D polyhedrons (volumes) and 2D polytopes are associated with faces or 2-cells of the corresponding PCC. All the project functions works similarly in these two cases.
 </p>
 
-<h2> Project modules and their *.ini files </h2>
+<h2> Project modules by their *.ini files </h2>
 1.	Main module
 Provides an “environment” for all the other libraries. Currently, it is the only .cpp file compiling in the project, attaching all the other libraries. All the variables, names and paths are defined here and then it calls all the other modules “ON” in the main.ini file in the /configurations directory.
 
