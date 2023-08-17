@@ -29,12 +29,12 @@ Such a theoretical framework allows to describe and analyse space ordering insid
 </p>
 
 <h2> How to execute the code </h2>
-<p> This is a C++ based software project consisting of several modules-libraries and the main.cpp file which is considered as a separate module. The code works with pre-created Polyhedral Cell Complex (PCC) as the set of its incidence and adjacency matrices represented in a sparse matrix form. It is intended to be launched as a CMake project using CMakeLists.txt file.
+<p> This is a C++ based software project consisting of several modules-libraries and the main.cpp file which is considered as a separate module. The code works with pre-created PCC as the set of its incidence and adjacency matrices represented in a sparse matrix form. It is intended to be launched as a CMake project using CMakeLists.txt file.
 For successful code execution, both the C++ compiler and CMake software must be installed. 
  
-The code is written and tested in C++17. It works well with <a href="http://cmake.org"> CMake 3.23 </a>, <a href="http://gcc.gnu.org"> g++ compiler </a> and <a href="http://jetbrains.com/clion"> CLion IDE </a>. It is partly parallelised with the Open MP library for its effective execution simultaneously using several cores within one CPU. 
+The code is written and tested in C++17. It works well with <a href="http://cmake.org" target="_blank"> CMake 3.23 </a>, <a href="http://gcc.gnu.org" target="_blank"> g++ compiler </a> and <a href="http://jetbrains.com/clion" target="_blank"> CLion IDE </a>. It is partly parallelised with the <a href=https://www.openmp.org" target="_blank"> Open MP </a> libraries for its effective execution using simultaneously several cores within one CPU. 
 It is used explicitly the Eigen and Spectra libraries which must be <a href="http://spectralib.org/download.html"> downloaded</a> and copied to the directory containing all the STL C++ libraries on the local PC.
-As an example, to compile the project in a command line tool one needs to change the working directory (cd command in Linux) to the one containing the project make file and then launch CMake as:
+As an example, to compile the project in a command line tool one needs to change the working directory (cd command in Linux) to the one containing the project CMakeLists.txt file and then launch CMake as:
 '''
 cmake -B buildtree
 cmake --build buildtree
