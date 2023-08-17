@@ -32,13 +32,15 @@ Such a theoretical framework allows to describe and analyse space ordering insid
 <p> This is a C++ based software project consisting of several modules-libraries and the main.cpp file which is considered as a separate module. The code works with pre-created PCC as the set of its incidence and adjacency matrices represented in a sparse matrix form. It is intended to be launched as a CMake project using CMakeLists.txt file.
 For successful code execution, both the C++ compiler and CMake software must be installed. 
  
-The code is written and tested in C++17. It works well with <a href="http://cmake.org" target="_blank"> CMake 3.23 </a>, <a href="http://gcc.gnu.org" target="_blank"> g++ compiler </a> and <a href="http://jetbrains.com/clion" target="_blank"> CLion IDE </a>. It is partly parallelised with the <a href=https://www.openmp.org" target="_blank"> Open MP </a> libraries for its effective execution using simultaneously several cores within one CPU. 
+The code is written and tested in C++17. It works well with <a href="http://cmake.org" target="_blank"> CMake 3.23 </a>, <a href="http://gcc.gnu.org" target="_blank"> g++ compiler </a> and <a href="http://jetbrains.com/clion" target="_blank"> CLion IDE </a>. It is partly parallelised with the <a href="https://www.openmp.org" target="_blank"> Open MP </a> libraries for its effective execution using simultaneously several cores within one CPU. 
 It is used explicitly the Eigen and Spectra libraries which must be <a href="http://spectralib.org/download.html"> downloaded</a> and copied to the directory containing all the STL C++ libraries on the local PC.
+</p>
 As an example, to compile the project in a command line tool one needs to change the working directory (cd command in Linux) to the one containing the project CMakeLists.txt file and then launch CMake as:
 ```
 cmake -B buildtree
 cmake --build buildtree
 ```
+<p>
 With the CLion and other IDEs, everything is straightforward: a new C++ project must be created (if it contains its own main.cpp “Hello world!” file by default, it must be deleted or ignored) and then executed. 
 The computational costs of different calculation types, functions and tasks are hugely different: for instance, the component analysis or Monte-Carlo simulations are a very time consuming procedures, while the random generation of special chains are fast.<\p>
 </p>
@@ -54,7 +56,7 @@ The main part of the “user interface” contains a few *.ini files governing t
 1.	Main,
 2.	Processing, 
 3.	Characterisation, and 
-4.	Writer
+4.	Writer <br>
 are essential ones. Some other modules like Multiphysics (stress and energies), Subcomplex (a subdivision of a PCC into subcomplexes), and Kinetic (processes related to state variables and do not determined by changes in the cell types of a PCC) still unfinished and are under active development. 
 Each of the modules is a *.h library of the corresponding functions written in C++ and, in their turn, consists of two sub-modules - one governing the code implementation based on the requests written in the corresponding *.ini file, and another one containing the functions themselves. A couple of other *.h function libraries in the \lib directory like Support_functions.h contain many useful functions exploiting different modules for supplementary tasks like reading from files to matrices and any others. For reading *.ini files the code exploits external <a href="https://github.com/pulzed/mINI"> mINI </a> library. 
 The code works equally good with 3D and 2D tessellations. In the 2D case, there are no 3D polyhedrons (volumes) and 2D polytopes are associated with faces or 2-cells of the corresponding PCC. All the project functions works similarly in these two cases.
