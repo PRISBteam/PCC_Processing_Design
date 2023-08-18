@@ -130,11 +130,8 @@ Containing only instructions for the assignment of the edges (1-cells) types.
 The set of parameters for edges is in full analogy (possibly less in their number) with one for [faces]. Please read the detailed description above. <br>
 [nodes]<br>
 Containing only instructions for the assignment of the nodes (0-cells) types.
-The set of parameters for nodes is in full analogy (possibly less in their number) with one for [faces]. Please read the detailed description above. 
-Finally, the “distribution” is a very special category relevant for the only case of the elongated chains of special cells, whose lengths are normally distributed with the average “mu” and dispersion “sigma”. It does not affect any other processing modes. <br>
-[distribution]<br>
-mu = 1.0<br>
-sigma = 0.0
+The set of parameters for nodes is in full analogy (possibly less in their number) with one for [faces]. Please read the detailed description above. <br>
+Finally, the [distribution] is a very special category relevant for the only case of the elongated chains of special cells, whose lengths are normally distributed with the average “mu = ..” and dispersion “sigma = ..”. It does not affect any other processing modes. <br>
 
 <h3>characterisation.ini</h3> 
 The characterisation module is divided in several "labs" [polyhedrons_lab], [faces_lab], [edges_lab], [nodes_lab], corresponding to the each type of k-cells in a 3-complex (PCC) with the similar set of structural characteristics: <br>
