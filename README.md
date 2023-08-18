@@ -39,6 +39,11 @@ As an example, to compile the project in a command line tool one needs to change
 cmake -B buildtree
 cmake --build buildtree
 ```
+After that, one needs change the working directory again to the newly created \buildtree and execute the built file like
+```
+cd buildtree
+ ./PCC_Processing_Design
+```
 With the CLion and other IDEs, everything is straightforward: a new C++ project must be created (if it contains its own main.cpp “Hello world!” file by default, it must be deleted or ignored) and then executed. 
 The computational costs of different calculation types, functions and tasks are hugely different: for instance, the component analysis or Monte-Carlo simulations are a very time consuming procedures, while the random generation of special chains are fast. <br>
 The code works equally good with 3D and 2D tessellations of space. In the 2D case, there are no 3D polyhedrons (volumes) and 2D polytopes are associated with faces or 2-cells of the corresponding PCC. All the project functions works similarly in these two cases.
