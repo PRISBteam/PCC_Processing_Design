@@ -68,7 +68,7 @@ The main part of the “user interface” contains a few *.ini files governing t
 Provides a common “environment” for all the other project parts. Currently, it is the only .cpp file compiling in the project (see CMakeLists.txt), including all the other project libraries. All the variables, names and paths are defined here and then it calls all the other modules marked “ON” in the main.ini file.
 <li> Processing </li>
 The central part of the code - generates labelling of a PCC k-cells of different dimensions according to some governing principles. 
-<li> Characterisation, and </li>
+<li> Characterisation </li>
 Takes as its input the state_vectors (for assigned, imposed and induced types of faces) as its input and performs different characterisation tasks to output an object of the C++ class Processed_Complex containing all structural characteristics of the special cell structures requested in the characterisation.ini file. The syntax of the characterisation.ini file is especially simple: it contains only boolean type parameters with a value equal to 1 means calculation of this particular characteristic, and 0 means that the code will not calculate it. 
 <li> Writer </li>
 Takes as its input the object Processed_Complex and performs only the output of various characteristics contained in this object to the “output” directory specified in the main.ini file with the pre-defined names. The writer.ini file also contains only boolean type of parameters with a value equal to 1 means writing these characteristics to the corresponding file, and 0 means that the parameter will not be written. 
@@ -134,20 +134,40 @@ mu = 1.0
 sigma = 0.0
 
 <h3>characterisation.ini</h3> 
-The characterisation module is divided in several "labs" corresponding to the each type of k-cells in a 3-complex (PCC) with the similar set of structural characteristics: <br>
-pl_active - switch on/off the calculations of the characteristics related to polyhedrons (3-cells); <br>
-config_entropy - calculation of the configuration entropy with its mean (if S_mean = 1) and deviatoric (if S_skew = 1) parts.<br>
-For edges_lab in addition the calculation of the imposed by faces characteristics of j_fractions (special edge fractions), d_fractions (special edge degree fractions), and analytical (analytical solutions) is posdible.
-[polyhedrons_lab] <br>
-[faces_lab]<br>
-[edges_lab]<br>
-[nodes_lab] <br>
-
-Finally, [spectra_lab] contains parameters of the corresponding Laplacian spectra. Here
-calc_steps_numb - set the number of points where the spectrum will be calculated;  laplacians - switch on the calculation of the calculation of the corresponding matrix of the combinatorial Laplacian; laplacians_spectra - switch on the calculation of the Laplacian's spectrum (the list of all its eigenvalues); laplacians_betti - switch on the Laplacian's Betti numbers as the dimensions of its null-space (the number of zero eigenvalues).
+The characterisation module is divided in several "labs" [polyhedrons_lab], [faces_lab], [edges_lab], [nodes_lab], corresponding to the each type of k-cells in a 3-complex (PCC) with the similar set of structural characteristics: <br>
+"*l_active = .." - switch on/off the calculations of the characteristics related to the corresponding k-cells (polyhedra, feaces, edges, nodes); <br>
+"config_entropy=.." - calculation of the configuration entropy with its mean (if "S_mean = 1") and deviatoric (if "S_skew = 1") parts.<br>
+For the [edges_lab] in addition the calculation of the imposed by faces characteristics of "j_fractions = .." (special edge fractions), "d_fractions = .." (special edge degree fractions), and "analytical = .." (analytical solutions) is posdible. <br>
+Finally, [spectra_lab] contains parameters of the corresponding Laplacian spectra. Here<br>
+"calc_steps_numb = .." - set the number of points where the spectrum will be calculated;  "laplacians = .." - switch on/off the calculation of the calculation of the corresponding matrix of the combinatorial Laplacian; "laplacians_spectra = .." - switch on/off the calculation of the Laplacian's spectrum (the list of all its eigenvalues); "laplacians_betti = .." - switch on/off the Laplacian's Betti numbers as the dimensions of its null-space (the number of zero eigenvalues).
 
 <h3>writer.ini</h3> 
-[…]
+
+[sequences]
+isSequencesOutput = 1
+isDesignvectorsOutput = 1
+
+[entropic_polyhedrons]
+isPolyhedronFractions = 0
+
+[entropic_faces]
+isFaceFractions = 0
+isConfEntropy = 0
+
+[entropic_edges]
+isConfEntropy = 1
+isFractions = 1
+isDegreeFractions = 1
+
+[entropic_nodes]
+isNodeFractions = 0
+
+[entropic_analytical]
+isEdgeFractions = 0
+isEdgeConfEntropies = 0
+
+[component_analysis]
+isBetti = 0
 
 <h2> Where to take a complex? </h2>
 The discrete cell complex is a pretty well-known object that originated from the field of algebraic topology, so it can be obtained in many various ways Below is just a concise review of a couple of flexible tools developed in the Mechanics and Physics of Solids research group in the University of Manchester providing DCCs based on Voronoi and a few others tessellations of space by convex polygons. 
