@@ -132,9 +132,21 @@ Finally, the “distribution” is a very special category relevant for the only
 [distribution]
 mu = 1.0
 sigma = 0.0
-3.	Characterisation module 
-[…]
-4.	Writer module 
+
+<h3>characterisation.ini</h3> 
+The characterisation module is divided in several "labs" corresponding to the each type of k-cells in a 3-complex (PCC) with the similar set of structural characteristics: <br>
+pl_active - switch on/off the calculations of the characteristics related to polyhedrons (3-cells); <br>
+config_entropy - calculation of the configuration entropy with its mean (if S_mean = 1) and deviatoric (if S_skew = 1) parts.<br>
+For edges_lab in addition the calculation of the imposed by faces characteristics of j_fractions (special edge fractions), d_fractions (special edge degree fractions), and analytical (analytical solutions) is posdible.
+[polyhedrons_lab] <br>
+[faces_lab]<br>
+[edges_lab]<br>
+[nodes_lab] <br>
+
+Finally, [spectra_lab] contains parameters of the corresponding Laplacian spectra. Here
+calc_steps_numb - set the number of points where the spectrum will be calculated;  laplacians - switch on the calculation of the calculation of the corresponding matrix of the combinatorial Laplacian; laplacians_spectra - switch on the calculation of the Laplacian's spectrum (the list of all its eigenvalues); laplacians_betti - switch on the Laplacian's Betti numbers as the dimensions of its null-space (the number of zero eigenvalues).
+
+<h3>writer.ini</h3> 
 […]
 
 <h2> Where to take a complex? </h2>
