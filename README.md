@@ -40,7 +40,8 @@ cmake -B buildtree
 cmake --build buildtree
 ```
 With the CLion and other IDEs, everything is straightforward: a new C++ project must be created (if it contains its own main.cpp “Hello world!” file by default, it must be deleted or ignored) and then executed. 
-The computational costs of different calculation types, functions and tasks are hugely different: for instance, the component analysis or Monte-Carlo simulations are a very time consuming procedures, while the random generation of special chains are fast.
+The computational costs of different calculation types, functions and tasks are hugely different: for instance, the component analysis or Monte-Carlo simulations are a very time consuming procedures, while the random generation of special chains are fast. <br>
+The code works equally good with 3D and 2D tessellations of space. In the 2D case, there are no 3D polyhedrons (volumes) and 2D polytopes are associated with faces or 2-cells of the corresponding PCC. All the project functions works similarly in these two cases.
 </p>
   
 <h2>Project files</h2>
@@ -53,28 +54,28 @@ The project directory contains several folders: <br>
 <li> <i>\data</i> — contains supplementary data files for each of the project modules.</li>
 </ul>
 
-The "source" directory contains several subfolders with libraries:
+The <i>\src</i> "source" directory contains several subfolders with libraries:
 <ul>
-<li> <i>\lib</i> — contains all the *.h project libraries Each of the modules is placed in the folder with the same name as its own. These subdirectories contains, in their turn, *.h files with the same name as the corresponding module, and a subdirectory named \functions containing *.h libraries with all the functions used in this particular module. Besides, it contains the library <i>SupportFunctions.h</i> with the additional functions used in several modules, <i>measures.h</i> with functions for calculations of various structural measures, and another library <i>Objects.h</i> as the only place in the project containing all the definitions of the code-specific classes. </li>
+<li> <i>\lib</i> — contains all the *.h project libraries Each of the modules is placed in the folder with the same name as its own. These subdirectories contains, in their turn, *.h files with the same name as the corresponding module, and a subdirectory named \functions containing *.h libraries with all the functions used in this particular module. Besides, it contains the library <i>SupportFunctions.h</i> with the additional functions used in several modules, <i>measures.h</i> with functions for calculations of various structural measures, and another library <i>Objects.h</i> as the only place in the project containing all the definitions of the code-specific classes. The subdirectory <i>\ini</i> contains the code-specific readers of the project's *.ini files which nedds to be amended at their any significant changes.</li>
 <li> <i>\task</i> — contains all the additional user-defined tasks written as separate functions and included in the main.cpp file. These functions became active in the mode "TASK" instead of the "LIST" of the [simulation_mode] option in the <i> main.ini</i> file. </li>
 <li> <i>\other</i> — contains additional external libraries such as the simple <a href="https://github.com/pulzed/mINI"> mINI </a> reader of the *.ini files.</li>
 </ul>
 
+<h2> Project modules by their *.ini files </h2>
 The main part of the “user interface” contains a few *.ini files governing the behaviour of each of the modules. Among them:
 <ol>
 <li> Main </li>
+Provides a common “environment” for all the other project parts. Currently, it is the only .cpp file compiling in the project (see CMakeLists.txt), including all the other project libraries. All the variables, names and paths are defined here and then it calls all the other modules marked “ON” in the main.ini file.
 <li> Processing </li>
+The central part of the code - generates labelling of a PCC k-cells of different dimensions according to some governing principles. 
 <li> Characterisation, and </li>
+Takes as its input the state_vectors (for assigned, imposed and induced types of faces) as its input and performs different characterisation tasks to output an object of the C++ class Processed_Complex containing all structural characteristics of the special cell structures requested in the characterisation.ini file. The syntax of the characterisation.ini file is especially simple: it contains only boolean type parameters with a value equal to 1 means calculation of this particular characteristic, and 0 means that the code will not calculate it. 
 <li> Writer </li>
+Takes as its input the object Processed_Complex and performs only the output of various characteristics contained in this object to the “output” directory specified in the main.ini file with the pre-defined names. The writer.ini file also contains only boolean type of parameters with a value equal to 1 means writing these characteristics to the corresponding file, and 0 means that the parameter will not be written. 
 </ol>
 
-Some other modules like Multiphysics (stress and energies), Subcomplex (a subdivision of a PCC into subcomplexes), and Kinetic (processes related to state variables and do not determined by changes in the cell types of a PCC) still unfinished and are under active development. Each of the modules is a *.h library of the corresponding functions written in C++ and, in their turn, consists of two sub-modules - one governing the code implementation based on the requests written in the corresponding *.ini file, and another one containing the functions themselves. A couple of other *.h function libraries in the <i>\lib</i> directory like <i> support_functions.h</i> contain many useful functions exploiting different modules for supplementary tasks like reading from files to matrices and any others. For reading *.ini files the code exploits external <a href="https://github.com/pulzed/mINI"> mINI </a> library. 
-The code works equally good with 3D and 2D tessellations of space. In the 2D case, there are no 3D polyhedrons (volumes) and 2D polytopes are associated with faces or 2-cells of the corresponding PCC. All the project functions works similarly in these two cases.
+Some other modules like Multiphysics (stress and energies), Subcomplex (a subdivision of a PCC into subcomplexes), and Kinetic (processes related to state variables and do not determined by changes in the cell types of a PCC) still unfinished and are under active development. Each of the modules is a *.h library of the corresponding functions written in C++ and, in their turn, consists of two sub-modules - one governing the code implementation based on the requests written in the corresponding *.ini file, and another one (in the corresponding \functions subdirectory) contains the functions themselves. A couple of other *.h function libraries in the <i>\lib</i> directory like <i> SupportFunctions.h</i> contain many useful functions using in different modules for supplementary simple tasks like reading from files to matrices. For reading *.ini files the code exploits external <a href="https://github.com/pulzed/mINI"> mINI </a> library. 
 </p>
-
-<h2> Project modules by their *.ini files </h2>
-1.	Main module
-Provides an “environment” for all the other libraries. Currently, it is the only .cpp file compiling in the project, attaching all the other libraries. All the variables, names and paths are defined here and then it calls all the other modules “ON” in the main.ini file in the /configurations directory.
 
 <h3> main.ini </h3>
 [general]
@@ -92,9 +93,6 @@ There are two different modes of the Main module:
 ”LIST” - by default, launch all the modules one after another strictly according to the data from *.ini files. 
 “TASK” - assumes tailored execution of the code using the functions, *.cpp and *.h files included explicitly inside the else if(task) {..} statement in the main.cpp module INSTEAD of the “LIST” mode sequence of modules. The ”task” mode is supposed to provide scientific freedom of the code execution and can ignore any instructions listed in the *.ini files.
 Each of the following *.ini files contains an almost similar list of settings for every type of cell in the tessellation and the corresponding PCC: polyhedrons (3-cells), faces (2-cells), edges (1-cells), nodes (0-cells). In the Processing module, any algorithm calculates as its output the lists (vectors) of “special” cells of different types described in the corresponding “state vectors”. The are three distinct sub-modules: (1) assigned structures: the algorithm picks cells and assigns them some type ID (label), writing the cell number in the corresponding special_sequence (s_sequence) vector (example: the random assignment of “special” type for some number of faces); (2) imposed structures: assigned types for low-dimensional (k-1)-cells or higher- dimensional (k+1)-cells according to some specific rule based on the already created assigned structures for k-cells (example: classification of face junctions according to the number of special faces incident to each junction); (3) induced structures: assigned types for the k-cells of the same dimension based on the already created assigned structures for k-cells (example: introducing fractured or cracked faces based on the initially assigned structure of faces containing inclusions). 
-
-2. Processing module
-The central part of the code - generates labelling of a PCC k-cells of different dimensions according to some governing principles. 
 
 <h3> processing.ini </h3>
 The file is divided in several parts reflecting the dimensions of the cells:
@@ -135,10 +133,8 @@ Finally, the “distribution” is a very special category relevant for the only
 mu = 1.0
 sigma = 0.0
 3.	Characterisation module 
-The module takes as its input the state_vectors (all - for assigned, imposed and induced types of faces) as its input and performs different characterisation tasks to output an object of the C++ class Processed_Complex containing all structural characteristics of the special face structures requested in the characterisation.ini file. The syntax of the characterisation.ini file is especially simple: it contains only boolean type parameters with a value equal to 1 means calculation of this particular characteristic, and 0 means that the code will not calculate it. 
 […]
 4.	Writer module 
-The module takes as its input object the Processed_Complex and performs only the output of various characteristics contained in this object to the “output” directory specified in the main.ini file with the pre-defined names. The writer.ini file contains also exclusively contains the only boolean type of parameters with a value equal to 1 means writing these characteristics to the corresponding file, and 0 means that it will not be written. 
 […]
 
 <h2> Where to take a complex? </h2>
