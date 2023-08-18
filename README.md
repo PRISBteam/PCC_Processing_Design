@@ -134,39 +134,43 @@ The set of parameters for nodes is in full analogy (possibly less in their numbe
 Finally, the [distribution] is a very special category relevant for the only case of the elongated chains of special cells, whose lengths are normally distributed with the average “mu = ..” and dispersion “sigma = ..”. It does not affect any other processing modes. <br>
 
 <h3>characterisation.ini</h3> 
-The characterisation module is divided in several "labs" [polyhedrons_lab], [faces_lab], [edges_lab], [nodes_lab], corresponding to the each type of k-cells in a 3-complex (PCC) with the similar set of structural characteristics: <br>
-"*l_active = .." - switch on/off the calculations of the characteristics related to the corresponding k-cells (polyhedra, feaces, edges, nodes); <br>
-"config_entropy=.." - calculation of the configuration entropy with its mean (if "S_mean = 1") and deviatoric (if "S_skew = 1") parts.<br>
+The characterisation module is divided in several "labs" [polyhedrons_lab], [faces_lab], [edges_lab], [nodes_lab], corresponding to the each type of k-cells in a 3-complex (PCC) with the similar set of structural characteristics:
+<ul>
+<li> "*l_active = .." - switch on/off the calculations of the characteristics related to the corresponding k-cells (polyhedra, feaces, edges, nodes); </li>
+<li> "config_entropy=.." - calculation of the configuration entropy with its mean (if "S_mean = 1") and deviatoric (if "S_skew = 1") parts. </li>
 For the [edges_lab] in addition the calculation of the imposed by faces characteristics of "j_fractions = .." (special edge fractions), "d_fractions = .." (special edge degree fractions), and "analytical = .." (analytical solutions) is posdible. <br>
 Finally, [spectra_lab] contains parameters of the corresponding Laplacian spectra. Here<br>
-"calc_steps_numb = .." - set the number of points where the spectrum will be calculated;  "laplacians = .." - switch on/off the calculation of the calculation of the corresponding matrix of the combinatorial Laplacian; "laplacians_spectra = .." - switch on/off the calculation of the Laplacian's spectrum (the list of all its eigenvalues); "laplacians_betti = .." - switch on/off the Laplacian's Betti numbers as the dimensions of its null-space (the number of zero eigenvalues).
+<li> "calc_steps_numb = .." - set the number of points where the spectrum will be calculated;  "laplacians = .." - switch on/off the calculation of the calculation of the corresponding matrix of the combinatorial Laplacian; "laplacians_spectra = .." - switch on/off the calculation of the Laplacian's spectrum (the list of all its eigenvalues); "laplacians_betti = .." - switch on/off the Laplacian's Betti numbers as the dimensions of its null-space (the number of zero eigenvalues). </li>
+</ul>
+
 
 <h3>writer.ini</h3> 
 
-[sequences]
-isSequencesOutput = 1
-isDesignvectorsOutput = 1
+[sequences] <br>
+<ul>
+<li> "isSequencesOutput = .." </li>
+<li> "isDesignvectorsOutput = .." </li>
+</ul>
+[entropic_polyhedrons] <br>
+"isPolyhedronFractions = .."
 
-[entropic_polyhedrons]
-isPolyhedronFractions = 0
-
-[entropic_faces]
+[entropic_faces] <br>
 isFaceFractions = 0
 isConfEntropy = 0
 
-[entropic_edges]
+[entropic_edges] <br>
 isConfEntropy = 1
 isFractions = 1
 isDegreeFractions = 1
 
-[entropic_nodes]
+[entropic_nodes] <br>
 isNodeFractions = 0
 
-[entropic_analytical]
+[entropic_analytical] <br>
 isEdgeFractions = 0
 isEdgeConfEntropies = 0
 
-[component_analysis]
+[component_analysis] <br>
 isBetti = 0
 
 <h2> Where to take a complex? </h2>
