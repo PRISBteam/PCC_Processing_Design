@@ -152,26 +152,33 @@ Finally, [spectra_lab] contains parameters of the corresponding Laplacian spectr
 <li> "isDesignvectorsOutput = .." </li>
 </ul>
 [entropic_polyhedrons] <br>
-"isPolyhedronFractions = .."
-
+<ul>
+<li> "isPolyhedronFractions = .." </li>
+</ul>
 [entropic_faces] <br>
-isFaceFractions = 0
-isConfEntropy = 0
-
+<ul>
+<li> "isFaceFractions = .." </li>
+<li> "isConfEntropy = .." </li>
+</ul>
 [entropic_edges] <br>
-isConfEntropy = 1
-isFractions = 1
-isDegreeFractions = 1
-
+<ul>
+<li> "isConfEntropy = .." </li>
+<li> "isFractions = .." </li>
+<li> "isDegreeFractions = .." </li>
+</ul>
 [entropic_nodes] <br>
-isNodeFractions = 0
-
+<ul>
+<li> "isNodeFractions = .." </li>
+</ul>
 [entropic_analytical] <br>
-isEdgeFractions = 0
-isEdgeConfEntropies = 0
-
+<ul>
+<li> "isEdgeFractions = .." </li>
+<li> "isEdgeConfEntropies = .." </li>
+</ul>
 [component_analysis] <br>
-isBetti = 0
+<ul>
+<li> "isBetti = .." </li>
+</ul>
 
 <h2> Where to take a complex? </h2>
 The discrete cell complex is a pretty well-known object that originated from the field of algebraic topology, so it can be obtained in many various ways Below is just a concise review of a couple of flexible tools developed in the Mechanics and Physics of Solids research group in the University of Manchester providing DCCs based on Voronoi and a few others tessellations of space by convex polygons. 
