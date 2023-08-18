@@ -78,12 +78,14 @@ Some other modules like Multiphysics (stress and energies), Subcomplex (a subdiv
 </p>
 
 <h3> main.ini </h3>
-[general]
-“dim = 3” or 2 - is the problem dimension for 3D or 2D space tessellations, respectively.
-“source = … \“ set the path to the directory containing PCC in its algebraic representation as a set of all adjacency and incidence matrices with some additional data about the corresponding space tessellation such as polyhedra volumes, face areas, face normals, etc. 
+[general] <br>
+<ul>
+<li> “dim = 3” or 2 - is the problem dimension for 3D or 2D space tessellations, respectively. </li>
+<li> “source = … \“ set the path to the directory containing PCC in its algebraic representation as a set of all adjacency and incidence matrices with some additional data about the corresponding space tessellation such as polyhedra volumes, face areas, face normals, etc. </li>
 It is important to use “\” symbol at the end of the source path!
-“output=…\” set the output directory for the Writer module - where all the calculation results will be written. 
+<li> “output=…\” set the output directory for the Writer module - where all the calculation results will be written. </li>
 It is important to use “\” symbol at the end of the output path!
+<ul>
 
 [modules]
 All the rest in the main.ini file is only the list of all MODULES with the two variants 
