@@ -85,54 +85,55 @@ Some other modules like Multiphysics (stress and energies), Subcomplex (a subdiv
 It is important to use “\” symbol at the end of the source path!
 <li> “output=…\” set the output directory for the Writer module - where all the calculation results will be written. </li>
 It is important to use “\” symbol at the end of the output path!
-<ul>
+</ul>
 
-[modules]
-All the rest in the main.ini file is only the list of all MODULES with the two variants 
-“ON” - for switching on the module execution, and “OFF” - for switching off the module execution.
-There are two different modes of the Main module:
-[simulation_mode]
-”LIST” - by default, launch all the modules one after another strictly according to the data from *.ini files. 
-“TASK” - assumes tailored execution of the code using the functions, *.cpp and *.h files included explicitly inside the else if(task) {..} statement in the main.cpp module INSTEAD of the “LIST” mode sequence of modules. The ”task” mode is supposed to provide scientific freedom of the code execution and can ignore any instructions listed in the *.ini files.
+[modules] <br>
+All the rest in the main.ini file is only the list of all MODULES with the two variants: “ON” - for switching on the module execution, and “OFF” - for switching off the module execution.
+There are two different [simulation_mode] of the Main module: <br>
+”LIST” - by default, launch all the modules one after another strictly according to the data from *.ini files. <br>
+“TASK” - assumes tailored execution of the code using the functions, *.cpp and *.h files included explicitly inside the else if(task) {..} statement in the main.cpp module INSTEAD of the “LIST” mode sequence of modules. The ”task” mode is supposed to provide scientific freedom of the code execution and can ignore any instructions listed in the *.ini files. <br>
+
 Each of the following *.ini files contains an almost similar list of settings for every type of cell in the tessellation and the corresponding PCC: polyhedrons (3-cells), faces (2-cells), edges (1-cells), nodes (0-cells). In the Processing module, any algorithm calculates as its output the lists (vectors) of “special” cells of different types described in the corresponding “state vectors”. The are three distinct sub-modules: (1) assigned structures: the algorithm picks cells and assigns them some type ID (label), writing the cell number in the corresponding special_sequence (s_sequence) vector (example: the random assignment of “special” type for some number of faces); (2) imposed structures: assigned types for low-dimensional (k-1)-cells or higher- dimensional (k+1)-cells according to some specific rule based on the already created assigned structures for k-cells (example: classification of face junctions according to the number of special faces incident to each junction); (3) induced structures: assigned types for the k-cells of the same dimension based on the already created assigned structures for k-cells (example: introducing fractured or cracked faces based on the initially assigned structure of faces containing inclusions). 
 
 <h3> processing.ini </h3>
-The file is divided in several parts reflecting the dimensions of the cells:
-[polyhedrons]
+The file is divided in several parts reflecting the dimensions of the cells: <br>
+[polyhedrons] <br>
 Containing only instructions for the assignment of the polyhedrons (3-cells) types.
-The set of parameters for polyhedra is in full analogy (possibly less in their number) with one for [faces]. Please read the detailed description below. 
-[faces]
-Containing only instructions for the assignment of the faces (2-cells) types.
-Several parameters below define the settings for the Assignment type of Processing module.
-“face_types_number =..” — the number of distinct face types (normally from 0 to 3) where 0 means that there are no special faces and the module does nothing here.
-“pf_mode = ..” — (if face_types_number >0) choose the specific processing type from the list of functions in the /src/lib/PCC_Processing/functions directory. 
+The set of parameters for polyhedra is in full analogy (possibly less in their number) with one for [faces]. Please read the detailed description below. <br>
+[faces] <br>
+Containing only instructions for the assignment of the faces (2-cells) types. Several parameters below define the settings for the Assignment type of Processing module.<br>
+<ul>
+<li> “face_types_number =..” — the number of distinct face types (normally from 0 to 3) where 0 means that there are no special faces and the module does nothing here. </li>
+<li> “pf_mode = ..” — (if face_types_number >0) choose the specific processing type from the list of functions in the /src/lib/PCC_Processing/functions directory. </li>
 S — reading from source *.txt file (s_sequence.txt ) the list of special faces (for this particular PCC) created before by some of the processing modes listed below;
-“source = /…/s_cells_sequence.txt” — the path to the *.txt file containing a list of numbers of faces of special types. This “source” affects only S processing mode and does not affect any other parts of the code. 
+<li> “source = /…/s_cells_sequence.txt” — the path to the *.txt file containing a list of numbers of faces of special types. This “source” affects only S processing mode and does not affect any other parts of the code. </li>
 R — simple random choice of new special faces during the assignment process;
 F — choice of new special faces governing by the maximum configuration entropy production principle (MEPP);
 D — choice of new special faces governing by the minimum configuration entropy production principle;
 Cr — determination of new special faces by effective random rotations of grains (applicable only for crystallography-related problems);  
 Cm — determination of new special faces by effective rotations of grains governing by the minimum configuration entropy production principle (MEPP) (applicable only for crystallography-related problems);  
 L — the random choice of new special faces with some restrictions that allow to the creation of elongated chains of special cells, whose lengths are normally distributed with the average “mu” and dispersion “sigma”. 
-“pf_index = 0” — supplementary index for more flexibility in the code execution, it does not affect anything in the default mode;
+<li> “pf_index = 0” — supplementary index for more flexibility in the code execution, it does not affect anything in the default mode; </li>
 The fractions from 0 to 1 for three possible face types specified above in the face_types_number parameter in their order. It is the fractions of special faces which will be assigned by the PCC_Processing module. If there is only one special type, only fmax_fraction1 should be above 0,  face_types_number =1, and all the rest fractions will be ignored. 
-fmax_fraction1 = 0.9
-fmax_fraction2 = 0.0
-fmax_fraction3 = 0.0
+<li> fmax_fraction1 = 0.9 </li>
+<li> fmax_fraction2 = 0.0 </li>
+<li> fmax_fraction3 = 0.0 </li>
 The following statements set parameters for the Induced type of Processing module and for “historical” reasons called cracked faces. By default, there is a possibility to set only one type of such induced faces. This part of the Processing module is always following (in execution time) after assignment one, and, by definition, uses the assignment face types for calculation of the corresponding list of induced faces type. 
-“crack_types_number = ..” — similarly to the face_types_number set the number of types and currently only two options are allowed: 0 - there are no induced faces, and 1 - means that the induced part of the Processing module is “on”.
-“cf_mode = Km” — similarly to the pf_mode set the specific mode of the choice of induced faces. 
+<li> “crack_types_number = ..” — similarly to the face_types_number set the number of types and currently only two options are allowed: 0 - there are no induced faces, and 1 - means that the induced part of the Processing module is “on”. </li>
+<li> “cf_mode = Km” — similarly to the pf_mode set the specific mode of the choice of induced faces. </li>
 Km — currently only one mode of the “kinematic fracture” is allowed. 
-“cfmax_fraction = …” — similarly to the fmax_fraction parameters for assigned face types it sets the fraction of induced faces (in the range from 0 to 1).
-[edges]
+<li> “cfmax_fraction = …” — similarly to the fmax_fraction parameters for assigned face types it sets the fraction of induced faces (in the range from 0 to 1). </li>
+</ul>
+
+[edges]<br>
 Containing only instructions for the assignment of the edges (1-cells) types.
-The set of parameters for edges is in full analogy (possibly less in their number) with one for [faces]. Please read the detailed description above. 
-[nodes]
+The set of parameters for edges is in full analogy (possibly less in their number) with one for [faces]. Please read the detailed description above. <br>
+[nodes]<br>
 Containing only instructions for the assignment of the nodes (0-cells) types.
 The set of parameters for nodes is in full analogy (possibly less in their number) with one for [faces]. Please read the detailed description above. 
-Finally, the “distribution” is a very special category relevant for the only case of the elongated chains of special cells, whose lengths are normally distributed with the average “mu” and dispersion “sigma”. It does not affect any other processing modes. 
-[distribution]
-mu = 1.0
+Finally, the “distribution” is a very special category relevant for the only case of the elongated chains of special cells, whose lengths are normally distributed with the average “mu” and dispersion “sigma”. It does not affect any other processing modes. <br>
+[distribution]<br>
+mu = 1.0<br>
 sigma = 0.0
 
 <h3>characterisation.ini</h3> 
