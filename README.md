@@ -88,7 +88,7 @@ It is important to use “\” symbol at the end of the output path!
 </ul>
 
 [modules] <br>
-All the rest in the main.ini file is only the list of all MODULES with the two variants: “ON” - for switching on the module execution, and “OFF” - for switching off the module execution.
+All the rest in the main.ini file is only the list of all MODULES with the two variants: “ON” - for switching on the module execution, and “OFF” - for switching off the module execution. <br>
 There are two different [simulation_mode] of the Main module: <br>
 ”LIST” - by default, launch all the modules one after another strictly according to the data from *.ini files. <br>
 “TASK” - assumes tailored execution of the code using the functions, *.cpp and *.h files included explicitly inside the else if(task) {..} statement in the main.cpp module INSTEAD of the “LIST” mode sequence of modules. The ”task” mode is supposed to provide scientific freedom of the code execution and can ignore any instructions listed in the *.ini files. <br>
