@@ -399,16 +399,16 @@ vector<int> g_couple_types;
                     else if (g_couple_types.at(0) == 3 && g_couple_types.at(1) == 3) face_states_vector.at(f) = 9;
         } // end of for(unsigned int f = 0; f < CellNumbs.at(2); ++f)
 
-        //    omega = g_Omega(grain_states_vector);
-        //    sigma = gb_Sigma(face_states_vector);
-        //    chi = gb_Chi(face_states_vector);
+            omega = g_Omega(grain_states_vector);
+            sigma = gb_Sigma(face_states_vector);
+            chi = gb_Chi(face_states_vector);
 
 // Weighted Laplacian Matrix
 SpMat WLMatrix = SMatrixReader(paths.at(5), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
 // WLMatrix = FES* ; /// WLMatrix = FES * WEIGHT (U voltages for each type of GB)
 
-/// cout << " befinning of the gb_Resistivity() computations " << endl;
-/// resistivity = gb_Resistivity(face_states_vector, WLMatrix);
+ cout << " befinning of the gb_Resistivity() computations " << endl;
+ resistivity = gb_Resistivity(face_states_vector, WLMatrix);
 
             cout << " START of the PCC Writer  " << endl;
             //writer
