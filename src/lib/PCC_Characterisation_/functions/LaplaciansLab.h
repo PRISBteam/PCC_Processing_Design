@@ -315,9 +315,11 @@ double gb_Resistivity(std::vector<int> &face_states_vector, Eigen::SparseMatrix<
     double resistivity = 0;
     std::vector<double> operator_spectrum = OperatorSpectrum(WLMatrix);
 
-    for (double os : operator_spectrum)
-       if (os != 0.0) resistivity += 1.0/os;
-        else resistivity = 1000000.0; // = infinity
-
+//    for (double os : operator_spectrum)
+        for (unsigned int  os = 0; os < operator_spectrum.size() - 2; ++os) {
+//            cout << operator_spectrum.at(os) << endl;
+            if (operator_spectrum.at(os) != 0.0) resistivity += 1.0 / operator_spectrum.at(os);
+//            else resistivity = 1000000.0; // = infinity
+        }
     return resistivity;
 } // end of function gb_Resistivity()
