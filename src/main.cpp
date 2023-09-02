@@ -274,7 +274,6 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
                 special_cells_design.at(0) = special_n_Sequence;
             }
 */
-
 // ===== Elapsing time Processing ================
             unsigned int Processing_time = clock();
             P_time = (double) Processing_time - S_time;
@@ -336,7 +335,8 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
             cout << "Writer time is equal to  " << W_time/ pow(10.0,6.0) <<  "  seconds" << endl;
         } // end if(WriterON)
 
-    } /// end SIMULATION MODE else (LIST)
+    } /// end of the SIMULATION MODE "LIST" in the main.ini file
+    else if ( main_type == "TASK"s ) {
 
 /// ==========================================================================================================================================
 /// ================================================= THE TASK MODE STARTS HERE ==============================================================
@@ -352,6 +352,124 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
 // # 3 # Macrocrack growth with multiple cracking simulations
 //#include "tasks/task_macrocrack.cpp"
 
+// # 4 # Several volumetric phases and imposed GB networks
+        { /// *** GRAIN PHASE DESIGN TASK *** ////
+cout << " START of the PCC Processing module " << endl;
+            //processing
+            new_cells_design = PCC_Processing(Configuration_State, Configuration_cState);
+
+cout << " START of the PCC Characterisation  " << endl;
+            //characterisation
+            double omega = 0, sigma = 0, chi = 0, resistivity = 0;
+            double g_Omega(std::vector<int> &grain_states_vector), gb_Sigma(std::vector<int> &face_states_vector), gb_Chi(std::vector<int> &face_states_vector), gb_Resistivity(std::vector<int> &face_states_vector, Eigen::SparseMatrix<double> const &WLMatrix);
+
+            //only polyhedrons
+            std::vector<int> grain_states_vector, face_states_vector(CellNumbs.at(2),0);
+
+            if(new_cells_design.Get_p_sequence().size() > 1)
+                for (auto pseq : new_cells_design.Get_p_design()) {
+                    grain_states_vector.push_back(pseq);
+                } // end for(auto pseq...)
+//REPAIR for(auto p : grain_states_vector) cout << p << endl;
+
+// new face types
+SpMat GFS = SMatrixReader(paths.at(6), CellNumbs.at(2), CellNumbs.at(3)); // Faces-Grains sparse incidence matrix
+
+vector<int> g_couple_types;
+    for(unsigned int f = 0; f < CellNumbs.at(2); ++f) { // loop over all Faces
+        g_couple_types.clear();
+        for (unsigned int g = 0; g < CellNumbs.at(3); ++g) {// loop over all Grains in the PCC
+            if (GFS.coeff(f, g) != 0) {
+                g_couple_types.push_back(grain_states_vector.at(g));
+            }
+//REPAIR  cout << " g = " << g << " gsv = " << count grain_states_vector.size() << "  coeff " << GFS.coeff(f, g) << endl;
+//REPAIR  cout << " f = " << f << " g = " << g << " g_couple_types size() = " << g_couple_types.size() << endl;
+        }
+        if (g_couple_types.size() < 2) g_couple_types.push_back(0);
+
+                    if (g_couple_types.at(0) == 0 && g_couple_types.at(1) == 0) face_states_vector.at(f) = 0;
+                    else if (g_couple_types.at(0) == 0 && g_couple_types.at(1) == 1 || g_couple_types.at(0) == 1 && g_couple_types.at(1) == 0) face_states_vector.at(f) = 1;
+                    else if (g_couple_types.at(0) == 1 && g_couple_types.at(1) == 1) face_states_vector.at(f) = 2;
+                    else if (g_couple_types.at(0) == 0 && g_couple_types.at(1) == 2 || g_couple_types.at(0) == 2 && g_couple_types.at(1) == 0) face_states_vector.at(f) = 3;
+                    else if (g_couple_types.at(0) == 1 && g_couple_types.at(1) == 2 || g_couple_types.at(0) == 2 && g_couple_types.at(1) == 1) face_states_vector.at(f) = 4;
+                    else if (g_couple_types.at(0) == 2 && g_couple_types.at(1) == 2) face_states_vector.at(f) = 5;
+                    else if (g_couple_types.at(0) == 0 && g_couple_types.at(1) == 3 || g_couple_types.at(0) == 3 && g_couple_types.at(1) == 0) face_states_vector.at(f) = 6;
+                    else if (g_couple_types.at(0) == 1 && g_couple_types.at(1) == 3 || g_couple_types.at(0) == 3 && g_couple_types.at(1) == 1) face_states_vector.at(f) = 7;
+                    else if (g_couple_types.at(0) == 2 && g_couple_types.at(1) == 3 || g_couple_types.at(0) == 3 && g_couple_types.at(1) == 2) face_states_vector.at(f) = 8;
+                    else if (g_couple_types.at(0) == 3 && g_couple_types.at(1) == 3) face_states_vector.at(f) = 9;
+        } // end of for(unsigned int f = 0; f < CellNumbs.at(2); ++f)
+
+            omega = g_Omega(grain_states_vector);
+            sigma = gb_Sigma(face_states_vector);
+            chi = gb_Chi(face_states_vector);
+
+/// Weighted Laplacian Matrix
+SpMat    AFS = SMatrixReader(paths.at(2), (CellNumbs.at(2)), (CellNumbs.at(2))); //all Faces
+         AFS = 0.5 * (AFS + SparseMatrix<double>(AFS.transpose())); // Full matrix instead of triagonal
+// weights
+vector<double> w_face_states_vector(CellNumbs.at(2),0);
+/// 0 -> alpha; 1 -> gamma; 2 -> sigma
+for(unsigned int f = 0; f < CellNumbs.at(2); ++f) { // loop over all Faces
+    if (face_states_vector.at(f) == 0) w_face_states_vector.at(f) = 0.0; // 0-0
+//    else if (face_states_vector.at(f) == 1) w_face_states_vector.at(f) = pow(61.0,-3.0); // 1-0
+    else if (face_states_vector.at(f) == 1) w_face_states_vector.at(f) = 61.0; // 1-0
+    else if (face_states_vector.at(f) == 2) w_face_states_vector.at(f) = 0.0; // 1-1
+//    else if (face_states_vector.at(f) == 3) w_face_states_vector.at(f) = pow(33.0,-3.0); // 0-2
+//    else if (face_states_vector.at(f) == 4) w_face_states_vector.at(f) = pow(11.0,-3.0); // 1-2
+    else if (face_states_vector.at(f) == 3) w_face_states_vector.at(f) = 33.0; // 0-2
+    else if (face_states_vector.at(f) == 4) w_face_states_vector.at(f) = 11.0; // 1-2
+    else if (face_states_vector.at(f) == 5) w_face_states_vector.at(f) = 0.0; // 2-2
+    else if (face_states_vector.at(f) == 6) w_face_states_vector.at(f) = 0.0; // 3-0
+    else if (face_states_vector.at(f) == 7) w_face_states_vector.at(f) = 0.0; // 3-1
+    else if (face_states_vector.at(f) == 8) w_face_states_vector.at(f) = 0.0; // 3-2
+    else if (face_states_vector.at(f) == 9) w_face_states_vector.at(f) = 0.0; // 3-3
+}
+// diagonal U-matrix
+SparseMatrix<double> U(CellNumbs.at(2),CellNumbs.at(2));
+U.setIdentity();
+
+for(unsigned int f = 0; f < CellNumbs.at(2); ++f) // loop over all Faces
+    U.coeffRef(f, f) = w_face_states_vector.at(f);
+//  SpMat WLMatrix = A^T * U^-1 * A;
+//    SpMat WLMatrix = SparseMatrix<double>(AFS.transpose()) * SparseMatrix<double>(U.cwiseInverse()) * AFS;
+    SpMat WLMatrix = SparseMatrix<double>(AFS.transpose()) * U * AFS;
+
+//REPAIR            for(unsigned int f = 0; f < CellNumbs.at(2); ++f) {// loop over all Faces
+//                cout << "  " << endl;
+//                for (unsigned int ff = 0; ff < CellNumbs.at(2); ++ff) // loop over all Faces
+//                    cout << WLMatrix.coeffRef(ff, f) << "  ";
+//            }
+cout << " befinning of the gb_Resistivity() computations " << endl;
+resistivity = gb_Resistivity(face_states_vector, WLMatrix);
+
+            cout << " START of the PCC Writer  " << endl;
+            //writer
+            int output_counter = 1;
+            /// grain design
+            PCC_CellSequences_Writer(new_cells_design, output_counter);
+
+            /// face_design
+            ofstream Out_face_design;
+            string face_design_path = output_dir + "face_design.txt"s; // output directory
+            Out_face_design.open(face_design_path, ios::trunc);
+            for (auto fs: face_states_vector)
+                Out_face_design << fs  << " ";
+            cout << "(" << ++output_counter << ")  " << "Face design was successfully written in " << face_design_path << endl;
+            Out_face_design.close();
+
+            /// additional output
+            ofstream Out_grain_measures;
+            string grain_measures_path = output_dir + "grain_measures.txt"s; // output directory
+            Out_grain_measures.open(grain_measures_path, ios::trunc);
+
+            Out_grain_measures << omega << " " << sigma << " " << chi << " " << resistivity << endl;
+            cout << "(" << ++output_counter << ")  " << "Grain measures were successfully written in " << grain_measures_path << endl;
+            Out_grain_measures.close();
+
+
+        } /// *** END of the GRAIN PHASE DESIGN TASK *** ////
+
+    } /// end of the SIMULATION MODE "TASK" in the main.ini file
 /// ==========================================================================================================================================
 
 /// ================ Total Elapsing time ================ ///
@@ -372,216 +490,4 @@ CellsDesign new_cells_design; // an object (described in PCC_Objects.h) containi
 
 /// ================================== FUNCTIONS DEFINED IN MAIN MODULE ==================================///
 
-/// NEW HEAP
-/*
-/// Principal variables
-///_____________________________________________________________________________________
-std::vector<unsigned int> kface_sequence; // special Faces sequence for the Kinetic module
-/// All grain coordinates
-string GCpath_string = source_dir + "grain_seeds.txt"s;
-char* GCpath = const_cast<char*>(GCpath_string.c_str());
-vector<tuple<double, double, double>> grain_coordinates(CellNumbs.at(3));
-grain_coordinates = TuplesReader(GCpath);
-/// Set grain_vector_coordinates
-for(auto grain_coord_tuple : grain_coordinates)
-grain_coordinates_vector.push_back(grain_coord_tuple);
-
-//REPAIR    cout << "Size of grain_seeds: " << gs_size << " CellNumbs.at(3): " << CellNumbs.at(3) << endl;
-
-/// All face coordinates /// LONG CALCULATION HERE
-string FSpath_string = source_dir + "face_seeds.txt"s;
-char* FSpath = const_cast<char*>(FSpath_string.c_str());
-face_coordinates_vector.clear();
-face_coordinates_vector.resize(CellNumbs.at(2), make_tuple(0,0,0));
-//REPAIR    cout << "face vector size: " << face_coordinates_vector.size() << endl;
-
-    if (is_file_exists(FSpath_string)) {
-        face_coordinates_vector = TuplesReader(FSpath);
-    }
-    else {
-        cout << "Calculation of face coordinates started now by find_aGBseed function" << endl;
-        #pragma omp parallel for // parallel execution by OpenMP
-        for (unsigned int fnumber = 0; fnumber < CellNumbs.at(2)-1; ++fnumber) {
-            face_coordinates_vector.at(fnumber) = find_aGBseed(fnumber, paths, CellNumbs, grain_coordinates);
-//REPAIR
-     if(fnumber % 10 == 0)  cout << "Total # of faces " << CellNumbs.at(2)<< " face # " << fnumber << " "<< get<0>(face_coordinates_vector.at(fnumber)) << " "
-                 << get<1>(face_coordinates_vector.at(fnumber)) << " " << get<2>(face_coordinates_vector.at(fnumber)) << endl;
-        }
-        cout << "Calculations was done!" << endl;
-        ofstream OutFaceCoord; OutFaceCoord.open(FSpath, ios::trunc);
-        if(OutFaceCoord.is_open())
-            #pragma omp parallel for // parallel execution by OpenMP
-            for (auto fcoord : face_coordinates_vector)
-                OutFaceCoord << get<0>(fcoord) << " " << get<1>(fcoord) << " " << get<2>(fcoord) << endl;
-    }
-
-
-/// All vertex coordinates
-string VCpath_string = source_dir + "vertex_seeds.txt"s;
-char* VCpath = const_cast<char*>(VCpath_string.c_str());
-vertex_coordinates_vector.resize(CellNumbs.at(0), make_tuple(0,0,0));
-vertex_coordinates_vector = TuplesReader(VCpath);
-//REPAIR    cout << "vertex_coordinates_vector size: " << vertex_coordinates_vector.size() << endl; //exit(0);
-
-/// All grain volumes
-string GVpath_string = source_dir + "grain_volumes.txt"s;
-char* GVpath = const_cast<char*>(GVpath_string.c_str());
-polyhedron_volumes_vector.resize(CellNumbs.at(3));
-polyhedron_volumes_vector = dVectorReader(GVpath);
-
-/// All face areas
-string GBApath_string = source_dir + "face_areas.txt"s;
-char* GBApath = const_cast<char*>(GBApath_string.c_str());
-face_areas_vector.resize(CellNumbs.at(3));
-face_areas_vector = dVectorReader(GBApath);
-
-//---------------------------------------------------------------------------
-*/
-
-/// OLD HEAP ///
-/*
-string line;
-ifstream inConf(sourcepath);
-/// I /// General paths and initial parameters
-if (inConf) { // If the file was successfully open, then
-while (getline(inConf, line, '\n')) {
-// Number of types
-for (auto it: line) {
-// integers
-if (it == '^') res.push_back(line.at(0) - '0'); // dimension of the problem; res[0]
-// strings
-if (it == '!') {
-stringstream line1_stream(line);
-line1_stream >> main_type;
-} // LIST or TASK simulation type
-else if (it == '&' && main_type == "TASK") {
-stringstream line2_stream(line);
-line2_stream >> sim_task;
-} // sumulation task path (if TASK main type only!)
-else if (it == '@') {
-stringstream line3_stream(line);
-line3_stream >> source_dir;
-} // input folder path input_dir = const_cast<char*>(input.c_str());
-else if (it == '$') {
-stringstream line4_stream(line);
-line4_stream >> output_dir;
-} // output folder path input_dir = const_cast<char*>(input.c_str());
-
-} // end for (auto it: line)
-} // end while (getline..)
-} else cout << "The file " << sourcepath << " cannot be read" << endl; // If something goes wrong
-// end if (inConf)
-
-/// II /// Different modulus On/Off states///
-bool isSectionON = 0, isProcessingON = 0, isCharacterisationON = 0, isKineticON = 0, isMultiphysicsON = 0, isWriterON = 0;
-
-if (inConf) { //If the file stream was successfully open, then
-while (getline(inConf, line, '\n')) {   // REPAIR            cout << line << endl;
-// (1)
-if (!line.compare("PCC_Section SWITCHED ON"s))
-isSectionON = 1;
-// (2)
-else if (!line.compare("PCC_Processing SWITCHED ON"s))
-isProcessingON = 1;
-// (3)
-else if (!line.compare("PCC_Characterisation SWITCHED ON"s))
-isCharacterisationON = 1;
-// (4)
-else if (!line.compare("PCC_Multiphysics SWITCHED ON"s))
-isMultiphysicsON = 1;
-// (5)
-else if (!line.compare("PCC_Kinetic SWITCHED OFF"s))
-isKineticON = 1;
-// (6)
-else if (!line.compare("PCC_Writer SWITCHED OFF"s))
-isWriterON = 1;
-
-} // end while (getline..)
-} // end if (inConf)
-else
-cout << "ProcessingON() error: The file " << sourcepath << " cannot be read" << endl; // If something goes wrong
-*/
-
-/*
-// Reading and Output of the configuration file
-std::vector<double> config_reader_main(char* config, string &Subcomplex_type, string &Processing_type, string &Kinetic_type, string &source_dir, string &output_dir) {
-    vector<double> res;
-
-    string line;
-    double p_max = 0, f_max = 0;
-
-    ifstream inConf(config);
-    if (inConf) { // If the file was successfully open, then
-        while (getline(inConf, line, '\n')) {
-            // Number of types
-            for (auto it: line) {
-                if (it == '}') Subcomplex_type = line.at(0); // simulation Section type
-                else if (it == '&') Processing_type = line.at(0); // simulation Processing type
-                else if (it == '`') Kinetic_type = line.at(0); // simulation Kinetic type
-
-                else if (it == '@') res.push_back(line.at(0) - '0'); // dimension of the problem; res[1]
-                else if (it == '!') res.push_back(line.at(0) - '0'); // number of i(X) designs; res[0]
-                    ///?? does it properly working with 10, 100 etc
-                    //else if (it == '!') res.push_back(line.at(0) - '0'); // number of special Face types; res[0]
-
-                else if (it == '?') {
-                    stringstream line1_stream(line);
-                    line1_stream >> p_max;
-                    res.push_back(p_max);
-                } // MAX fraction of Faces (calculation limit); res[2]
-                else if (it == '^') {
-                    stringstream line2_stream(line);
-                    line2_stream >> f_max;
-                    res.push_back(f_max);
-                } // MAX fraction of Cracks (calculation limit); res[3]
-                else if (it == '~') {
-                    stringstream line3_stream(line);
-                    line3_stream >> source_dir;
-                } // input folder path input_dir = const_cast<char*>(input.c_str());
-                else if (it == '$') {
-                    stringstream line4_stream(line);
-                    line4_stream >> output_dir;
-                } // output folder path input_dir = const_cast<char*>(input.c_str());
-
-                else if (it == '#') res.push_back(1); // 1 and # means accept - the parameter will be calculated
-                else if (it == '%') res.push_back(0); // 0 and % means ignore - the parameter will not be calculated
-            }
-        }
-
-    } else cout << "The file " << config << " cannot be read" << endl; // If something goes wrong
-
-    res.size();
-    cout << "The problem dimension that is the maximum dimension k_max of k-Cells\t | "s << res.at(0) << endl;
-    cout << "The number of i(X) designs (0 - random, 1 - random + smax,.. )\t\t\t | " << res.at(1) << endl;
-    if (SubcomplexON(config, 0)) cout << "Subcomplex type ('P' or 'H')\t\t\t\t\t\t\t\t\t | "s << Subcomplex_type << endl;
-    if (ProcessingON(config, 0)) cout << "Processing type ('R', 'S', 'C' or 'X')\t\t\t\t\t\t\t\t\t | "s << Processing_type << endl;
-    //cout << "Calculation type ('R', 'RW', 'S', 'F', 'I' or 'X'):\t\t\t\t\t\t | "s << Processing_type << endl;
-    //cout << "The number of special Face (2-cells) types:\t\t\t\t\t\t\t\t | " << res.at(1) << endl;
-    cout << "MAX fraction of Faces (calculation limit) \t\t\t\t\t\t\t\t | " << res.at(2) << endl;
-    if (KineticON(config, 0)) cout << "Kinetic type ('W' or 'I')\t\t\t\t\t\t\t\t\t\t\t\t | "s << Kinetic_type << endl;
-    if (KineticON(config, 0)) cout << "MAX fraction of Cracks (calculation limit)\t\t\t\t\t\t\t\t | " << res.at(3) << endl;
-    cout << endl;
-    cout << "Input folder:\t" << source_dir << endl;
-    cout << "Output folder:\t" << output_dir << endl;
-    cout << endl;
-    if (CharacterisationON(config, 0)) {
-        cout << "Nodes types statistics, indices and configuration entropy:     "; if (res.at(4) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Edges types statistics, indices and configuration entropy:     "; if (res.at(5) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Faces types statistics and structural indices:                 "; if (res.at(6) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Grain types statistics, indices and configuration entropy:     "; if (res.at(7) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Node Laplacian with its spectrum for the Nodes network:       "; if (res.at(8) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Edge Laplacian with its spectrum for the Edges network:       "; if (res.at(9) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Face  Laplacian with its spectrum for the Faces network:       "; if (res.at(10) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Grain Laplacian with its spectrum for the Grains network:      "; if (res.at(11) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-        cout << "Tutte polynomial for the special network:                      "; if (res.at(12) == 1) cout << "\t[" << "On" << "]\t" << endl; else cout << "\t[" << "Off" << "]\t" << endl;
-    }
-
-    return res;
-}
-*/
-
-// void eraseSubStr(std::string & mainStr, const std::string & toErase); // support (technical) function: erase the first occurrence of given substring from main string
-// Still not working in Windows:(
-// using std::__fs::filesystem::current_path; // to obtain current working directory
-// string MainPath = current_path(); // MainPath variables
-// eraseSubStr(MainPath, "cmake-build-debug"s); // to delete .../cmake-build-debug/ from the path
+/// HEAP
