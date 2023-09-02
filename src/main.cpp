@@ -403,12 +403,44 @@ vector<int> g_couple_types;
             sigma = gb_Sigma(face_states_vector);
             chi = gb_Chi(face_states_vector);
 
-// Weighted Laplacian Matrix
-SpMat WLMatrix = SMatrixReader(paths.at(5), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
-// WLMatrix = FES* ; /// WLMatrix = FES * WEIGHT (U voltages for each type of GB)
+/// Weighted Laplacian Matrix
+SpMat    AFS = SMatrixReader(paths.at(2), (CellNumbs.at(2)), (CellNumbs.at(2))); //all Faces
+         AFS = 0.5 * (AFS + SparseMatrix<double>(AFS.transpose())); // Full matrix instead of triagonal
+// weights
+vector<double> w_face_states_vector(CellNumbs.at(2),0);
+/// 0 -> alpha; 1 -> gamma; 2 -> sigma
+for(unsigned int f = 0; f < CellNumbs.at(2); ++f) { // loop over all Faces
+    if (face_states_vector.at(f) == 0) w_face_states_vector.at(f) = 0.0; // 0-0
+//    else if (face_states_vector.at(f) == 1) w_face_states_vector.at(f) = pow(61.0,-3.0); // 1-0
+    else if (face_states_vector.at(f) == 1) w_face_states_vector.at(f) = 61.0; // 1-0
+    else if (face_states_vector.at(f) == 2) w_face_states_vector.at(f) = 0.0; // 1-1
+//    else if (face_states_vector.at(f) == 3) w_face_states_vector.at(f) = pow(33.0,-3.0); // 0-2
+//    else if (face_states_vector.at(f) == 4) w_face_states_vector.at(f) = pow(11.0,-3.0); // 1-2
+    else if (face_states_vector.at(f) == 3) w_face_states_vector.at(f) = 33.0; // 0-2
+    else if (face_states_vector.at(f) == 4) w_face_states_vector.at(f) = 11.0; // 1-2
+    else if (face_states_vector.at(f) == 5) w_face_states_vector.at(f) = 0.0; // 2-2
+    else if (face_states_vector.at(f) == 6) w_face_states_vector.at(f) = 0.0; // 3-0
+    else if (face_states_vector.at(f) == 7) w_face_states_vector.at(f) = 0.0; // 3-1
+    else if (face_states_vector.at(f) == 8) w_face_states_vector.at(f) = 0.0; // 3-2
+    else if (face_states_vector.at(f) == 9) w_face_states_vector.at(f) = 0.0; // 3-3
+}
+// diagonal U-matrix
+SparseMatrix<double> U(CellNumbs.at(2),CellNumbs.at(2));
+U.setIdentity();
 
- cout << " befinning of the gb_Resistivity() computations " << endl;
- resistivity = gb_Resistivity(face_states_vector, WLMatrix);
+for(unsigned int f = 0; f < CellNumbs.at(2); ++f) // loop over all Faces
+    U.coeffRef(f, f) = w_face_states_vector.at(f);
+//  SpMat WLMatrix = A^T * U^-1 * A;
+//    SpMat WLMatrix = SparseMatrix<double>(AFS.transpose()) * SparseMatrix<double>(U.cwiseInverse()) * AFS;
+    SpMat WLMatrix = SparseMatrix<double>(AFS.transpose()) * U * AFS;
+
+//REPAIR            for(unsigned int f = 0; f < CellNumbs.at(2); ++f) {// loop over all Faces
+//                cout << "  " << endl;
+//                for (unsigned int ff = 0; ff < CellNumbs.at(2); ++ff) // loop over all Faces
+//                    cout << WLMatrix.coeffRef(ff, f) << "  ";
+//            }
+cout << " befinning of the gb_Resistivity() computations " << endl;
+resistivity = gb_Resistivity(face_states_vector, WLMatrix);
 
             cout << " START of the PCC Writer  " << endl;
             //writer
