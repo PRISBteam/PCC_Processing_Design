@@ -1,13 +1,19 @@
 ///******************************************************************************************************************************///
-///*                                                                                                                           *///
-///****************************************************************************************************************************///
-///********************************** Dr Elijah Borodin, Manchester, UK, Spring 2022   ***************************************///
-///**************************************************************************************************************************///
 ///************************   Polyhedral Cell Complex (PCC) Processing Design :: (CPD code) (c)   **************************///
 ///************************************************************************************************************************///
-// Material :: quadruple points, triple junctions, grain boundaries, and grains
-// Tessellation :: nodes, edges, faces, polytopes
-// PCC :: k-cells with their measures (areas, volumes) and barycenter coordinates
+
+///****************************************************************************************************************************///
+///********************************** Dr Elijah Borodin, Manchester, UK ***************************************///
+///************************************** Spring 2022 - Autumn 2023  ****************************************///
+///**************************************************************************************************************************///
+
+///* The project provides a reliable tool for 1. Obtaining, 2. Analysing and 3. Improving of the 'design vectors' as the sequences
+///  of k-cells containing in the k-skeletons (k={0,1,2,3}) of a Polyhedral Cell Complex (PCC). Such PCCs can be created by external
+/// codes based on the tessellation of 2D or 3D spaces by an agglomeration of polytopes (in the 2D case) or polyhedrons (in the 3D case). *///
+// Key terminology:
+// Material :: 'quadruple points, 'triple junctions', 'grain boundaries', and 'grains' with their measures (areas, volumes) and barycenter coordinates
+// Tessellation :: 'nodes, 'edges', 'faces', 'polytopes' with their measures (areas, volumes) and barycenter coordinates
+// PCC :: 'k-cells' containing in 'k-skeletons' (k = {0,1,2,3})
 
 ///* ----------------------------------------- *
 ///* Standard C++ (STL) libraries
@@ -20,8 +26,6 @@
 #include <tuple>
 #include <numeric>
 #include <algorithm>
-// #include <thread> // Require C++ 17 and above
-// #include <execution> // Require C++ 17 and above
 #include <cmath>
 
 ///* ------------------------------------------------------------------------------- *
@@ -38,16 +42,11 @@
 #include <Spectra/SymEigsSolver.h>
 
 /// Open MP library https://www.openmp.org/resources/openmp-compilers-tools/
-// #include "/usr/local/Cellar/libomp/15.0.7/include/omp.h"
-#include <omp.h>
+// Presented in the parallelized version of the code
 
 /// Simple reader (library) for .ini files and specific DPD code-related functions for reading its .ini files
 #include "lib/ini/ini.h"
 #include "lib/ini/ini_readers.h"
-
-// * For the future -- include the whole CPD modules and functions as a single C++ library here placed in the STL directory *//
-//include { Processing + SupportFunctions + Objects + Characterisation + Writer + Section + Multiphysics + Kinetic modules }
-///#include <CPD_libs>
 
 ///------------------------------------------
 using namespace std; //Standard namespace
@@ -57,31 +56,30 @@ using namespace Spectra; //Spectra namespace
 /// Eigen library based Triplets class containing objects in the form T = T(i, j, value), where i and j are element's a(i, j) indices in the corresponding dense matrix and the third variable is its value
 typedef Triplet<double> Tr; // <Eigen library class> Declares a triplet's type with name - Tr
 typedef SparseMatrix<double> SpMat; // <Eigen library class> Declares a column-major sparse matrix type of doubles with name - SpMat
-typedef MatrixXd DMat; // <Eigen library class> Declares a column-major sparse matrix type of doubles with name - SpMat
+typedef MatrixXd DMat; // <Eigen library class> Declares a normal dense matrix type of doubles with name - DMat
 
 /// * ------------------------------------------------------------------------------- -------------------------- *
 /// * ============================================ GLOBAL VARIABLES ============================================ * ///
 /// * ----------- Declaration of GLOBAL variables (can be used in all the project modules and libraries)-------- *
 // Technical variables
 /// File path to the configuration profile (MainPath is the path to the code's main directory)
-string MainPath = "../";
-string source_path = MainPath + "config/"s; char* sourcepath = const_cast<char*>(source_path.c_str()); // file path with main.ini
+string source_path = "../config/"s; char* sourcepath = const_cast<char*>(source_path.c_str()); // file path as it is written in the main.ini file
 
-vector<char*> paths; // the vector with paths to all the PCC's matrices, sizes and other elements related to the input and output directories
-string source_dir, output_dir; // input and output directories read from the file config_main.txt file
-string sim_task; // path to the corresponding .cpp file (with "..") with a simulation task (form TASK main mode) as it is written in the main.ini file
+vector<char*> paths; // The vector with paths to all the PCC's matrices, sizes and other elements related to the input and output directories
+string source_dir, output_dir; // Input and output directories read from the file config/main.tini file
+ string sim_task; // path to the corresponding .cpp file (with "..") with a simulation task (form TASK main mode) as it is written in the main.ini file
 
-// Global .log file output
-ofstream Out_logfile_stream; //log.txt file output for the whole computation process
+// Global ".log" file output
+ofstream Out_logfile_stream; // log.txt file output of the whole computation process as a copy of the console output
 
-/// PCC related variables
+/// PCC - related variables
 // General
-int dim0, dim; // problem dimension (2D or 3D)
-std::vector<unsigned int> CellNumbs; // the vector named CellNumbs with the number of k-cells of different types; will be read from file
+int dim; // problem dimension (dim = 2 for 2D and dim = 3 for 3D) as it is specified in the main.ini file
+std::vector<unsigned int> CellNumbs; // the vector named CellNumbs with the number of k-cells of different types; will be read from a 'number_of_cells.txt' file
 
 // PCC Complex Geometry
-// Global vectors of Descartes Coordinates for: (1) vertices, (2) barycenters of edges, (3) barycenters of faces and (4) barycenters of polyhedrons
-vector<tuple<double, double, double>> vertex_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, grain_coordinates_vector;
+// Global vectors of Cartesian coordinates for: (1) vertices, (2) barycentres of edges, (3) barycentres of faces and (4) barycentres of polyhedrons
+vector<tuple<double, double, double>> vertex_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, grain_coordinates_vector; // vectors containing barycenter Cartesian coordinates of the corresponding tessellation elements
 
 // Measures
 std::vector<double> edge_lengths_vector, face_areas_vector, polyhedron_volumes_vector;
@@ -107,34 +105,32 @@ std::vector<vector<int>> Configuration_State, Configuration_cState; //  is the l
 // #include all the main project's modules and libraries
 // IMPORTANT! Each module here is just a library (*_lib.h) or simple function(s) definition without any additional code surrounded it
 
+// * Task for the future: include all the code modules and functions as a single C++ library here placed in the STL directory *//
+//include { Processing + SupportFunctions + Objects + Characterisation + Writer + Section + Multiphysics + Kinetic modules }
+/// #include <PCC>
+
 /* Various useful functions (it must be here - first in this list! ) */
 #include "lib/PCC_SupportFunctions.h"
-
 /* Various set measures */
 #include "lib/measures.h"
-
-/* Objects library contains classes of various objects related to PCC substructures and elements (it must be here - second in this list! ) */
+/* Objects library contains classes of various objects related to the PCC substructures and elements */
 #include "lib/PCC_Objects.h"
-
 /* Section module calculates reduced PCC subcomplexes (including plain cuts) inheriting reduced sequences of special cells and State vectors of the original PCC */
-//#include "lib/PCC_Section/PCC_Subcomplex.h"
-
-/* Processing module assigned special IDs for the various elements (Vertices, Edges, Faces, Polyhedrons) of the space tessellation */
-/* Output: module generates an s_sequences as the lists with the sequences of k-cells possessing "special" IDs including
+/// #include "lib/PCC_Section/PCC_Subcomplex.h"
+/* Processing module assigned special IDs for the various elements (Nodes, Edges, Faces, Polytopes/Polyhedrons) of the space tessellation */
+/* Output: module generates a design_sequences as the lists containing the sequences of k-cells possessing "special" IDs including
  * (1) ASSIGNED: k-Cells, k= {0,1,2,3}, corresponding to different generation principles (random, maximum entropy, etc.),
- * (2) IMPOSED m-Cells (where m < k) by HIGH-ORDER k-Cells, and
- * (3) INDUCED i-Cells by some KINETIC process DEPENDENT on the assigned special k-Cells and imposed special m-Cells structures */
+ * (2) IMPOSED: m-Cells (where m < k) directly labelled based on the HIGH-ORDER k-Cell IDs
+ * (3) INDUCED: i-Cells generaTED AS A RESULT OF some KINETIC process. They are always DEPEND ON the assigned design_sequences of special k-Cells (and maybe also imposed special m-Cells structures) */
 #include "lib/PCC_Processing/PCC_Processing.h"
 
-/* Characterisation module calculates various structural characteristics of special substructures defined on the PCC elements */
+/* Characterisation module calculates various structural characteristics of special cell substructures defined on the k-skeletons of a PCC */
 #include "lib/PCC_Characterisation_/PCC_StructureCharacterisation.h"
 
-/* Multiphysics module assign various physical quantities (energies, temperature, electrical conductivity) to the k-Cells of the PCC's subcomplexes */
-//#include "lib/PCC_Multiphysics/PCC_Multiphysics.h"
-
-/* Kinetic module assign some new values for the scalar or vector variables defined on the (Vertices, Edges, Faces, Polyhedrons) of the space tessellation (or new types of identifiers (IDs) of PCC's k-cells) */
-/* As its output module currently generates one or several sequences of "fractured" cells' ID's; the new "fractured" State_cvector of faces (2-cells) can be generated */
-//#include "lib/PCC_Kinetic/PCC_Kinetic.h"
+/* Multiphysics module assign various physical quantities (such as energies, temperature, electrical conductivity) to the k-Cells of the PCC's subcomplexes */
+///#include "lib/PCC_Multiphysics/PCC_Multiphysics.h"
+/* Kinetic module assign some new continuous or discrete values (not labels or IDs!!) for the scalar or vector variables defined on the (Nodes, Edges, Faces, Polyhedrons) of the space tessellation (or new types of identifiers (IDs) of PCC's k-cells) */
+///#include "lib/PCC_Kinetic/PCC_Kinetic.h"
 
 /* Writer module perform formatted output of various data structures generated by other modules */
 #include "lib/PCC_Writer/PCC_Writer.h"

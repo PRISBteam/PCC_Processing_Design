@@ -1,0 +1,547 @@
+New in 4.6.1 (12 Sep 2023):
+- module -T: fixed -domain cylinder and circle, fixed tesr reading, made minor
+  fixes.
+- module -M: fixed -elset, fixed -statelset group -elt hex, fixed -statnode
+  col_stdtriangle, fixed -statelt part in 2D, added -faset for -format inp.
+- module -V: fixed -datacellcolscheme ipf for -crysym hexagonal, fixed
+  -space [i]pf png output.
+- general: added tutorial "Installing Neper on Ubuntu 22", updated tests to
+  pass on Ubuntu 22, made minor compilation fix.
+
+New in 4.6.0 (06 Apr 2023):
+- module -T: fixed truncated statistical distributions (from and to), improved
+  -domain stdtriangle, generalized body key, added elsetbody key, removed legacy
+  true key.
+- module -M: added crystal symmetry to mesh file.
+- module -S: added computation of standard deviation (or variance) and other
+  statistical properties of the results of element-based entities (elset, mesh,
+  etc.), added -restess odf,odfn and -restesr odf,odfn, made various fixes.
+- module -V: fixed -data*colscheme ipf to support hexagonal crystal symmetry
+  (see the "Plotting an Orientation Color Key" tutorial too), added support for
+  hexagonal crystal symmetry (pole figures and inverse pole figures), added
+  -dataelset, -datacellweight and -dataelsetweight, added -res{cell,elt,elset}
+  odf, added -pfsym uniaxial, improved -step, enabled string completion for
+  options, added -space ipf, added -ipf* options, added -[i]pfprojlabel and
+  -[i]pfpolelabel options, extended -space [i]pf to mesh results, made code
+  overhaul, made minor fixes.
+- general: added tutorial, improved testing (including -S), added step, gos
+  and scale keys, added REAL_PRINT_FORMAT configuration variables.
+- documentation: made minor improvements.
+
+New in 4.5.0 (07 Sep 2022):
+- module -T: fixed -morpho cube, added -statcell and -statvox
+  <orientation_descriptor>, added -ori :flat, added -transform ori, made minor
+  fix to the objective function for tesr (does not change the result), made
+  minor fixes to -statface and -statpoly, made other minor fixes.
+- module -M: added -transform node and ori, fixed -stateltco and -statelsetco,
+  added -stat{elt,elset}{1d,2d} theta, fixed nsets in 2D, added -statelt and
+  -statelset <orientation_descriptor>, added -statelset scaleid, added
+  -statelset* elts,nodenb,nodes, made minor fix to inp output, made minor fixes
+  and improvements.
+- module -S: fixed various bugs related to the initial state, revised odf and
+  odfn, made minor other improvements.
+- module -V: added -datacellsymbol, -datapointsymbol, -lightambient,
+  -lightsource, -lightdiffuse and -lightreflection options, added -space pf to
+  plot pole figures, added -space tree to plot a simulation directory, added
+  -asymptote, added -pfpole, -pfprojection, -pfmode, -pfgrid, -pfkernel,
+  -pfdir, -pfclustering, -pfsym and -pfshape options, renamed -imageantialias
+  into -povrayantialiasing, added :shape transformation to color maps, made
+  minor fixes.
+- documentation: made minor improvements.
+- general: added tutorials to documentation, fixed FORCE_BUILTIN_*
+  configuration options, made various installation improvements.
+
+* Incompatible changes:  In -V, removed -sceneshadow (merged in -light), renamed
+  -imageantialias into -povrayantialiasing, moved point shape definition to
+  -datapointsymbol, rotated long scale title by 180°, changed syntax for custom
+  color maps from <color1>:<color2>:... to custom(<color1>,<color2>,...).
+  In -S, changed odf(sigma=<value>) using radians into odf(theta=<value>) using
+  degrees, changed odfn(sigma=<value>) using radians into odf(theta=<value>) using
+  degrees.
+
+New in 4.4.1 (09 Mar 2022):
+- module -T: improved -morpho lamellar to avoid unrealistically small lamellae
+  (pos=optimal, reps), added -transform cubei.
+- module -M: made minor fix.
+- module -V: fixed -dataelsetcol ori, fixed tests.
+- general: improved make install.
+
+New in 4.4.0 (02 Mar 2022):
+- module -T: added -format sim for tesr, added **oridef to tesr file, removed
+  *hasvoid from tesr file, made minor improvements to tesr file.
+- module -M: made minor fix.
+- module -S: fixed backward compatibility, added support of tess- or tesr-only
+  simulation directories, added -rescell and -restesr, added -step, added
+  -rescell gos (tesr), made minor fixes and improvements.
+- module -V: added -showcrystal and -datacrystal*, improved support of
+  simulation directory, improved support of EBSD-type data (orientation +
+  "indexed" fields), generalized -data*rad and -data*trs to take expressions,
+  renamed -simstep into -step, made minor improvements.
+- documentation: made minor fixes and improvements.
+- general: added tutorials, added and fixed tests (especially on macOS).
+
+New in 4.3.1 (07 Feb 2022):
+- module -T: fixed -ori, added -format sim.
+- module -S: added -rescell and -restess, removed report file from simulation
+  directory (replaced by a hidden file, .sim), made minor fixes and code
+  improvements.
+- documentation: made small fixes and improvements.
+- general: fixed tests, improved Bash completion.
+
+New in 4.3.0 (02 Feb 2022):
+- website: general overhaul, now includes the documentation, tutorials, etc.
+- module -T: added -morpho "lamellar(v=random(...))", added fiber() tess key,
+  made minor fixes and improvements.
+- module -M: added -format phase, fixed -interface discontinuous|cohesive,
+  fixed inp output, added fiber() mesh key, made minor fixes.
+- module -S: renamed result options into -resnode, -reselt and -reselset; added
+  -resmesh and -res<entity>, added -orispace and -entity, added orientation
+  distribution computation (-resmesh odf and odfn), fixed merging of simulation
+  directories, rewrote and cleaned code, made minor improvements.
+- module -V: revised options -show* file(<file_name>); added support for
+  -datanodecol in vtk file, renamed -imagebackground into -scenebackground,
+  rename -showshadow into -sceneshadow, made minor fixes.
+- documentation: moved to html documentation using Sphinx and reStructuredText,
+  revised description of -V, made minor fixes and improvements.
+- general: improved testing, added FORCE_BUILTIN_LIBSCOTCH and
+  FORCE_BUILTIN_NLOPT.
+
+* Incompatible changes:  In -S, renamed options -noderes, -eltres and -elsetres
+  into -resnode, -reselt and -reselset.  -show* file(<file_name>) now takes
+  individual logical values for the entities instead of a list of entities.  In
+  -V, renamed (rarely used) -imagebackground into -scenebackground and
+  -showshadow into -sceneshadow.
+
+New in 4.2.0 (11 Jun 2021):
+- module -T: added -transform "cut(torus)" for tesses, -transform tesrrenumber,
+  tesrtranslate, tesrmerge, resetorigin, resetcellid, rmcell, orirotate and
+  resetlabels, bumped tesr file format to 2.1, improved -morpho tesr when
+  -transform cut is also used (to generate non-convex domains), made minor
+  fixes and improvements.
+- module -M: multithreaded hex meshing, fixed -faset and bumped msh version
+  file to 2.2.1 accordingly, fix -showvox, made minor fixes.
+- module -V: fixed -showcell "file()", changed default values to -datacellcol
+  id, -dataelsetcol id and -datavoxedgerad 0 (colors are now generated by
+  default), made minor improvements.
+- module -S: added -elsetres oridisanisoaxes, oridisanisoangles and
+  oridisanisofact, added -noderes disp, added support for multiphase and
+  restarted simulations.
+- general: integrated NLopt and libscotch in contrib (they do not need to be
+  installed on the system itself any more), improved CMake, fixed compilation
+  with GCC 9.3.0.
+
+* Incompatible changes: Neper -S should preferably be used with FEPX v1.2.0 or
+  greater.
+
+New in 4.1.2 (21 Jan 2021):
+- module -T: added custom (user-defined) statistical distribution, added
+  physical volumes tag to geo file, fixed -statvox, made minor improvements.
+- module -M: fixed -elt hex (faset output disabled), made minor fixes.
+- documentation: made minor fixes and improvements.
+
+New in 4.1.1 (24 Nov 2020):
+- module -T: applied -oridistrib to tesr, fixed -transform cut in 2D, added
+  tessellation key oridisanisodeltas, made minor code cleaning.
+- module -S: added -elsetres, made minor improvements.
+- module -V: made minor fixes.
+- documentation: made minor improvements and fixes.
+- general: made minor fixes.
+
+New in 4.1.0 (21 Oct 2020):
+- module -T: extended -group to tesr, added -statgroup, added raster
+  tessellation keys area, vol, size and oridisaniso*, made minor fixes.
+- module -M: sped up -part, added options -sortnode and -sortelt.
+- module -V: added options -showedge and -dataedgerad for 2D tesrs, made small
+  improvements, made minor fixes.
+- module -S: extended support of FEPX raw results, extended -*res options to
+  general expressions based on the mesh and simulation results (or subresults),
+  added ability to import results from external files, added ability to remove
+  results, improved terminal output, cleaned code, made minor fixes and
+  improvements.
+- documentation: added several -S examples, made minor fixes and improvements.
+
+New in 4.0.2 (17 Sep 2020):
+- module -V: fixed png output (disabled defective povray's version test).
+- general: made minor improvements.
+
+New in 4.0.1 (11 Sep 2020):
+- module -T: added -transform unindex, fixed -morpho "file(tess_file)",
+  improved -oriformat, made minor fixes.
+- module -M: added col_stdtriangle and col_rodrigues mesh keys, fixed loading
+  of pre-version 4 tessellations, fixed -meshface, made minor improvements.
+- module -V: added -showvoidvox and -datavoidvoxcol, made minor fixes and code
+  cleaning.
+- documentation: made minor fixes and improvements.
+
+New in 4.0.0 (30 Jul 2020):
+- general: Neper now has a companion program for polycrystal plasticity, the
+  new free / open-source finite element software package for polycrystal
+  plasticity, FEPX (http://fepx.info), added new module -S for post-processing
+  simulation results, added support for OpenMP on Mac.
+- module -T: added option -group to (primarily) represent multiphase materials,
+  added option -oridistrib to define in-cell orientation distributions, renamed
+  orientation descriptors from e, ek, er, rtheta, R, q and g to euler-bunge,
+  euler-kocks, euler-roe, axis-angle, rodrigues, quaternion and rotmat, changed
+  default orientation descriptor to rodrigues, added support for active and
+  passive orientation conventions to -oridescriptor, added circularity variable
+  (as a synonym of sphericity), renamed tessellation key modeid into mode and
+  lamid into lam, added tessellation key per, added options -stattess and
+  -stattesr, made minor fixes.
+- module -M: revised msh file content to include microstructure definition
+  (element orientations, groups, etc.), element and node partitions, nsets and
+  fasets, added options -statmesh, -statmesh0d, -statmesh1d, -statmesh2d,
+  -statmesh3d and -statmeshco, updated per file, changed default value of
+  -faset to all, improved -loadmesh, added format msh4 (msh version 4), added
+  in-elset orientation distributions (as defined by -oridistrib in -T), added
+  ori and bcs (optional FEPX) output files, added mesh key per, made .per
+  output optional, cleaned code and made minor fixes.
+- module -V: added simulation directory as generated by -S as input data, added
+  -simstep, added VTK output, added ipf orientation coloring, changed default
+  color map for real values to viridis (the previous one is available as
+  'legacy') and added many other colormaps using tinycolormap, fixed colors,
+  added -datapointedgerad and -datapointedgecol, added -outdir, renamed
+  -data*colscheme arguments for orientations, revised and extended -data
+  options accordingly, made minor fixes.
+- documentation: improved developer's guide, made minor fixes and improvements.
+
+Note on backward (in)compatibility:
+- module -T: renamed orientation descriptors (old tessellation files can be
+  loaded, but option arguments must be updated), changed default orientation
+  descriptor to rodrigues in all output files.
+- module -M: changed nset and faset default values, added several fields to the
+  msh file (those who have their own parser will need to update it), made .per
+  output optional (use -format per to get it).
+- module -V: changed default colormap for real values from
+  blue,cyan,yellow,green to viridis, decreased average brightness.
+
+New in 3.5.2 (12 Mar 2020):
+- module -T: fixed -morphooptiobjective, fixed -statface nfaces, added
+  tessellation keys nfaces_samedomain, nfacenb_samedomain, npolys_samedomain
+  and npolynb_samedomain, fixed -transform planecut, added -transform
+  crop(cube(...)) for tess, fixed tess loading, modified syntax of -transform
+  crop for tesr, minor fixes.
+- module -M: fixed meshing of tessellation cut by a sphere, fixed .per file for
+  2nd-order meshing, fixed 2nd-order meshing with -interface discontinuous and
+  cohesive, added -transform explode, added -statelt2d length, added -transform
+  slice, fixed -statelt area for quad element, fixed -nset with discontinuous
+  or cohesive (interface) mesh, added mesh keys, improved inp format, minor
+  fixes.
+- module -V: minor improvements.
+- documentation: minor fixes.
+
+New in 3.5.1 (15 Nov 2019):
+- module -T: fixed -morpho from wide grain size distributions, sped up -morpho
+  tesr using openGJK, added olmap format.
+- module -M: added -elt quad9, added -transform rotate, added fasets to .msh
+  file, fixed -elt hex for non-cubic tessellations.
+- module -V: fixed scale labels.
+- general: fixed compilation without openMP.
+
+New in 3.5.0 (01 Oct 2019):
+- module -T: added -transform slice and oriaverage,
+  added new statistical distributions to -morpho: beta, lorentzian, studentst,
+  weibull, breitwigner, expnormal, moffat, pearson7, pseudovoigt and
+  skewnormal, added endpoints to statistical distributions, added variable
+  1-sphericity to -morpho, added tessellation keys, added -orioptilogvar,
+  improved argument reading (multiscale tessellation), improved tesr format,
+  improved -transform renumber, improved -ori fibre, improved -statcell
+  convexity, replaced -transform plane with -transform hspace, fixed -loadtesr
+  file.tesr:..., fixed -statvox e, fixed -for ori, fixed -domain, fixed -morpho
+  centroidal, fixed tesr reading, fixed vtk output, enrich tesr file, made
+  minor fixes.
+- module -M: added -transform scale, translate and smooth, added
+  -transporteltmethod, added -transportfepx, added mesh keys, added -performat,
+  added kocks file to -for fepx:legacy, fixed -interface cohesive for Abaqus,
+  fixed -elt hex, merged -scale into -transform, speed up -transport, made
+  minor fixes.
+- module -V: added -showvox, added -datavoxcol disori, added colour schemes
+  R(), r, theta and rtheta, added -imageformat pov:objects, improved
+  -includepov, fixed visualization of periodic meshes, made small fixes.
+- documentation: made minor fixes and improvements.
+- general: fixed compilation when GSL and NLopt locally installed, website now
+  at http://neper.info.
+
+New in 3.4.0 (15 Apr 2019):
+- module -T: added tessellation cutting (to get non-convex domains) using
+  -transform cut, added cell merging and removal using -transform mergecell and
+  rmcell, added -transform resetcellid, added -ori spread, improved -morpho
+  lamellar, improved -morpho diameq, added -format stl:bycell, added
+  tessellation keys, fixed -morpho aspratio and rasterization of periodic
+  tessellations, fixed -domain circle:split, made small fixes and improvements.
+- module -M: made -interface mutliscale, renamed -mesh3dclconv into
+  -mesh3dclreps, improved -cl, -rcl and -mesh3dclreps argument expressions,
+  speed up -transport, fixed 2D remeshing, speed up -statelt and -statelset,
+  added -[r]clface, -[r]cledge and -[r]clver.
+- module -V: improved visualization of non-convex cells, fixed visualization of
+  hex meshes, minor other fixes.
+
+New in 3.3.0 (25 Jul 2018):
+- New paper: "R. Quey, A. Villani, and C. Maurice. Nearly uniform
+  sampling of crystal orientations. J. Appl. Crystallogr., vol. 51,
+  doi:10.1107/S1600576718009019, 2018."
+- module -T: added -ori uniform for uniform orientation distribution,
+  added sister options -orioptiini, -orioptifix, -orioptistop and
+  -orioptineigh, added -morpho tocta, columnar, bamboo and aspratio,
+  fixed -morpho multimodal, improved -morphooptiini, added -transform
+  translate, fixed tesr output for periodic tessellations, fixed tess to
+  tesr conversion, added several tessellation keys, merged option -scale
+  into -transform, made minor improvements.
+- module -M: fixed meshing of periodic tessellation with openMP, allowed
+  Gmsh development versions.
+- module -V: improved camera parameters, fixed -slicemesh for hex
+  meshes.
+
+New in 3.2.0 (23 May 2018):
+- general: Neper is now fully multithreaded.
+- module -T: improved -morpho, added -morpho variable:value, added -morpho
+  centroidtol, improved -morphooptiobjective, improved -transform crop, fixed
+  -n from_morpho, added -transform addbuffer, renamed -datarpt* into -datavox*,
+  added -transform renumber, added -domain stdtriangle, added **oridata to the
+  tesr file, added -statvox, speed up tesr generation, added -morphooptilogtime
+  val_ keys, minor fixes.
+- module -M: improved inp format.
+- module -V: improved msh reading, added -datapointrad arr, added -datavox
+  options.
+- documentation: small fixes.
+
+New in 3.1.1 (20 Feb 2018):
+- New paper: "R. Quey and L. Renversade, Optimal polyhedral description of 3D
+  polycrystals: Method and application to statistical and synchrotron X-ray
+  diffraction data, Comput. Methods Appl. Mech. Engrg., vol. 330, pp. 308-333,
+  2018."
+- module -T: fixed -scale, added -domain rodrigues.
+- module -M: fixed mesh of regularized tessellation through 2D-mesh pinches
+  correction, fixed -stat when a tesr is meshed, improved -loadmesh, added
+  -mesh2dpinchfix, added test on Gmsh's version.
+- module -V : fixed -datapolyscale.
+- general: fixed use without nlopt or openmp.
+
+New in 3.1.0 (05 Sep 2017):
+- module -T: made all options applicable to multiscale tessellations,
+  improved -morpho for all types of data, improved -morpho*
+  options, added -n from_morpho to set the number of cells from all
+  -morpho inputs, added -format stl, added -transform crop and 2d, added
+  -morphooptilogtesr, added tessellation key 'scale', included openMP
+  parallelization for -morpho tesr.
+- module -M: allowed -interface cohesive -periodic in 2D, improved -dim
+  for -format geof, improved -format geof, minor fixes.
+- module -V: added -datapointrad tor and disc.
+- documentation: small fixes.
+- general: support OpenMP.
+
+New in 3.0.2 (16 Feb 2017):
+- module -T: added -transform scale and transform rotate for scalar
+  tessellations (.tess), fixed -morpho with -periodic, fixed -morpho
+  with non-unitary domains, fixed -statedge/-statface theta with
+  -oricrysym hexagonal, improved -ori, added -morpho
+  lamellar(v=crysdir), added ***tess/**cell/*crysym section to .tess
+  file, fixed -morphooptialgo random, small fixes.
+- module -M: fixed -interface cohesive in 2D and 3D (for Abaqus), enable
+  -interface discontinuous and cohesive for periodic tessellations,
+  added -format msh:binary, fixed faset internal for 3D, added
+  -transport node:..., changed point keys "elt3d" and "elset3d" into "elt"
+  and "elset" (now apply to 3D or 2D), small fixes.
+- documentation: minor fixes.
+
+New in 3.0.1 (01 Dec 2016):
+- module -T: fixed up options -periodic and -morphooptialgoneigh qsort,
+  added tessellation key `modeid' (for cells), added -morpho
+  cube(N1,N2,N3) and -morpho square(N1,N2), enabled -loadtess -scale,
+  added -oricrysym hexagonal, added tessellation keys 'nfacelist' and
+  'theta', cleaned code, fixed documentation of .tess file, added tests
+  on conflicing options.
+- module -M: added option -scale, fixed hexahedral meshing of periodic
+  tessellations, added physical groups to .msh, fixed 2D meshes in
+  Abaqus (.inp) file, fixed up option -faset internal.
+- module -V: fixed options -dataseed*.
+- general: removed libmatheval dependency, fixed testing.
+
+New in 3.0.0 (12 Sep 2016):
+- module -T: added 3 major capabilities: (i) tessellation generation
+  from morphological cell properties (options starting by -morpho),
+  (ii) multiscale tessellation generation (using the :: separator), and
+  (iii) periodic and semi-periodic tessellation generation (option
+  -periodic); made some other improvements and some clean up all over
+  the place.
+- module -M: added ability to mesh the new tessellations, including
+  periodic tessellations; added interface meshing using cohesive
+  elements (option -interface); made small other improvements.
+- module -V: made small improvements.
+- module -D: replaced by "make test" using CTest.
+- new development website: https://github.com/rquey/neper.
+
+New in 2.0.5 (06 Feb 2016):
+- module -T: fixed up -domain planes in 3D, added -domain sphere, added
+  'rotate', 'translate' and 'scale' arguments to -domain, added normal
+  specification in -morpho lamella, minor other improvements.
+- module -M: fixed up vtk output.
+- module -V: added -datacellcol id:filename, fixed up options -data*col
+  id.
+- module -D: minor improvements.
+
+New in 2.0.4 (22 Jun 2015):
+- module -T: fixed up regularization in 2D, extended -morpho planes to
+  2D, added semi-periodicity for raster tessellations, minor fixes.
+- module -M: fixed up 2D mesh output in Abaqus format, minor fixes.
+- module -V: fixed up -datacellcolscheme, improved -cameracoo to account
+  for the tessellation/mesh dimensions.
+
+New in 2.0.3 (27 Nov 2014):
+- module -M: fixed up bug on Mac OS X, fixed up Ctrl-C, fixed up and
+  speed up option -statpoint 2dmesh*.
+- module -T: improved options for 2-scale tessellations, added option
+  '-clip'.
+
+New in 2.0.2 (29 Sep 2014):
+- module -T: fixed up regularization of cylinder tessellations, fixed up
+  option '-domain planes', added tessellation cell domain, fixed up 3dec
+  and ply support, added Wavefront obj format, added / fixed up
+  tessellation keys.
+- module -M: added vtk mesh format, fixed up fepx and geof mesh formats,
+  added extrusion of a 2D mesh to get a 3D mesh (option -dim), fixed up
+  topology reconstruction.
+- module -V: added points plotting as cubes, spheres, cylinders or
+  ellipsoids (options -showpoint and -datapoint*).
+
+New in 2.0.1 (12 Mar 2014):
+- Fixed up compilation on some systems, added support for libscotch
+  version 6.0, small fixes and cleanups.
+- module -T: enabled square and cube tessellations in .tess format,
+  fixed up cell sorting, made option -id mandatory, improved
+  regularization of 2D tessellations, added bunch of tessellation
+  keys, small fixes.
+- module -M: added 'domtype' mesh key.
+- module -V: fixed up simultaneous tess and mesh printing, fixed up
+  colouring based on id, improved camera positioning for 2D and 1D
+  inputs, added coordinate system, improved option -slicemesh, added
+  options -data*scaletitle, improved -data*scale options.
+
+New in 2.0.0 (10 Jan 2014):
+- General: Full restructuring and added many new features.  Neper now
+  has 3 main modules: tessellation module (-T), meshing module (-M) and
+  visualization module (-V); details are provided below. Added
+  developer's guide and module (-D). Documentation has been much
+  improved.
+- module -T: added several tessellation algorithms (hardcore Voronoi
+  and Laguerre Voronoi); added orientation generation (was previously in
+  -O); significantly sped up tessellation; included and significantly
+  sped up regularization (was previously in -FM); added 2-scale
+  polycrystal generation; added 2D and 1D supports; improved statistics;
+  enabled both scalar (tess) and raster (tesr) outputs; cleaned up tess
+  file.
+- module -M: module for free and mapped meshings (merging of -FM and
+  -MM). Removed regularization (now in -T); added per-cell mesh size
+  definition; sped up multimeshing; improved statistics.
+- module -V: full restructuring; added support for 2D and 1D
+  tessellations and meshes; the way all entities are shown (cells,
+  polyhedra, faces, edges, vertices, germs, 3D/2D/1D/0D element sets and
+  elements, nodes) can be set in great detail; added transparency.
+
+New in 1.10.3 (26 Nov 2012):
+- module -T: added 3dec geometry format, added option -checktess, minor
+  improvements, added individual file extension support in -stattess,
+  changed option -neigh 1 to -statp i,f,npl,fal,feql.
+- module -FM: added 3dec geometry format; changed "top" and "bot" nset
+  names for cylindrical domains to "z0" and "z1"; minor bug fixes;
+  improved fev format support; added individual file extension support in
+  options -stattess and -statmesh.
+- module -O:  minor bug fixes.
+- module -MM: sped up meshing; fixed -domain, -scale and -nset options,
+  add .nper file for periodicity conditions; fixed msh output for meshes
+  with different element dimensions; minor other bug fixes.
+- module -VS: sped up meshing reconstruction and PNG file generation,
+  added option '-camerasky', added option '-showeltedge', sped up mesh
+  reconstruction, minor fixes
+- documentation: minor fixes.
+- General: minor fixes.
+
+New in 1.10.2 (O9 Aug 2012):
+- module -T: fixed -centroid option.
+- module -FM: fixed list of available meshing algorithms.  Added
+  tests.
+- module -MM: fixed nset syntax in inp (Abaqus) files.
+- module -VS: added capability to plot mapped meshes.
+- General: various minor improvements, code cleaning.
+
+New in 1.10.1 (08 June 2012):
+- Bug fix to get Neper working after invoquing `make install'.
+
+New in 1.10.0 (04 June 2012):
+- General: New (hopefully simpler) installation procedure based on Cmake.
+  Added support for domains of any convex polyhedral shape.
+- module -VS: major code rewriting and option changes. New capabilities
+  for defining the colours and sizes of the tessellation / mesh
+  (including gradients).  Added options to show only specific parts of the
+  tessellation / mesh and to view slices of a mesh. Other small
+  enhancements.
+- module -T : added option `-domain' to specify the shape of the domain
+  (cuboidal, cylindrical or of any convex shape), small bug fixes, added
+  centroid Voronoi tessellation generation (option -centroid), merged
+  option -centrecoo into option -morpho, added polyhedron centroid
+  coordinates in file .stt3, changed option -load to -loadtess, added
+  output format `.ply' (thanks Ehsan!).
+- module -FM: mesh partitionning needs libscotch version 5.1.12 or later,
+  small bug fixes, changed default value of -faset to "" (i.e. no faset
+  in output), fixed bug for Abaqus output, added polyhedron centroid
+  coordinates in file .stt3, added output format `.ply' (geometry only).
+- module -MM: new options -dsize and -scale, new option -loadmesh, new
+  option -outdim, changed arguments of -ttype, changed default value of
+  -faset to "" (i.e. no faset in output), fixed bug for Abaqus output,
+  small bug fixes.
+
+New in 1.9.2 (Sep 2011):
+- module -T: added option -morpho for specifying the type of grain
+  structure (equiaxed, columnar or bamboo), merged option -regular
+  with -morpho, added post-processing -neighbour option for information
+  on the polyhedron neighbours, added geo (Gmsh geometry) output format
+  (mostly for visualization), fixed bugs.
+- module -MM: proper processing of the input tess files, added msh
+  (Gmsh) and inp (Abaqus) output formats, added options -morpho and
+  -centrecoo (as in module -T), small bug fixes, code cleaning.
+- module -FM: added geo (Gmsh geometry) output format (mostly for
+  visualization), small bug fixes.
+- documentation: small corrections.
+
+New in 1.9.1 (May 2011):
+- module -FM: fixed bug occurring when -mesh3dalgo is not set by the
+  user.  Small other bug fixes.
+- module -MM: small bug fixes.
+
+New in 1.9.0 (Apr 2011):
+This is a major release.  Neper now has its own paper:
+"R.Quey, P.R. Dawson and F. Barbe.  Large-scale 3D random polycrystal
+ for the finite element method: Generation, meshing and remeshing.
+ Computer Methods in Applied Mechanics and Engineering,
+ Vol. 200, pp. 1729--1745, 2011."
+Please cite it in your works if you use Neper.
+- General: added option --rcfile to disregard / change the
+  initialization file; big distribution and source clean up; bug fixes.
+- module -T: added capability to generate regular morphologies
+  (truncated octahedra), tess file format bumped to 1.9; big clean up.
+- module -FM: included multimeshing, remeshing and mesh partitioning
+  capabilities; big clean up.  Neper now uses the *standard* Gmsh
+  distribution for 2D and 3D meshings (versions >=2.4.2).  Strongly
+  reduced memory usage.
+- module -O: added capability to handle different orientation
+  descriptors.
+- module -VS: new visualization module to generate publication-quality
+  images (PNG format) of the tessellations, meshes and more...
+
+New in 1.8.1 (Aug 2009):
+- upgraded website at http://neper.sourceforge.net
+- module -T: new file format ***tess1.8, new option -restart to load an
+  existing tessellation (not through std input any more), new option
+  -printformat, bug fixes.
+- module -MM: bug fixes.
+- module -FM: new output format mae, new option -restart to restart from
+  an existing geometry or mesh (options -mesh and -conv removed); new
+  options -printformat and -maeextension; better mesh numbering (+ new
+  options -elementfirstid and -nodefirstid), new way to choose the node
+  sets to output (-nset 4), fixed option -estat, renamed -bwcy-clmin to
+  -clmin, cleaned bunch of options, bug fixes.
+- module -O: added option -euleranglesconvention (Bunge, Roe & Kocks);
+  new output formats mae and geof (option -format).
+- manual: some corrections.
+
+New in 1.8.0 (Jul 2009):
+- First GPL-distributed version of Neper.
