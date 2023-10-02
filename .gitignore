@@ -6,6 +6,7 @@
 build/
 release/
 downloads/
+external/
 
 # CMakeFiles
 CMakeCache.txt
