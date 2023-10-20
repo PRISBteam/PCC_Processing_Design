@@ -14,6 +14,7 @@
 
 /// Attached user-defined C++ libraries:
 // External
+#include <Eigen/SparseCore>
 
 // Internal
 #include "../PCC_Support_Functions.h" // It must be here - first in this list (!)
@@ -80,7 +81,7 @@ CellsDesign PCC_Processing(std::vector<std::vector<int>> &Configuration_State,st
             cout << "Random processing in operation: cell_type : "s << cell_type << endl;
             Out_logfile_stream << "Random processing in operation: cell_type : "s << cell_type << endl;
 
-///***            special_x_sequence = Processing_Random(cell_type, Configuration_State, max_fractions_vectors);
+            special_x_sequence = Processing_Random(cell_type, Configuration_State, max_fractions_vectors);
         } // End of 'R' type simulations
 
         else if (ptype_vector.at(cell_type) == "F" && max_fractions_vectors[cell_type].size() > 0) { // Maximum <functional> production

@@ -18,6 +18,7 @@
 
 // local libraries
 #include "../../PCC_Objects.h"
+#include "../../PCC_Support_Functions.h" // It must be here - first in this list (!)
 
 using namespace std; // standard namespace
 
@@ -25,8 +26,9 @@ typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which decla
 
 extern std::vector<unsigned int> CellNumbs;
 extern ofstream Out_logfile_stream;
-//extern string source_path;
+extern vector<char*> paths;
 //extern int dim;
+int dim0 = 3; //// to be DELETED
 
 #include "Processing_Assignment_functions.h"
 ///------------------------------------------------------------------
@@ -44,10 +46,10 @@ unsigned int NewCellNumb_R(unsigned int OCellsNumb){ // Random generation machin
     return New2CellNumb;
 // Fast standard generator instead::  return New2CellNumb = ::rand() % OCellsNumb;
 }
-/**
+
 /// (1.2) Quasi-random choice of the element with # New2CellNumb from the list of numbers {0 to OCellsNumb}
 // This RW choose ANY faces, not necessary only ordinary ones (!)
-vector<int> NewFacesStrip_RW( int iniFaceNumber, int strip_length, int Leap_friquency = 1, double Leap_dist = 1) { // Random generation machine for a strips of new 2-Cells
+vector<int> NewFacesStrip_RW( int iniFaceNumber, int strip_length, int Leap_friquency, double Leap_dist) { // Random generation machine for a strips of new 2-Cells
     unsigned int New2CellNumb;  vector<int> NewStripVector_RW;
     vector<double> neigh_Faces; // vector for all neighbours of each face
     /// Sparse Face Adjacency matrix - reading from the file of the considered PCC
@@ -184,7 +186,7 @@ Configuration_State[cell_type].push_back(var);
 
 return special_cells_sequence;
 } // end of Random generation mode
-
+/**
 /// (2.2) Lengthy special strips with the distribution of lengths taken from file
 vector<vector<int>> RStrips_Distribution( std::vector<unsigned int> const &face_strip_distribution, std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence) {
 ///================================================================= 'L' =======================================================================////
@@ -245,7 +247,7 @@ vector<vector<int>> RStrips_Distribution( std::vector<unsigned int> const &face_
 
     return RW_series;
 } // end  of Random lengthy inclusions
-
+**/
 /// (3) Maximum Functional based generation process
 /*!
  * @param S_Vector

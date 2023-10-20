@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+#include <Eigen/SparseCore>
+
+
 using namespace std; // standard namespace
 
 #include "PCC_Support_Functions.h" // It must be here - first in this list (!)
@@ -34,9 +37,6 @@ std::vector<double> res; double d = 0.0;  // function output
     return res;
 } // END of VectorDReader()
 
-
-
-/*
 /// Creation Eigen::Sparse_Matrix from file
 Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsigned int Cols) {
     /// function output
@@ -66,7 +66,7 @@ Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsig
 }
 
 /// Function for reading triplet list from file
-vector<Triplet<double>> TripletsReader(char* SMpath) {
+vector<Eigen::Triplet<double>> TripletsReader(char* SMpath) {
     typedef Eigen::Triplet<double> Tr; // Eigen library class
     std::vector<Tr> tripletList; // Probe vector of triplets
 
@@ -83,6 +83,7 @@ vector<Triplet<double>> TripletsReader(char* SMpath) {
     return tripletList;
 }
 
+/**
 /// Function for reading tuples list from file
 vector<vector<double>> VectorVectors4Reader(char* SMpath) {
     vector<vector<double>> res;
