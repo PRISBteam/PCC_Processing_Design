@@ -3,9 +3,17 @@
 #include <string>
 #include <vector>
 
-using namespace std; // standard namespace
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
-extern std::vector<tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, grain_coordinates_vector;
+using namespace std; // standard namespace
+using namespace Eigen; // standard namespace
+
+
+extern std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, grain_coordinates_vector; // coordinate vectors defined globally
+extern std::vector<unsigned int> CellNumbs; // number of cells in a PCC defined globally
+
+typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which declares a column-major sparse matrix type of doubles with the nickname 'SpMat'
 
 #include "PCC_Objects.h"
 
@@ -134,7 +142,7 @@ extern std::vector<tuple<double, double, double>> node_coordinates_vector, edge_
 
 /// # 3 # The class of SUBCOMPLEX
 
-Subcomplex::Subcomplex(unsigned int subcomplex_id_new) { // constructor 1, simple
+    Subcomplex::Subcomplex(unsigned int subcomplex_id_new) { // constructor 1, simple
         subcomplex_id = subcomplex_id_new;
     }
     //2
@@ -204,52 +212,126 @@ Subcomplex::Subcomplex(unsigned int subcomplex_id_new) { // constructor 1, simpl
     std::vector<tuple<double, double, double>> Subcomplex::Get_common_faces_coordinates(unsigned int subcomplex_id){
         return common_faces_coordinates; }
 
-    Subcomplex Get_half_plane(Subcomplex new_sub, double crack_length, std::vector<unsigned int> const &half_sub_sfaces_sequence){
-//        vector<tuple<double, double, double>> grain_coordinates = grain_coordinates_vector;
-//REPAIR        cout << " grain_coordinates_vector " << grain_coordinates.size() << endl;
-        //cout << "Xmin " << get<0>(minmax_tuple.at(0)) << " Ymin " <<get<1>(minmax_tuple.at(0)) << " Zmin " << get<2>(minmax_tuple.at(0)) << endl;
-        std::vector<tuple<double, double, double>> face_coordinates = face_coordinates_vector;
-//REPAIR        cout << " face_coordinates_vector " << face_coordinates.size() << endl;
-
-        Subcomplex half_plane_cut(1);
-        std::vector<unsigned int> half_sub_grains_sequence, half_common_faces_sequence;
-//        for (auto  itr = grain_coordinates.begin(); itr != grain_coordinates.end(); ++itr)
-//            if (std::find(sub_grains_sequence.begin(), sub_grains_sequence.end(), distance(grain_coordinates.begin(),itr)) != sub_grains_sequence.end()
-//                    && get<0>(*itr) < crack_length) half_sub_grains_sequence.push_back(distance(grain_coordinates.begin(),itr));
-//REPAIR cout << "half_sub.Get_grains_sequence(0) " << half_sub.Get_grains_sequence(0).size() << endl;
-        for (auto half_grains : new_sub.Get_grains_sequence(0)) {
-            if (get<1>(grain_coordinates_vector.at(half_grains)) < crack_length) {
-//REPAIR                cout << " half_grains " << half_grains << " half_grain_coordinates " << get<0>(grain_coordinates_vector.at(half_grains)) << " crack_length " << crack_length << endl;
-                half_sub_grains_sequence.push_back(half_grains); //// get<0> ->> only along X now!!!
-            }
-        }
-///TEMPORARILY!!!
-//        for (auto  itr2 = face_coordinates.begin(); itr2 != face_coordinates.end(); ++itr2)
-//            if (std::find(sub_common_face_sequence.begin(), sub_common_face_sequence.end(), distance(face_coordinates.begin(),itr2)) != sub_common_face_sequence.end()
-//                    && get<0>(*itr2) < crack_length) half_common_faces_sequence.push_back(distance(face_coordinates.begin(),itr2));
-//        for (auto  itr3 = face_coordinates.begin(); itr3 != face_coordinates.end(); ++itr3)
-//            if (std::find(sub_sfaces_sequence.begin(), sub_sfaces_sequence.end(), distance(face_coordinates.begin(),itr3)) != sub_sfaces_sequence.end()
-//                && get<0>(*itr3) < crack_length) half_sub_sfaces_sequence.push_back(distance(face_coordinates.begin(),itr3));
-
-        half_plane_cut.Set_grains_sequence(half_sub_grains_sequence); // all grains before cut
-        ///       half_plane_cut.Set_common_faces_sequence(half_common_faces_sequence); // common faces
-        half_plane_cut.Set_sfaces_sequence(half_sub_sfaces_sequence); //special faces
-        //half_plane_cut.Set_common_faces_coordinates(common_faces_coordinates);
-        //half_plane_cut.Set_sub_grain_coordinates(subcomplex_grain_coordinates);
-        //half_plane_cut.Set_cfaces_sequence(c_sub_faces_sequence); //cracked (induced) faces
-        half_plane_cut.sub_length = crack_length;
-
-        return half_plane_cut;
-    } // end of Get_half_plane() function
-
 /// ========== END of class SUBCOMPLEX
 
-/// # 8 # The class of a PROCESSED COMPLEX
+/// # 4 # The class of a PROCESSED COMPLEX
     void ProcessedComplex::Set_design(CellsDesign processed_pcc_design) {
         pcc_design = processed_pcc_design;
     }
 
 /// ========== END of class PROCESSED COMPLEX functions description
+
+
+/// # 5 # The class of Polytopes in a PCC
+
+    Polytope::Polytope(unsigned int grain_new_id) { // constructor 1 simple
+        grain_id = grain_new_id;
+    }
+
+    void Polytope::Set_node_ids(unsigned int grain_id, SpMat const &GFS, SpMat const &FES, SpMat const &ENS) { // set the node ids
+        /// GFS -> FES -> ENS
+        if(node_ids.size() == 0) {
+            for(unsigned int l = 0; l < CellNumbs.at(2); l++) {// over all Faces (l)
+                if (GFS.coeff(l, grain_id) == 1) {
+                    for (unsigned int j = 0; j < CellNumbs.at(1); j++) // over all Edges (j)
+                        if (FES.coeff(j, l) == 1) { // at the chosen Face with ID = 'l'
+                            for (unsigned int i = 0; i < CellNumbs.at(0); i++) // over all Nodes
+                                if (ENS.coeff(i, j) == 1) node_ids.push_back(i); // at the chosen Face with ID = 'l'
+                        } // end of if (FES.coeff(l, j) == 1)
+                } // end of (GFS.coeff(m, l) == 1)
+            } // end of for(unsigned int l = 0; l < CellNumbs.at(2); l++) - Faces
+
+        }/// end of if(node_ids.size() == 0)
+
+    } // end of Set_node_ids()
+
+    void Polytope::Set_Faces_list(unsigned int grain_id, SpMat const &GFS) {
+        for (unsigned int l = 0; l < CellNumbs.at(2); l++) // for each GB
+            if (GFS.coeff(l, grain_id) == 1)
+                Faces_list.push_back(l);
+    } // end of Set_GBs_list()
+
+    vector<unsigned int> Polytope::Get_Faces_list() {
+        if (Faces_list.size() > 0) return Faces_list;
+        else { cout << "coution GBs_list.size() = 0! Please Set_GBs_list(unsigned int grain_id, SpMat const &GFS)  first!"s << endl;
+            return {0};
+        };
+    } // end of Get_GBs_list()
+
+    /// return - vector of all node (vertices) coordinates of a grain
+    void Polytope::Set_node_coordinates(unsigned int grain_id) { // set the node ids from Tr = triplet list
+//        for (auto  itr = node_ids.begin(); itr != node_ids.end(); ++itr)
+        //if(find(node_ids.begin(), node_ids.end(), distance(node_ids.begin(), itr)) != node_ids.end())
+//                node_coordinates.push_back(vertex_coordinates_vector.at(*itr)); // vector<unsigned int> node_ids;
+        if(node_ids.size() > 0) {
+            for (auto ids: node_ids) {
+//REPAIR        cout << "vertex_coordinates_vector size " << vertex_coordinates_vector.size() << endl;
+//REPAIR        cout << "ids: " << ids << " node_coordinates size: " << get<0>(vertex_coordinates_vector.at(ids)) << endl;
+                node_coordinates.push_back(node_coordinates_vector.at(ids)); // vector<unsigned int> node_ids;
+//REPAIR cout << "grain id: " << grain_id << " node_coordinates size: " << node_coordinates.size() << endl;
+            }
+
+        }
+        else {
+            cout << "Caution! The size of node_ids vector of the grain " << grain_id << " is 0 !" << endl;
+            node_coordinates.push_back(make_tuple(0,0,0)); /// change after !!
+        }
+    } // the end of Set_node_coordinates
+
+    std::vector<unsigned int> Polytope::Get_node_ids(unsigned int grain_id) { // set the node ids
+        return node_ids;
+    }
+
+std::vector<std::tuple<double, double, double>> Polytope::Get_node_coordinates(unsigned int grain_id) { // set the node ids
+        if (node_coordinates.size() != 0) {
+            return node_coordinates;
+        } else if (node_coordinates.size() > 0) {
+            Set_node_coordinates(grain_id);
+            return node_coordinates;
+        } else {
+            throw std::invalid_argument(
+                    "Please call Set_node_coordinates(unsigned int grain_id, vector<tuple<double, double, double>> const &vertex_coordinates) method first!");
+            return node_coordinates;
+        }
+    } // end of  Get_node_coordinates() method
+
+    /// return - vector with two tuples : { x_min, y_min, z_min; x_max, y_max, z_max} of a grain witn number grain_id
+    vector<tuple<double, double, double>> Polytope::Get_minmax_node_coordinates(unsigned int grain_id) { // min and max {x,y,z} values of vertices for a grain
+        vector<tuple<double, double, double>> minmax_tuple;
+        ///Get_node_coordinates(grain_id)
+        vector<tuple<double, double, double>> tup_node_coordinates = Get_node_coordinates(grain_id); // class Grain3D function Get_node_coordinates(grain_id)
+//REPAIR        cout << "Xtup_node_coordinates " << get<0>(tup_node_coordinates.at(0)) << " Ytup_node_coordinates " <<get<1>(tup_node_coordinates.at(0)) << " Ztup_node_coordinates " << get<2>(tup_node_coordinates.at(0)) << endl;
+
+        // separating in three parts
+        vector<double> x_node_coordinates, y_node_coordinates, z_node_coordinates;
+        for (auto itr = tup_node_coordinates.begin(); itr != tup_node_coordinates.end(); ++itr) {
+            x_node_coordinates.push_back(get<0>(*itr));
+            y_node_coordinates.push_back(get<1>(*itr));
+            z_node_coordinates.push_back(get<2>(*itr));
+        }
+//REPAIR        cout << "x_node_coordinates " << (x_node_coordinates.at(0)) << " y_node_coordinates " << (y_node_coordinates.at(0)) << " z_node_coordinates " << (z_node_coordinates.at(0)) << endl;
+//        std::for_each(tup_node_coordinates.begin(), tup_node_coordinates.end(), );
+
+// Return iterators (!)
+        auto itx = std::minmax_element(x_node_coordinates.begin(), x_node_coordinates.end());
+        double xmin = *itx.first;
+        double xmax = *itx.second;
+
+        auto ity = std::minmax_element(y_node_coordinates.begin(), y_node_coordinates.end());
+        double ymin = *ity.first;
+        double ymax = *ity.second;
+
+        auto itz = std::minmax_element(z_node_coordinates.begin(), z_node_coordinates.end());
+        double zmin = *itz.first;
+        double zmax = *itz.second;
+
+        minmax_tuple = {make_tuple(xmin, ymin, zmin), make_tuple(xmax, ymax, zmax)};
+//REPAIR !!        cout << "Xmin " << get<0>(minmax_tuple.at(0)) << " Ymin " <<get<1>(minmax_tuple.at(0)) << " Zmin " << get<2>(minmax_tuple.at(0)) << endl;
+
+        return minmax_tuple;
+    } // end of Get_minmax_node_coordinates()
+
+/// ========== END of class grain3D functions description
 
 
 /*
@@ -344,139 +426,6 @@ private:
     double Cl_energy;
     double total_energy; //= surface_energy + external_elastic_energy + Bl_energy + Cl_energy;
 };
-
-
-
-/// #2# The class of Grains in a PCC
-
-class grain3D {
-    vector<tuple<double, double, double>> minmax_node_coordinates; // a vecor containing two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}
-
-private:
-    // list of nodes
-    vector<unsigned int> node_ids;
-
-    // list of GBs
-    vector<unsigned int> GBs_list;
-
-    // list of triplets of nodes coordinated
-    vector<tuple<double, double, double>> node_coordinates;
-
-public:
-
-    unsigned int grain_id;
-
-    grain3D(unsigned int grain_new_id) { // constructor 1 simple
-        grain_id = grain_new_id;
-    }
-
-    void Set_node_ids(unsigned int grain_id, SpMat const &GFS, SpMat const &FES, SpMat const &ENS) { // set the node ids
-        /// GFS -> FES -> ENS
-        if(node_ids.size() == 0) {
-            for(unsigned int l = 0; l < CellNumbs.at(2); l++) {// over all Faces (l)
-                if (GFS.coeff(l, grain_id) == 1) {
-                    for (unsigned int j = 0; j < CellNumbs.at(1); j++) // over all Edges (j)
-                        if (FES.coeff(j, l) == 1) { // at the chosen Face with ID = 'l'
-                            for (unsigned int i = 0; i < CellNumbs.at(0); i++) // over all Nodes
-                                if (ENS.coeff(i, j) == 1) node_ids.push_back(i); // at the chosen Face with ID = 'l'
-                        } // end of if (FES.coeff(l, j) == 1)
-                } // end of (GFS.coeff(m, l) == 1)
-            } // end of for(unsigned int l = 0; l < CellNumbs.at(2); l++) - Faces
-
-        }/// end of if(node_ids.size() == 0)
-
-    }
-
-    void Set_GBs_list(unsigned int grain_id, SpMat const &GFS) {
-        for (unsigned int l = 0; l < CellNumbs.at(2); l++) // for each GB
-            if (GFS.coeff(l, grain_id) == 1)
-                GBs_list.push_back(l);
-    }
-
-    vector<unsigned int> Get_GBs_list() {
-        if (GBs_list.size() > 0) return GBs_list;
-        else { cout << "coution GBs_list.size() = 0! Please Set_GBs_list(unsigned int grain_id, SpMat const &GFS)  first!"s << endl;
-            return {0};
-        };
-    }
-
-    /// return - vector of all node (vertices) coordinates of a grain
-    void Set_node_coordinates(unsigned int grain_id) { // set the node ids from Tr = triplet list
-//        for (auto  itr = node_ids.begin(); itr != node_ids.end(); ++itr)
-        //if(find(node_ids.begin(), node_ids.end(), distance(node_ids.begin(), itr)) != node_ids.end())
-//                node_coordinates.push_back(vertex_coordinates_vector.at(*itr)); // vector<unsigned int> node_ids;
-        if(node_ids.size()>0) {
-//REPAIR
-            for (auto ids: node_ids) {
-//REPAIR        cout << "vertex_coordinates_vector size " << vertex_coordinates_vector.size() << endl;
-//REPAIR        cout << "ids: " << ids << " node_coordinates size: " << get<0>(vertex_coordinates_vector.at(ids)) << endl;
-
-                node_coordinates.push_back(vertex_coordinates_vector.at(ids)); // vector<unsigned int> node_ids;
-//REPAIR cout << "grain id: " << grain_id << " node_coordinates size: " << node_coordinates.size() << endl;
-            }
-
-        }
-        else {
-            cout << "Caution! The size of node_ids vector of the grain " << grain_id << " is 0 !" << endl;
-            node_coordinates.push_back(make_tuple(0,0,0)); /// change after !!
-        }
-
-    } // the end of Set_node_coordinates
-
-    vector<unsigned int> Get_node_ids(unsigned int grain_id) { // set the node ids
-        return node_ids;
-    }
-
-    vector<tuple<double, double, double>> Get_node_coordinates(unsigned int grain_id) { // set the node ids
-        if (node_coordinates.size() != 0) {
-            return node_coordinates;
-        } else if (node_coordinates.size() > 0) {
-            Set_node_coordinates(grain_id);
-            return node_coordinates;
-        } else {
-            throw std::invalid_argument(
-                    "Please call Set_node_coordinates(unsigned int grain_id, vector<tuple<double, double, double>> const &vertex_coordinates) method first!");
-            return node_coordinates;
-        }
-    }// end of  Get_node_coordinates() method
-
-    /// return - vector with two tuples : { x_min, y_min, z_min; x_max, y_max, z_max} of a grain witn number grain_id
-    vector<tuple<double, double, double>> Get_minmax_node_coordinates(unsigned int grain_id) { // min and max {x,y,z} values of vertices for a grain
-        vector<tuple<double, double, double>> minmax_tuple;
-        ///Get_node_coordinates(grain_id)
-        vector<tuple<double, double, double>> tup_node_coordinates = Get_node_coordinates(grain_id); // class Grain3D function Get_node_coordinates(grain_id)
-//REPAIR        cout << "Xtup_node_coordinates " << get<0>(tup_node_coordinates.at(0)) << " Ytup_node_coordinates " <<get<1>(tup_node_coordinates.at(0)) << " Ztup_node_coordinates " << get<2>(tup_node_coordinates.at(0)) << endl;
-
-        // separating in three parts
-        vector<double> x_node_coordinates, y_node_coordinates, z_node_coordinates;
-        for (auto itr = tup_node_coordinates.begin(); itr != tup_node_coordinates.end(); ++itr) {
-            x_node_coordinates.push_back(get<0>(*itr));
-            y_node_coordinates.push_back(get<1>(*itr));
-            z_node_coordinates.push_back(get<2>(*itr));
-        }
-//REPAIR        cout << "x_node_coordinates " << (x_node_coordinates.at(0)) << " y_node_coordinates " << (y_node_coordinates.at(0)) << " z_node_coordinates " << (z_node_coordinates.at(0)) << endl;
-//        std::for_each(tup_node_coordinates.begin(), tup_node_coordinates.end(), );
-
-// Return iterators (!)
-        auto itx = std::minmax_element(x_node_coordinates.begin(), x_node_coordinates.end());
-        double xmin = *itx.first;
-        double xmax = *itx.second;
-
-        auto ity = std::minmax_element(y_node_coordinates.begin(), y_node_coordinates.end());
-        double ymin = *ity.first;
-        double ymax = *ity.second;
-
-        auto itz = std::minmax_element(z_node_coordinates.begin(), z_node_coordinates.end());
-        double zmin = *itz.first;
-        double zmax = *itz.second;
-
-        minmax_tuple = {make_tuple(xmin, ymin, zmin), make_tuple(xmax, ymax, zmax)};
-//REPAIR !!        cout << "Xmin " << get<0>(minmax_tuple.at(0)) << " Ymin " <<get<1>(minmax_tuple.at(0)) << " Zmin " << get<2>(minmax_tuple.at(0)) << endl;
-
-        return minmax_tuple;
-    }
-
-}; // end of class grain3D
 
 /// # 3 # The class of Agglomeration of defects in one special face element of a PCC
 class agglomeration {

@@ -7,8 +7,8 @@
 
 #include <Eigen/SparseCore>
 
-
 using namespace std; // standard namespace
+using namespace Eigen; // standard namespace
 
 #include "PCC_Support_Functions.h" // It must be here - first in this list (!)
 /// # 1 # Checking if file exists in the directory 'fileName'
@@ -82,6 +82,57 @@ vector<Eigen::Triplet<double>> TripletsReader(char* SMpath) {
 
     return tripletList;
 }
+
+
+/// DDRX support function :: GFS matrix reading and calculation of new seeds at the centres of GBs
+
+std::tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<char*> const paths, std::vector<unsigned int> & CellNumbs, vector<tuple<double, double, double>> & AllSeeds_coordinates) {
+    tuple <double, double, double> res; // find two grain neighbour for fnumber
+    vector<double> xx, yy, zz;
+    //Triplet<double> res;     // find two grain neighbour for fnumber
+
+    Eigen::SparseMatrix<double> GFS(CellNumbs.at(2),CellNumbs.at(3));
+    /// GFS matrix reading
+    GFS = SMatrixReader(paths.at(6), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
+
+    vector<int> Grain_neighbours;
+    vector<unsigned int> grainIDs;
+// #pragma omp parallel for // parallel execution by OpenMP
+
+//          grainIDs.clear();
+//          for (SparseMatrix<double>::InnerIterator it(GFS, facenumb); it; ++it)
+//              grainIDs.push_back(it.col());
+
+    //normal loop
+    for (unsigned int j = 0; j < CellNumbs.at(3); ++j) {
+        if (GFS.coeff(facenumb, j) == 1) {
+            grainIDs.push_back(j);
+            if(j<CellNumbs.at(3)-1) {
+                for (unsigned int k = j + 1; k < CellNumbs.at(3); ++k)
+                    if (GFS.coeff(facenumb, k) == 1)
+                        grainIDs.push_back(k);
+            }
+        }
+    }
+//        cout << grainIDs[0] << " " << grainIDs[1] << endl;
+
+    if(grainIDs.size()>0) xx.push_back(get<0>(AllSeeds_coordinates.at(grainIDs[0])));
+    if(grainIDs.size()>1) xx.push_back(get<0>(AllSeeds_coordinates.at(grainIDs[1])));
+    if(grainIDs.size()>0) yy.push_back(get<1>(AllSeeds_coordinates.at(grainIDs[0])));
+    if(grainIDs.size()>1) yy.push_back(get<1>(AllSeeds_coordinates.at(grainIDs[1])));
+    if(grainIDs.size()>0) zz.push_back(get<2>(AllSeeds_coordinates.at(grainIDs[0])));
+    if(grainIDs.size()>1) zz.push_back(get<2>(AllSeeds_coordinates.at(grainIDs[1])));
+    if(grainIDs.size()>1) res = make_tuple(0.5*(xx[0] + xx[1]), 0.5*(yy[0] + yy[1]), 0.5*(zz[0] + zz[1]));
+    else if(grainIDs.size()>0) res = make_tuple(xx[0], yy[0], zz[0]);
+    else res = make_tuple(0, 0, 0);
+//    cout << "facenumb " << facenumb << " " << 0.5*(xx[0] + xx[1]) << "\t" << 0.5*(yy[0] + yy[1]) << "\t"<< 0.5*(zz[0] + zz[1]) << "\t" << endl;
+//    cout << "facenumb " << facenumb << " " << get<0>(res) << "\t" << get<1>(res) << "\t"<< get<2>(res) << "\t" << endl;
+
+    return res;
+
+} /// END of std::tuple<double, double, double> find_aGBseed() function
+
+
 
 /**
 /// Function for reading tuples list from file
@@ -872,54 +923,6 @@ std::vector<vector<int>> Get_crystallographic_cases_random_list(std::vector<vect
 
     return cryst_cases_list; // function output
 } // END of Get_crystallographic_cases_random_list()
-
-
-/// DDRX support function :: GFS matrix reading and calculation of new seeds at the centres of GBs
-tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<char*> const paths, std::vector<unsigned int> & CellNumbs, vector<tuple<double, double, double>> & AllSeeds_coordinates) {
-    tuple <double, double, double> res; // find two grain neighbour for fnumber
-    vector<double> xx, yy, zz;
-    //Triplet<double> res;     // find two grain neighbour for fnumber
-
-    SpMat GFS(CellNumbs.at(2),CellNumbs.at(3));
-    /// GFS matrix reading
-    GFS = SMatrixReader(paths.at(6), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
-
-    vector<int> Grain_neighbours;
-    vector<unsigned int> grainIDs;
-// #pragma omp parallel for // parallel execution by OpenMP
-
-//          grainIDs.clear();
-//          for (SparseMatrix<double>::InnerIterator it(GFS, facenumb); it; ++it)
-//              grainIDs.push_back(it.col());
-
-    //normal loop
-    for (unsigned int j = 0; j < CellNumbs.at(3); ++j) {
-        if (GFS.coeff(facenumb, j) == 1) {
-            grainIDs.push_back(j);
-            if(j<CellNumbs.at(3)-1) {
-                for (unsigned int k = j + 1; k < CellNumbs.at(3); ++k)
-                    if (GFS.coeff(facenumb, k) == 1)
-                        grainIDs.push_back(k);
-            }
-        }
-    }
-//        cout << grainIDs[0] << " " << grainIDs[1] << endl;
-
-    if(grainIDs.size()>0) xx.push_back(get<0>(AllSeeds_coordinates.at(grainIDs[0])));
-    if(grainIDs.size()>1) xx.push_back(get<0>(AllSeeds_coordinates.at(grainIDs[1])));
-    if(grainIDs.size()>0) yy.push_back(get<1>(AllSeeds_coordinates.at(grainIDs[0])));
-    if(grainIDs.size()>1) yy.push_back(get<1>(AllSeeds_coordinates.at(grainIDs[1])));
-    if(grainIDs.size()>0) zz.push_back(get<2>(AllSeeds_coordinates.at(grainIDs[0])));
-    if(grainIDs.size()>1) zz.push_back(get<2>(AllSeeds_coordinates.at(grainIDs[1])));
-    if(grainIDs.size()>1) res = make_tuple(0.5*(xx[0] + xx[1]), 0.5*(yy[0] + yy[1]), 0.5*(zz[0] + zz[1]));
-    else if(grainIDs.size()>0) res = make_tuple(xx[0], yy[0], zz[0]);
-    else res = make_tuple(0, 0, 0);
-//    cout << "facenumb " << facenumb << " " << 0.5*(xx[0] + xx[1]) << "\t" << 0.5*(yy[0] + yy[1]) << "\t"<< 0.5*(zz[0] + zz[1]) << "\t" << endl;
-//    cout << "facenumb " << facenumb << " " << get<0>(res) << "\t" << get<1>(res) << "\t"<< get<2>(res) << "\t" << endl;
-
-    return res;
-
-}
 
 /// Configuration TJs entropy
 double Get_TJsEntropy(vector<unsigned int> special_faces_seq) {

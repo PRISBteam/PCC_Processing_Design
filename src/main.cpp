@@ -87,7 +87,7 @@ std::vector<unsigned int> CellNumbs; // the vector named CellNumbs with the numb
 
 // Geometry
 // Global vectors of Cartesian coordinates for: (1) vertex coordinates, (2) barycentres of edges, (3) barycentres of faces and (4) barycentres of polyhedrons
-vector<tuple<double, double, double>> vertex_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, grain_coordinates_vector; // vectors containing barycenter Cartesian coordinates of the corresponding tessellation's elements
+vector<tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, grain_coordinates_vector; // vectors containing barycenter Cartesian coordinates of the corresponding tessellation's elements
 
 // Measures
 std::vector<double> edge_lengths_vector, face_areas_vector, polyhedron_volumes_vector;
@@ -115,20 +115,20 @@ double Main_time = 0.0, S_time = 0.0, P_time = 0.0, C_time = 0.0, M_time = 0.0, 
 /// * MODULES and LIBRARIES * ///
 // '#include' all the main project's modules and libraries // IMPORTANT! Each module here is just a C++ library
 
-// * A task for the future: include all the code modules and functions as a single C++ library here placed in the STL directory *//
+/// * A task for the future: include all the code modules and functions as a single C++ library here placed in the STL directory *//
 /// #include <processing_lib>
 
 /* Various useful functions  */
 #include "lib/PCC_Support_Functions.h" // It must be here - first in this list (!)
 
 /* Various set measures */
-/// #include "lib/PCC_Measures.h"
+#include "lib/PCC_Measures.h"
 
 /* Objects library contains classes of various objects related to PCC's substructures and k-cells */
  #include "lib/PCC_Objects.h"
 
 /* Section module calculates reduced PCC subcomplexes (including plain cuts) inheriting reduced sequences of special cells and 'state vectors' of the original PCC */
-/// #include "lib/PCC_Section/PCC_Subcomplex.h"
+#include "lib/PCC_Section/PCC_Subcomplex.h"
 
 /* Processing module assigned special IDs for the various elements (Nodes, Edges, Faces, Polytopes/Polyhedrons) of the space tessellation */
 /* Output: module generates a design_sequences as the lists containing the sequences of k-cells possessing "special" IDs including

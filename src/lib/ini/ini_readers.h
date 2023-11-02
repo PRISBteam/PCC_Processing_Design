@@ -8,4 +8,6 @@ void config_reader_processing(std::string &source_path, std::vector<std::string>
 
 void config_reader_writer(std::string &source_path, std::vector<int> &writer_specifications, std::ofstream &Out_logfile_stream);
 
+void config_reader_subcomplex(std::string &source_path, std::string &sctype, double &cut_length, std::ofstream &Out_logfile_stream);
+
 #endif //PCC_PROCESSING_DESIGN_INI_READERS_H

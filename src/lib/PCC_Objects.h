@@ -1,6 +1,8 @@
 #ifndef PCC_PROCESSING_DESIGN_PCC_OBJECTS_H
 #define PCC_PROCESSING_DESIGN_PCC_OBJECTS_H
 
+#include <Eigen/SparseCore>
+
 /// ==== # 1 # =============== CellsDesign class  ========================= ///
 class CellsDesign{
 private:
@@ -118,6 +120,45 @@ public:
     std::vector<std::tuple<double, double, double>> Get_common_faces_coordinates(unsigned int subcomplex_id);
 };
 
-Subcomplex Get_half_plane(Subcomplex new_sub, double crack_length, std::vector<unsigned int> const &half_sub_sfaces_sequence);
+/// ==== # 4 # =============== grain3D class  ========================= ///
+
+class Polytope {
+
+    std::vector<std::tuple<double, double, double>> minmax_node_coordinates; // a vecor containing two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}
+
+private:
+    // list of nodes
+    std::vector<unsigned int> node_ids;
+
+    // list of Faces
+    std::vector<unsigned int> Faces_list;
+
+    // list of triplets of nodes coordinated
+    std::vector<std::tuple<double, double, double>> node_coordinates;
+
+public:
+    unsigned int grain_id;
+
+    Polytope(unsigned int grain_new_id); // constructor 1
+
+    void Set_node_ids(unsigned int grain_id, Eigen::SparseMatrix<double> const &GFS, Eigen::SparseMatrix<double> const &FES, Eigen::SparseMatrix<double> const &ENS);
+
+    void Set_Faces_list(unsigned int grain_id, Eigen::SparseMatrix<double> const &GFS);
+
+    std::vector<unsigned int> Get_Faces_list();
+
+    /// return - vector of all node (vertices) coordinates of a grain
+    void Set_node_coordinates(unsigned int grain_id);
+
+    std::vector<unsigned int> Get_node_ids(unsigned int grain_id);
+
+    std::vector<std::tuple<double, double, double>> Get_node_coordinates(unsigned int grain_id);
+
+    /// return - vector with two tuples : { x_min, y_min, z_min; x_max, y_max, z_max} of a grain witn number grain_id
+    std::vector<std::tuple<double, double, double>> Get_minmax_node_coordinates(unsigned int grain_id);
+
+}; // end of class Polytope
+
+/// ========== END of class Polytope functions description
 
 #endif //PCC_PROCESSING_DESIGN_PCC_OBJECTS_H

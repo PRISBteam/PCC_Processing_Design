@@ -7,6 +7,7 @@
 using namespace std; // standard namespace
 
 #include "PCC_Measures.h"
+
 /*
 /// * Function calculates the vector<int> "EdgeTypes" of types Edges in the PCC using its FES incidence matrix and special faces sequence (special_faces_sequence) * ///
 std::vector<double> j_fractions_vector(std::vector<int> const &TJsTypes){ // based on Edges vector

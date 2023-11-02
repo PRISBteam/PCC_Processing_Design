@@ -715,3 +715,24 @@ int isBetti = 0; // Laplacians lab
 
     return;
 } /// END of config_reader_writer function
+
+/// ================== # 5 # Initial SUBCOMPLEX module configuration - reading and output ==================
+void config_reader_subcomplex(std::string &source_path, std::string &sctype, double &cut_length, std::ofstream &Out_logfile_stream) {
+/*    std::string line;
+    ifstream inConf(config);
+    bool isSectionON = 0;
+
+    if (inConf) { // If the file was successfully open, then
+        while(getline(inConf, line, '\n'))
+// REPAIR            cout << line << endl;
+            if (line.compare("DCC_Section SWITCHED ON"s)) {
+                isSectionON = 1;
+                if (time_step_one == 1) cout << "ON    | DCC_Section"s << endl;
+                return isSectionON;
+            }
+    } else cout << "SubcomplexON() error: The file " << config << " cannot be read" << endl; // If something goes wrong
+
+    if (time_step_one == 1) cout << "OFF   | DCC_Section"s << endl;
+    return isSectionON;
+    */
+} /// end of the bool SubcomplexON() function
