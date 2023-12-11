@@ -1,4 +1,4 @@
-<h1>Polytopal Cell Complex (PCC) Processing Design  (DPD code)</h1>
+<h1>Polytopal Cell Complex (PCC) Processing Design  (CPD code)</h1>
 
 Manual version: 0.3.0 <br>
 Current manual release date: 17 August 2023 <br>
