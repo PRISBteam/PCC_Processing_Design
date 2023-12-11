@@ -18,15 +18,18 @@ In this Technical Guidance, only the architecture of the code and practical guid
 </p>
 
 <h2>A few necessary definitions</h2>
-<p> All the k-cells with a specific value of k form a PCC <i>skeleton</i>, so that the whole PCC can be thought as an agglomeration of these several skeletons. </br>
-Additionally to the scalar and vector parameters defined on the PCC cells, for each cell can be assigned a label characterising its own type. Hence all k-cells can be divided in two classes of <i>ordinary</i> (without labels or with the labels 0) and <i>special</i> (labelled) cells. </br>
-Inside the class of special cells several types can be defined. The whole set of these labels assigned on the each skeleton form a configuration <i>state</i> which can be expressed by a single <i>state vector</i> encoding all the cell types like the well-known DNA sequences. </br>
-The set of all the state-vectors in a PCC form its <i>structure</i>.  </br>
-The notion of a <i>process</i> can be referred to as the discrete sequence of all the states expressed by their state vectors. 
-Three different types of the structures can be distinguished: directly <i>assigned</i>, <i>imposed</i> by the cells of other dimensions and <i>induced</i> by a pre-existing assigned structure as a result of a kinetic process. </br>
-The last component of the proposed approach is a function or <i>map</i> relating structural (such as fractions of special grain boundaries) and physical (time, plastic strain, mass fraction, etc. ) characteristics which can be  obtained based on the particular experimental data. </br>
-Such a theoretical framework allows to describe and analyse space ordering inside a real materials by the well-developed tools of topology, statistics and graph theory.   
-</p>
+<p>The provided discrete theoretical framework allows to description and analysis of space ordering inside real materials by the well-developed tools of topology, statistics and graph theory. </p> 
+<p> 
+ <ul>
+<li> All m-cells with values m less than k form a PCC <i>skeleton</i>, and 3-skeleton coincides with the whole PCC </li>
+<li> Additionally to the scalar and vector parameters defined on the PCC cells, any k-cell can be assigned one or several labels characterising its type(s). Hence all the k-cells can be divided into two classes of <i>ordinary</i> (labelled with ID = 0) and <i>special</i> (labelled with ID > 0) cells. </li>
+<li> The whole set of these labels assigned on each type of k-cells form a configuration <i>state</i> which can be expressed by a single <i>state vector</i> encoding all the cell types similar to the widely-known DNA sequences. </li>
+<li> The set of all the state-vectors in a PCC form its <i>structure</i>.  </li>
+<li> Three different types of structures can be distinguished: directly <i>assigned</i> by k-cells labelling, <i>induced</i> on the k-cells by the cells of other dimensions (greater or lesser than k) and <i>produced</i> by pre-existing assigned structures as a result of the corresponding kinetic process (composites fracture, as an example). </li>
+<li> The notion of a <i>process</i> can be referred to as the discrete sequence of all consequent states expressed by their state vectors. </li>
+ </ul>
+The last component of the proposed approach is a function or <i>map</i> relating structural (such as fractions of special k-cells) and physical (time, plastic strain, mass fraction, etc.) characteristics which can be obtained using the particular experimental data.
+ </p>
 
 <h2> How to execute the code </h2>
 <p> This is a C++ based software project consisting of several modules-libraries and the main.cpp file which is considered as a separate module. The code works with pre-created PCC as the set of its incidence and adjacency matrices represented in a sparse matrix form. It is intended to be launched as a CMake project using CMakeLists.txt file.
