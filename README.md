@@ -224,7 +224,7 @@ This code has been created as a part of the EPSRC funded projects EP/V022687/1 _
 
 <h2> License </h2>
 
-Distributed under the GNU General Public License v3.0. See LICENSE.txt for more information.
+Distributed under the MIT License. See LICENSE.txt for more information.
 
 
 <h2> Contacts </h2>
