@@ -333,6 +333,64 @@ std::vector<std::tuple<double, double, double>> Polytope::Get_node_coordinates(u
 
 /// ========== END of class grain3D functions description
 
+/// # 6 # The class of a MACROCRACK
+
+Macrocrack::Macrocrack(int crack_id_new, Subcomplex &half_plane_sub) : half_plane_subcomplex(0) { // constructor 3, with a subcomplex
+        crack_id = crack_id_new;
+        crack_length = half_plane_sub.sub_length; // crack length from the corresponding subcomplex size
+        half_plane_subcomplex = half_plane_sub; //set subcomplex
+    }
+
+    double Macrocrack::Get_crack_length(int crack_id_new) {
+        return crack_length;
+    }
+
+    void Macrocrack::Set_real_crack_length(double sample_size) {
+        real_crack_length = half_plane_subcomplex.sub_length * sample_size;
+    }
+    double Macrocrack::Get_real_crack_length() {
+        if (real_crack_length > 0.0) return real_crack_length;
+        else {
+            cout << "Caution! real_crack_length = 0! Please use Set_real_crack_length(double sample_size) before!"s << endl;
+            return 0;
+        }
+    }
+
+    void Macrocrack::Set_crack_plane() {
+        crack_plane = {half_plane_subcomplex.a_n, half_plane_subcomplex.b_n, half_plane_subcomplex.c_n, half_plane_subcomplex.D_plane};
+    }
+    vector<double> Macrocrack::Get_crack_plane() {
+        if (crack_plane.size() > 0.0) return crack_plane;
+        else {
+            cout << "Caution! crack_plane.size() = 0! Please update first {half_plane_subcomplex.a_n, half_plane_subcomplex.b_n, half_plane_subcomplex.c_n, half_plane_subcomplex.D_plane} in the corresponding subcomplex!"s << endl;
+            return {0};
+        }
+    }
+
+    void Macrocrack::Set_multiple_cracking_energy(double total_energy) {
+        multiple_cracking_energy = total_energy;
+    }
+    double Macrocrack::Get_multiple_cracking_energy() {
+        return multiple_cracking_energy;
+    }
+
+    std::vector <unsigned int> Macrocrack::Get_faces_sequence(){
+        return half_plane_subcomplex.Get_faces_sequence(crack_id); }
+
+    std::vector <unsigned int> Macrocrack::Get_sfaces_sequence(){
+        return half_plane_subcomplex.Get_sfaces_sequence(0); }
+
+    std::vector <tuple<double,double,double>> Macrocrack::Get_common_faces_coordinates(unsigned int  crack_id){
+        return half_plane_subcomplex.Get_common_faces_coordinates(crack_id); }
+
+/// ========== END of class MACROCRACK functions description
+
+/// # V # The class of a CELLS_ENERGIES :: list of the energy_vectors corresponding to different dimensions 'k' of the k-cells in a PCC
+//class CellEnergies
+/// CellEnergies
+
+/// ========== END of class CellEnergies functions description
+
 
 /*
  /// # 0 # The class of Grain Boundaries in a PCC
@@ -564,81 +622,5 @@ public:
         return cl_index;
     }
 }; // end of class
-
-/// # 6 # The class of a MACROCRACK
-class macrocrack {
-    double total_fracture_energy = 0;
-    subcomplex half_plane_subcomplex; // geometry part
-
-private:
-    double a_n;
-    double b_n;
-    double c_n;
-    double D_plane;
-    double crack_length;
-    double real_crack_length;
-    vector<double> crack_plane = {a_n, b_n, c_n, D_plane};
-
-public:
-    int crack_id = 0;
-    double surface_energy = 0;
-    double bridging_energy = 0;
-    double multiple_cracking_energy = 0;
-    double stress_concentrators_energy = 0;
-
-    //3
-    macrocrack(int crack_id_new, subcomplex &half_plane_sub) : half_plane_subcomplex(0) { // constructor 3, with a subcomplex
-        crack_id = crack_id_new;
-        crack_length = half_plane_sub.sub_length; // crack length from the corresponding subcomplex size
-        half_plane_subcomplex = half_plane_sub; //set subcomplex
-    }
-
-    double Get_crack_length(int crack_id_new) {
-        return crack_length;
-    }
-
-    void Set_real_crack_length(double sample_size) {
-        real_crack_length = half_plane_subcomplex.sub_length * sample_size;
-    }
-    double Get_real_crack_length() {
-        if (real_crack_length > 0.0) return real_crack_length;
-        else {
-            cout << "Caution! real_crack_length = 0! Please use Set_real_crack_length(double sample_size) before!"s << endl;
-            return 0;
-        }
-    }
-
-    void Set_crack_plane() {
-        crack_plane = {half_plane_subcomplex.a_n, half_plane_subcomplex.b_n, half_plane_subcomplex.c_n, half_plane_subcomplex.D_plane};
-    }
-    vector<double> Get_crack_plane() {
-        if (crack_plane.size() > 0.0) return crack_plane;
-        else {
-            cout << "Caution! crack_plane.size() = 0! Please update first {half_plane_subcomplex.a_n, half_plane_subcomplex.b_n, half_plane_subcomplex.c_n, half_plane_subcomplex.D_plane} in the corresponding subcomplex!"s << endl;
-            return {0};
-        }
-    }
-
-    void Set_multiple_cracking_energy(double total_energy) {
-        multiple_cracking_energy = total_energy;
-    }
-    double Get_multiple_cracking_energy() {
-        return multiple_cracking_energy;
-    }
-
-    std::vector <unsigned int> Get_faces_sequence(){
-        return half_plane_subcomplex.Get_faces_sequence(crack_id); }
-
-    std::vector <unsigned int> Get_sfaces_sequence(){
-        return half_plane_subcomplex.Get_sfaces_sequence(0); }
-
-    std::vector <tuple<double,double,double>> Get_common_faces_coordinates(unsigned int  crack_id){
-        return half_plane_subcomplex.Get_common_faces_coordinates(crack_id); }
-
-//    double Get_surface_energy()
-//    { if (crack_length != 0.0)
-//            return ;
-//        else return 0.0; }
-}; /// end of class MACROCRACK
 
  */

@@ -132,6 +132,22 @@ std::tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vect
 
 } /// END of std::tuple<double, double, double> find_aGBseed() function
 
+///* For MULTIPFYSICS functions :: Just three overloaded templates for "sign()" function templates
+template <typename TP> inline constexpr
+int sign(TP x, std::false_type is_signed) {
+    return TP(0) < x;
+}
+
+template <typename TP> inline constexpr
+int sign(TP x, std::true_type is_signed) {
+    return (TP(0) < x) - (x < TP(0));
+}
+
+template <typename TP> inline constexpr
+int sign(TP x) {
+    return sign(x, std::is_signed<TP>());
+}
+
 
 
 /**

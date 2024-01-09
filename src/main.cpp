@@ -1,22 +1,23 @@
 ///******************************************************************************************************************************///
-///************************   Polyhedral Cell Complex (PCC) Processing Design :: (CPD code) (c)   ******************************///
+///************************   Polytopal Cell Complex (PCC) Processing Design :: (CPD code) (c)   *******************************///
 ///****************************************************************************************************************************///
-///*                                        version 4.0 | 16/10/2023                                                          *///
+///*                                        Version 4.0 | 11/12/2023                                                         *///
 ///**************************************************************************************************************************///
 ///************************************ Dr Elijah Borodin, Manchester, UK **************************************************///
 ///**************************************** Spring 2022 - Winter 2023  ****************************************************///
 ///***********************************************************************************************************************///
-///*    Code source: https://github.com/PRISBteam/PCC_Processing_Design/                                                     *///
-///*    PCC sources: https://materia.team/                                                                                 *///
-
-///* The project provides a reliable tool for 1. Obtaining, 2. Analysing and 3. Improving of the 'design vectors' as the sequences           *///
-///*  of k-cells containing in the k-skeletons, k={0,1,2,3} of a Polyhedral Cell Complex (PCC). Such PCCs can be created by external        *///
-///* codes based on the tessellation of 2D or 3D spaces by an agglomeration of polytopes (in the 2D case) or polyhedrons (in the 3D case). *///
+///*    Code source:    https://github.com/PRISBteam/PCC_Processing_Design/
+///*    Documentation:  https://prisbteam.github.io/
+///*    PCC sources:    https://materia.team/
+///*  The project provides a reliable tool for 1. Obtaining, 2. Analysing and 3. Improving of 'design vectors' as the sequences                         *///
+///*  of k-cells containing in the k-skeletons (k = {0,1,2,3}) of a Polytopal Cell Complex (PCC). Such PCCs can be created by external                  *///
+///*  codes based on the tessellation of 2D or 3D spaces by an agglomeration of polytopes (polygons in the 2D case or polyhedrons in 3D).               *///
+///*  Graphs and networks (without loops) are considered as 1-complexes (1-PCCs) and also available for analysis similarly to the the 2D and 3D cases.  *///
 
 // Key terminology:
-// Material :: 'quadruple points', 'triple junctions', 'grain boundaries', and 'grains' with their orientations and barycenter coordinates
-// Tessellation :: 'nodes, 'edges', 'faces', 'polytopes' with their measures (lengths, areas, volumes) and barycenter coordinates
-// PCC :: 'k-cells' containing in 'k-skeletons' (k = {0,1,2,3}) with their degree fractions
+// Material's elements      ::   'quadruple points', 'grain boundary junctions', 'grain boundaries', and 'grains' (with their orientations and barycenter coordinates)
+// Tessellation's elements  ::   'nodes, 'edges', 'faces', 'polytopes' (with their measures - lengths, areas and volumes - and barycenter coordinates)
+// PCC's elements           ::   'k-cells' containing in 'k-skeletons' (k = {0,1,2,3}) with their degree fractions, and incident (k-1)-cells and (k+1)-cells.
 
 ///* ----------------------------------------- *
 ///* Standard C++ (STL) libraries
@@ -27,9 +28,9 @@
 #include <ctime>
 #include <vector>
 #include <tuple>
-#include <numeric>
-#include <algorithm>
 #include <cmath>
+// #include <numeric>
+// #include <algorithm>
 
 ///* ------------------------------------------------------------------------------- *
 ///* Attached user-defined C++ libraries (must be copied in the directory for STL):
@@ -40,14 +41,14 @@
 #include <Eigen/SparseCore>
 
 /// Spectra source: https://spectralib.org/ (2022)
-#include <Spectra/MatOp/SparseGenMatProd.h>
 #include <Spectra/GenEigsSolver.h>
 #include <Spectra/SymEigsSolver.h>
+#include <Spectra/MatOp/SparseGenMatProd.h>
 
 /// Open MP library https://www.openmp.org/resources/openmp-compilers-tools/
 // Included only in the parallelized version of the code
 
-/// Tailored Reader for the main.ini file in the ../config/ subdirectory of the project
+/// Tailored Reader for the main.ini file in the ../config/ subdirectory of the project based on the mINI C++ library (2018 Danijel Durakovic http://pulzed.com/, MIT license is included)
 #include "lib/ini/ini_readers.h"
 
 ///------------------------------------------
@@ -55,58 +56,54 @@ using namespace std; // STL namespace
 using namespace Eigen; // Eigen library namespace
 using namespace Spectra; // Spectra library namespace
 
-/// Eigen library based Triplets class containing objects in the form T = T(i, j, value), where i and j are element's a(i, j) indices in the corresponding dense matrix and the third variable is its value
+/// Eigen library-based class Triplets class containing objects in the form T = T(i, j, value), where i and j are element's a(i, j) indices in the corresponding dense matrix and the third variable is its value
 typedef Triplet<double> Tr; // <Eigen> library class, which declares a triplet type with the nickname 'Tr'
 typedef SparseMatrix<double> SpMat; // <Eigen> library class, which declares a column-major sparse matrix type of doubles with the nickname 'SpMat'
 typedef MatrixXd DMat; // <Eigen> library class, which declares a dense matrix type of doubles with the nickname 'DMat'
 
 /// * ---------------------------------------------------------------------------------------------------------- *///
 /// * ============================================ GLOBAL VARIABLES ============================================ *///
-/// * ----------- Declaration of GLOBAL variables (can be used in all the project modules and libraries)-------- *///
+/// * ----------- Declaration of GLOBAL variables (can be seen in all the project modules and libraries)-------- *///
 
 /// Technical variables
-// 'source_path' is a path to the directory containing *.ini files
-string source_path = "../config/"s; char* sourcepath = const_cast<char*>(source_path.c_str()); // path *.ini files as it is written in the main.ini file (!)
-string e_mode = "tutorial"; // 'execution_type' (etype variable) from the config/main.ini file
+string source_path = "../config/"s; char* sourcepath = const_cast<char*>(source_path.c_str()); // 'source_path' is a path to the directory reading from the 'config/main.ini' file
+string e_mode = "tutorial"; // '[execution_type]' (etype variable) from the config/main.ini file. The "tutorial" mode by default means the 'educational' mode, where the program learn of how to work with its input files and simulation types
 
-vector<char*> paths; // The vector with the paths to all the PCC's matrices, measures and other supplementary data
-string source_dir, output_dir; // Input and output directories as it is written in the file 'config/main.ini' file
-string sim_task; // path to the corresponding *.cpp file with a simulation task (for TASK main mode only) as it is written in the main.ini file
+vector<char*> paths; // The vector containing the paths to all the PCC's matrices, measures and other supplementary data
+string source_dir, output_dir; // Input and output directories as it is written in the 'config/main.ini' file
+string sim_task; // path to the corresponding *.cpp file containing a 'simulation task' (for 'TASK' execution mode only, not 'LIST') as it is written in the 'config/main.ini' file
 
 /// Global 'log.txt' file output
-ofstream Out_logfile_stream; // log.txt file output of the entire computation process as a copy of the console output
+ofstream Out_logfile_stream; // 'log.txt' file output of the entire computation process as a copy of the console output
 
 /// PCC - related variables
-// General
-int dim;// PCC dimension: dim = 1 for graphs, dim = 2 for 2D plane polytopial complexes and dim = 3 for 3D bulk polyhedron complexes, as it is specified in the main.ini file.
+// [general]
+int dim; // PCC's dimension: dim = 1 for graphs and networks, dim = 2 for the 2D plane polygonal complexes, and dim = 3 for the 3D bulk polyhedron complexes, as it is specified in the 'config/main.ini' file.
 
 // Combinatorial
-std::vector<unsigned int> CellNumbs; // the vector named CellNumbs with the number of k-cells of different types 'k'. It will be readed from the 'number_of_cells.txt' file.
+std::vector<unsigned int> CellNumbs; // the vector named CellNumbs containing the numbers of k-cells of different types 'k'. It is read from the 'number_of_cells.txt' file.
 // First line here is the number of nodes (0-cells), second - edges (1-cells), third - faces (2-cells) (in the 2D and 3D cases only), fourth - polyhedra (3-cells) (in the 3D case only)
-// In the 2D case "grains" -> 2-cells; "faces" -> 1-cells; "triple junctions (lines) -> 0-cells".
 
 // Geometry
-// Global vectors of Cartesian coordinates for: (1) vertex coordinates, (2) barycentres of edges, (3) barycentres of faces and (4) barycentres of polyhedrons
 vector<tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, grain_coordinates_vector; // vectors containing barycenter Cartesian coordinates of the corresponding tessellation's elements
+// Global vectors of Cartesian coordinates for: (1) vertex coordinates, (2) barycentres of edges, (3) barycentres of faces and (4) barycentres of polyhedrons
 
 // Measures
-std::vector<double> edge_lengths_vector, face_areas_vector, polyhedron_volumes_vector;
+std::vector<double> edge_lengths_vector, face_areas_vector, polyhedron_volumes_vector; // Global vectors of measures: edge lengths, face areas and polyhedra volumes
 
 /// PCC special structure-related variables
-// Configurations and  states
-
-// State_Vector in the form : [Element index] - > [Element type]
-// Configuration_State = {State_p_vector, State_f_vector, State_e_vector, State_n_vector} is a list of all 'state vectors': from (1) State_p_vector (on top, id = 0) to (4) State_n_vector (bottom, id = 3)
-std::vector<int> State_p_vector, State_f_vector, State_e_vector, State_n_vector; // based on each sequences in the list, the State_<*>_vector's of special cells can be calculated, including State_n_vector, State_e_vector, State_f_vector and State_p_vector
-std::vector<int> State_pfracture_vector, State_ffracture_vector, State_efracture_vector, State_nfracture_vector; // based on each sequences in the list, the State_<*>_vector's of special cells can be calculated, including State_n_vector, State_e_vector, State_f_vector and State_p_vector
+// State_Vector in the form : [Element index] - > [Element type], like [0, 0, 2, 1, 1, 0, 2, 4, 3, 3, 2, 0,... ...,2] containing all CellNumb.at(*) element types
+std::vector<int> State_p_vector, State_f_vector, State_e_vector, State_n_vector; // Normally the State_<*>_vector of special cells can be calculated based on the corresonding special_cell_sequences
+std::vector<int> State_pfracture_vector, State_ffracture_vector, State_efracture_vector, State_nfracture_vector; // separate vectors containing the other 'fractured' labels different from the 'special' ones. To be calculated based on the corresonding fractured_cell_sequences
+// Configuration_State = { State_p_vector, State_f_vector, State_e_vector, State_n_vector } is a list of all 'state vectors': from (1) State_p_vector (on top, id = 0) to (4) State_n_vector (bottom, id = 3)
 std::vector<vector<int>> Configuration_State = { State_p_vector, State_f_vector, State_e_vector, State_n_vector },
                          Configuration_cState = { State_pfracture_vector, State_ffracture_vector, State_efracture_vector, State_nfracture_vector }; //  is the list of all mentioned below State_<*>_vectors and State_<*>fracture_vectors as the output of the Processing module // is the list of 'state vectors' analogous to the Configuration_State but for 'cracked' (or induced) network of k-cells
-/* where n = "nodes", e = "edges", f = "faces" and p = "polyhedrons" */
+/* where 'n' :: "nodes", 'e' :: "edges", 'f' :: "faces", and 'p' :: "polyhedrons" */
 
 /// Initial configuration reader
-void initial_configuration(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_cState);
+void initial_configuration(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_cState); // Read the 'initial configuration' of the problem set in all the relevant '*.ini' files containing in the '\config' project directory using the functions from the 'ini_readers.cpp' project library (and only from there)
 
-/// 'CPD Tutorial' :: educational course active in the 'tutorial' (please see 'main.ini file') code execution mode
+/// 'CPD Tutorial' :: educational course active in the 'TUTORIAL' (please see 'config/main.ini' file) code execution mode
 void tutorial();
 
 /// Time interval variables for different parts (modulus) of the CPD code

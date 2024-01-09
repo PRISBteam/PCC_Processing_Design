@@ -10,4 +10,6 @@ void config_reader_writer(std::string &source_path, std::vector<int> &writer_spe
 
 void config_reader_subcomplex(std::string &source_path, std::string &sctype, double &cut_length, std::ofstream &Out_logfile_stream);
 
+void config_reader_multiphysics(std::string &source_path, std::tuple<double, double, double> &sample_dimensions, std::ofstream &Out_logfile_stream);
+
 #endif //PCC_PROCESSING_DESIGN_INI_READERS_H

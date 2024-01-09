@@ -2,9 +2,10 @@
 ///=========================================================================================================================================///
 ///* Creates a set of subcomplexes of a PCC     *///
 ///* -----------------------------------------------------------------------------------------------------------------------------------*///
-///* Created by Dr Elijah Borodin at the University of Manchester 2022-2023 years as a module of PCC Processing Design tool (PDT code) *///
-///* A part or the PRISB codes project (https://github.com/PRISBteam) supported by EPSRC UK via grant EP/V022687/1б 2022-2023 years   *///
-///===================================================================================================================================///
+///* Created by Dr Elijah Borodin at the University of Manchester 2022-2023 years as a module of PCC Processing Design code (CPD code) *///
+///* A part or the PRISB codes project (https://github.com/PRISBteam) supported by EPSRC UK via grant EP/V022687/1 in 2022-2023 years *///
+/// (https://gow.epsrc.ukri.org/NGBOViewGrant.aspx?GrantRef=EP/V022687/1)                                                            *///
+///==================================================================================================================================///
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -34,6 +35,18 @@ extern std::vector<std::tuple<double, double, double>> node_coordinates_vector, 
 #include "PCC_Subcomplex.h"
 ///* ========================================================= PCC SUBCOMPLEX FUNCTION ======================================================= *///
 ///* ========================================================================================================================================= *///
+/*!
+ *
+ * @param new_cut
+ * @param s_faces_sequence
+ * @param sub_faces_sequence
+ * @param c_faces_sequence
+ * @param a_coeff
+ * @param b_coeff
+ * @param c_coeff
+ * @param D_coeff
+ * @return
+ */
 Subcomplex PCC_Subcomplex(Subcomplex &new_cut, std::vector<unsigned int> const &s_faces_sequence, std::vector<unsigned int> &sub_faces_sequence, std::vector<unsigned int> const &c_faces_sequence, double a_coeff = 0.0, double b_coeff = 0.0, double c_coeff = 1.0, double D_coeff = 0.6) {
 // sub_grains_sequence - all grains in the subcomplex, sub_faces_sequence - all faces in the subcomplex, common_faces_sequence - all faces common for two grains in the subcomplex, s_sub_faces_sequence - special faces, c_sub_faces_sequence - induced (fractured, for instance) faces
 

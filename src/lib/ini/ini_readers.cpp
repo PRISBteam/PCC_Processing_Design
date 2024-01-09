@@ -29,9 +29,9 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
 // 0
     if (main_ini.has("execution_type")) {
         auto& collection = main_ini["execution_type"];
-        if (collection.has("etype"))
+        if (collection.has("e_type"))
         {
-            e_type = main_ini.get("execution_type").get("etype");
+            e_type = main_ini.get("execution_type").get("e_type");
         } }
 // I
     if (main_ini.has("simulation_mode")) {
@@ -736,3 +736,43 @@ void config_reader_subcomplex(std::string &source_path, std::string &sctype, dou
     return isSectionON;
     */
 } /// end of the bool SubcomplexON() function
+
+/// ================== # 6 # Initial MULTIPFYSICS module configuration - physical dimesions and all ==================
+void config_reader_multiphysics(std::string &source_path, std::tuple<double, double, double> &sample_dimensions, std::ofstream &Out_logfile_stream) {
+
+    double lx_size = 0.0, ly_size = 0.0, lz_size = 0.0; // sample dimensions
+// ini files reader - external (MIT license) library
+    mINI::INIFile file(source_path + "multiphysics.ini"s);
+    mINI::INIStructure multiphysics_ini;
+    file.read(multiphysics_ini);
+
+// I
+// sequences and designs output
+    if (multiphysics_ini.has("physical_dimensions")) {
+        auto& collection = multiphysics_ini["physical_dimensions"];
+        if (collection.has("sample_dimension_x"))
+            lx_size = stod(multiphysics_ini.get("physical_dimensions").get("sample_dimension_x"));
+        if (collection.has("sample_dimension_y"))
+            ly_size = stod(multiphysics_ini.get("physical_dimensions").get("sample_dimension_y"));
+        if (collection.has("sample_dimension_z"))
+            lz_size = stod(multiphysics_ini.get("physical_dimensions").get("sample_dimension_z"));
+    } // end of  if (multiphysics_ini.has("physical_dimensions"))
+
+    std::get<0>(sample_dimensions) = lx_size;
+    std::get<1>(sample_dimensions) = ly_size;
+    std::get<2>(sample_dimensions) = lz_size;
+
+/// Output to the screen/console
+//    cout<< "______________________________________________________________________________________" << endl;
+    cout << "The Multiphysics module specifications:\t\t" << endl;
+    cout << "Sample dimensions are \t\t\t"s << " x: " << std::get<0>(sample_dimensions) << ", y: " << std::get<1>(sample_dimensions) << ", z: " << std::get<2>(sample_dimensions) << endl;
+    cout << endl;
+
+/// Output into .log file
+//    Out_logfile_stream<< "______________________________________________________________________________________" << endl;
+    Out_logfile_stream << "The Writer module specifications:\t\t" << endl;
+    Out_logfile_stream << "Sample dimensions are \t\t\t"s << " x: " << std::get<0>(sample_dimensions) << ", y: " << std::get<1>(sample_dimensions) << ", z: " << std::get<2>(sample_dimensions) << endl;
+    Out_logfile_stream << endl;
+
+    return;
+} /// end of the bool MultiphysicsON() function

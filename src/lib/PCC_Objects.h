@@ -161,4 +161,59 @@ public:
 
 /// ========== END of class Polytope functions description
 
+/// # 6 # The class of a MACROCRACK
+class Macrocrack {
+    double total_fracture_energy = 0;
+    Subcomplex half_plane_subcomplex; // geometry part
+
+private:
+    double a_n;
+    double b_n;
+    double c_n;
+    double D_plane;
+    double crack_length;
+    double real_crack_length;
+    std::vector<double> crack_plane = {a_n, b_n, c_n, D_plane};
+
+public:
+    int crack_id = 0;
+    double surface_energy = 0;
+    double bridging_energy = 0;
+    double multiple_cracking_energy = 0;
+    double stress_concentrators_energy = 0;
+
+    Macrocrack(int crack_id_new, Subcomplex &half_plane_sub);
+
+    double Get_crack_length(int crack_id_new);
+
+    void Set_real_crack_length(double sample_size);
+
+    double Get_real_crack_length();
+
+    void Set_crack_plane();
+
+    void Set_multiple_cracking_energy(double total_energy);
+
+    double Get_multiple_cracking_energy();
+
+    std::vector <unsigned int> Get_faces_sequence();
+
+    std::vector <unsigned int> Get_sfaces_sequence();
+
+    std::vector<double> Get_crack_plane();
+
+    std::vector <std::tuple<double,double,double>> Get_common_faces_coordinates(unsigned int  crack_id);
+
+}; // end of class MACROCRACK
+
+/// ========== END of class Macrocrack functions description
+
+/// # V # The class of a CELLS_ENERGIES :: list of the energy_vectors corresponding to different dimensions 'k' of the k-cells in a PCC
+/// class CellEnergies {
+///
+/// }; // end of class CELLS_ENERGIES
+
+/// ========== END of class CellEnergies functions description
+
+
 #endif //PCC_PROCESSING_DESIGN_PCC_OBJECTS_H

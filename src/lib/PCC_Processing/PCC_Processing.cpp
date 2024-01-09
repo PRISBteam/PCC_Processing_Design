@@ -4,9 +4,10 @@
 ///* labelling of the k-cells (k={0,1,2,3}) of the pre-constructed polyhedral cell complex (PCC) 'M' using the whole set of incidence    *///
 /// and adjacency matrices                                                                                                              *///
 ///* -----------------------------------------------------------------------------------------------------------------------------------*///
-///* Created by Dr Elijah Borodin at the University of Manchester 2022-2023 years as a module of PCC Processing Design tool (PDT code) *///
-///* A part or the PRISB codes project (https://github.com/PRISBteam) supported by EPSRC UK via grant EP/V022687/1б 2022-2023 years   *///
-///===================================================================================================================================///
+///* Created by Dr Elijah Borodin at the University of Manchester 2022-2023 years as a module of PCC Processing Design code (CPD code) *///
+///* A part or the PRISB codes project (https://github.com/PRISBteam) supported by EPSRC UK via grant EP/V022687/1 in 2022-2023 years *///
+/// (https://gow.epsrc.ukri.org/NGBOViewGrant.aspx?GrantRef=EP/V022687/1)                                                            *///
+///==================================================================================================================================///
 #include <iostream>
 #include <fstream>
 #include <string>
