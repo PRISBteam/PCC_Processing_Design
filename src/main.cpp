@@ -4,7 +4,7 @@
 ///*                                        Version 4.0 | 11/12/2023                                                         *///
 ///**************************************************************************************************************************///
 ///************************************ Dr Elijah Borodin, Manchester, UK **************************************************///
-///**************************************** Spring 2022 - Winter 2023  ****************************************************///
+///**************************************** Spring 2022 - Winter 2024  ****************************************************///
 ///***********************************************************************************************************************///
 ///*    Code source:    https://github.com/PRISBteam/PCC_Processing_Design/
 ///*    Documentation:  https://prisbteam.github.io/
@@ -17,7 +17,7 @@
 // Key terminology:
 // Material's elements      ::   'quadruple points', 'grain boundary junctions', 'grain boundaries', and 'grains' (with their orientations and barycenter coordinates)
 // Tessellation's elements  ::   'nodes, 'edges', 'faces', 'polytopes' (with their measures - lengths, areas and volumes - and barycenter coordinates)
-// PCC's elements           ::   'k-cells' containing in 'k-skeletons' (k = {0,1,2,3}) with their degree fractions, and incident (k-1)-cells and (k+1)-cells.
+// PCC's elements           ::   'k-cells' containing in 'k-skeletons', where k = {0,1,2,3}, with their degree fractions, and incident (k-1)-cells and (k+1)-cells.
 
 ///* ----------------------------------------- *
 ///* Standard C++ (STL) libraries
@@ -35,12 +35,12 @@
 ///* ------------------------------------------------------------------------------- *
 ///* Attached user-defined C++ libraries (must be copied in the directory for STL):
 ///* ------------------------------------------------------------------------------- *
-/// Eigen source: https://eigen.tuxfamily.org/ (2022)
+/// Eigen source: https://eigen.tuxfamily.org/ (2024)
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 
-/// Spectra source: https://spectralib.org/ (2022)
+/// Spectra source: https://spectralib.org/ (2024)
 #include <Spectra/GenEigsSolver.h>
 #include <Spectra/SymEigsSolver.h>
 #include <Spectra/MatOp/SparseGenMatProd.h>
@@ -178,7 +178,7 @@ if ( main_type == "LIST"s ) { // 'LIST module'
             cout << " START of the PCC Subcomplex module " << endl;
             Out_logfile_stream << " START of the PCC Subcomplex module " << endl;
 
-/// Subcomplex();
+///* module */// Subcomplex();
 
 // ===== Elapsing time Subcomplex ================
             unsigned int Subcomplex_time = clock();
