@@ -1,0 +1,19 @@
+name: Build
+on: push
+permissions:
+  contents: read
+
+jobs:
+  windows-cmake:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      timeout-minutes: 2
+    - name: Build Project
+      uses: threeal/cmake-action@v1.3.0
+      with:
+        run-build: true
+      env:
+        CMAKE_BUILD_TYPE: Release
+      timeout-minutes: 10
