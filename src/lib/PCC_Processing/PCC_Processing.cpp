@@ -1,6 +1,6 @@
-///================================ PCC Processing module ===================================================================================///
+///======================================= PCC Processing module ============================================================================///
 ///=========================================================================================================================================///
-///* The interface using functions from Processing_<***>_functions.h C++ libraries to generate quasi-random or non-random processes of    *///
+///* The interface use functions from Processing_<***>_functions.h C++ libraries to generate quasi-random or non-random processes of    *///
 ///* labelling of the k-cells (k={0,1,2,3}) of the pre-constructed polyhedral cell complex (PCC) 'M' using the whole set of incidence    *///
 /// and adjacency matrices                                                                                                              *///
 ///* -----------------------------------------------------------------------------------------------------------------------------------*///

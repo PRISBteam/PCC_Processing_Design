@@ -1,23 +1,25 @@
 ///******************************************************************************************************************************///
 ///************************   Polytopal Cell Complex (PCC) Processing Design :: (CPD code) (c)   *******************************///
 ///****************************************************************************************************************************///
-///*                                        Version 4.0 | 11/12/2023                                                         *///
+///*                                        Version 4.0 | 12/02/2024                                                         *///
 ///**************************************************************************************************************************///
 ///************************************ Dr Elijah Borodin, Manchester, UK **************************************************///
-///**************************************** Spring 2022 - Winter 2024  ****************************************************///
+///**************************************** Spring 2022 - Spring 2024  ****************************************************///
 ///***********************************************************************************************************************///
+///*
 ///*    Code source:    https://github.com/PRISBteam/PCC_Processing_Design/
 ///*    Documentation:  https://prisbteam.github.io/
 ///*    PCC sources:    https://materia.team/
-///*  The project provides a reliable tool for 1. Obtaining, 2. Analysing and 3. Improving of 'design vectors' as the sequences                         *///
-///*  of k-cells containing in the k-skeletons (k = {0,1,2,3}) of a Polytopal Cell Complex (PCC). Such PCCs can be created by external                  *///
-///*  codes based on the tessellation of 2D or 3D spaces by an agglomeration of polytopes (polygons in the 2D case or polyhedrons in 3D).               *///
-///*  Graphs and networks (without loops) are considered as 1-complexes (1-PCCs) and also available for analysis similarly to the the 2D and 3D cases.  *///
+///*
+///*  The project provides a reliable tool for 1. Obtaining, 2. Analysing and 3. Improving of 'design vectors' as the sequences                          *///
+///*  of k-cells containing in the k-skeletons, where k = {0,1,2,3}, of a Polytopal Cell Complex (PCC). Such PCCs can be created by external             *///
+///*  codes based on the tessellation of 2D or 3D spaces by an agglomeration of polytopes (polygons in the 2D case or polyhedrons in 3D).                *///
+///*  Graphs and networks (without loops) are considered as 1-complexes (1-PCCs) and also available for analysis similarly to the the 2D and 3D cases.   *///
 
-// Key terminology:
-// Material's elements      ::   'quadruple points', 'grain boundary junctions', 'grain boundaries', and 'grains' (with their orientations and barycenter coordinates)
-// Tessellation's elements  ::   'nodes, 'edges', 'faces', 'polytopes' (with their measures - lengths, areas and volumes - and barycenter coordinates)
-// PCC's elements           ::   'k-cells' containing in 'k-skeletons', where k = {0,1,2,3}, with their degree fractions, and incident (k-1)-cells and (k+1)-cells.
+///* Key terminology:
+/// Material's elements         ::   'quadruple points', 'grain boundary junctions', 'grain boundaries', and 'grains' (with their orientations and barycenter coordinates)
+/// Tessellation's elements     ::   'nodes, 'edges', 'faces', 'polytopes' (with their measures - lengths, areas and volumes - and barycenter coordinates)
+/// PCC's elements              ::   'k-cells' containing in 'k-skeletons', where k = {0,1,2,3}, with their degree fractions, and incident (k-1)-cells and (k+1)-cells.
 
 ///* ----------------------------------------- *
 ///* Standard C++ (STL) libraries
@@ -78,7 +80,7 @@ ofstream Out_logfile_stream; // 'log.txt' file output of the entire computation 
 
 /// PCC - related variables
 // [general]
-int dim; // PCC's dimension: dim = 1 for graphs and networks, dim = 2 for the 2D plane polygonal complexes, and dim = 3 for the 3D bulk polyhedron complexes, as it is specified in the 'config/main.ini' file.
+int dim; // PCC's dimension: dim = 1 for graphs and networks, dim = 2 for the 2D plane polygonal complexes, and dim = 3 for the 3D bulk polytopal complexes, as it is specified in the 'config/main.ini' file.
 
 // Combinatorial
 std::vector<unsigned int> CellNumbs; // the vector named CellNumbs containing the numbers of k-cells of different types 'k'. It is read from the 'number_of_cells.txt' file.
@@ -99,9 +101,6 @@ std::vector<int> State_pfracture_vector, State_ffracture_vector, State_efracture
 std::vector<vector<int>> Configuration_State = { State_p_vector, State_f_vector, State_e_vector, State_n_vector },
                          Configuration_cState = { State_pfracture_vector, State_ffracture_vector, State_efracture_vector, State_nfracture_vector }; //  is the list of all mentioned below State_<*>_vectors and State_<*>fracture_vectors as the output of the Processing module // is the list of 'state vectors' analogous to the Configuration_State but for 'cracked' (or induced) network of k-cells
 /* where 'n' :: "nodes", 'e' :: "edges", 'f' :: "faces", and 'p' :: "polyhedrons" */
-
-/// Initial configuration reader
-void initial_configuration(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_cState); // Read the 'initial configuration' of the problem set in all the relevant '*.ini' files containing in the '\config' project directory using the functions from the 'ini_readers.cpp' project library (and only from there)
 
 /// 'CPD Tutorial' :: educational course active in the 'TUTORIAL' (please see 'config/main.ini' file) code execution mode
 void tutorial();
@@ -137,7 +136,18 @@ double Main_time = 0.0, S_time = 0.0, P_time = 0.0, C_time = 0.0, M_time = 0.0, 
 /* Writer module performs formatted output of various data structures generated by other modules */
 #include "lib/PCC_Writer/PCC_Writer.h"
 
+/// Initial configuration as an object of the Config class described in Objects.cpp project library
+Config initial_configuration;
+// void initial_configuration(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_cState); // Read the 'initial configuration' of the problem set in all the relevant '*.ini' files containing in the '\config' project directory using the functions from the 'ini_readers.cpp' project library (and only from there)
+
 ///* ........................................................................................    Main    ................................................................ *///
+//* (.h files) * @brief, @param and @return
+//* (.cpp files) * @details (detailed descriptions)
+/*!
+* @brief Implement the whole program execution according to the specifications written in 'config/*.ini' files. I the LIST mode call the execution of the project modules one by one and compute the execution time for each of them.
+* @param void
+* @return 0, if successful
+*/
 int main() {
     cout << "------------------------------------------------------------------------------------------------" << endl;
     Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
@@ -146,11 +156,11 @@ int main() {
 /// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen and *.log file.
     std::string main_type; /// SIMULATION MODE(LIST) or 'SIMULATION MODE(TASK) :: This define the global simulation mode: 'LIST' for the "list" of modules implementing one by one (if ON) and 'TASK' for the user-defined task scripts with modules and functions included from the project's libraries
 
-    std::vector<int> ConfigVector = config_reader_main(source_path, source_dir, output_dir, main_type, e_mode);
-// ConfigVector (../config/main.ini) contains ALL the control variables needed for the program execution
-
-/// Initial configuration reader and information output to the screen and into the .log file
-    initial_configuration(ConfigVector, source_dir, dim, paths, Configuration_State, Configuration_cState);
+/// Initial configuration reader and information output to the screen and into the '.log' file
+    initial_configuration.Read_config();
+    std::vector<int> ConfigVector = initial_configuration.Get_ConfVector();
+    /// alternatively :: set 'initial_configuration' object "manually"
+//    initial_configuration.Set_config(const std::vector<int> &initial_configuration.Get_ConfVector(), const std::string &initial_configuration.Get_source_dir(), int &initial_configuration.Get_dim(), std::vector<char*> &initial_configuration.Get_paths(), std::vector<vector<int>> &initial_configuration.Get_Configuration_State(), std::vector<vector<int>> &initial_configuration.Get_Configuration_cState());
 
 ///    face_coordinates_vector = VectorDReader(paths.at(12?));
 ///    grain_coordinates_vector = VectorDReader(paths.at(9));
@@ -243,153 +253,8 @@ else if ( main_type == "TASK"s ) {
 /// ================================== FUNCTIONS DEFINED IN MAIN MODULE ==================================///
 
 /// ================== # 7 # Initial configuration reader function (for main.cpp module) ==================
-//const std::ofstream &Out_logfile_stream
-void initial_configuration(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_cState) {
-
-    dim = ConfigVector.at(0); // [0] space dimension of the problem (dim = 1, 2 or 3);
-    if (dim != 1 && dim != 2 && dim != 3) {
-        cout << "Wrong dimension ERROR! Please change 'dim' parameter in ../config/mail.ini file to 1, 2, or 3"
-             << endl;
-        Out_logfile_stream
-                << "Wrong dimension ERROR! Please change 'dim' parameter in ../config/mail.ini file to 1, 2, or 3"
-                << endl;
-        exit(1);
-    }
-
-/// Several file paths to the sparse PCC's matrices which must already exit in the 'source_dir' and have the same names as below (!)
-// They can be obtained by the PCC Generator tool (https://github.com/PRISBteam/Voronoi_PCC_Analyser) based on the Neper output (*.tess file) (https://neper.info/) or PCC Structure Generator tool (https://github.com/PRISBteam/PCC_Structure_Generator) for plasticity problems
-//  PCC matrices, metrices and coordinates
-    std::string ssd0, ssd1, ssd2, ssd3, ssd4, ssd5, ssd6, ssd7, ssd8, ssd9, ssd10, ssd11, ssd12, ssd13, ssd14; // PCC matrices
-
-    if (is_file_exists(source_dir + "algebraic/A0.txt"s) && is_file_exists(source_dir + "algebraic/A1.txt"s) &&
-        is_file_exists(source_dir + "algebraic/B1.txt"s) && dim >= 0)
-        ssd0 = source_dir + "algebraic/A0.txt"s, ssd1 = source_dir + "algebraic/A1.txt"s, ssd4 =
-                source_dir + "algebraic/B1.txt"s; // 1D
-    if (is_file_exists(source_dir + "/algebraic/A2.txt"s) && is_file_exists(source_dir + "algebraic/B2.txt"s) &&
-        dim >= 2)
-        ssd2 = source_dir + "algebraic/A2.txt"s, ssd5 = source_dir + "algebraic/B2.txt"s; // 2D
-    if (is_file_exists(source_dir + "/algebraic/A3.txt"s) && is_file_exists(source_dir + "algebraic/B3.txt"s) &&
-        dim == 3)
-        ssd3 = source_dir + "algebraic/A3.txt"s, ssd6 = source_dir + "algebraic/B3.txt"s; // 3D
-    if (dim > 3) {
-        cout
-                << "INPUT DATA ERROR (!) dim > 3 as it specified in the ../config/main.ini file. Please, make it equal to 1, 2 or 3."
-                << endl;
-        Out_logfile_stream
-                << "INPUT DATA ERROR (!) dim > 3 in the ../config/main.ini file. Please, make it equal to 1, 2 or 3."
-                << endl;
-        exit(1);
-    }
-    //The next line just a technical procedure string to char arrays transformation needed to use them as the function arguments
-    paths.push_back(const_cast<char *>(ssd0.c_str()));
-    paths.push_back(const_cast<char *>(ssd1.c_str()));
-    paths.push_back(const_cast<char *>(ssd2.c_str()));
-    paths.push_back(const_cast<char *>(ssd3.c_str()));
-    paths.push_back(const_cast<char *>(ssd4.c_str()));
-    paths.push_back(const_cast<char *>(ssd5.c_str()));
-    paths.push_back(const_cast<char *>(ssd6.c_str()));
-
-//  PCC measures
-/// ---> edge lengths HERE (!) // see next 'ssd14 = source_dir + "edge_lengths.txt"s;' and replace with 'ssd6'
-    if (is_file_exists(source_dir + "measures/face_areas.txt"s) && dim >= 2)
-        ssd7 = source_dir + "measures/face_areas.txt"s; // 2D
-    paths.push_back(const_cast<char *>(ssd7.c_str()));
-    if (is_file_exists(source_dir + "measures/polyhedron_volumes.txt"s) && dim == 3)
-        ssd8 = source_dir + "measures/polyhedron_volumes.txt"s; // 3D
-    paths.push_back(const_cast<char *>(ssd8.c_str()));
-
-//  PCC geometry (barycenter coordinates)
-//    For vector<tuple<double, double, double>> vertex_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, grain_coordinates_vector;
-    if (is_file_exists(source_dir + "coordinates/polyhedron_seeds.txt"s) && dim == 3)
-        ssd9 = source_dir + "coordinates/polyhedron_seeds.txt"s; // grain (polyhedron) seeds
-    paths.push_back(const_cast<char *>(ssd9.c_str()));
-    if (is_file_exists(source_dir + "coordinates/vertex_seeds.txt"s) && dim >= 1)
-        ssd10 = source_dir + "coordinates/vertex_seeds.txt"s; // vertex coordinates
-    paths.push_back(const_cast<char *>(ssd10.c_str()));
-    if (is_file_exists(source_dir + "other/face_normals.txt"s) && dim >= 2)
-        ssd11 = source_dir + "other/face_normals.txt"s; // face normal vectors
-    paths.push_back(const_cast<char *>(ssd11.c_str()));
-    if (is_file_exists(source_dir + "coordinates/edge_seeds.txt"s) && dim >= 1)
-        ssd12 = source_dir + "coordinates/edge_seeds.txt"s; // edge barycentres coordinates
-    paths.push_back(const_cast<char *>(ssd12.c_str()));
-    if (is_file_exists(source_dir + "coordinates/face_seeds.txt"s) && dim >= 2)
-        ssd13 = source_dir + "coordinates/face_seeds.txt"s; // face barycentres coordinates
-    paths.push_back(const_cast<char *>(ssd13.c_str()));
-
-    if (is_file_exists(source_dir + "measures/edge_lengths.txt"s) && dim >= 1)
-        ssd14 = source_dir + "measures/edge_lengths.txt"s; // edge barycentres coordinates
-    paths.push_back(const_cast<char *>(ssd14.c_str()));
-
-/// Vector with rhe numbers of PCC k-cells for k\in{0,1,2,3} from file
-    if (is_file_exists(source_dir + "/combinatorial/number_of_cells.txt"s)) {
-        std::string ncells = source_dir + "/combinatorial/number_of_cells.txt"s;
-        char *number_of_cells = const_cast<char *>(ncells.c_str());
-// :: CellNumbs vector components: [0] - Nodes number, [1] - Edges number, [2] - Faces number, [3] - Polyhedrons number
-        CellNumbs = VectorIReader(
-                number_of_cells); // VectorReader is a function from the PCC_SupportFunctions.h library; "number_of_cells" here if the PATH to file
-
-/// CellNumbs output
-        cout << "=====================================================================================" << endl;
-        Out_logfile_stream
-                << "=========================================================================================================================================================================="
-                << endl;
-        unsigned int t_length = 0;
-        for (int cell_numb: CellNumbs) {
-            cout << t_length++ << "-cells #\t" << cell_numb << endl;
-            Out_logfile_stream << t_length << "-cells #\t" << cell_numb << endl;
-        } // end for (int cell_numb : CellNumbs)
-    } // if voro_Ncells exists
-    else
-        cout << "ERROR: The file " << source_dir + "/combinatorial/number_of_cells.txt"s
-             << " does not exists (!)" << endl;
-
-/// Initial state::
-    if (dim < 3) { // Does not exist in 2D: CellNumbs.at(3)
-        State_p_vector.resize(0, 0);
-        State_pfracture_vector.resize(0, 0);
-        if (dim == 1)
-            State_f_vector.resize(0, 0);
-        State_ffracture_vector.resize(0, 0);
-    } else {
-        State_p_vector.resize(CellNumbs.at(3), 0);
-        State_pfracture_vector.resize(CellNumbs.at(3), 0);
-        State_f_vector.resize(CellNumbs.at(2), 0);
-        State_ffracture_vector.resize(CellNumbs.at(2), 0);
-    }
-    State_e_vector.resize(CellNumbs.at(1), 0);
-    State_n_vector.resize(CellNumbs.at(0), 0);
-    State_efracture_vector.resize(CellNumbs.at(1), 0);
-    State_nfracture_vector.resize(CellNumbs.at(0), 0);
-
-    if (dim == 1) { // 1D case
-        Configuration_State.resize(2);
-        Configuration_State = {State_n_vector, State_e_vector};
-        Configuration_cState.resize(2);
-        Configuration_cState = {State_nfracture_vector, State_efracture_vector};
-    }
-    if (dim == 2) { // 2D case
-        Configuration_State.resize(3);
-        Configuration_State = {State_n_vector, State_e_vector, State_f_vector};
-        Configuration_cState.resize(3);
-        Configuration_cState = {State_nfracture_vector, State_efracture_vector, State_ffracture_vector};
-    } else { // 3D case
-        Configuration_State.resize(4);
-        Configuration_State = {State_n_vector, State_e_vector, State_f_vector, State_p_vector};
-        Configuration_cState.resize(4);
-        Configuration_cState = {State_nfracture_vector, State_efracture_vector, State_ffracture_vector,
-                                State_pfracture_vector};
-    } // Configuration_State in 3D: [0] -> nodes, [1] -> edges, [2] -> faces, [3] -> polyhedrons
-
-/// Output paths.vector to console and logfile out
-    int npath = 0;
-    cout << "_____________________________________________________________________________________" << endl;
-    Out_logfile_stream
-            << "_____________________________________________________________________________________" << endl;
-    for (auto path: paths) {
-        cout << "[" << npath++ << "]" << " paths:\t" << path << endl;
-        Out_logfile_stream << "[" << npath << "]" << " paths:\t" << path << endl;
-    }
-} /// END of the 'initial_configuration' function
+// void initial_configuration(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_cState) {
+//} /// END of the 'initial_configuration' function
 
 /// ====================# 2 #============================= TUTORIAL ================================================= ///
 
@@ -405,4 +270,3 @@ void tutorial(){
     } /// END of the tutorial() function
 
                             /// *** H E A P *** ///
-            // HERE ARE OLD AND/OR UNUSED BUT USEFUL PIECES OF CODE
