@@ -23,7 +23,7 @@ using namespace std; // standard namespace
 
 /// External variables
 extern std::vector<unsigned int> CellNumbs; //number of cells in a PCC defined globally
-extern std::vector<char*> paths; //paths to PCC files
+extern std::vector<char*> PCCpaths; //PCCpaths to PCC files
 extern int dim; // PCC dimension: dim = 1 for graphs, dim = 2 for 2D plane polytopial complexes and dim = 3 for 3D bulk polyhedron complexes, as it is specified in the main.ini file.
 extern std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, grain_coordinates_vector; // coordinate vectors defined globally
 
@@ -37,19 +37,19 @@ std::vector<unsigned int> PCC_Plane_cut (double a_coeff, double b_coeff, double 
 
     vector<unsigned int> planecut_grains;
 
-    // Obtaining Faces (coloumns) - Edges (rows) incidence matrix from file paths.at(5 + (dim - 3))
-    Eigen::SparseMatrix<double> ENS = SMatrixReader(paths.at(4 + (dim - 3)), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Nodes-Edges
-    //SpMat AES = SMatrixReader(paths.at(1 + (dim - 3)), (CellNumbs.at(1)), (CellNumbs.at(1))); //all Edges
+    // Obtaining Faces (coloumns) - Edges (rows) incidence matrix from file PCCpaths.at(5 + (dim - 3))
+    Eigen::SparseMatrix<double> ENS = SMatrixReader(PCCpaths.at(4 + (dim - 3)), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Nodes-Edges
+    //SpMat AES = SMatrixReader(PCCpaths.at(1 + (dim - 3)), (CellNumbs.at(1)), (CellNumbs.at(1))); //all Edges
     ///  Full symmetric AES matrix instead of triagonal
     //AES = 0.5 * (AES + SparseMatrix<double>(AES.transpose()));
 
-    Eigen::SparseMatrix<double> FES = SMatrixReader(paths.at(5 + (dim - 3)), CellNumbs.at(1), CellNumbs.at(2)); // Edges-Faces
-    //SpMat AFS = SMatrixReader(paths.at(2 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(2))); //all Faces
+    Eigen::SparseMatrix<double> FES = SMatrixReader(PCCpaths.at(5 + (dim - 3)), CellNumbs.at(1), CellNumbs.at(2)); // Edges-Faces
+    //SpMat AFS = SMatrixReader(PCCpaths.at(2 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(2))); //all Faces
     ///  Full symmetric AFS matrix instead of triagonal
     //AFS = 0.5 * (AFS + SparseMatrix<double>(AFS.transpose()));
 
-    Eigen::SparseMatrix<double> GFS = SMatrixReader(paths.at(6 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
-    Eigen::SparseMatrix<double> AGS = SMatrixReader(paths.at(3 + (dim - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Volumes
+    Eigen::SparseMatrix<double> GFS = SMatrixReader(PCCpaths.at(6 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
+    Eigen::SparseMatrix<double> AGS = SMatrixReader(PCCpaths.at(3 + (dim - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Volumes
     ///  Full symmetric AGS matrix instead of triagonal
     AGS = 0.5 * (AGS + Eigen::SparseMatrix<double>(AGS.transpose()));
 

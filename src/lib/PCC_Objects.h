@@ -6,7 +6,7 @@
 /// ==== # 0 # =============== Structure for the initial configuration  ========================= ///
 
 /*!
- * @brief This class combine paths to directories and initial variables set in the config/*.ini files with the methods of their reading like
+ * @brief This class combine PCCpaths to directories and initial variables set in the config/*.ini files with the methods of their reading like
  * @public Get_config(), Set_config()
  * @param dim, source_dir, paths, ConfigVector
  * @return Configuration_State, Configuration_cState
@@ -15,23 +15,23 @@ class Config {
     private:
         int dim;
         std::string source_dir;
-        std::vector<char*> paths;
+        std::vector<char*> PCCpaths;
         std::vector<int> ConfVector; // main module keys
 
     /// Output:
-        std::vector<vector<int>> Configuration_State;
-        std::vector<vector<int>> Configuration_cState;
+        std::vector<std::vector<int>> Configuration_State;
+        std::vector<std::vector<int>> Configuration_cState;
 
 public:
     void Read_config(); // Read the 'initial configuration' of the problem set in all the relevant '*.ini' files containing in the '\config' project directory using the functions from the 'ini_readers.cpp' project library (and only from there)
-    void Set_config(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_cState); // manual setting of the configuration
+    void Set_config(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<std::vector<int>> Configuration_State, std::vector<std::vector<int>> Configuration_cState); // manual setting of the configuration
 
     int Get_dim(); //@return dim
     std::vector<int> Get_ConfVector(); //@return ConfVector
     std::string Get_source_dir(); //@return source_dir
-    std::vector<char*> Get_paths(); //@return paths
-    std::vector<vector<int>> Get_Configuration_State(); //@return Configuration_State
-    std::vector<vector<int>> Get_Configuration_cState(); //@return Configuration_State
+    std::vector<char*> Get_paths(); //@return PCC PCCpaths
+    std::vector<std::vector<int>> Get_Configuration_State(); //@return Configuration_State
+    std::vector<std::vector<int>> Get_Configuration_cState(); //@return Configuration_State
 };
 // ConfigVector (../config/main.ini) contains ALL the control variables needed for the program execution
 

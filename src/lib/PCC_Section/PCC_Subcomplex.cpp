@@ -28,7 +28,7 @@ using namespace std; // standard namespace
 
 /// External variables
 extern std::vector<unsigned int> CellNumbs; //number of cells in a PCC defined globally
-extern std::vector<char*> paths; //paths to PCC files
+extern std::vector<char*> PCCpaths; //PCCpaths to PCC files
 extern int dim; // PCC dimension: dim = 1 for graphs, dim = 2 for 2D plane polytopial complexes and dim = 3 for 3D bulk polyhedron complexes, as it is specified in the main.ini file.
 extern std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, grain_coordinates_vector; // coordinate vectors defined globally
 
@@ -62,8 +62,8 @@ Subcomplex PCC_Subcomplex(Subcomplex &new_cut, std::vector<unsigned int> const &
 
     std::vector <unsigned int>  sub_grains_sequence, common_faces_sequence, s_sub_faces_sequence, c_sub_faces_sequence;
 
-    Eigen::SparseMatrix<double> GFS = SMatrixReader(paths.at(6 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
-    Eigen::SparseMatrix<double> AGS = SMatrixReader(paths.at(3 + (dim - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Volumes
+    Eigen::SparseMatrix<double> GFS = SMatrixReader(PCCpaths.at(6 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
+    Eigen::SparseMatrix<double> AGS = SMatrixReader(PCCpaths.at(3 + (dim - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Volumes
     ///  Full symmetric AGS matrix instead of triagonal
     AGS = 0.5 * (AGS + Eigen::SparseMatrix<double>(AGS.transpose()));
 
@@ -175,7 +175,7 @@ if (sub_faces_sequence.size() > 0) {
     /// Common face coordinates
     for(unsigned int fnumber = 0; fnumber < CellNumbs.at(2); ++fnumber)
         if(std::find(common_faces_sequence.begin(), common_faces_sequence.end(), fnumber) != common_faces_sequence.end())
-            common_faces_coordinates.push_back(find_aGBseed(fnumber, paths, CellNumbs, grain_coordinates_vector)); // tuple<double, double, double> NewSeed_coordinates = make_tuple(0, 0, 0);
+            common_faces_coordinates.push_back(find_aGBseed(fnumber, PCCpaths, CellNumbs, grain_coordinates_vector)); // tuple<double, double, double> NewSeed_coordinates = make_tuple(0, 0, 0);
 
 //    for(auto cfs : common_faces_sequence) cout << "common_faces_sequence : " << cfs << endl;
     cout << "common faces coordinates size: " << common_faces_coordinates.size() << endl;

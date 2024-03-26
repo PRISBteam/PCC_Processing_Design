@@ -73,7 +73,7 @@ The <i>\src</i> "source" directory contains several subfolders with libraries:
 The main part of the “user interface” contains a few *.ini files governing the behaviour of each of the modules. Among them:
 <ol>
 <li> Main </li>
-Provides a common “environment” for all the other project parts. Currently, it is the only .cpp file compiling in the project (see CMakeLists.txt), including all the other project libraries. All the variables, names and paths are defined here and then it calls all the other modules marked “ON” in the main.ini file.
+Provides a common “environment” for all the other project parts. Currently, it is the only .cpp file compiling in the project (see CMakeLists.txt), including all the other project libraries. All the variables, names and PCCpaths are defined here and then it calls all the other modules marked “ON” in the main.ini file.
 <li> Processing </li>
 The central part of the code - generates labelling of a PCC k-cells of different dimensions according to some governing principles. 
 <li> Characterisation </li>

@@ -45,7 +45,7 @@ extern int dim;
  * @param Configuration_cState [not mandatory - only if exists some "non-zero" initial state of "fractured" cells]
  * @return cells_design
  */
-/// All the initial settings are written in 'processing.ini' file, including paths to the corresponding directories and execution types
+/// All the initial settings are written in 'processing.ini' file, including PCCpaths to the corresponding directories and execution types
 CellsDesign PCC_Processing(std::vector<std::vector<int>> &Configuration_State,std::vector<std::vector<int>> &Configuration_cState) {
 // CellNumbs :: vector components: [0] - Node numbers, [1] - Edge numbers, [2] - Face numbers, [3] - Polyhedron numbers
 // Maximal fraction of max_sFaces_fraction \in [0,1] for the simulation loop
@@ -364,7 +364,7 @@ ofstream OutFLfile, OutJFile, OutJ2File, OutSFile, OutS2File, OutPowersADistribu
    } /// End of 'X' (ip index) type of simulations
 
   else if (*stype == 'E') { // Experimental data
-       Processing_ExperimentalData(State_Vector, special_faces_sequence, max_sFaces_fraction, number_of_types, CellNumbs, paths);
+       Processing_ExperimentalData(State_Vector, special_faces_sequence, max_sFaces_fraction, number_of_types, CellNumbs, PCCpaths);
 
        /// ====== Reading from file instead of DCC_Processing3D ( ) if it is off ============>
        string SFS_path = in + "Smax/SpecialGrainBoundaries.txt"s;

@@ -83,7 +83,6 @@ vector<Eigen::Triplet<double>> TripletsReader(char* SMpath) {
     return tripletList;
 }
 
-
 /// DDRX support function :: GFS matrix reading and calculation of new seeds at the centres of GBs
 
 std::tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<char*> const paths, std::vector<unsigned int> & CellNumbs, vector<tuple<double, double, double>> & AllSeeds_coordinates) {
@@ -949,7 +948,7 @@ double Get_TJsEntropy(vector<unsigned int> special_faces_seq) {
     vector<double> TJsTypes;
 
     SpMat FES(CellNumbs.at(1), CellNumbs.at(2));
-    FES = SMatrixReader(paths.at(5 ), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
+    FES = SMatrixReader(PCCpaths.at(5 ), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
 
     TJsTypes = EdgesTypesCalc(CellNumbs, special_faces_seq, FES);
 

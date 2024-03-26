@@ -11,8 +11,8 @@ add_executable( PCC_Processing_Design
         src/lib/PCC_Objects.cpp
         src/lib/PCC_Measures.cpp
 
-        src/lib/PCC_Section/PCC_Subcomplex.cpp
-        src/lib/PCC_Section/functions/Subcomplex_Planecut_functions.cpp
+        #        src/lib/PCC_Section/PCC_Subcomplex.cpp
+        #       src/lib/PCC_Section/functions/Subcomplex_Planecut_functions.cpp
         src/lib/PCC_Processing/PCC_Processing.cpp
         src/lib/PCC_Processing/functions/Processing_Assignment_functions.cpp
 

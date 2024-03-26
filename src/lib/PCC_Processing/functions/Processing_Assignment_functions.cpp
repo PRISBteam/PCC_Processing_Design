@@ -26,7 +26,7 @@ typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which decla
 
 extern std::vector<unsigned int> CellNumbs;
 extern ofstream Out_logfile_stream;
-extern vector<char*> paths;
+extern vector<char*> PCCpaths;
 //extern int dim;
 int dim0 = 3; //// to be DELETED
 
@@ -53,7 +53,7 @@ vector<int> NewFacesStrip_RW( int iniFaceNumber, int strip_length, int Leap_friq
     unsigned int New2CellNumb;  vector<int> NewStripVector_RW;
     vector<double> neigh_Faces; // vector for all neighbours of each face
     /// Sparse Face Adjacency matrix - reading from the file of the considered PCC
-    SpMat AFS = SMatrixReader(paths.at(2 + (dim0 - 3)), (CellNumbs.at(2)), (CellNumbs.at(2))); //all Faces
+    SpMat AFS = SMatrixReader(PCCpaths.at(2 + (dim0 - 3)), (CellNumbs.at(2)), (CellNumbs.at(2))); //all Faces
     AFS = 0.5 * (AFS + Eigen::SparseMatrix<double>(AFS.transpose()));     //  Full symmetric AFS matrix instead of triagonal
     // Find ordinary-ONLY faces: Calculation OrdinaryCellNumbs vector based on a given S_Vector std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(2), 1); // Vector of the size equal to the total number of faces in PCC initialised with '1's for( unsigned int lit = 0; lit < OrdinaryCellNumbs.size(); lit++) OrdinaryCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces // S_Vector with its non-zero elements set any pre-define structure of special element feeding to the function Processing_Random for( unsigned int itr : S_Vector) if(itr != 0) OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
 
@@ -325,8 +325,8 @@ std::vector<double> j_fractions(4, 0), d_fractions(3, 0); // fractions of (1) ed
 EdgeTypes = Edge_types_byFaces(CellNumbs, special_cells_sequence, j_fractions, d_fractions);
 //REPAIR for(auto kl : EdgesTypes) cout << " " <<kl ; cout << endl; exit(10);
 
-// Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file paths.at(5 + (dim - 3))
-SpMat FES = SMatrixReader(paths.at(5 + (dim - 3)), CellNumbs.at(1 + (dim - 3)), CellNumbs.at(2 + (dim - 3))); // Edges-Faces (3D) or Nodes-Edges (2D) sparse incidence matrix
+// Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file PCCpaths.at(5 + (dim - 3))
+SpMat FES = SMatrixReader(PCCpaths.at(5 + (dim - 3)), CellNumbs.at(1 + (dim - 3)), CellNumbs.at(2 + (dim - 3))); // Edges-Faces (3D) or Nodes-Edges (2D) sparse incidence matrix
 
 /// ================ Loop over all Faces ===================
 int index_new = 0;
@@ -502,8 +502,8 @@ std::vector<double> j_fractions(4, 0), d_fractions(3, 0); // fractions of (1) ed
 EdgeTypes = Edge_types_byFaces(CellNumbs, special_cells_sequence, j_fractions, d_fractions);
 //REPAIR for(auto kl : EdgesTypes) cout << " " <<kl ; cout << endl; exit(10);
 
-// Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file paths.at(5 + (dim - 3))
-SpMat FES = SMatrixReader(paths.at(5 + (dim - 3)), CellNumbs.at(1 + (dim - 3)), CellNumbs.at(2 + (dim - 3))); // Edges-Faces sparse incidence matrix
+// Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file PCCpaths.at(5 + (dim - 3))
+SpMat FES = SMatrixReader(PCCpaths.at(5 + (dim - 3)), CellNumbs.at(1 + (dim - 3)), CellNumbs.at(2 + (dim - 3))); // Edges-Faces sparse incidence matrix
 
 /// ================ Loop over all Faces ===================
 do { // do{ ... }while(output_step) loop starting point
@@ -648,11 +648,11 @@ std::vector<double> j_fractions(dim0 + 1, 0), d_fractions(dim0, 0); // fractions
 EdgeTypes = Edge_types_byFaces(CellNumbs, special_cells_sequence, j_fractions, d_fractions);
 //REPAIR for(auto kl : EdgesTypes) cout << " " <<kl ; cout << endl; exit(10);
 
-// Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file paths.at(5 + (dim - 3))
-SpMat FES = SMatrixReader(paths.at(5 + (dim0 - 3)), CellNumbs.at(1 + (dim0 - 3)), CellNumbs.at(2 + (dim0 - 3))); // Edges-Faces sparse incidence matrix
-SpMat GFS = SMatrixReader(paths.at(6 + (dim0 - 3)), CellNumbs.at(2 + (dim0 - 3)), CellNumbs.at(3 + (dim0 - 3))); // Faces-Grains sparse incidence matrix
+// Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file PCCpaths.at(5 + (dim - 3))
+SpMat FES = SMatrixReader(PCCpaths.at(5 + (dim0 - 3)), CellNumbs.at(1 + (dim0 - 3)), CellNumbs.at(2 + (dim0 - 3))); // Edges-Faces sparse incidence matrix
+SpMat GFS = SMatrixReader(PCCpaths.at(6 + (dim0 - 3)), CellNumbs.at(2 + (dim0 - 3)), CellNumbs.at(3 + (dim0 - 3))); // Faces-Grains sparse incidence matrix
 
-SpMat AGS = SMatrixReader(paths.at(3 + (dim0 - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Faces
+SpMat AGS = SMatrixReader(PCCpaths.at(3 + (dim0 - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Faces
 AGS = 0.5 * (AGS + SparseMatrix<double>(AGS.transpose())); // Full matrix instead of triagonal
 
 std::vector<vector<double>> grain_quaternions(CellNumbs.at(3 + (dim0 - 3)), std::vector<double>(4)),
@@ -927,11 +927,11 @@ std::vector<double> j_fractions(4, 0), d_fractions(3, 0); // fractions of (1) ed
 EdgeTypes = Edge_types_byFaces(CellNumbs, special_cells_sequence, j_fractions, d_fractions);
 //REPAIR for(auto kl : EdgesTypes) cout << " " <<kl ; cout << endl; exit(10);
 
-// Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file paths.at(5 + (dim - 3))
-SpMat FES = SMatrixReader(paths.at(5 + (dim - 3)), CellNumbs.at(1 + (dim - 3)), CellNumbs.at(2 + (dim - 3))); // Edges-Faces sparse incidence matrix
-SpMat GFS = SMatrixReader(paths.at(6 + (dim - 3)), CellNumbs.at(2 + (dim - 3)), CellNumbs.at(3 + (dim - 3))); // Faces-Grains sparse incidence matrix
+// Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file PCCpaths.at(5 + (dim - 3))
+SpMat FES = SMatrixReader(PCCpaths.at(5 + (dim - 3)), CellNumbs.at(1 + (dim - 3)), CellNumbs.at(2 + (dim - 3))); // Edges-Faces sparse incidence matrix
+SpMat GFS = SMatrixReader(PCCpaths.at(6 + (dim - 3)), CellNumbs.at(2 + (dim - 3)), CellNumbs.at(3 + (dim - 3))); // Faces-Grains sparse incidence matrix
 
-SpMat AGS = SMatrixReader(paths.at(3 + (dim - 3)), (CellNumbs.at(3 + (dim - 3))), (CellNumbs.at(3 + (dim - 3)))); //all Faces
+SpMat AGS = SMatrixReader(PCCpaths.at(3 + (dim - 3)), (CellNumbs.at(3 + (dim - 3))), (CellNumbs.at(3 + (dim - 3)))); //all Faces
 AGS = 0.5 * (AGS + SparseMatrix<double>(AGS.transpose())); // Full matrix instead of triagonal
 
 std::vector<vector<double>> grain_quaternions(CellNumbs.at(3 + (dim - 3)), std::vector<double>(4)),
@@ -1217,11 +1217,11 @@ std::vector<double> j_fractions(dim0 + 1, 0), d_fractions(dim0, 0); // fractions
 EdgeTypes = Edge_types_byFaces(CellNumbs, special_cells_sequence, j_fractions, d_fractions);
 //REPAIR for(auto kl : EdgesTypes) cout << " " <<kl ; cout << endl; exit(10);
 
-// Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file paths.at(5 + (dim - 3))
-SpMat FES = SMatrixReader(paths.at(5 + (dim0 - 3)), CellNumbs.at(1 + (dim0 - 3)), CellNumbs.at(2 + (dim0 - 3))); // Edges-Faces sparse incidence matrix
-SpMat GFS = SMatrixReader(paths.at(6 + (dim0 - 3)), CellNumbs.at(2 + (dim0 - 3)), CellNumbs.at(3 + (dim0 - 3))); // Faces-Grains sparse incidence matrix
+// Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file PCCpaths.at(5 + (dim - 3))
+SpMat FES = SMatrixReader(PCCpaths.at(5 + (dim0 - 3)), CellNumbs.at(1 + (dim0 - 3)), CellNumbs.at(2 + (dim0 - 3))); // Edges-Faces sparse incidence matrix
+SpMat GFS = SMatrixReader(PCCpaths.at(6 + (dim0 - 3)), CellNumbs.at(2 + (dim0 - 3)), CellNumbs.at(3 + (dim0 - 3))); // Faces-Grains sparse incidence matrix
 
-SpMat AGS = SMatrixReader(paths.at(3 + (dim0 - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Faces
+SpMat AGS = SMatrixReader(PCCpaths.at(3 + (dim0 - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Faces
 AGS = 0.5 * (AGS + SparseMatrix<double>(AGS.transpose())); // Full matrix instead of triagonal
 
 std::vector<vector<double>> grain_quaternions(CellNumbs.at(3 + (dim0 - 3)), std::vector<double>(4)),
@@ -1468,9 +1468,9 @@ int Processing_ipIndex(std::vector<unsigned int> &S_Vector, std::vector<unsigned
     double J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
     double Sstr0 = 0, Sstr00 = 0, SstrN = 0, Sstr0N = 0, Configuration_Face_Entropy = 0, Face_Entropy_Median = 0, Face_Entropy_Skrew = 0;
 
-    // Obtaining Faces (coloumns) - Edges (rows) incidence matrix from file paths.at(5 + (dim - 3))
-    SpMat FES = SMatrixReader(paths.at(5 + (dim - 3)), CellNumbs.at(1), CellNumbs.at(2)); // Edges-Faces
-    SpMat AFS = SMatrixReader(paths.at(2 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(2))); //all Faces
+    // Obtaining Faces (coloumns) - Edges (rows) incidence matrix from file PCCpaths.at(5 + (dim - 3))
+    SpMat FES = SMatrixReader(PCCpaths.at(5 + (dim - 3)), CellNumbs.at(1), CellNumbs.at(2)); // Edges-Faces
+    SpMat AFS = SMatrixReader(PCCpaths.at(2 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(2))); //all Faces
     AFS = 0.5 * (AFS + SparseMatrix<double>(AFS.transpose())); // Full matrix instead of triagonal
 
     double special_faces_fraction = s_faces_sequence.size() / (double) CellNumbs.at(2);
@@ -1656,17 +1656,17 @@ int Processing_ipIndex(std::vector<unsigned int> &S_Vector, std::vector<unsigned
  * @return
  */
  /**
-//int Processing_DDRX(std::vector<unsigned int>  &State_Vector, std::vector<unsigned int>  &special_faces_sequence, double max_sFaces_fraction, std::vector<char*> const paths, int number_of_types, std::vector<unsigned int> &CellNumbs) {
+//int Processing_DDRX(std::vector<unsigned int>  &State_Vector, std::vector<unsigned int>  &special_faces_sequence, double max_sFaces_fraction, std::vector<char*> const PCCpaths, int number_of_types, std::vector<unsigned int> &CellNumbs) {
 int Processing_DDRX(std::vector<unsigned int>  &State_Vector, std::vector<unsigned int>  &special_faces_sequence) {
 ///=============================================================================================================================================////
 ///========================================================================= 'D' =================================================================////
 /// ==================================================================>  DDRX process   <========================================================////
 ///=============================================================================================================================================////
     /// Function
-    tuple<double, double, double> find_aGBseed(unsigned int Facenumb, std::vector<char*> const paths, std::vector<unsigned int> & CellNumbs, vector<tuple<double, double, double>> & AllSeeds_coordinates);
+    tuple<double, double, double> find_aGBseed(unsigned int Facenumb, std::vector<char*> const PCCpaths, std::vector<unsigned int> & CellNumbs, vector<tuple<double, double, double>> & AllSeeds_coordinates);
     /// Streams
     ofstream NewSeedsStream;
-    NewSeedsStream.open(paths.at(8), ios::trunc);
+    NewSeedsStream.open(PCCpaths.at(8), ios::trunc);
     NewSeedsStream << "New generated seeds\t" << endl;
     NewSeedsStream.close();
 
@@ -1676,7 +1676,7 @@ int Processing_DDRX(std::vector<unsigned int>  &State_Vector, std::vector<unsign
     tuple<double, double, double> NewSeed_coordinates = make_tuple(0, 0, 0);
 
     /// Face Seeds reading from file Seeds.txt
-    AllSeeds_coordinates = TuplesReader(paths.at(7));
+    AllSeeds_coordinates = TuplesReader(PCCpaths.at(7));
 
 /// ============== Constants and model parameters ===================
     double kb = 1.23* pow(10,-23);
@@ -1689,13 +1689,13 @@ int Processing_DDRX(std::vector<unsigned int>  &State_Vector, std::vector<unsign
 
     srand((unsigned) time(NULL)); // seed for random
     // Output stream opening
-    NewSeedsStream.open(paths.at(8), ios::app);
+    NewSeedsStream.open(PCCpaths.at(8), ios::app);
 
     for(unsigned int fnumber = 0; fnumber < CellNumbs.at(2); ++fnumber) {
         double rv = (rand() / (RAND_MAX + 1.0));
         //   cout << rv << "\t" << prob_seed << endl;
         if (rv <= prob_seed) {
-            NewSeed_coordinates = find_aGBseed(fnumber, paths, CellNumbs, AllSeeds_coordinates);
+            NewSeed_coordinates = find_aGBseed(fnumber, PCCpaths, CellNumbs, AllSeeds_coordinates);
             NewSeedsStream << fnumber << "\t" << get<0>(NewSeed_coordinates) << "\t" << get<1>(NewSeed_coordinates) << "\t" << get<2>(NewSeed_coordinates) << endl;
         }
     }
@@ -1733,7 +1733,7 @@ std::vector<double> Log_normal_distribution (double &mu_f, double &sigm_f, int b
 
 /// *** H E A P *** ///
 /*
- * int Processing_ExperimentalData(std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence, double max_sFaces_fraction, int number_of_types, std::vector<unsigned int> &CellNumbs, std::vector<char*> paths) {
+ * int Processing_ExperimentalData(std::vector<unsigned int> &S_Vector, std::vector<unsigned int> &s_faces_sequence, double max_sFaces_fraction, int number_of_types, std::vector<unsigned int> &CellNumbs, std::vector<char*> PCCpaths) {
     if ( ProcessingON(confpath, time_step_one) && *Processing_type == 'E') {
         string  pass1path = input_dir + "pass_1_misorientation.txt"s; char* p1path = const_cast<char*>(pass1path.c_str());
         string  pass1_B2path = input_dir + "pass_1_B2.txt"s; char* p1B2path = const_cast<char*>(pass1_B2path.c_str());

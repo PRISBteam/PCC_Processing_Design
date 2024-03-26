@@ -70,13 +70,14 @@ typedef MatrixXd DMat; // <Eigen> library class, which declares a dense matrix t
 /// Technical variables
 string source_path = "../config/"s; char* sourcepath = const_cast<char*>(source_path.c_str()); // 'source_path' is a path to the directory reading from the 'config/main.ini' file
 string e_mode = "tutorial"; // '[execution_type]' (etype variable) from the config/main.ini file. The "tutorial" mode by default means the 'educational' mode, where the program learn of how to work with its input files and simulation types
+std::string main_type; /// SIMULATION MODE(LIST) or 'SIMULATION MODE(TASK) :: This define the global simulation mode: 'LIST' for the "list" of modules implementing one by one (if ON) and 'TASK' for the user-defined task scripts with modules and functions included from the project's libraries
 
-vector<char*> paths; // The vector containing the paths to all the PCC's matrices, measures and other supplementary data
+vector<char*> PCCpaths; // The vector containing the PCCpaths to all the PCC's matrices, measures and other supplementary data
 string source_dir, output_dir; // Input and output directories as it is written in the 'config/main.ini' file
 string sim_task; // path to the corresponding *.cpp file containing a 'simulation task' (for 'TASK' execution mode only, not 'LIST') as it is written in the 'config/main.ini' file
 
 /// Global 'log.txt' file output
-ofstream Out_logfile_stream; // 'log.txt' file output of the entire computation process as a copy of the console output
+std::ofstream Out_logfile_stream; // 'log.txt' file output of the entire computation process as a copy of the console output
 
 /// PCC - related variables
 // [general]
@@ -97,9 +98,9 @@ std::vector<double> edge_lengths_vector, face_areas_vector, polyhedron_volumes_v
 // State_Vector in the form : [Element index] - > [Element type], like [0, 0, 2, 1, 1, 0, 2, 4, 3, 3, 2, 0,... ...,2] containing all CellNumb.at(*) element types
 std::vector<int> State_p_vector, State_f_vector, State_e_vector, State_n_vector; // Normally the State_<*>_vector of special cells can be calculated based on the corresonding special_cell_sequences
 std::vector<int> State_pfracture_vector, State_ffracture_vector, State_efracture_vector, State_nfracture_vector; // separate vectors containing the other 'fractured' labels different from the 'special' ones. To be calculated based on the corresonding fractured_cell_sequences
-// Configuration_State = { State_p_vector, State_f_vector, State_e_vector, State_n_vector } is a list of all 'state vectors': from (1) State_p_vector (on top, id = 0) to (4) State_n_vector (bottom, id = 3)
-std::vector<vector<int>> Configuration_State = { State_p_vector, State_f_vector, State_e_vector, State_n_vector },
-                         Configuration_cState = { State_pfracture_vector, State_ffracture_vector, State_efracture_vector, State_nfracture_vector }; //  is the list of all mentioned below State_<*>_vectors and State_<*>fracture_vectors as the output of the Processing module // is the list of 'state vectors' analogous to the Configuration_State but for 'cracked' (or induced) network of k-cells
+/// Configuration_State = { State_p_vector, State_f_vector, State_e_vector, State_n_vector } is a list of all 'state vectors': from (1) State_p_vector (on top, id = 0) to (4) State_n_vector (bottom, id = 3)
+std::vector<std::vector<int>> Configuration_State = { State_p_vector, State_f_vector, State_e_vector, State_n_vector },
+    Configuration_cState = { State_pfracture_vector, State_ffracture_vector, State_efracture_vector, State_nfracture_vector }; //  is the list of all mentioned below State_<*>_vectors and State_<*>fracture_vectors as the output of the Processing module // is the list of 'state vectors' analogous to the Configuration_State but for 'cracked' (or induced) network of k-cells
 /* where 'n' :: "nodes", 'e' :: "edges", 'f' :: "faces", and 'p' :: "polyhedrons" */
 
 /// 'CPD Tutorial' :: educational course active in the 'TUTORIAL' (please see 'config/main.ini' file) code execution mode
@@ -138,7 +139,7 @@ double Main_time = 0.0, S_time = 0.0, P_time = 0.0, C_time = 0.0, M_time = 0.0, 
 
 /// Initial configuration as an object of the Config class described in Objects.cpp project library
 Config initial_configuration;
-// void initial_configuration(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_cState); // Read the 'initial configuration' of the problem set in all the relevant '*.ini' files containing in the '\config' project directory using the functions from the 'ini_readers.cpp' project library (and only from there)
+// void initial_configuration(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> PCCpaths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_cState); // Read the 'initial configuration' of the problem set in all the relevant '*.ini' files containing in the '\config' project directory using the functions from the 'ini_readers.cpp' project library (and only from there)
 
 ///* ........................................................................................    Main    ................................................................ *///
 //* (.h files) * @brief, @param and @return
@@ -153,17 +154,14 @@ int main() {
     Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
     Out_logfile_stream << "------------------------------------------------------------------------------------------------" << endl;
 
-/// Read simulation configuration from file :: the number of special face types and calculating parameters. Then Output of the current configuration to the screen and *.log file.
-    std::string main_type; /// SIMULATION MODE(LIST) or 'SIMULATION MODE(TASK) :: This define the global simulation mode: 'LIST' for the "list" of modules implementing one by one (if ON) and 'TASK' for the user-defined task scripts with modules and functions included from the project's libraries
-
 /// Initial configuration reader and information output to the screen and into the '.log' file
     initial_configuration.Read_config();
     std::vector<int> ConfigVector = initial_configuration.Get_ConfVector();
     /// alternatively :: set 'initial_configuration' object "manually"
 //    initial_configuration.Set_config(const std::vector<int> &initial_configuration.Get_ConfVector(), const std::string &initial_configuration.Get_source_dir(), int &initial_configuration.Get_dim(), std::vector<char*> &initial_configuration.Get_paths(), std::vector<vector<int>> &initial_configuration.Get_Configuration_State(), std::vector<vector<int>> &initial_configuration.Get_Configuration_cState());
 
-///    face_coordinates_vector = VectorDReader(paths.at(12?));
-///    grain_coordinates_vector = VectorDReader(paths.at(9));
+///    face_coordinates_vector = VectorDReader(PCCpaths.at(12?));
+///    grain_coordinates_vector = VectorDReader(PCCpaths.at(9));
 
     // ===== Elapsing time Main ================
     unsigned int Mn_time = clock();
@@ -253,7 +251,7 @@ else if ( main_type == "TASK"s ) {
 /// ================================== FUNCTIONS DEFINED IN MAIN MODULE ==================================///
 
 /// ================== # 7 # Initial configuration reader function (for main.cpp module) ==================
-// void initial_configuration(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_cState) {
+// void initial_configuration(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> PCCpaths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_cState) {
 //} /// END of the 'initial_configuration' function
 
 /// ====================# 2 #============================= TUTORIAL ================================================= ///
