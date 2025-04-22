@@ -4,7 +4,7 @@
 ///*                                        Version 4.0 | 15/04/2024                                                         *///
 ///**************************************************************************************************************************///
 ///************************************ Dr Elijah Borodin, Manchester, UK **************************************************///
-///**************************************** Spring 2022 - Spring 2024  ****************************************************///
+///**************************************** Spring 2022 - Winter 2024  ****************************************************///
 ///***********************************************************************************************************************///
 ///*
 ///*    Code source:    https://github.com/PRISBteam/PCC_Processing_Design/
@@ -29,6 +29,7 @@
 #include <string>
 #include <ctime>
 #include <vector>
+#include <set>
 
 ///* ------------------------------------------------------------------------------- *
 ///* Attached user-defined C++ libraries (must be copied in the directory for STL):
@@ -78,14 +79,14 @@ std::vector<unsigned int> CellNumbs; // the vector named CellNumbs containing th
 // First line here is the number of nodes (0-cells), second - edges (1-cells), third - faces (2-cells) (in the 2D and 3D cases only), fourth - polyhedra (3-cells) (in the 3D case only)
 
 /// Geometry
-std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, grain_coordinates_vector; // vectors containing barycenter Cartesian coordinates of the corresponding tessellation's elements
+std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, polytope_coordinates_vector; // vectors containing barycenter Cartesian coordinates of the corresponding tessellation's elements
 // Global vectors of Cartesian coordinates for: (1) vertex coordinates, (2) barycentres of edges, (3) barycentres of faces and (4) barycentres of polyhedrons
 
 /// Measures
 std::vector<double> edge_lengths_vector, face_areas_vector, polyhedron_volumes_vector; // Global vectors of measures: edge lengths, face areas and polyhedra volumes
 
 /// Time interval variables for different parts (modulus) of the CPD code
-double Main_time = 0.0, S_time = 0.0, P_time = 0.0, C_time = 0.0, W_time = 0.0;
+double Main_time = 0.0, S_time = 0.0, M_time = 0.0, P_time = 0.0, C_time = 0.0, W_time = 0.0;
 
 /// * ===================== MODULES and LIBRARIES ==============================* ///
 ///* =========================================================================== *///
@@ -102,6 +103,9 @@ double Main_time = 0.0, S_time = 0.0, P_time = 0.0, C_time = 0.0, W_time = 0.0;
 
 /*! Section module calculates reduced PCC subcomplexes (parts of the initial PCC including plain cuts) inheriting reduced sequences of special cells and 'state vectors' of the original PCC */
 #include "lib/PCC_Subcomplex/PCC_Subcomplex.h"
+
+/*! Multiphysics module set elastic and thermal energies associated with all k-cells in a PCC taking data from the "CPD_material_database" and multiphysics.ini files */
+#include "lib/PCC_Multiphysics/PCC_Multiphysics.h"
 
 /*! Processing module assigned special IDs for the various elements (Nodes, Edges, Faces, Polytopes/Polyhedrons) of the space tessellation */
 /* Output: module generates a design_sequences as the lists containing the sequences of k-cells possessing "special" IDs including
@@ -200,12 +204,16 @@ int main() {
         configuration = initial_configuration;
 
     /// ====================== I. PCC Subcomplex module ======================
+        std::vector<Subcomplex> pcc_subcomplexes; // vector containing all the PCC subcomplexes (cuts, k-order grain neighbours, etc)
+
         if (ConfigVector.at(1) == 1) { // if the 'PCC_Section' parameter is switched 'ON' in the config/main.ini file
+            Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
             cout << "-------------------------------------------------------------------------" << endl;             Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
             cout << " START of the PCC Subcomplex module " << endl; Out_logfile_stream << " START of the PCC Subcomplex module " << endl;
 
-            std::vector<Subcomplex> pcc_subcomplexes; // vector containing all the PCC subcomplexes (cuts, k-order grain neighbours, etc)
-            PCC_Subcomplex(configuration);
+            pcc_subcomplexes = PCC_Subcomplex(configuration);
+
+            cout << " pcc_subcomplexes size =  " << pcc_subcomplexes.size() << endl;
 
             // ================ Elapsing time for the Subcomplex module ================
             unsigned int Subcomplex_time = clock();
@@ -214,12 +222,36 @@ int main() {
             cout << "-------------------------------------------------------" << endl;
             Out_logfile_stream << "Section time is equal to  " << S_time/ pow(10.0,6.0) <<  "  seconds" << endl;
             Out_logfile_stream << "-------------------------------------------------------" << endl;
+            Out_logfile_stream.close();
         } // end if(SectionON)
 
-    /// ====================== II. PCC Processing module ======================
+        /// ====================== II. PCC Multiphysics module ======================
+        std::vector<CellEnergies> new_cells_energies; // a class described in PCC_Objects.h contained (1) all the k-cell elastic energies and (2) all the k-cell thermal energies in the PCC
+        // Example: vector<CellEnergies> for several crack lengths in a PCC
+
+        if (ConfigVector.at(4) == 1) { // if the 'PCC_Multiphysics' parameter is switched 'ON' in the config/main.ini file
+            Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
+            cout << "-------------------------------------------------------------------------" << endl;             Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            cout << "START of the PCC Multiphysics module " << endl << endl; Out_logfile_stream << "START of the PCC Multiphysics module " << endl << endl;
+
+            /// Defects
+            std::vector<Macrocrack> crack_growth_series; // series of objects of the class Macrocrack with different lengths simulating a crack growth
+
+            new_cells_energies = PCC_Multiphysics(configuration, pcc_subcomplexes, crack_growth_series);
+
+            // ================ Elapsing time for the Processing module ================
+            unsigned int Multiphysics_time = clock();
+            M_time = (double) Multiphysics_time - S_time - Main_time;
+            cout << endl << "Multiphysics time is equal to  " << M_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl; //cout << "-------------------------------------------------------------------------" << endl;
+            Out_logfile_stream << endl << "Multiphysics time is equal to  " << M_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl; //Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            Out_logfile_stream.close();
+        } // end if(MultiphysicsON)
+
+        /// ====================== II. PCC Processing module ======================
         CellDesign new_cells_design; // a class described in PCC_Objects.h contained (1) all special k-cell sequences and (2) all the design_<*>_vectors for all k-cells in the PCC
 
         if (ConfigVector.at(2) == 1) { // if the 'PCC_Processing' parameter is switched 'ON' in the config/main.ini file
+            Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
             cout << "-------------------------------------------------------------------------" << endl;             Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
             cout << "START of the PCC Processing module " << endl; Out_logfile_stream << "START of the PCC Processing module " << endl;
 
@@ -227,15 +259,17 @@ int main() {
 
         // ================ Elapsing time for the Processing module ================
             unsigned int Processing_time = clock();
-            P_time = (double) Processing_time - S_time - Main_time;
+            P_time = (double) Processing_time - S_time - M_time - Main_time;
             cout << "Processing time is equal to  " << P_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl; //cout << "-------------------------------------------------------------------------" << endl;
             Out_logfile_stream << "Processing time is equal to  " << P_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl; //Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            Out_logfile_stream.close();
         } // end if(ProcessingON)
 
     /// ====================== III. PCC Characterisation module ======================
         ProcessedComplex pcc_processed;  // a class described in PCC_Objects.h
 
         if (ConfigVector.at(3) == 1) { // if the 'PCC_Characterisation' parameter is switched 'ON' in the config/main.ini file
+            Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
             cout << "-------------------------------------------------------------------------" << endl;             Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
             cout << "START of the PCC Characterisation module" << endl; Out_logfile_stream << "START of the PCC Characterisation module" << endl;
             cout << "=========================================================================" << endl; Out_logfile_stream << "==============================================================================================================================================================" << endl;
@@ -244,34 +278,225 @@ int main() {
 
         // ===== Elapsing time for the Characterisation module ================
             unsigned int Characterisation_time = clock();
-            C_time = (double) Characterisation_time - S_time - Main_time - P_time;
+            C_time = (double) Characterisation_time - S_time - M_time - P_time - Main_time;
             cout << "Characterisation time is equal to  " << C_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl; //cout << "-------------------------------------------------------------------------" << endl;
             Out_logfile_stream << "Characterisation time is equal to  " << C_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl; //Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            Out_logfile_stream.close();
         }// end if(CharacterisationON)
 
     /// ====================== IV. PCC Writer module ======================
-
         if (ConfigVector.at(6) == 1) { // if the 'PCC_Writer' parameter is switched 'ON' in the config/main.ini file
+            Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
             cout << "-------------------------------------------------------------------------" << endl;             Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
             cout << "START of the PCC Writer module" << endl; Out_logfile_stream << "START of the PCC Writer module" << endl;
             cout << "=========================================================================" << endl; Out_logfile_stream << "==============================================================================================================================================================" << endl;
 
-            PCC_Writer(new_cells_design, pcc_processed);
+            PCC_Writer(new_cells_energies, new_cells_design, pcc_processed);
 
         // ================ Elapsing time for the Writer module ================
             unsigned int Writer_time = clock();
-            W_time = (double) Writer_time - Main_time- C_time - S_time - P_time;
+            W_time = (double) Writer_time - Main_time - S_time - M_time  - P_time - C_time;
             cout << "Writer time is equal to  " << W_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl;
+            Out_logfile_stream.close();
         } // end if(WriterON)
 
     } /// END of the SIMULATION MODE "LIST" as specified in the config/main.ini file
+
 
 /// ==========================================================================================================================================
 /// ================================================= TASK MODE STARTS HERE ==============================================================
 /// ==========================================================================================================================================
     else if ( main_type == "TASK"s ) { // In the TASK mode any piece of code using the project libraries can be included
 
-        /// #include.. .cpp
+/*
+#include "tasks/energy_levels.h"
+        energy_plasticity();
+exit(0);
+*/
+
+/**
+        string indir1 = "/Users/user/Dropbox/OFFICE/Communications/Siying/Belgorod_data_2022/Experimental_Data/ECAP2022/texture_effect/Neper_Cu_01Cr_01Zr_pass4_rand/rand1/pass4_xy.txt"s;
+        string indir2 = "/Users/user/Dropbox/OFFICE/Communications/Siying/Belgorod_data_2022/Experimental_Data/ECAP2022/texture_effect/Neper_Cu_01Cr_01Zr_pass4_rand/rand2/pass4_xy.txt"s;
+        string outdir1 = "/Users/user/Dropbox/OFFICE/Communications/Siying/Belgorod_data_2022/Experimental_Data/ECAP2022/texture_effect/Neper_Cu_01Cr_01Zr_pass4_rand/rand1/"s;
+        string outdir2 = "/Users/user/Dropbox/OFFICE/Communications/Siying/Belgorod_data_2022/Experimental_Data/ECAP2022/texture_effect/Neper_Cu_01Cr_01Zr_pass4_rand/rand2/"s;
+        std::string f1 = outdir1 + "frand_1.txt"s, f2 = outdir2 + "frand_2.txt"s;
+        shuffle_coord_vector(indir1, f1, 10283);
+        shuffle_coord_vector(indir2, f2, 10283);
+**/
+
+#include "tasks/macrocrack_growth.h"
+        /// Initialisation of the current_configuration as equal to the initial_configuration
+        configuration = initial_configuration;
+
+        Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
+
+        vector<unsigned int> node_coordinates_seq, face_coordinates_seq, polytope_coordinates_seq;
+        //      for(unsigned int i = 0; i < CellNumbs.at(0); ++i) { node_coordinates_seq.push_back(i); }
+        //       node_coordinates_vector = kCell_barycentre_coordinates(0,node_coordinates_seq);
+
+        for (unsigned int i = 0; i < CellNumbs.at(2); ++i) {
+            face_coordinates_seq.push_back(i);
+        }
+
+///        face_coordinates_vector = kCell_barycentre_coordinates(2, face_coordinates_seq);
+        face_coordinates_vector = Tuple3Reader(PCCpaths.at(13));
+        if(face_coordinates_vector.size() == 0)
+            face_coordinates_vector = kSequence_barycentre_coordinates(2, face_coordinates_seq);
+
+        //     for(unsigned int i = 0; i < CellNumbs.at(3); ++i) { polytope_coordinates_seq.push_back(i); }
+        //     polytope_coordinates_vector = kCell_barycentre_coordinates(3, polytope_coordinates_seq);
+
+        /// Function simulating Microcrach Growth
+        ProcessedComplex cracked_pcc;
+        std::vector<Macrocrack> macrocrack_growth_series; // series of objects of the class Macrocrack with different lengths simulating a crack growth
+        std::ofstream agglomeration_stat_out;
+        agglomeration_stat_out.open(output_dir + "Agglomeration_stats.txt"s, ios::trunc);
+        agglomeration_stat_out << " powder_number " << "\t" << " max_power " << "\t" << " aggls_in_powder.size() " << "\t" << " counter " << "\n"; // for each POWDER
+        agglomeration_stat_out.close();
+
+        unsigned int counter = 0;
+/// DO        do{ //while loop
+
+        agglomeration_stat_out.open(output_dir + "Agglomeration_stats.txt"s, ios::app);
+
+        cracked_pcc = Macrocrack_growth(configuration); //, macrocrack_growth_series);
+
+        ///  cout << "SIZE\t " << cracked_pcc.Get_macrocrack_sfaces_series().at(0).size() << endl; exit(0);
+        std::ofstream Cracked_pcc_out, Cracked_betti_pcc_out;
+        cout << "-------------------------------------------------------------------------" << endl;
+        Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+        cout << "START of the Writer " << endl;
+        Out_logfile_stream << "START of the Writer " << endl;
+        cout << "=========================================================================" << endl;
+        Out_logfile_stream
+                << "=============================================================================================================================================================="
+                << endl;
+
+        //std::vector<std::vector<unsigned int>> macrocrack_faces_set = cracked_pcc.Get_macrocrack_sfaces();
+        // std::vector<std::vector<std::tuple<double, double, double>>> msb_coord_vector;
+
+        /// Finding inclusions in the current powder
+//
+//        current_PCC.Set_face_barycentre_coordinates();
+
+/*
+ *         Cracked_pcc_out.open(output_dir + "Macrocrack_sfaces_coordinates.txt"s, ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
+
+        PCC current_PCC;
+        std::vector<std::tuple<double, double, double>> FBC = current_PCC.Get_face_barycentre_coordinates();
+        std::vector<std::vector<std::tuple<double, double, double>>> vector_of_series_of_sface_coord_tuples;
+        for ( Macrocrack mcrack : macrocrack_growth_series) {
+            std::vector<unsigned int> new_sface_sequence = mcrack.Get_sfaces_sequence();
+            vector_of_series_of_sface_coord_tuples.push_back(face_sequence_barycentre_coordinates(new_sface_sequence, FBC));
+            cout << "msb SIZE\t" << vector_of_series_of_sface_coord_tuples.back().size() << endl;
+        } // end pf for (auto sf_set: microcrack_faces_set)
+
+            for (auto acc : vector_of_series_of_sface_coord_tuples.back()) {
+                cout << get<0>(acc) * 10.0 << "\t" << get<1>(acc) * 10.0 << "\t" << get<2>(acc) * 10.0 << "\t" << endl;;
+                Cracked_pcc_out << get<0>(acc) * 10.0 << "\t" << get<1>(acc) * 10.0 << "\t" << get<2>(acc) * 10.0 << "\t" << endl;;
+            }
+//            cout << endl; Cracked_pcc_out << endl;
+
+        Cracked_pcc_out.close();
+        exit(0);
+*/
+        Cracked_pcc_out.open(output_dir + "Macrocrack_D_sFace_fractions.txt"s, ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
+        int powder_iterator = 2;
+        for (auto dfrac: cracked_pcc.de_fractions_sface_vector) {
+            Cracked_pcc_out << "Powder #\t" << powder_iterator++ << endl;
+            for (auto itdf: dfrac) {
+// REPAIR                cout << itdf << "\t";
+                Cracked_pcc_out << itdf << "\t";
+            }
+            cout << endl; Cracked_pcc_out << endl;
+        }
+        Cracked_pcc_out.close();
+
+            Cracked_betti_pcc_out.open(output_dir + "Macrocrack_sFace_Betti.txt"s,ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
+            powder_iterator = 0;
+            for (int betti_itr = 0; betti_itr < cracked_pcc.Betti_0_sface.size(); ++betti_itr) {
+                Cracked_betti_pcc_out << "Powder #\t" << powder_iterator++ << endl;
+                Cracked_betti_pcc_out << cracked_pcc.Betti_0_sface.at(betti_itr) << "\t"  << cracked_pcc.Betti_1_sface.at(betti_itr) << "\t" << cracked_pcc.Betti_2_sface.at(betti_itr) << "\t" << cracked_pcc.inverse_connectivity_sface.at(betti_itr) << endl;
+            }
+            Cracked_betti_pcc_out.close();
+
+            Cracked_betti_pcc_out.open(output_dir + "Macrocrack_iFace_Betti.txt"s,ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
+            powder_iterator = 0;
+            for (int betti_itr = 0; betti_itr < cracked_pcc.Betti_0_iface.size(); ++betti_itr) {
+                Cracked_betti_pcc_out << "Powder #\t" << powder_iterator++ << endl;
+                Cracked_betti_pcc_out << cracked_pcc.Betti_0_iface.at(betti_itr) << "\t"  << cracked_pcc.Betti_1_iface.at(betti_itr) << "\t" << cracked_pcc.Betti_2_iface.at(betti_itr) << "\t" << cracked_pcc.inverse_connectivity_iface.at(betti_itr) << endl;
+            }
+            Cracked_betti_pcc_out.close();
+
+            Cracked_pcc_out.open(output_dir + "Macrocrack_agglomeration_powers.txt"s, ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
+
+        int numb = 0, npowd = 0;
+        double average_power = 0.0;
+        for (auto aggls_in_powder: cracked_pcc.agglomerations_in_powders) {
+            ++npowd;
+            average_power = 0;
+            numb = 0;
+            for (auto aggl: aggls_in_powder) {
+                ++numb;
+                Cracked_pcc_out << aggl.Get_agglomeration_power() << "\t";
+                average_power += aggl.Get_agglomeration_power();
+            }
+
+            cout << " Powder #:\t" << npowd << " agglomeration fraction:\t" << (double) numb / CellNumbs.at(2) << "\t"
+                 << " agglomeration relative fraction:\t" << (double) numb / CellNumbs.at(2) << "\t"
+                 << "average agglomeration power:\t" << average_power / (double) numb << "\t" << endl;
+            //Cracked_pcc_out << aggl.Get_agglomeration_power() << "\t";
+            cout << endl;
+            Cracked_pcc_out << endl;
+        }
+        Cracked_pcc_out.close();
+
+        double max_power = 0.0;
+        int powder_number = 0;
+        for (auto aggls_in_powder : cracked_pcc.agglomerations_in_powders) {
+            ++powder_number;
+
+            max_power = 0;
+
+            cout << "powder number\t" << powder_number << "\t\t\t";
+            for (auto aggl : aggls_in_powder) {
+                cout << aggl.Get_agglomeration_power() << "\t";
+                if (aggl.Get_agglomeration_power() > max_power)
+                    max_power = aggl.Get_agglomeration_power();
+            }
+            cout << endl;
+            agglomeration_stat_out << powder_number << "\t" << max_power << "\t" << aggls_in_powder.size() << "\t" << counter << endl; // for each POWDER
+        }
+        agglomeration_stat_out << endl;
+        Cracked_pcc_out.open(output_dir + "Macrocrack_agglomeration_coordinates.txt"s, ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
+        std::vector<unsigned int> aggl_cells_sequence;
+        aggl_cells_sequence.clear();
+
+        int powder_numb = 0; /// A SPECIFIC number of a powder for the output of the agglomeration coordinates
+        ///============================
+        for (auto aggl: cracked_pcc.agglomerations_in_powders.at(powder_numb)) {
+            aggl_cells_sequence.push_back(aggl.Get_agglomeration_kcell_number());
+        }
+
+        std::vector<std::tuple<double, double, double>> aggl_cells_coords;
+        aggl_cells_coords.clear();
+        aggl_cells_coords = face_sequence_barycentre_coordinates(aggl_cells_sequence);
+
+        unsigned int a_numerator = 0;
+        for (auto acc: aggl_cells_coords) {
+// REPAIR            cout << get<0>(acc) * 10.0 << "\t" << get<1>(acc) * 10.0 << "\t" << get<2>(acc) * 10.0 << "\t" << cracked_pcc.agglomerations_in_powders[powder_numb][a_numerator].Get_agglomeration_power() << endl;
+            Cracked_pcc_out << get<0>(acc) * 10.0 << "\t" << get<1>(acc) * 10.0 << "\t" << get<2>(acc) * 10.0 << "\t"
+                            << cracked_pcc.agglomerations_in_powders[powder_numb][a_numerator].Get_agglomeration_power()
+                            << endl;
+            a_numerator++;
+        }
+
+        Cracked_pcc_out.close();
+        Out_logfile_stream.close();
+
+        agglomeration_stat_out.close();
+
+/// WHILE } while (++counter < 1000);
 
     } /// END of the SIMULATION MODE "TASK" as specified in the config/main.ini file
 /// ==========================================================================================================================================

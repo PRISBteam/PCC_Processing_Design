@@ -12,6 +12,6 @@ void PCC_Writer(CellDesign &new_cells_design);
  * @param new_cells_design
  * @param pcc_processed
  */
-void PCC_Writer(CellDesign &new_cells_design, ProcessedComplex &pcc_processed);
+void PCC_Writer(std::vector<CellEnergies> &new_cells_energies, CellDesign &new_cells_design, ProcessedComplex &pcc_processed);
 
 #endif //PCC_PROCESSING_DESIGN_PCC_WRITER_H

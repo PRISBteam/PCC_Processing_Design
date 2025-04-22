@@ -13,6 +13,6 @@ void config_reader_writer(std::string &source_path, std::vector<int> &writer_spe
 // === # 5 # === //
 void config_reader_subcomplex(std::string &source_path, std::string &sctype, std::vector<double> &plane_orientation, double &cut_length, unsigned int &grain_neighbour_orders, std::ofstream &Out_logfile_stream);
 // === # 6 # === //
-void config_reader_multiphysics(std::string &source_path, std::tuple<double, double, double> &sample_dimensions, std::ofstream &Out_logfile_stream);
+void config_reader_multiphysics(std::string &source_path, std::string &Mid_matrix, std::string &Mid_inclusion, std::tuple<double, double, double> &sample_dimensions, double &tau, Eigen::MatrixXd &external_stress, std::vector<double> &macrocrack_ini, std::ofstream &Out_logfile_stream);
 
 #endif //PCC_PROCESSING_DESIGN_INI_READERS_H

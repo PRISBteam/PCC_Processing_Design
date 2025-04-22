@@ -7,13 +7,17 @@
 #include <string>
 #include <vector>
 
+#include "../../PCC_Support_Functions.h" // It must be here - first in this list (!)
 #include "../../PCC_Objects.h"
-// #include "../../PCC_Support_Functions.h" // It must be here - first in this list (!)
+#include "../../ini/ini_readers.h"
 
 using namespace std; // standard namespace
 
 extern std::ofstream Out_logfile_stream;
-extern std::string output_dir;
+extern std::string output_dir, source_path;
+extern std::vector<unsigned int> CellNumbs; // number of cells in a PCC defined globally
+extern std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, polytope_coordinates_vector; // coordinate vectors defined globally
+extern std::vector<std::string> PCCpaths; // The vector containing the paths to all the PCC's matrices, measures and other supplementary data files
 
 #include "Writer_functions.h"
 /// # 1 # Sequences and Designs output
@@ -167,6 +171,90 @@ void PCC_CellSequences_Writer(CellDesign &new_cells_design, int &output_counter)
         Out_ind_scells_file.close();
     } else cout << "Error: No such a directory for\t" << aggl_odir << endl;
 
+
+    return;
+} // END of PCC_CellSequences_Writer()
+
+/// # 2 # Entropic writer
+void PCC_CellEnergies_Writer(std::vector<CellEnergies> &new_cell_energies, int &output_counter) {
+// Offstreams
+    ofstream Out_n_elastic_energy_file, Out_e_elastic_energy_file, Out_f_elastic_energy_file, Out_p_elastic_energy_file; // Cell elastic energies output
+
+    // File names and output directories
+    std::string n_elastic_path = output_dir + "node_elastic_energies.txt"s; // output directory
+    std::string e_elastic_path = output_dir + "edge_elastic_energies.txt"s; // output directory
+    std::string f_elastic_path = output_dir + "face_elastic_energies.txt"s; // output directory
+    std::string p_elastic_path = output_dir + "polytope_elastic_energies.txt"s; // output directory
+
+
+/// Output to file Special and Ordinary faces order :: tess - means "numeration of Faces start with 1 instead of 0 like in the NEPER output"
+    // (1) Random
+    Out_n_elastic_energy_file.open(n_elastic_path, ios::trunc);
+    Out_e_elastic_energy_file.open(e_elastic_path, ios::trunc);
+    Out_f_elastic_energy_file.open(f_elastic_path, ios::trunc);
+    Out_p_elastic_energy_file.open(p_elastic_path, ios::trunc);
+
+    std::vector<std::vector<double>> n_elastic_energies, e_elastic_energies, f_elastic_energies, p_elastic_energies;
+    std::vector<double> zero_n_energies(CellNumbs.at(0),0), zero_e_energies(CellNumbs.at(1),0), zero_f_energies(CellNumbs.at(2),0), zero_p_energies(CellNumbs.at(3),0);
+
+        for(auto ncl : new_cell_energies) {
+            if (ncl.Get_n_elastic_energies().size() > 0) n_elastic_energies.push_back(ncl.Get_n_elastic_energies());
+            else n_elastic_energies.push_back(zero_n_energies);
+
+            if (ncl.Get_e_elastic_energies().size() > 0) e_elastic_energies.push_back(ncl.Get_e_elastic_energies());
+                else e_elastic_energies.push_back(zero_e_energies);
+
+            if (ncl.Get_f_elastic_energies().size() > 0) f_elastic_energies.push_back(ncl.Get_f_elastic_energies());
+                else f_elastic_energies.push_back(zero_f_energies);
+
+            if (ncl.Get_p_elastic_energies().size() > 0) p_elastic_energies.push_back(ncl.Get_p_elastic_energies());
+                    else p_elastic_energies.push_back(zero_p_energies);
+        } // end  for(auto ncl : new_cell_energies)
+
+    if(node_coordinates_vector.size() == 0)
+        node_coordinates_vector = Tuple3Reader(PCCpaths.at(10)); // node barycentres
+
+        /// Only for obtaining here 'sample_dimensions'
+    std::string Mid_matrix, Mid_inclusion; std::tuple<double, double, double> sample_dimensions; double tau; Eigen::MatrixXd external_stress_tensor(3,3); std::vector<double> macrocrack_ini;
+    config_reader_multiphysics(source_path, Mid_matrix, Mid_inclusion, sample_dimensions, tau, external_stress_tensor, macrocrack_ini, Out_logfile_stream);
+
+    for (unsigned int nn = 0; nn < CellNumbs.at(0); ++nn) {
+            for (int it = 0; it < n_elastic_energies.size(); ++it) {
+                Out_n_elastic_energy_file << n_elastic_energies[it][nn] << "\t";
+            }
+                Out_n_elastic_energy_file << get<0>(node_coordinates_vector[nn])*std::get<0>(sample_dimensions)*pow(10.0,6) << "\t" << get<1>(node_coordinates_vector[nn])*std::get<1>(sample_dimensions)*pow(10.0,6) << "\t" << get<2>(node_coordinates_vector[nn])*std::get<2>(sample_dimensions)*pow(10.0,6) << endl;
+        }
+
+    for (unsigned int ee = 0; ee < CellNumbs.at(1); ++ee) {
+        for (int it = 0; it < e_elastic_energies.size(); ++it) {
+            Out_e_elastic_energy_file << e_elastic_energies[it][ee] << "\t";
+        }
+//        Out_e_elastic_energy_file << get<0>(edge_coordinates_vector[ee])*std::get<0>(sample_dimensions)*pow(10.0,6) << "\t" << get<1>(edge_coordinates_vector[ee])*std::get<1>(sample_dimensions)*pow(10.0,6) << "\t" << get<2>(edge_coordinates_vector[ee])*std::get<2>(sample_dimensions)*pow(10.0,6) << endl;
+    }
+
+    if(face_coordinates_vector.size() == 0)
+        face_coordinates_vector = Tuple3Reader(PCCpaths.at(13)); // face barycentres
+
+    for (unsigned int ff = 0; ff < CellNumbs.at(2); ++ff) {
+        for (int it = 0; it < f_elastic_energies.size(); ++it) {
+            Out_f_elastic_energy_file << f_elastic_energies[it][ff] << "\t";
+        }
+        Out_f_elastic_energy_file << get<0>(face_coordinates_vector[ff])*std::get<0>(sample_dimensions)*pow(10.0,6) << "\t" << get<1>(face_coordinates_vector[ff])*std::get<1>(sample_dimensions)*pow(10.0,6) << "\t" << get<2>(face_coordinates_vector[ff])*std::get<2>(sample_dimensions)*pow(10.0,6) << endl;
+    }
+
+    if(polytope_coordinates_vector.size() == 0)
+        polytope_coordinates_vector = Tuple3Reader(PCCpaths.at(9)); // grain seeds reader
+
+        for (unsigned int pp = 0; pp < CellNumbs.at(3); ++pp) {
+            for (int it = 0; it < p_elastic_energies.size(); ++it) {
+                Out_p_elastic_energy_file << p_elastic_energies[it][pp] << "\t";
+            }
+            Out_p_elastic_energy_file << get<0>(polytope_coordinates_vector[pp])*std::get<0>(sample_dimensions)*pow(10.0,6) << "\t" << get<1>(polytope_coordinates_vector[pp])*std::get<1>(sample_dimensions)*pow(10.0,6) << "\t" << get<2>(polytope_coordinates_vector[pp])*std::get<2>(sample_dimensions)*pow(10.0,6) << endl;
+        }
+    Out_n_elastic_energy_file.close();
+    Out_e_elastic_energy_file.close();
+    Out_f_elastic_energy_file.close();
+    Out_p_elastic_energy_file.close();
 
     return;
 }

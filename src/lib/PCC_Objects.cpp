@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <set>
 
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
@@ -13,6 +14,8 @@ using namespace Eigen; // standard namespace
 extern std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, grain_coordinates_vector; // coordinate vectors defined globally
 extern std::vector<unsigned int> CellNumbs; // number of cells in a PCC defined globally
 extern std::string source_path, output_dir;
+extern std::vector<std::string> PCCpaths;
+
 std::ofstream Out_local_logstream;
 
 typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which declares a column-major sparse matrix type of doubles with the nickname 'SpMat'
@@ -22,10 +25,10 @@ typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which decla
 
 /// Tailored Reader for the main.ini file in the ../config/ subdirectory of the project based on the mINI C++ library (2018 Danijel Durakovic http://pulzed.com/, MIT license is included)
 #include "ini/ini_readers.h"
+#include "ini/ini_materials_reader.h"
 
 #include "PCC_Objects.h"
 ///------------------------------------------------------------------
-
 
 /// --------------------------------------------------------------------------------------------------- ///
 /// ========== # 1 # ====================== CLASS 'Config' ============================================ ///
@@ -252,6 +255,9 @@ typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which decla
             Out_local_logstream << "[" << npath++ << "]" << " PCCpaths:\t" << path << endl;
         }
         cout << endl; Out_local_logstream << endl;
+        cout << "Size of Configuration_sState:\t" << Configuration_sState.size() << endl; Out_local_logstream << "Size of Configuration_sState:\t" << Configuration_sState.size() << endl;
+        cout << "Size of Configuration_cState:\t" << Configuration_cState.size() << endl; Out_local_logstream << "Size of Configuration_cState:\t" << Configuration_cState.size() << endl;
+
   } // end of  if (pcc_standard == "pcc1s")
   else {
       cout << "ERROR in the reading PCC: please specify the correct 'pcc_standard' perameter in the config/main.ini file corresponding to the version of the PCC you use (please see technical documentation for more details, the first PCC standard has an ID 'pcc1s'" << endl;
@@ -563,80 +569,97 @@ std::vector<unsigned int> CellDesign::Get_p_induced_sequence(void) const {
 /// --------------------------------------------------------------------------------------------------- ///
 /// ========== # 3 # ====================== CLASS 'Subcomplex' ============================================ ///
 /// --------------------------------------------------------------------------------------------------- ///
+  /// Class constructors
+    // 1
+//    Subcomplex::Subcomplex(unsigned int subcomplex_id_new) {};// constructor 1, simple
 
-Subcomplex::Subcomplex(unsigned int subcomplex_id_new) { // constructor 1, simple
-    subcomplex_id = subcomplex_id_new;
-}
-    //2
-    Subcomplex::Subcomplex(unsigned int subcomplex_id_new, std::vector <unsigned int> new_sub_grains_sequence) { // constructor 2, based on a sub_grains_sequence
-        subcomplex_id = subcomplex_id_new;
-        Set_grains_sequence(new_sub_grains_sequence);
+    // 2
+    Subcomplex::Subcomplex(std::set <unsigned int> &new_sub_grains_set) { // constructor 2, based on a sub_grains_sequence
+        Set_sub_polytope_set(new_sub_grains_set);
+    };
+
+    /// Polytopes
+    void Subcomplex::Set_sub_polytope_set(std::set <unsigned int> &new_sub_grains_set){
+        sub_grains_set = new_sub_grains_set;
     }
 
-    /// Grains
-    void Subcomplex::Set_grains_sequence(std::vector <unsigned int> new_sub_grains_sequence){
-        sub_grains_sequence = new_sub_grains_sequence;
-    }
-
-    std::vector <unsigned int> Subcomplex::Get_grains_sequence(unsigned int subcomplex_id) const {
-        if(sub_grains_sequence.size() != 0)
-            return sub_grains_sequence;
+    std::set <unsigned int> Subcomplex::Get_sub_polytope_set(void) const {
+        if(sub_grains_set.size() != 0)
+            return sub_grains_set;
         else return {0};
     }
 
-    /// geometry
-    void Subcomplex::Set_sub_grain_coordinates(std::vector<tuple<double, double, double>> new_sub_grain_coordinates){
+    ///Geometry
+    void Subcomplex::Set_sub_polytope_coordinates(std::vector<tuple<double, double, double>> &new_sub_grain_coordinates){
         sub_grain_coordinates = new_sub_grain_coordinates;
     }
-    std::vector<std::tuple<double, double, double>> Subcomplex::Get_sub_grain_coordinates(unsigned int subcomplex_id) const {
+    std::vector<std::tuple<double, double, double>> Subcomplex::Get_sub_polytope_coordinates(void) const {
         return sub_grain_coordinates;
     }
 
-    //2
-//    std::vector <unsigned int>  Get_grains_sequence(unsigned int subcomplex_id, std::vector <unsigned int> new_sub_grains_sequence){
-//        if(sub_grains_sequence.size() != 0) return sub_grains_sequence;
-//        else { Set_grains_sequence(new_sub_grains_sequence); return sub_grains_sequence; } }
-
     /// Faces
-    void Subcomplex::Set_faces_sequence(std::vector <unsigned int> new_sub_faces_sequence){
-        sub_faces_sequence = new_sub_faces_sequence;
+    void Subcomplex::Set_sub_faces_set(std::set <unsigned int> &new_sub_faces_set){
+        sub_faces_set = new_sub_faces_set;
     }
     //1
-    std::vector <unsigned int>  Subcomplex::Get_faces_sequence(unsigned int  subcomplex_id) const{
-        if(sub_faces_sequence.size() != 0)
-            return sub_faces_sequence;
+    std::set <unsigned int>  Subcomplex::Get_sub_faces_set(void) const{
+        if(sub_faces_set.size() != 0)
+            return sub_faces_set;
         else return {0};
     }
 
-    void Subcomplex::Set_common_faces_sequence(std::vector <unsigned int> new_common_faces_sequence){
-        common_faces_sequence = new_common_faces_sequence; }
-    std::vector <unsigned int> Subcomplex::Get_common_faces_sequence(unsigned int subcomplex_id) const {
-        return common_faces_sequence; }
+    void Subcomplex::Set_internal_faces_set(std::set <unsigned int> &new_internal_faces_set){
+        internal_faces_set = new_internal_faces_set; }
+    std::set <unsigned int> Subcomplex::Get_internal_faces_set(void) const {
+        return internal_faces_set; }
 
-    void Subcomplex::Set_sfaces_sequence(std::vector <unsigned int> const &ssub_faces_sequence){
-        s_sub_faces_sequence = ssub_faces_sequence;
+void Subcomplex::Set_sub_sfaces_sequence(std::vector <unsigned int> const &special_faces_sequence) {
+    sub_sfaces_sequence = special_faces_sequence;
+}
+
+std::vector <unsigned int> Subcomplex::Get_sub_sfaces_sequence(void) const {
+    if (sub_sfaces_sequence.size() > 0)
+        return sub_sfaces_sequence;
+    else {
+        cout << "Caution! sub_sfaces_sequence = 0! Please add it to the corresponding subcomplex/crack"s << endl;
+        return {0};
     }
-    std::vector <unsigned int> Subcomplex::Get_sfaces_sequence(unsigned int  subcomplex_id) const {
-        if(s_sub_faces_sequence.size() > 0) return s_sub_faces_sequence;
-        else {
-            cout << "Caution! s_sub_faces_sequence = 0! Please add it to the corresponding subcomplex/crack"s << endl;
-            return {0};
-        }
+}
+
+void Subcomplex::Set_sub_cfaces_sequence(std::vector <unsigned int> const &induced_faces_sequence) {
+    sub_cfaces_sequence = induced_faces_sequence;
+}
+
+std::vector <unsigned int> Subcomplex::Get_sub_cfaces_sequence(void) const {
+    if (sub_cfaces_sequence.size() > 0) return sub_cfaces_sequence;
+    else {
+        cout << "Caution! sub_sfaces_sequence = 0! Please add it to the corresponding subcomplex/crack"s << endl;
+        return {0};
+    }
+}
+
+    void Subcomplex::Set_sub_sfaces_coord(std::vector <tuple<double, double, double>> const &sfaces_coord) {
+        sub_sfaces_coord = sfaces_coord;
     }
 
-    void Subcomplex::Set_cfaces_sequence(std::vector <unsigned int> csub_faces_sequence){
-        c_sub_faces_sequence = csub_faces_sequence;
-    }
-    std::vector <unsigned int> Subcomplex::Get_cfaces_sequence(unsigned int  subcomplex_id) const {
-        return c_sub_faces_sequence;
+void Subcomplex::Set_sub_cfaces_coord(std::vector <tuple<double, double, double>> const &induced_faces_coord) {
+    sub_cfaces_coord = induced_faces_coord;
+}
+
+std::vector <tuple<double, double, double>> Subcomplex::Get_sub_sfaces_coord(void) const {
+    return sub_sfaces_coord;
+}
+
+std::vector <tuple<double, double, double>> Subcomplex::Get_sub_cfaces_coord(void) const {
+    return sub_cfaces_coord;
     }
 
-    /// geometry
-    void Subcomplex::Set_common_faces_coordinates(std::vector<tuple<double, double, double>> new_common_faces_coordinates){
-        common_faces_coordinates = new_common_faces_coordinates; }
+    /// Geometry
+    void Subcomplex::Set_internal_face_coordinates(std::vector<tuple<double, double, double>> &new_internal_face_coordinates){
+        internal_face_coordinates = new_internal_face_coordinates; }
 
-    std::vector<tuple<double, double, double>> Subcomplex::Get_common_faces_coordinates(unsigned int subcomplex_id) const {
-        return common_faces_coordinates; }
+    std::vector<tuple<double, double, double>> Subcomplex::Get_internal_face_coordinates(void) const {
+        return internal_face_coordinates; }
 
 // ========== END of class SUBCOMPLEX functions description
 
@@ -647,7 +670,20 @@ Subcomplex::Subcomplex(unsigned int subcomplex_id_new) { // constructor 1, simpl
 void ProcessedComplex::Set_design(CellDesign processed_pcc_design) {
         pcc_design = processed_pcc_design;
     }
+void ProcessedComplex::Set_macrocrack_sfaces_series(std::vector<std::set <unsigned int>> &crack_growth_sf_series){
+    macrocrack_sfaces_series = crack_growth_sf_series;
+}
 
+void ProcessedComplex::Set_macrocrack_sfaces(std::vector<std::vector <unsigned int>> &crack_growth_sf){
+    macrocrack_sfaces = crack_growth_sf;
+}
+
+std::vector<std::set <unsigned int>> ProcessedComplex::Get_macrocrack_sfaces_series(void) const{
+    return macrocrack_sfaces_series;
+}
+std::vector<std::vector <unsigned int>> ProcessedComplex::Get_macrocrack_sfaces(void) const{
+    return macrocrack_sfaces;
+}
 // ========== END of the class PROCESSED_COMPLEX functions description
 
 /// --------------------------------------------------------------------------------------------------- ///
@@ -756,79 +792,86 @@ Agglomeration::Agglomeration(unsigned int AFace, unsigned int AglPower) { // con
     Polytope::Polytope(unsigned int grain_new_id) { // constructor 1 simple
         grain_id = grain_new_id;
     }
-
-    void Polytope::Set_node_ids(unsigned int grain_id, SpMat const &GFS, SpMat const &FES, SpMat const &ENS) { // set the node ids
+    
+    void Polytope::Set_node_ids(SpMat const &GFS, SpMat const &FES, SpMat const &ENS) { // set the node ids
         /// GFS -> FES -> ENS
         if(node_ids.size() == 0) {
             for(unsigned int l = 0; l < CellNumbs.at(2); l++) {// over all Faces (l)
-                if (GFS.coeff(l, grain_id) == 1) {
+                if (GFS.coeff(l, grain_id) != 0) {
                     for (unsigned int j = 0; j < CellNumbs.at(1); j++) // over all Edges (j)
-                        if (FES.coeff(j, l) == 1) { // at the chosen Face with ID = 'l'
+                        if (FES.coeff(j, l) != 0) { // at the chosen Face with ID = 'l'
                             for (unsigned int i = 0; i < CellNumbs.at(0); i++) // over all Nodes
-                                if (ENS.coeff(i, j) == 1) node_ids.push_back(i); // at the chosen Face with ID = 'l'
-                        } // end of if (FES.coeff(l, j) == 1)
-                } // end of (GFS.coeff(m, l) == 1)
+                                if (ENS.coeff(i, j) != 0) node_ids.push_back(i); // at the chosen Face with ID = 'l'
+                        } // end of if (FES.coeff(l, j) != 0)
+                } // end of (GFS.coeff(m, l) != 0)
             } // end of for(unsigned int l = 0; l < CellNumbs.at(2); l++) - Faces
 
-        }/// end of if(node_ids.size() == 0)
+        } // end of if(node_ids.size() == 0)
 
     } // end of Set_node_ids()
 
-    void Polytope::Set_Faces_list(unsigned int grain_id, SpMat const &GFS) {
-        for (unsigned int l = 0; l < CellNumbs.at(2); l++) // for each GB
-            if (GFS.coeff(l, grain_id) == 1)
-                Faces_list.push_back(l);
-    } // end of Set_GBs_list()
+    void Polytope::Set_faces_list(SpMat const &GFS) {
+        for (unsigned int l = 0; l < CellNumbs.at(2); ++l) // for each GB
+            if (GFS.coeff(l, grain_id) != 0)
+                faces_list.push_back(l);
+    } // end of Set_faces_list()
 
-    vector<unsigned int> Polytope::Get_Faces_list() const {
-        if (Faces_list.size() > 0) return Faces_list;
+    vector<unsigned int> Polytope::Get_faces_list(void) const {
+        if (faces_list.size() > 0)
+            return faces_list;
         else { cout << "coution GBs_list.size() = 0! Please Set_GBs_list(unsigned int grain_id, SpMat const &GFS)  first!"s << endl;
             return {0};
         };
-    } // end of Get_GBs_list()
+    } // end of Get_faces_list()
 
     /// return - vector of all node (vertices) coordinates of a grain
-    void Polytope::Set_node_coordinates(unsigned int grain_id) { // set the node ids from Tr = triplet list
-//        for (auto  itr = node_ids.begin(); itr != node_ids.end(); ++itr)
-        //if(find(node_ids.begin(), node_ids.end(), distance(node_ids.begin(), itr)) != node_ids.end())
-//                node_coordinates.push_back(vertex_coordinates_vector.at(*itr)); // vector<unsigned int> node_ids;
-        if(node_ids.size() > 0) {
-            for (auto ids: node_ids) {
-//REPAIR        cout << "vertex_coordinates_vector size " << vertex_coordinates_vector.size() << endl;
-//REPAIR        cout << "ids: " << ids << " node_coordinates size: " << get<0>(vertex_coordinates_vector.at(ids)) << endl;
-                node_coordinates.push_back(node_coordinates_vector.at(ids)); // vector<unsigned int> node_ids;
+    void Polytope::Set_node_coordinates(std::vector<std::tuple<double,double,double>> &vertex_coordinates_vector) { // set the node ids from Tr = triplet list
+        node_coordinates.clear();
+        for (auto  itr = node_ids.begin(); itr != node_ids.end(); ++itr) {
+//REPAIR cout << "\tnode_id\t"s << *itr << "\tvertex_coordinates_vector.size()\t" << vertex_coordinates_vector.size() << endl;
+///            if (find(node_ids.begin(), node_ids.end(), distance(node_ids.begin(), itr)) != node_ids.end())
+            // && *itr <= vertex_coordinates_vector.size()
+                node_coordinates.push_back(vertex_coordinates_vector.at(*itr)); // vector<unsigned int> node_ids;
+                //        if(node_ids.size() > 0) {
+//            for (auto ids: node_ids) {
+//REPAIR    cout << "vertex_coordinates_vector size " << vertex_coordinates_vector.size() << endl;
+//REPAIR    cout << "ids: " << ids << " node_coordinates size: " << get<0>(vertex_coordinates_vector.at(ids)) << endl;
+//                node_coordinates.push_back(node_coordinates.at(ids)); // vector<unsigned int> node_ids;
 //REPAIR cout << "grain id: " << grain_id << " node_coordinates size: " << node_coordinates.size() << endl;
-            }
-
+//            }
+//        }
+//        else {
+//            cout << "Caution! The size of node_ids vector of the grain " << grain_id << " is 0 !" << endl;
+//            node_coordinates.push_back(make_tuple(0,0,0)); /// change after !!
+//        }
+// REPAIR            cout << grain_id  << "____" << node_coordinates.size() << "___" << *itr << "  ";
         }
-        else {
-            cout << "Caution! The size of node_ids vector of the grain " << grain_id << " is 0 !" << endl;
-            node_coordinates.push_back(make_tuple(0,0,0)); /// change after !!
-        }
-    } // the end of Set_node_coordinates
+// REPAIR        cout << endl;
+    } // the end of Set_node_coordinates()
 
-    std::vector<unsigned int> Polytope::Get_node_ids(unsigned int grain_id) const { // set the node ids
+    std::vector<unsigned int> Polytope::Get_node_ids(void) const { // set the node ids
         return node_ids;
-    }
+    } // end of Get_node_ids(void)
 
-std::vector<std::tuple<double, double, double>> Polytope::Get_node_coordinates(unsigned int grain_id) const { // set the node ids
+std::vector<std::tuple<double, double, double>> Polytope::Get_node_coordinates(void) const { // set the node ids
         if (node_coordinates.size() != 0) {
             return node_coordinates;
         } else {
             throw std::invalid_argument( "Please call Set_node_coordinates(unsigned int grain_id, vector<tuple<double, double, double>> const &vertex_coordinates) method first!");
             return node_coordinates;
         }
-    } // end of  Get_node_coordinates() method
+    } // end of Get_node_coordinates() method
 
     /// return - vector with two tuples : { x_min, y_min, z_min; x_max, y_max, z_max} of a grain witn number grain_id
-    vector<tuple<double, double, double>> Polytope::Get_minmax_node_coordinates(unsigned int grain_id) const { // min and max {x,y,z} values of vertices for a grain
-        vector<tuple<double, double, double>> minmax_tuple;
+    std::vector<tuple<double, double, double>> Polytope::Get_minmax_node_coordinates(void) const { // min and max {x,y,z} values of vertices for a grain
+        std::vector<tuple<double, double, double>> minmax_tuple;
         ///Get_node_coordinates(grain_id)
-        vector<tuple<double, double, double>> tup_node_coordinates = Get_node_coordinates(grain_id); // class Grain3D function Get_node_coordinates(grain_id)
-//REPAIR        cout << "Xtup_node_coordinates " << get<0>(tup_node_coordinates.at(0)) << " Ytup_node_coordinates " <<get<1>(tup_node_coordinates.at(0)) << " Ztup_node_coordinates " << get<2>(tup_node_coordinates.at(0)) << endl;
+        std::vector<tuple<double, double, double>> tup_node_coordinates = node_coordinates; // class Polytope
 
+// REPAIR        cout << "\tsize\t" << tup_node_coordinates.size() <<  "\tgrain ID\t" << grain_id << endl;
+        //REPAIR cout << "Xtup_node_coordinates " << get<0>(tup_node_coordinates.at(0)) << " Ytup_node_coordinates " <<get<1>(tup_node_coordinates.at(0)) << " Ztup_node_coordinates " << get<2>(tup_node_coordinates.at(0)) << endl;
         // separating in three parts
-        vector<double> x_node_coordinates, y_node_coordinates, z_node_coordinates;
+        std::vector<double> x_node_coordinates, y_node_coordinates, z_node_coordinates;
         for (auto itr = tup_node_coordinates.begin(); itr != tup_node_coordinates.end(); ++itr) {
             x_node_coordinates.push_back(get<0>(*itr));
             y_node_coordinates.push_back(get<1>(*itr));
@@ -851,7 +894,7 @@ std::vector<std::tuple<double, double, double>> Polytope::Get_node_coordinates(u
         double zmax = *itz.second;
 
         minmax_tuple = {make_tuple(xmin, ymin, zmin), make_tuple(xmax, ymax, zmax)};
-//REPAIR !!        cout << "Xmin " << get<0>(minmax_tuple.at(0)) << " Ymin " <<get<1>(minmax_tuple.at(0)) << " Zmin " << get<2>(minmax_tuple.at(0)) << endl;
+//REPAIR cout << "Xmin " << get<0>(minmax_tuple.at(0)) << " Ymin " <<get<1>(minmax_tuple.at(0)) << " Zmin " << get<2>(minmax_tuple.at(0)) << endl;
 
         return minmax_tuple;
     } // end of Get_minmax_node_coordinates()
@@ -859,19 +902,25 @@ std::vector<std::tuple<double, double, double>> Polytope::Get_node_coordinates(u
 /// ========== END of class grain3D functions description
 
 /// # 6 # The class of a MACROCRACK
+//Macrocrack::Macrocrack(int crack_id_new, Subcomplex &half_plane_sub) : half_plane_subcomplex(0) { // constructor 3, with a subcomplex
+//        crack_id = crack_id_new;
+//        crack_length = half_plane_sub.sub_length; // crack length from the corresponding subcomplex size
+//        half_plane_subcomplex = half_plane_sub; //set subcomplex
+//    }
 
-Macrocrack::Macrocrack(int crack_id_new, Subcomplex &half_plane_sub) : half_plane_subcomplex(0) { // constructor 3, with a subcomplex
-        crack_id = crack_id_new;
-        crack_length = half_plane_sub.sub_length; // crack length from the corresponding subcomplex size
-        half_plane_subcomplex = half_plane_sub; //set subcomplex
-    }
+Macrocrack::Macrocrack(int crack_new_id, int sub_id, Subcomplex &half_plane_sub, double crack_new_length, double crack_mode) : plane_subcomplex() { // constructor 3, with a subcomplex
+    crack_new_id = crack_new_id;
+    crack_stress_mode = crack_mode;
+    crack_length = crack_new_length;
+    plane_subcomplex = half_plane_sub; //set subcomplex
+}
 
-    double Macrocrack::Get_crack_length(int crack_id_new) const {
+double Macrocrack::Get_crack_length(void) const {
         return crack_length;
     }
 
     void Macrocrack::Set_real_crack_length(double sample_size) {
-        real_crack_length = half_plane_subcomplex.sub_length * sample_size;
+        real_crack_length = plane_subcomplex.sub_length * sample_size;
     }
     double Macrocrack::Get_real_crack_length() const {
         if (real_crack_length > 0.0) return real_crack_length;
@@ -879,10 +928,10 @@ Macrocrack::Macrocrack(int crack_id_new, Subcomplex &half_plane_sub) : half_plan
             cout << "Caution! real_crack_length = 0! Please use Set_real_crack_length(double sample_size) before!"s << endl;
             return 0;
         }
-    }
+}
 
     void Macrocrack::Set_crack_plane() {
-        crack_plane = {half_plane_subcomplex.a_n, half_plane_subcomplex.b_n, half_plane_subcomplex.c_n, half_plane_subcomplex.D_plane};
+        crack_plane = {plane_subcomplex.a_n, plane_subcomplex.b_n, plane_subcomplex.c_n, plane_subcomplex.D_plane};
     }
     vector<double> Macrocrack::Get_crack_plane() const {
         if (crack_plane.size() > 0.0) return crack_plane;
@@ -892,32 +941,306 @@ Macrocrack::Macrocrack(int crack_id_new, Subcomplex &half_plane_sub) : half_plan
         }
     }
 
-    void Macrocrack::Set_multiple_cracking_energy(double total_energy) {
-        multiple_cracking_energy = total_energy;
+    void Macrocrack::Set_multiple_cracking_energy(CellEnergies &cell_energies_obj, std::vector<double> &cfaces_sequence) {
+        for(unsigned int fn : cfaces_sequence)
+            multiple_cracking_energy += cell_energies_obj.Get_f_self_energies().at(fn);
     }
-    double Macrocrack::Get_multiple_cracking_energy() const {
+void Macrocrack::Set_bridging_energy(double adhesion_energy, std::vector<double> &special_sfaces_sequence) {
+    for(unsigned int fn : special_sfaces_sequence)
+        bridging_energy += 4.0*adhesion_energy;
+}
+
+double Macrocrack::Get_multiple_cracking_energy() const {
         return multiple_cracking_energy;
     }
+    double Macrocrack::Get_bridging_energy() const {
+        return bridging_energy;
+    }
+    std::set <unsigned int> Macrocrack::Get_crack_faces_set() const {
+        return plane_subcomplex.Get_internal_faces_set(); }
 
-    std::vector <unsigned int> Macrocrack::Get_faces_sequence() const {
-        return half_plane_subcomplex.Get_faces_sequence(crack_id); }
+void Macrocrack::Set_sfaces_sequence(std::vector <unsigned int> const &special_faces_sequence) {
+    plane_subcomplex.Set_sub_sfaces_sequence(special_faces_sequence);
+}
 
-    std::vector <unsigned int> Macrocrack::Get_sfaces_sequence() const {
-        return half_plane_subcomplex.Get_sfaces_sequence(0); }
+void Macrocrack::Set_cfaces_sequence(std::vector <unsigned int> const &induced_faces_sequence) {
+    plane_subcomplex.Set_sub_cfaces_sequence(induced_faces_sequence);
+}
 
+std::vector <unsigned int> Macrocrack::Get_sfaces_sequence() const {
+    if (plane_subcomplex.Get_sub_sfaces_sequence().size() > 0)
+        return plane_subcomplex.Get_sub_sfaces_sequence();
+    else {
+        cout << "Caution! sub_sfaces_sequence = 0! Please add it to the corresponding subcomplex/crack"s << endl;
+        return {0}; }
+}
+
+std::vector <unsigned int> Macrocrack::Get_cfaces_sequence() const {
+    if (plane_subcomplex.Get_sub_cfaces_sequence().size() > 0) return plane_subcomplex.Get_sub_cfaces_sequence();
+    else {
+        cout << "Caution! sub_sfaces_sequence = 0! Please add it to the corresponding subcomplex/crack"s << endl;
+        return {0}; }
+}
+
+void Macrocrack::Set_sfaces_coordinates(std::vector <tuple<double, double, double>> const &special_faces_coord) {
+    plane_subcomplex.Set_sub_sfaces_coord(special_faces_coord);
+}
+
+void Macrocrack::Set_cfaces_coordinates(std::vector <tuple<double, double, double>> const &induced_faces_coord) {
+    plane_subcomplex.Set_sub_cfaces_coord(induced_faces_coord);
+}
+
+
+std::vector <tuple<double, double, double>> Macrocrack::Get_sfaces_coordinates(void) const {
+    return plane_subcomplex.Get_sub_sfaces_coord();
+}
+std::vector <tuple<double, double, double>> Macrocrack::Get_cfaces_coordinates(void) const {
+    return plane_subcomplex.Get_sub_cfaces_coord();
+}
+
+/*
+void Macrocrack::Set_sfaces_sequence(std::vector <unsigned int> const &special_face_sequence) {
+    std::vector <unsigned int> sfaces_sequence;
+    for (auto sfs : plane_subcomplex.Get_sub_faces_set()) { // get sFaces
+        if (std::find(special_face_sequence.begin(), special_face_sequence.end(), sfs) != special_face_sequence.end())
+        sfaces_sequence.push_back(sfs);
+    }
+    plane_subcomplex.Set_sfaces_sequence(sfaces_sequence);
+}
+// plane_subcomplex.sub_sfaces_sequence
+
+*/
     std::vector <tuple<double,double,double>> Macrocrack::Get_common_faces_coordinates(unsigned int  crack_id) const {
-        return half_plane_subcomplex.Get_common_faces_coordinates(crack_id); }
+        return plane_subcomplex.Get_internal_face_coordinates(); }
 
 /// ========== END of class MACROCRACK functions description
 
 /// # V # The class of a CELLS_ENERGIES :: list of the energy_vectors corresponding to different dimensions 'k' of the k-cells in a PCC
-//class CellEnergies
-/// CellEnergies
+// Set
+void CellEnergies::Set_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress) { // [Pa]
+    double sxx = 0.0, sxy = 0.0, sxz = 0.0, syx = 0.0, syy = 0.0, syz = 0.0, szx = 0.0, szy = 0.0, szz = 0.0; // external stress tensor components [homogeneous stress state]
+    std::get<0>(external_stress) = sxx;
+    std::get<1>(external_stress) = sxy;
+    std::get<2>(external_stress) = sxz;
+    std::get<3>(external_stress) = syx;
+    std::get<4>(external_stress) = syy;
+    std::get<5>(external_stress) = syz;
+    std::get<6>(external_stress) = szx;
+    std::get<7>(external_stress) = szy;
+    std::get<8>(external_stress) = szz;
 
+    von_Mises_elastic_stress =  std::sqrt(0.5 * (pow((sxx - syy), 2.0) + pow((sxx - szz), 2.0) + pow((syy - szz), 2.0) + 6 * pow(sxy, 2.0)));
+    }
+
+void CellEnergies::Set_homogeneous_elastic_energy(std::tuple<double, double, double> &sample_dimensions, double &von_Mises_elastic_stress, Material &matrix_material) { // [J]
+    homogeneous_elastic_energy = pow(von_Mises_elastic_stress,2)*std::get<0>(sample_dimensions)*std::get<1>(sample_dimensions)*std::get<2>(sample_dimensions)/ (2.0*matrix_material.Get_Young_modulus());
+    }
+
+void CellEnergies::Set_p_elastic_energies(std::vector<double> p_el_energies) {
+    f_elastic_energies = p_el_energies; }
+void CellEnergies::Set_f_elastic_energies(std::vector<double> f_el_energies) {
+    f_elastic_energies = f_el_energies; }
+void CellEnergies::Set_e_elastic_energies(std::vector<double> e_el_energies) {
+    f_elastic_energies = e_el_energies; }
+void CellEnergies::Set_n_elastic_energies(std::vector<double> n_el_energies) {
+    f_elastic_energies = n_el_energies; }
+
+void CellEnergies::Set_p_self_energies(std::vector<double> p_self_energies) {
+    f_elastic_energies = p_self_energies; }
+void CellEnergies::Set_f_self_energies(std::vector<double> f_self_energies) {
+    f_elastic_energies = f_self_energies; }
+void CellEnergies::Set_e_self_energies(std::vector<double> e_self_energies) {
+    f_elastic_energies = e_self_energies; }
+void CellEnergies::Set_n_self_energies(std::vector<double> n_self_energies) {
+    f_elastic_energies = n_self_energies; }
+
+// Get
+double CellEnergies::Get_von_Mises_stress(void) { // [Pa]
+    return von_Mises_elastic_stress; }
+double CellEnergies::Get_homogeneous_elastic_energy(void) { // [J]
+    return homogeneous_elastic_energy; }
+
+std::vector<double> CellEnergies::Get_p_elastic_energies(void) const {
+    return p_elastic_energies; }
+std::vector<double> CellEnergies::Get_f_elastic_energies(void) const {
+    return f_elastic_energies; }
+std::vector<double> CellEnergies::Get_e_elastic_energies(void) const {
+    return e_elastic_energies; }
+std::vector<double> CellEnergies::Get_n_elastic_energies(void) const {
+    return n_elastic_energies; }
+
+std::vector<double> CellEnergies::Get_p_self_energies(void) const {
+    return p_self_energies; }
+std::vector<double> CellEnergies::Get_f_self_energies(void) const {
+    return f_self_energies; }
+std::vector<double> CellEnergies::Get_e_self_energies(void) const {
+    return e_self_energies; }
+std::vector<double> CellEnergies::Get_n_self_energies(void) const {
+    return n_self_energies; }
 /// ========== END of class CellEnergies functions description
 
+/// --------------------------------------------------------------------------------------------------- ///
+/// ========== # VII # ====================== CLASS 'Material' ============================================ ///
+/// --------------------------------------------------------------------------------------------------- ///
+/*!
+ * @details Material from the CPD materials Database
+ *
+*/
+// Constructor
+Material::Material(std::string Mid) {
+    material_database_reader(Mid, material_type, mass_density, melting_point, gb_cohesion_energy, Young_modulus, Poisson_ratio, yield_strength, strength, fracture_toughness, gb_width, gb_inclusion1_adh_energy);
+}
 
-/*
+Material::Material(std::string Mid, std::string Iid) {
+    material_database_reader(Mid, material_type, mass_density, melting_point, gb_cohesion_energy, Young_modulus, Poisson_ratio, yield_strength, strength, fracture_toughness, gb_width, gb_inclusion1_adh_energy, Iid, inclusion_type, sface_energy_agglomeration, inclusion_mass_density);
+}
+
+// Structural
+std::string Material::Get_material_type(void) const {
+     return material_type;
+}
+
+double Material::Get_gb_width(void) const {
+    return gb_width;
+}
+
+// Thermodynamic
+double Material::Get_mass_density(void) const {
+    return mass_density;
+}
+
+double Material::Get_melting_point(void) const {
+    return melting_point;
+}
+
+double Material::Get_gb_cohesion_energy(void) const {
+    return gb_cohesion_energy;
+}
+
+// Mechanical
+double Material::Get_Young_modulus(void) const {
+    return Young_modulus;
+}
+
+double Material::Get_Poisson_ratio(void) const {
+    return Poisson_ratio;
+}
+
+double Material::Get_Yield_strength(void) const {
+    return yield_strength;
+}
+
+double Material::Get_Strength(void) const {
+    return strength;
+}
+
+double Material::Get_Fracture_toughness(void) const {
+    return fracture_toughness;
+}
+
+double Material::Get_gb_inclusion1_adh_energy(void) const {
+    return gb_inclusion1_adh_energy;
+}
+
+std::string Material::Get_inclusion_type(void) const {
+    return inclusion_type;
+}
+
+double Material::Get_inclusion_agglomeration_energy(void) const {
+    return sface_energy_agglomeration;
+}
+
+double Material::Get_inclusion_mass_density(void) const {
+    return inclusion_mass_density;
+}
+
+/// ========== END of class Material functions description
+
+
+/// # * # The class of a PCC
+void PCC::Set_edge_barycentre_coordinates(void){
+    if (node_coordinates_vector.size() == 0)
+        node_coordinates_vector = Tuple3Reader(PCCpaths.at(10)); // node barycentres
+
+    if (cell_barycentre_coordinates.size() == 0)
+        cell_barycentre_coordinates.resize(4);
+
+    for (unsigned int en = 0; en < CellNumbs.at(2); ++en) {
+        cell_barycentre_coordinates.at(2).push_back(find_anEdgeSeed(en, PCCpaths, CellNumbs, node_coordinates_vector));
+        if (en % 500 == 1) cout << "Edge number\t\t" << en << "\tout of\t\t" << CellNumbs.at(2) << endl;
+        }
+    return;
+}
+void PCC::Set_face_barycentre_coordinates(void) {
+    if (node_coordinates_vector.size() == 0)
+        node_coordinates_vector = Tuple3Reader(PCCpaths.at(10)); // node barycentres
+
+    if (cell_barycentre_coordinates.size() == 0) {
+        cell_barycentre_coordinates.resize(4);
+        if (cell_barycentre_coordinates.at(2).size() == 0) {
+            cout << "Finding face barycentre coordinates:\t\t" << endl;
+            Out_local_logstream << "Finding face barycentre coordinates:\t\t" << endl;
+            for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn) {
+                cell_barycentre_coordinates.at(2).push_back(
+                        find_aGBseed(fn, PCCpaths, CellNumbs, node_coordinates_vector));
+                if (fn % 500 == 1) {
+                    cout << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
+                    Out_local_logstream << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
+                }
+            }
+        }
+
+    }
+return;
+}
+
+std::vector<std::tuple<double, double, double>> PCC::Get_edge_barycentre_coordinates(void) {
+    return cell_barycentre_coordinates.at(1);
+}
+std::vector<std::tuple<double, double, double>> PCC::Get_face_barycentre_coordinates(void) {
+    if (cell_barycentre_coordinates.at(2).size() > 0.0)
+        return cell_barycentre_coordinates.at(2);
+    else throw std::invalid_argument("Error: SET 'cell_barycentre_coordinates' (!)");
+}
+/// ========== END of class PCC functions description
+
+
+/// # X # The class of stress concentrators related to defects in one special face element of a PCC
+
+class face_concentrator {
+    double total_elastic_energy = 0;
+
+private:
+    //string conc_type; // bl or cl
+    unsigned int conc_face_number = 0;
+    unsigned int bl_index = 0;
+    unsigned int cl_index = 0;
+    double Bl_elastic_energy = 0;
+    double Cl_elastic_energy = 0;
+public:
+
+    face_concentrator (unsigned int ConcFace) { // constructor 1 simple
+        conc_face_number = ConcFace;
+    }
+
+    face_concentrator (unsigned int ConcFace, unsigned int Bl, unsigned int Cl) { // constructor 2 complex
+        conc_face_number = ConcFace;
+        bl_index = Bl;
+        cl_index = Cl;
+    }
+
+    unsigned int GetBl_index()
+    {
+        return bl_index;
+    }
+
+    int GetCl_index()
+    {
+        return cl_index;
+    }
+}; // end of class
+
+ /*
  /// # 0 # The class of Grain Boundaries in a PCC
 
 class grain_boundary{
@@ -1009,40 +1332,5 @@ private:
     double Cl_energy;
     double total_energy; //= surface_energy + external_elastic_energy + Bl_energy + Cl_energy;
 };
-
-/// # 4 # The class of stress concentrators related to defects in one special face element of a PCC
-
-class face_concentrator {
-    double total_elastic_energy = 0;
-
-private:
-    //string conc_type; // bl or cl
-    unsigned int conc_face_number = 0;
-    unsigned int bl_index = 0;
-    unsigned int cl_index = 0;
-    double Bl_elastic_energy = 0;
-    double Cl_elastic_energy = 0;
-public:
-
-    face_concentrator (unsigned int ConcFace) { // constructor 1 simple
-        conc_face_number = ConcFace;
-    }
-
-    face_concentrator (unsigned int ConcFace, unsigned int Bl, unsigned int Cl) { // constructor 2 complex
-        conc_face_number = ConcFace;
-        bl_index = Bl;
-        cl_index = Cl;
-    }
-
-    unsigned int GetBl_index()
-    {
-        return bl_index;
-    }
-
-    int GetCl_index()
-    {
-        return cl_index;
-    }
-}; // end of class
 
  */

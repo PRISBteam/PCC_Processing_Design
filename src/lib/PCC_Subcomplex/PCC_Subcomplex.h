@@ -7,9 +7,10 @@
 /*!
  * @brief Create a vector of PCC complexes with their special and induced labels taken from the initial PCC
  * @param configuration
- * @return
+ * @return std::vector<Subcomplex>
  */
 std::vector<Subcomplex> PCC_Subcomplex(Config &configuration);
-//Subcomplex PCC_Subcomplex(Subcomplex &new_cut, std::vector<unsigned int> const &s_faces_sequence, std::vector<unsigned int> &sub_faces_sequence, std::vector<unsigned int> const &c_faces_sequence, double a_coeff, double b_coeff, double c_coeff, double D_coeff);
+std::vector<Subcomplex> PCC_Subcomplex(Config &configuration, std::vector <unsigned int> &sub_sfaces_sequence);
+std::vector<Subcomplex> PCC_Subcomplex(Config &configuration, std::vector <unsigned int> &sub_sfaces_sequence, std::vector <unsigned int> &sub_cfaces_sequence);
 
 #endif //PCC_PROCESSING_DESIGN_PCC_SUBCOMPLEX_H

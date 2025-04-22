@@ -9,7 +9,16 @@
 /// Simple reader for *.ini files and a specific CPD code-related library for reading its particular *.ini files ( downloaded from https://github.com/pulzed/mINI )
 #include "../ini/ini.h"
 
+///* ------------------------------------------------------------------------------- *
+///* Attached user-defined C++ libraries (must be copied in the directory for STL):
+///* ------------------------------------------------------------------------------- *
+/// Eigen source: https://eigen.tuxfamily.org/ (2024)
+#include <Eigen/Dense>
+
 using namespace std; // standard namespace
+
+extern std::string output_dir;
+extern std::ofstream Out_logfile_stream;
 
 /// ================== # 1 # Initial configuration - reading and output ==================
 std::vector<int> config_reader_main(std::string &source_path, std::string &source_dir, std::string &output_dir, std::string &cell_complex_standard, std::string &main_type) {
@@ -39,16 +48,24 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
         auto& collection = main_ini["simulation_mode"];
         if (collection.has("mode"))
         {
-            main_type = main_ini.get("simulation_mode").get("mode");
+            if (main_ini.get("simulation_mode").get("mode") == "LIST" || main_ini.get("simulation_mode").get("mode") == "TUTORIAL" ||
+                    main_ini.get("simulation_mode").get("mode") == "PERFORMANCE_TEST" || main_ini.get("simulation_mode").get("mode") == "TASK")
+            {
+                main_type = main_ini.get("simulation_mode").get("mode");
+                }
+            else throw std::invalid_argument("ERROR in ../src/ini/ini_readers.cpp: WRONG TYPE OF THE 'simulation_mode' IN ../config/main.ini FILE; Please change the mode to one of the allowed: 'LIST', 'TUTORIAL', 'PERFORMANCE_TEST' or 'TASK' "s);
         }
     }
 // II
     std::string problem_dimension;
     if (main_ini.has("general")) {
         auto& collection = main_ini["general"];
-        if (collection.has("dim"))
-            problem_dimension = main_ini.get("general").get("dim");
-    }
+        if (collection.has("dim")) {
+            if(stoi(main_ini.get("general").get("dim")) == 1 || stoi(main_ini.get("general").get("dim")) == 2 || stoi(main_ini.get("general").get("dim")) == 3) {
+                problem_dimension = main_ini.get("general").get("dim");
+            }
+            else throw std::invalid_argument("ERROR in ../src/ini/ini_readers.cpp: WRONG TYPE OF DIMENSION 'dim' IN ../config/main.ini FILE; Please change the [general] dim parameter to one of the allowed: 1, 2 or 3 "s);
+        }    }
     res.at(0) = stoi(problem_dimension); // res[0]
 
     // III
@@ -57,6 +74,13 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
         if (collection.has("PCC_Subcomplex"))
             isSubcomplex = main_ini.get("modules").get("PCC_Subcomplex");
     }
+
+    if (main_ini.has("modules")) {
+        auto& collection = main_ini["modules"];
+        if (collection.has("PCC_Multiphysics"))
+            isMultiphysics = main_ini.get("modules").get("PCC_Multiphysics");
+    }
+
     if (main_ini.has("modules")) {
         auto& collection = main_ini["modules"];
         if (collection.has("PCC_Processing"))
@@ -77,10 +101,11 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
 
     /// forming the output RES vector
 // ON/OFF IDs
-    if (isSubcomplex == "ON") { isSubcomplexON = 1; res.at(1) = 1; } else res.at(1) = 0; // res[1] - Section
-    if (isProcessing == "ON") { isProcessingON = 1; res.at(2) = 1; } else res.at(2) = 0; // res[2] - Processing
-    if (isCharacterisation == "ON") { isCharacterisationON = 1; res.at(3) = 1; } else res.at(3) = 0; // res[3] - Characterisation
-    if (isWriter == "ON") { isWriterON = 1; res.at(6) = 1; } else res.at(6) = 0; // res[6] - Writer
+    if (isSubcomplex == "ON") { isSubcomplexON = 1; res.at(1) = 1; } else res.at(1) = 0; // res[1] - Section -> ConfigVector.at(1) in main.cpp
+    if (isProcessing == "ON") { isProcessingON = 1; res.at(2) = 1; } else res.at(2) = 0; // res[2] - Processing -> ConfigVector.at(2) in main.cpp
+    if (isCharacterisation == "ON") { isCharacterisationON = 1; res.at(3) = 1; } else res.at(3) = 0; // res[3] - Characterisation -> ConfigVector.at(3) in main.cpp
+    if (isMultiphysics == "ON") { isMultiphysicsON = 1; res.at(4) = 1; } else res.at(4) = 0; // res[4] - Multiphysics -> ConfigVector.at(4) in main.cpp
+    if (isWriter == "ON") { isWriterON = 1; res.at(6) = 1; } else res.at(6) = 0; // res[6] - Writer -> ConfigVector.at(6) in main.cpp
 
     if (main_ini.has("general")) {
         auto& collection = main_ini["general"];
@@ -109,6 +134,8 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
     cout << endl;
     if (isSubcomplexON == 1) cout << "ON    | PCC_Subcomplex"s << endl;
     else cout << "OFF    | PCC_Subcomplex"s << endl;
+    if (isMultiphysicsON == 1) cout << "ON    | PCC_Multiphysics"s << endl;
+    else cout << "OFF    | PCC_Multiphysics"s << endl;
     if (isProcessingON == 1) cout << "ON    | PCC_Processing"s << endl;
     else cout << "OFF    | PCC_Processing"s << endl;
     if (isCharacterisationON == 1) cout << "ON    | PCC_Characterisation"s << endl;
@@ -118,8 +145,8 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
     cout << endl;
 
 /// Output into .log file
-    std::ofstream Out_logfile_stream;
     Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::trunc); // this *.log stream will be closed at the end of the main function
+
     Out_logfile_stream << endl;
     Out_logfile_stream << "The problem dimension that is the maximum value k_max of k-cells in the PCC:\t\t|\t\t"s << "dim = " << res.at(0) << endl;
     Out_logfile_stream << "PCC standard ID:\t\t"s << cell_complex_standard << endl;
@@ -131,6 +158,8 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
     Out_logfile_stream << endl;
     if (isSubcomplexON == 1) Out_logfile_stream << "ON    | PCC_Subcomplex"s << endl;
     else Out_logfile_stream << "OFF    | PCC_Subcomplex"s << endl;
+    if (isMultiphysicsON == 1) cout << "ON    | PCC_Multiphysics"s << endl;
+    else Out_logfile_stream << "OFF    | PCC_Multiphysics"s << endl;
     if (isProcessingON == 1) Out_logfile_stream << "ON    | PCC_Processing"s << endl;
     else Out_logfile_stream << "OFF    | PCC_Processing"s << endl;
     if (isCharacterisationON == 1) Out_logfile_stream << "ON    | PCC_Characterisation"s << endl;
@@ -142,7 +171,7 @@ std::vector<int> config_reader_main(std::string &source_path, std::string &sourc
     Out_logfile_stream.close();
 
     return res;
-} /// END of config_reader_main function
+} /// END of config_reader_main() function
 
 /// ================== # 2 # Initial PROCESSING module configuration - reading and output ==================
 void config_reader_processing(std::string &source_path, std::vector<string> &sequence_source_paths, std::vector<vector<double>> &max_fractions_vectors, std::vector<vector<double>> &max_cfractions_vectors, double &mu, double &sigma, unsigned int &bins_numb, std::vector<string> &ptype_vector, std::vector<string> &ctype_vector, std::vector<double> &pindex_vector, std::ofstream &Out_logfile_stream) {
@@ -504,7 +533,10 @@ vector<double> max_fractions_output(3, 0); // temporary vector serving as an out
         if (max_fractions_vectors[0].size() > 0 && max_fractions_vectors[0][i] > 0) max_fractions_output.at(i) = max_fractions_vectors[0][i];
     cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1) << "\t\t"<< max_fractions_output.at(2) << "\t\t" << endl;
     cout<< "_________________________________________________" << endl << endl;
+
 /// Output into .log file
+    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
+
     Out_logfile_stream << "The Processing module simulation type and initial parameters:\t\t" << endl;
     Out_logfile_stream << endl;
     if (ptypes_number_string != "0") {
@@ -586,6 +618,8 @@ vector<double> max_fractions_output(3, 0); // temporary vector serving as an out
         if (max_fractions_vectors[0].size() > 0 && max_fractions_vectors[0][i] > 0) max_fractions_output.at(i) = max_fractions_vectors[0][i];
     Out_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1) << "\t\t"<< max_fractions_output.at(2) << "\t\t" << endl;
     Out_logfile_stream<< "_________________________________________________" << endl << endl;
+
+    Out_logfile_stream.close(); // this *.log stream will be closed at the end of the main function
 
     return;
 } /// END of config_reader_processing function
@@ -803,6 +837,8 @@ std::vector<double> config_reader_characterisation(std::string const &source_pat
 //    cout<< "______________________________________________________________________________________" << endl;
 
 /// Output into Processing_Design.log file
+    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
+
 //    Out_logfile_stream<< "______________________________________________________________________________________" << endl;
     Out_logfile_stream << "The Characterisation module simulation type and initial parameters:\t\t" << endl;
     Out_logfile_stream << endl;
@@ -850,6 +886,8 @@ std::vector<double> config_reader_characterisation(std::string const &source_pat
     } // if(charlabs_laplacians.at(0) == 1)
 //    Out_logfile_stream<< "______________________________________________________________________________________" << endl;
 
+    Out_logfile_stream.close(); // this *.log stream will be closed at the end of the main function
+
     return config_characterisation_vector;
 } // END of config characterisation reader function
 
@@ -857,8 +895,9 @@ std::vector<double> config_reader_characterisation(std::string const &source_pat
 /// ================== # 4 # Initial WRITER module configuration - reading and output ==================
 void config_reader_writer(std::string &source_path, std::vector<int> &writer_specifications, std::ofstream &Out_logfile_stream) {
 /// writer_specifications vector ::
-int    isSequencesOutput;      // - >     [0]
-int    isDesignvectorsOutput;  // - >     [1]
+int    isSequencesOutput = 0;      // - >     [0]
+int    isDesignvectorsOutput = 0;  // - >     [1]
+int    isEnergiesOutput = 0;       // - >     [2]
 int isEdgeConfEntropy = 0, isEdgeFractions = 0, isDegreeEdgeFractions = 0, isEdgeAnFractions = 0, isEdgeAnConfEntropies = 0; // [2], [3], [4], [5], [6]
 int isBetti = 0; // Laplacians lab
 
@@ -935,6 +974,17 @@ int isBetti = 0; // Laplacians lab
         } }
     writer_specifications.push_back(isBetti); // [7]
 
+// IV
+// cell energies output
+    if (writer_ini.has("energies")) {
+        auto& collection = writer_ini["energies"];
+        if (collection.has("isEnergiesOutput"))
+        {
+            isEnergiesOutput = stoi(writer_ini.get("energies").get("isEnergiesOutput"));
+        } }
+    writer_specifications.push_back(isEnergiesOutput); // [8]
+
+
 /// Output to the screen/console
 //    cout << endl;
 //    cout<< "______________________________________________________________________________________" << endl;
@@ -949,9 +999,12 @@ int isBetti = 0; // Laplacians lab
     cout << "Analytical Edge degree fractions \t"s << writer_specifications.at(5) << endl;
     cout << "Analytical Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
     cout << "Laplacians and Betti numbers \t\t"s << writer_specifications.at(7) << endl;
+    cout << "Cell Energies \t\t\t\t\t\t"s << writer_specifications.at(8) << endl;
     cout << endl;
 
 /// Output into .log file
+    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
+
 //    Out_logfile_stream << endl;
 //    Out_logfile_stream<< "______________________________________________________________________________________" << endl;
     Out_logfile_stream << "The Writer module specifications:\t\t" << endl;
@@ -965,7 +1018,10 @@ int isBetti = 0; // Laplacians lab
     Out_logfile_stream << "Analytical Edge degree fractions \t"s << writer_specifications.at(5) << endl;
     Out_logfile_stream << "Analytical Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
     Out_logfile_stream << "Laplacians and Betti numbers \t\t"s << writer_specifications.at(7) << endl;
+    Out_logfile_stream << "Cell Energies \t\t\t\t\t\t"s << writer_specifications.at(8) << endl;
     Out_logfile_stream << endl;
+
+    Out_logfile_stream.close(); // this *.log stream will be closed at the end of the main function
 
     return;
 } /// END of config_reader_writer function
@@ -1026,9 +1082,13 @@ void config_reader_subcomplex(std::string &source_path, std::string &sctype, std
     if (sctype == "H"s) {
         cout << "Half-plane length:\t"s << cut_length << endl << endl;
     }
+    if (sctype == "P"s || sctype == "H"s) {
+        cout << "Plane orientation:\ta_coeff*X + b_coeff*Y + c_coeff*Z = D"s << endl << "Plane normal vector\t"s << "\ta =\t" << plane_orientation.at(0) << "\tb =\t" << plane_orientation.at(1) << "\tc =\t" << plane_orientation.at(2) << "\t\tPlane position D =\t"s << plane_orientation.at(3) << endl;
+    }
     else if(sctype == "N"s){
         cout << "Grain k-neighbours order:\t"s << grain_neighbour_orders << endl << endl;
     }
+    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
 
     Out_logfile_stream << "The Subcomplex module type and initial parameters:\t\t" << endl << endl;
     Out_logfile_stream << "Subcomplex type:\t"s << sctype << endl;
@@ -1036,53 +1096,198 @@ void config_reader_subcomplex(std::string &source_path, std::string &sctype, std
         Out_logfile_stream << "Half-plane length:\t"s << cut_length << endl << endl;
     }
     if (sctype == "P"s || sctype == "H"s) {
-        Out_logfile_stream << "Plane normal:\t"s << plane_orientation[0] << "  " << plane_orientation[1] << "  " << plane_orientation[2] << "Plane position D:\t" << plane_orientation[3] << endl;
+        Out_logfile_stream << "Plane orientation:\ta_coeff*X + b_coeff*Y + c_coeff*Z = D"s << endl << "Plane normal vector:\t"s << " a: " << plane_orientation.at(0) << " b: " << plane_orientation.at(1) << " c: " << plane_orientation.at(2) << "\t\tPlane position:\t" << " D: " << plane_orientation.at(3) << endl;
     }
     else if(sctype == "N"s){
         Out_logfile_stream << "Grain k-neighbours order:\t"s << grain_neighbour_orders << endl << endl;
     }
 
+    Out_logfile_stream.close();
+
     return;
 } /// end of the bool SubcomplexON() function
 
-/*
+
 /// ================== # 6 # Initial MULTIPFYSICS module configuration - physical dimesions and all ==================
-void config_reader_multiphysics(std::string &source_path, std::tuple<double, double, double> &sample_dimensions, std::ofstream &Out_logfile_stream) {
+void config_reader_multiphysics(std::string &source_path, std::string &Mid_matrix, std::string &Mid_inclusion1, std::tuple<double, double, double> &sample_dimensions, double &tau, Eigen::MatrixXd &ext_stress_tensor, std::vector<double> &macrocrack_ini, std::ofstream &Out_logfile_stream) {
 
     double lx_size = 0.0, ly_size = 0.0, lz_size = 0.0; // sample dimensions
+    double sxx = 0.0, sxy = 0.0, sxz = 0.0, syx = 0.0, syy = 0.0, syz = 0.0, szx = 0.0, szy = 0.0, szz = 0.0; // external stress tensor components [homogeneous stress state]
+
 // ini files reader - external (MIT license) library
     mINI::INIFile file(source_path + "multiphysics.ini"s);
     mINI::INIStructure multiphysics_ini;
     file.read(multiphysics_ini);
 
 // I
+// Material ID for the CPD code Database
+    if (multiphysics_ini.has("material_id")) {
+        auto &collection = multiphysics_ini["material_id"];
+        if (collection.has("Mid_matrix"))
+            Mid_matrix = multiphysics_ini.get("material_id").get("Mid_matrix");
+    }
+// Material ID for the CPD code Database
+    if (multiphysics_ini.has("material_id")) {
+        auto &collection = multiphysics_ini["material_id"];
+        if (collection.has("Mid_inclusion1"))
+            Mid_inclusion1 = multiphysics_ini.get("material_id").get("Mid_inclusion1");
+    }
+
+// II
 // sequences and designs output
-    if (multiphysics_ini.has("physical_dimensions")) {
-        auto& collection = multiphysics_ini["physical_dimensions"];
-        if (collection.has("sample_dimension_x"))
-            lx_size = stod(multiphysics_ini.get("physical_dimensions").get("sample_dimension_x"));
-        if (collection.has("sample_dimension_y"))
-            ly_size = stod(multiphysics_ini.get("physical_dimensions").get("sample_dimension_y"));
-        if (collection.has("sample_dimension_z"))
-            lz_size = stod(multiphysics_ini.get("physical_dimensions").get("sample_dimension_z"));
+    if (multiphysics_ini.has("sample_dimensions")) {
+        auto &collection = multiphysics_ini["sample_dimensions"];
+        if (collection.has("lx"))
+            lx_size = stod(multiphysics_ini.get("sample_dimensions").get("lx"));
+        if (collection.has("ly"))
+            ly_size = stod(multiphysics_ini.get("sample_dimensions").get("ly"));
+        if (collection.has("lz"))
+            lz_size = stod(multiphysics_ini.get("sample_dimensions").get("lz"));
     } // end of  if (multiphysics_ini.has("physical_dimensions"))
 
     std::get<0>(sample_dimensions) = lx_size;
     std::get<1>(sample_dimensions) = ly_size;
     std::get<2>(sample_dimensions) = lz_size;
 
-/// Output to the screen/console
-//    cout<< "______________________________________________________________________________________" << endl;
-    cout << "The Multiphysics module specifications:\t\t" << endl;
-    cout << "Sample dimensions are \t\t\t"s << " x: " << std::get<0>(sample_dimensions) << ", y: " << std::get<1>(sample_dimensions) << ", z: " << std::get<2>(sample_dimensions) << endl;
-    cout << endl;
+// III
+    if (multiphysics_ini.has("time_scale")) {
+        auto &collection = multiphysics_ini["time_scale"];
+        if (collection.has("tau"))
+            tau = stod(multiphysics_ini.get("time_scale").get("tau"));
+    }
 
+// IV
+// sExternal stress state
+    if (multiphysics_ini.has("stress_tensor")) {
+        auto &collection = multiphysics_ini["stress_tensor"];
+        if (collection.has("sxx"))
+            sxx = stod(multiphysics_ini.get("stress_tensor").get("sxx"));
+        if (collection.has("sxy"))
+            sxy = stod(multiphysics_ini.get("stress_tensor").get("sxy"));
+        if (collection.has("sxz"))
+            sxz = stod(multiphysics_ini.get("stress_tensor").get("sxz"));
+
+        if (collection.has("syx"))
+            syx = stod(multiphysics_ini.get("stress_tensor").get("syx"));
+        if (collection.has("syy"))
+            syy = stod(multiphysics_ini.get("stress_tensor").get("syy"));
+        if (collection.has("syz"))
+            syz = stod(multiphysics_ini.get("stress_tensor").get("syz"));
+
+        if (collection.has("szx"))
+            szx = stod(multiphysics_ini.get("stress_tensor").get("szx"));
+        if (collection.has("szy"))
+            szy = stod(multiphysics_ini.get("stress_tensor").get("szy"));
+        if (collection.has("szz"))
+            szz = stod(multiphysics_ini.get("stress_tensor").get("szz"));
+    } // end of  if (multiphysics_ini.has("physical_dimensions"))
+
+    double vonMises_stress = 0.0, pressure = 0.0;
+    if (sxx > 1000000.0 || syy > 1000000.0 || szz > 1000000.0 || sxy > 1000000.0 || sxz > 1000000.0 || syx > 1000000.0 || syz > 1000000.0) {
+        cout << endl
+             << "WARNING: Highly likely stress values in the '../config/multiphysics.ini' file are not in [MPa] as requested !!!"
+             << endl << endl;
+        Out_logfile_stream << endl
+                           << "WARNING: Highly likely stress values in the '../config/multiphysics.ini' file are not in [MPa] as requested !!!"
+                           << endl << endl;
+    }
+        ext_stress_tensor(0,0) = sxx*pow(10,6);
+        ext_stress_tensor(0,1) = sxy*pow(10,6);
+        ext_stress_tensor(0,2) = sxz*pow(10,6);
+        ext_stress_tensor(1,0) = syx*pow(10,6);
+        ext_stress_tensor(1,1) = syy*pow(10,6);
+        ext_stress_tensor(1,2) = syz*pow(10,6);
+        ext_stress_tensor(2,0) = szx*pow(10,6);
+        ext_stress_tensor(2,1) = szy*pow(10,6);
+        ext_stress_tensor(2,2) = szz*pow(10,6);
+        vonMises_stress = std::sqrt(0.5 * (pow((ext_stress_tensor(0,0) - ext_stress_tensor(1,1)), 2.0) + pow((ext_stress_tensor(0,0) - ext_stress_tensor(2,2)), 2.0) + pow((ext_stress_tensor(1,1) - ext_stress_tensor(2,2)), 2.0) ) + 3.0 * ( pow(ext_stress_tensor(0,1), 2.0) + pow(ext_stress_tensor(1,2), 2.0) + pow(ext_stress_tensor(2,0), 2.0) ));
+        pressure = (ext_stress_tensor(0,0) + ext_stress_tensor(1,1) + ext_stress_tensor(2,2)) / 3.0;
+
+
+macrocrack_ini.resize(5,0);
+double number_of_crack_sizes = 0.0, max_crack_lenghts = 0.0, min_crack_lenghts = 0.0, crack_stress_mode = 0.0, macrocrack_number = 0.0;
+    if (multiphysics_ini.has("macrocracks")) {
+        auto &collection = multiphysics_ini["macrocracks"];
+        if (collection.has("number_of_macrocracks"))
+            macrocrack_number = stod(multiphysics_ini.get("macrocracks").get("number_of_macrocracks"));
+    }
+    if(macrocrack_number > 0){
+        if (multiphysics_ini.has("macrocracks")) {
+            auto &collection = multiphysics_ini["macrocracks"];
+            if (collection.has("crack_stress_mode"))
+                crack_stress_mode = stod(multiphysics_ini.get("macrocracks").get("crack_stress_mode"));
+        }
+        if (multiphysics_ini.has("macrocracks")) {
+            auto &collection = multiphysics_ini["macrocracks"];
+            if (collection.has("min_crack_lenghts"))
+                min_crack_lenghts = stod(multiphysics_ini.get("macrocracks").get("min_crack_lenghts"));
+        }
+        if (multiphysics_ini.has("macrocracks")) {
+            auto &collection = multiphysics_ini["macrocracks"];
+            if (collection.has("max_crack_lenghts"))
+                max_crack_lenghts = stod(multiphysics_ini.get("macrocracks").get("max_crack_lenghts"));
+        }
+        if (multiphysics_ini.has("macrocracks")) {
+            auto &collection = multiphysics_ini["macrocracks"];
+            if (collection.has("number_of_crack_sizes"))
+                number_of_crack_sizes = stod(multiphysics_ini.get("macrocracks").get("number_of_crack_sizes"));
+        }
+    } // end of if(macrocrack_number > 0)
+
+    macrocrack_ini.at(0) = macrocrack_number; macrocrack_ini.at(1) = crack_stress_mode; macrocrack_ini.at(2) = max_crack_lenghts;
+    macrocrack_ini.at(3) = min_crack_lenghts; macrocrack_ini.at(4) = number_of_crack_sizes;
+/// Output to the screen/console
+    cout << "______________________________________________________________________________________" << endl;
+    cout << "The Multiphysics module specifications:\t\t" << endl;
+    cout << "Sample dimensions are \t\t\t"s << " x: " << std::get<0>(sample_dimensions) << " [m] "s << ", y: "
+         << std::get<1>(sample_dimensions) << " [m] "s << ", z: " << std::get<2>(sample_dimensions) << " [m] "s << endl;
+    cout << "Characteristic time is \t\t\t"s << " tau: " << tau*pow(10,6) << " [microseconds] "s << endl;
+
+    // Homogeneous External Stress State
+    cout << "Pressure is equal to \t\t\t"s << " P: "<< pressure/pow(10,6) << " [MPa] "s  << endl;
+    cout << "Von Mises stress is equal to \t"s << " Sv: " << vonMises_stress/pow(10,6) << " [MPa] "s << endl;
+
+    if (pressure || vonMises_stress > 0) {
+        cout << "External Stress [MPa]: "s << endl;
+        cout << ext_stress_tensor << endl;
+    }
+    cout << endl;
+    if(macrocrack_number > 0) {
+        cout << "Number of macrocracks  \t\t\t\t"s << macrocrack_ini.at(0) << endl;
+        cout << "Crack mode  \t\t\t\t\t\t"s << macrocrack_ini.at(1) << endl;
+        cout << "MAX crack lenghts (fraction)  \t\t"s << macrocrack_ini.at(2) << endl;
+        cout << "MIN crack lenghts (fraction)  \t\t"s << macrocrack_ini.at(3) << endl;
+        cout << "Series of crack sizes (number)  \t"s << macrocrack_ini.at(4) << endl;
+    }
+    cout << endl;
 /// Output into .log file
-//    Out_logfile_stream<< "______________________________________________________________________________________" << endl;
-    Out_logfile_stream << "The Writer module specifications:\t\t" << endl;
-    Out_logfile_stream << "Sample dimensions are \t\t\t"s << " x: " << std::get<0>(sample_dimensions) << ", y: " << std::get<1>(sample_dimensions) << ", z: " << std::get<2>(sample_dimensions) << endl;
+    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
+
+    Out_logfile_stream << "______________________________________________________________________________________"
+                       << endl;
+    Out_logfile_stream << "The Multiphysics module specifications:\t\t" << endl;
+    Out_logfile_stream << "Sample dimensions are \t\t\t"s << " x: " << std::get<0>(sample_dimensions) << " [m] "s << ", y: "
+         << std::get<1>(sample_dimensions) << " [m] "s << ", z: " << std::get<2>(sample_dimensions) << " [m] "s << endl;
+    Out_logfile_stream << "Characteristic time is \t\t\t"s << " tau: " << tau*pow(10,6) << " [microseconds] "s << endl;
+
+    // Homogeneous External Stress State
+    Out_logfile_stream << "Pressure is equal to \t\t\t"s << " P: "<< pressure/pow(10,6) << " [MPa] "s  << endl;
+    Out_logfile_stream << "Von Mises stress is equal to \t"s << " Sv: " << vonMises_stress/pow(10,6) << " [MPa] "s << endl;
+
+    if (pressure || vonMises_stress > 0) {
+        Out_logfile_stream << "External Stress [MPa]: "s << endl;
+        Out_logfile_stream << ext_stress_tensor << endl;
+    }
     Out_logfile_stream << endl;
+    if(macrocrack_number > 0) {
+        Out_logfile_stream << "Number of macrocracks  \t\t\t\t"s << macrocrack_ini.at(0) << endl;
+        Out_logfile_stream << "Crack mode  \t\t\t\t\t\t"s << macrocrack_ini.at(1) << endl;
+        Out_logfile_stream << "MAX crack lenghts (fraction)  \t\t"s << macrocrack_ini.at(2) << endl;
+        Out_logfile_stream << "MIN crack lenghts (fraction)  \t\t"s << macrocrack_ini.at(3) << endl;
+        Out_logfile_stream << "Series of crack sizes (number)  \t"s << macrocrack_ini.at(4) << endl;
+    }
+    Out_logfile_stream << endl;
+    Out_logfile_stream.close();
 
     return;
-} /// end of the bool MultiphysicsON() function
-*/
+} /// end of the void config_reader_multiphysics() function

@@ -15,7 +15,6 @@
 #include "../PCC_Objects.h"
 #include "../ini/ini_readers.h"
 
-
 #include "functions/Writer_functions.h"
 ///-------------------------------------
 
@@ -42,7 +41,7 @@ void PCC_Writer(CellDesign &new_cells_design) {
 } /// END of PCC Writer module
 
 /// # 2 # overloaded
-void PCC_Writer(CellDesign &new_cells_design, ProcessedComplex &pcc_processed) {
+void PCC_Writer(std::vector<CellEnergies> &new_cells_energies, CellDesign &new_cells_design, ProcessedComplex &pcc_processed) {
 // Read PCC Writer specifications from the writer.ini file and output of the current configuration to the screen and .log file
     std::vector<int> writer_specifications; // vector<int> containing writer specifications and formats
     config_reader_writer(source_path, writer_specifications, Out_logfile_stream); // Read and output the initial configuration from the writer.ini file
@@ -51,6 +50,16 @@ void PCC_Writer(CellDesign &new_cells_design, ProcessedComplex &pcc_processed) {
 
     if (writer_specifications.at(0) == 1)
         PCC_CellSequences_Writer(new_cells_design, output_counter);
+
+    output_counter = 0;
+    if (writer_specifications.at(8) == 1)
+        PCC_CellEnergies_Writer(new_cells_energies,output_counter);
+
+    return;
+} // END of PCC Writer module
+
+/** HEAP **/
+
 /**
     if (writer_specifications.at(2) == 1)
         PCC_Entropic_Writer(pcc_processed, output_counter);
@@ -78,5 +87,3 @@ void PCC_Writer(CellDesign &new_cells_design, ProcessedComplex &pcc_processed) {
 
     } // end of if(P_simulation_type == 'L')
 */
-    return ;
-} // END of PCC Writer module

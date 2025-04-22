@@ -4,6 +4,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <set>
+#include <numeric>
 
 #include <Eigen/SparseCore>
 
@@ -18,10 +20,9 @@ extern std::vector<unsigned int> CellNumbs; // number of cells in a PCC defined 
 
 typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which declares a column-major sparse matrix type of doubles with the nickname 'SpMat'
 
-
 #include "PCC_Support_Functions.h" // It must be here - first in this list (!)
 ///------------------------------------------------------------------
-
+#include "PCC_Objects.h" // It must be here - first in this list (!)
 
 /// # 1 # Checking if file exists in the directory 'fileName'
 bool is_file_exists(const string fileName) {
@@ -48,6 +49,39 @@ std::vector<double> res; double d = 0.0;  // function output
     return res;
 } // END of VectorDReader()
 
+std::vector<tuple<double, double>> Tuple2Reader(std::string SMpath, unsigned int Rows) {
+    std::vector<tuple<double, double>> res(Rows);
+
+    int iter = 0;
+    double a = 0.0, b = 0.0;
+    ifstream inAN(SMpath);
+    if (inAN.is_open()) { //If the file was successfully open, then
+        while(!inAN.eof()) {
+            inAN >> a >> b;
+            std::get<0>(res.at(iter)) = a;
+            std::get<1>(res.at(iter++)) = b;
+        }
+    } else cout << "WARNING: The file " << SMpath << " cannot be read" << endl; //If something goes wrong
+
+    return res;
+}
+
+std::vector<tuple<double, double, double>> Tuple3Reader(std::string SMpath) {
+    std::vector<tuple<double, double, double>> res;
+
+   // unsigned int iter = 0;
+    double a = 0.0, b = 0.0, c = 0.0;
+    ifstream inAN(SMpath);
+    if (inAN.is_open()) { //If the file was successfully open, then
+        while(!inAN.eof()) {
+            inAN >> a >> b >> c;
+            res.push_back(std::make_tuple(a,b,c));
+        }
+    } else cout << "WARNING: The file " << SMpath << " cannot be read" << endl; //If something goes wrong
+
+    return res;
+}
+
 /// Creation Eigen::Sparse_Matrix from filef
 //Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsigned int Cols) {
 Eigen::SparseMatrix<double> SMatrixReader(std::string SMpath, unsigned int Rows, unsigned int Cols) {
@@ -63,7 +97,8 @@ Eigen::SparseMatrix<double> SMatrixReader(std::string SMpath, unsigned int Rows,
         while(!inAN.eof()) {
             inAN >> i >> j >> value;
             tripletList.push_back(Tr(i, j, value));
-// REPAIR cout << i << "\t" << j << "\t" << value << endl;
+// REPAIR             cout << i << "\t" << j << "\t" << value << endl;
+//for(auto trr = tripletList.begin(); trr < tripletList.end(); ++trr)     cout << " triplets " << trr->value() << endl;
         }
     } else cout << "WARNING: The file " << SMpath << " cannot be read" << endl; //If something goes wrong
 //Sparse AB matrix
@@ -96,8 +131,35 @@ vector<Eigen::Triplet<double>> TripletsReader(char* SMpath) {
 }
 
 /// DDRX support function :: GFS matrix reading and calculation of new seeds at the centres of GBs
+std::tuple<double, double, double> find_anEdgeSeed(unsigned int edgenumb, std::vector<std::string> const &paths, std::vector<unsigned int> const &CellNumbs, vector<tuple<double, double, double>> const &AllSeeds_coordinates) {
+    tuple <double, double, double> res; // find two grain neighbour for fnumber
+    vector<double> xx, yy, zz;
+    //Triplet<double> res;     // find two grain neighbour for fnumber
 
-std::tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<char*> const paths, std::vector<unsigned int> & CellNumbs, vector<tuple<double, double, double>> & AllSeeds_coordinates) {
+    Eigen::SparseMatrix<double> ENS(CellNumbs.at(0),CellNumbs.at(1));
+    /// ENS matrix reading
+    ENS = SMatrixReader(paths.at(4), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Faces-Grains
+
+    std::vector<unsigned int> nodeIDs;
+    for (unsigned int j = 0; j < CellNumbs.at(0); ++j) {
+        if (ENS.coeff(j,edgenumb) != 0)
+            nodeIDs.push_back(j);
+    }
+
+    if(nodeIDs.size()>0) xx.push_back(get<0>(AllSeeds_coordinates.at(nodeIDs[0])));
+    if(nodeIDs.size()>1) xx.push_back(get<0>(AllSeeds_coordinates.at(nodeIDs[1])));
+    if(nodeIDs.size()>0) yy.push_back(get<1>(AllSeeds_coordinates.at(nodeIDs[0])));
+    if(nodeIDs.size()>1) yy.push_back(get<1>(AllSeeds_coordinates.at(nodeIDs[1])));
+    if(nodeIDs.size()>0) zz.push_back(get<2>(AllSeeds_coordinates.at(nodeIDs[0])));
+    if(nodeIDs.size()>1) zz.push_back(get<2>(AllSeeds_coordinates.at(nodeIDs[1])));
+    if(nodeIDs.size()>1) res = make_tuple(0.5*(xx[0] + xx[1]), 0.5*(yy[0] + yy[1]), 0.5*(zz[0] + zz[1]));
+    else if(nodeIDs.size()>0) res = make_tuple(xx[0], yy[0], zz[0]);
+    else res = make_tuple(0, 0, 0);
+
+    return res;
+} /// END find_anEdgeSeed()
+
+std::tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<std::string> const &paths, std::vector<unsigned int> const &CellNumbs, vector<tuple<double, double, double>> const &AllSeeds_coordinates) {
     tuple <double, double, double> res; // find two grain neighbour for fnumber
     vector<double> xx, yy, zz;
     //Triplet<double> res;     // find two grain neighbour for fnumber
@@ -116,11 +178,11 @@ std::tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vect
 
     //normal loop
     for (unsigned int j = 0; j < CellNumbs.at(3); ++j) {
-        if (GFS.coeff(facenumb, j) == 1) {
+        if (GFS.coeff(facenumb, j) != 0) {
             grainIDs.push_back(j);
-            if(j<CellNumbs.at(3)-1) {
+            if (j < CellNumbs.at(3) - 1) {
                 for (unsigned int k = j + 1; k < CellNumbs.at(3); ++k)
-                    if (GFS.coeff(facenumb, k) == 1)
+                    if (GFS.coeff(facenumb, k) != 0)
                         grainIDs.push_back(k);
             }
         }
@@ -208,10 +270,59 @@ vector<tuple<double, double, double>> dTuplesReader(char* SMpath, unsigned int &
     return tripletList;
 }
 
+/*!
+ *
+ * @param v
+ * @return
+ */
+std::set<unsigned int> convertToSet(std::vector<unsigned int> &v) {
+    std::set<unsigned int> s(v.begin(), v.end());
+    return s;
+}
+
+std::vector<unsigned int> SetToVector(std::set<unsigned int> &s) {
+    std::vector<unsigned int> v(s.begin(), s.end());
+    return v;
+}
+
+
+/*!
+ * @details Log-normal distribution generator (for the RStrips_Distribution() processing function).
+ * @param mu_f
+ * @param sigm_f
+ * @param baskets
+ * @return
+ */
+// IDEA: make also version with different "bool multiplexity" parameter
+std::vector<double> Log_normal_distribution (double mu_f, double sigm_f, int bins_number) { // Log-normal distribution generator
+    std::vector<double>  s_lenght_distribution;
+
+    double bin_width = 5.0 / (double) (bins_number); // in the midle of each bin
+    for (int xx = 1; xx <= bins_number; ++xx) {
+        double X_scale = ((xx-1)*bin_width + xx*bin_width)/2.0;
+//        X_scale = xx / (double) (bins_number) ; // scale
+//        for (int lx = 1; xx <= bins_number; ++xx) {
+        s_lenght_distribution.push_back( (1.0 / (X_scale * sigm_f * std::sqrt(2.0 * 3.14159))) * std::exp( - std::pow((std::log(X_scale) - mu_f), 2.0) / (2.0 * std::pow(sigm_f, 2))) );
+    }
+
+//    s_lenght_distribution.at(0) += 1.0 - std::accumulate(s_lenght_distribution.begin(), s_lenght_distribution.end(), decltype(s_lenght_distribution)::value_type(0));
+// REPAIR cout << std::accumulate(s_lenght_distribution.begin(), s_lenght_distribution.end(), decltype(s_lenght_distribution)::value_type(0)) << endl;
+    return s_lenght_distribution; // end of Stips_distribution function
+} // end of Log_normal_distribution()
+
+/*!
+ * @details Lengthy special strips with the distribution of lengths taken from file.
+ * @param cell_type
+ * @param cell_strip_distribution
+ * @param Configuration_State
+ * @param max_fractions_vectors
+ * @return vector of vectors of numbers k-cells in the each strip/chain
+ */
+
 /// * The function count the number of Edges possessing with types J0, J1, J2, J3 and J4 for every junction * ///
 /// * Calculation Face-Edge index ::                                                                                                     * ///
 
-std::vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> const& FES, vector<double> const& TJsTypes) {
+std::vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> const& FES, std::vector<double> const& TJsTypes) {
     std::vector<double> res(100,0); /// Up to 100 types of possible TJs types
 
     for (unsigned int l = 0; l < FES.rows(); l++) // Loop over all Edges
@@ -222,26 +333,36 @@ std::vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double
     return res;
 }
 
+std::vector<double> NodeIndex(unsigned int node_number, Eigen::SparseMatrix<double> const& ENS, std::vector<double> const& TJsTypes) {
+    std::vector<double> res(100,0); /// Up to 100 types of possible TJs types
+
+    for (unsigned int l = 0; l < ENS.cols(); l++) // Loop over all Edges
+        if (ENS.coeff(node_number,l) != 0)
+            res[TJsTypes.at(l)]++;
+    /// output in the form res[0] = #TJsTypes[0] incident to the noce with the number node_number, res[1] = #TJsTypes[1] incident to the face with the number face_number,...
+    return res;
+}
+
 /// * Function calculates the vector<int> "TJsTypes" of types TJs in the PCC using its FES incidence matrix and special faces sequence (s_faces_sequence) * ///
 /// *                                                                                                                                                    * ///
 std::vector<double> NodesTypesCalc(std::vector<unsigned int> const &CellNumbs, std::vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const &ENS)
 {
-std::vector<double> TJsTypes(CellNumbs.at(0),0); // CellNumbs.at(1) is the number of Edges
-for (auto vit: s_faces_sequence) // loop over all Special Faces
-for(int k = 0; k < CellNumbs.at(0); k++) // loop over all Edges
-if (ENS.coeff(k, vit) != 0)
-TJsTypes.at(k)++;
+std::vector<double> NodesTypes(CellNumbs.at(0),0); // CellNumbs.at(1) is the number of Edges
+    for (auto vit: s_faces_sequence) // loop over all Special Faces
+        for(int k = 0; k < CellNumbs.at(0); k++) // loop over all Edges
+             if (ENS.coeff(k, vit) != 0)
+                NodesTypes.at(k)++;
 
-return TJsTypes;
+return NodesTypes;
 }
 
 std::vector<double> EdgesTypesCalc(std::vector<unsigned int> const &CellNumbs, std::vector<unsigned int> &s_faces_sequence, Eigen::SparseMatrix<double> const &FES)
 {
 std::vector<double> TJsTypes(CellNumbs.at(1),0); // CellNumbs.at(1) is the number of Edges
 for (auto vit: s_faces_sequence) // loop over all Special Faces
-for(int k = 0; k < CellNumbs.at(1); k++) // loop over all Edges
-if (FES.coeff(k, vit) != 0)
-TJsTypes.at(k)++;
+    for(int k = 0; k < CellNumbs.at(1); k++) // loop over all Edges
+        if (FES.coeff(k, vit) != 0)
+            TJsTypes.at(k)++;
 
 return TJsTypes;
 }
@@ -337,11 +458,10 @@ vector<double> Get_EntropyIncreaseList(std::vector<unsigned int> &S_Vector, vect
 
     return EntropyIncreaseList;
 }
+std::vector<std::vector<int>> Get_cases_list(std::vector<unsigned int> const &S_Vector, std::vector<double> const &EdgeTypes, SpMat const &FES, std::map<unsigned int, std::vector<unsigned int>> &cases_to_sfaces, double const p_index) {
+std::vector<std::vector<int>> cases_list; // in every case its own TJs vector
 
-std::vector<vector<int>> Get_cases_list(std::vector<int> const &S_Vector, std::vector<int> const &EdgeTypes, SpMat const &FES, std::map<unsigned int, std::vector<unsigned int>> &cases_to_sfaces, double const &p_index) {
-std::vector<vector<int>> cases_list; // in every case its own TJs vector
-
-std::vector<int> NewEdgeTypes = EdgeTypes;
+std::vector<double> NewEdgeTypes = EdgeTypes;
 
 if (p_index == 0) { // cases: direct assigment of special faces one by one
 unsigned int iter = 0;
@@ -354,7 +474,9 @@ for(unsigned int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all E
 if (FES.coeff(e, f) != 0) NewEdgeTypes.at(e)++;
 //                cout << " J1: " << std::count(NewEdgeTypes.begin(), NewEdgeTypes.end(), 1)<< " J2: " << std::count(NewEdgeTypes.begin(), NewEdgeTypes.end(), 2) << " J3: " << std::count(NewEdgeTypes.begin(), NewEdgeTypes.end(), 3) << endl; // containing 1 incident special face
 
-cases_list.push_back(NewEdgeTypes);
+std::vector<int> iNewEdgeTypes;
+std::transform(NewEdgeTypes.begin(), NewEdgeTypes.end(), iNewEdgeTypes.begin(), [](double x) { return (int)x;});
+cases_list.push_back(iNewEdgeTypes);
 /// map from the Cases to special Faces set
 cases_to_sfaces.insert( std::pair<unsigned int, std::vector<unsigned int>> (iter, {f})); // each cases coresponds to the vector with a single element which is the same number of special face
 // new # in the case_list
@@ -759,7 +881,7 @@ std::vector<vector<int>> Get_crystallographic_cases_list(std::vector<vector<doub
     return cryst_cases_list; // function output
 } // END of Get_crystallographic_cases_list()
 
-std::vector<vector<int>> Get_crystallographic_cases_random_list(std::vector<vector<double>> &grain_quaternions_list, std::map<unsigned int, std::vector<unsigned int>> &g_gbs_map, double &dq, double &HAGBs_threshold, std::vector<int> const &S_Vector, std::vector<int> const &EdgeTypes, SpMat &GFS, SpMat &FES, std::map<unsigned int, unsigned int> &cases_to_grains, std::map<unsigned int, std::vector<unsigned int>> &cases_to_sfaces, std::map<unsigned int, std::vector<double>> &cases_to_new_quaternions, double const &p_index) {
+std::vector<vector<int>> Get_crystallographic_cases_random_list(std::vector<vector<double>> &grain_quaternions_list, std::map<unsigned int, std::vector<unsigned int>> &g_gbs_map, double &dq, double &HAGBs_threshold, std::vector<int> const &S_Vector, std::vector<int> const &EdgeTypes, SpMat &GFS, SpMat &FES, std::map<unsigned int, unsigned int> &cases_to_grains, std::map<unsigned int, std::vector<unsigned int>> &cases_to_sfaces, std::map<unsigned int, std::vector<double>> &cases_to_new_quaternions, double const p_index = 0) {
     std::vector<vector<int>> cryst_cases_list; // function output
 
 /// Assighment NEW orientations and related 3-cases
@@ -949,7 +1071,7 @@ std::vector<vector<int>> Get_crystallographic_cases_random_list(std::vector<vect
 } // END of Get_crystallographic_cases_random_list()
 
 /// Configuration TJs entropy
-double Get_TJsEntropy(vector<unsigned int> special_faces_seq) {
+double Get_TJsEntropy(std::vector<unsigned int> &special_faces_seq) {
     double TJsEntropy = 0.0;
 
     double J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
@@ -974,7 +1096,42 @@ double Get_TJsEntropy(vector<unsigned int> special_faces_seq) {
 
     /// using values with pow(10,-10) instead of 0s!
     if (j0s != 0) j0s = j0* log2(j0); if (j1s != 0) j1s = j1* log2(j1); if (j2s != 0) j2s = j2* log2(j2); if (j3s != 0) j3s = j3* log2(j3); //Gives 0 in entropy!
+    /// Configuration Entropy related with Faces
+    TJsEntropy = - (j0s + j1s + j2s + j3s);
 
+    return TJsEntropy;
+};
+
+double Get_TJsEntropy(std::vector<unsigned int> &special_faces_seq, std::vector<double> &Jtypes, std::vector<double> &Dtypes) {
+    double TJsEntropy = 0.0;
+
+    double J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
+    double Configurational_Face_Entropy = 0;
+    vector<double> TJsTypes;
+
+    SpMat FES(CellNumbs.at(1), CellNumbs.at(2));
+    FES = SMatrixReader(PCCpaths.at(5), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
+
+    TJsTypes = EdgesTypesCalc(CellNumbs, special_faces_seq, FES);
+
+    J1 = std::count(TJsTypes.begin(), TJsTypes.end(), 1);
+    J2 = std::count(TJsTypes.begin(), TJsTypes.end(), 2);
+    J3 = std::count(TJsTypes.begin(), TJsTypes.end(), 3);
+    J0 = CellNumbs.at(1) - J1 - J2 - J3;
+    Jall = (double) CellNumbs.at(1);
+
+/// Conversion from numbers to fractions
+// (!) log2 means binary (or base-2) logarithm and we use "-" for fractions to make the value positive
+    j0 = J0/Jall; j1 = J1/Jall; j2 = J2/Jall; j3 = J3/Jall;
+
+    double j0s = j0, j1s = j1, j2s = j2, j3s = j3;
+    Jtypes = {j0, j1, j2, j3};
+
+    double d1 = j1/ j0, d2 = j2/ j0, d3 = j3/ j0;
+    Dtypes = {d1, d2, d3};
+
+    /// using values with pow(10,-10) instead of 0s!
+    if (j0s != 0) j0s = j0* log2(j0); if (j1s != 0) j1s = j1* log2(j1); if (j2s != 0) j2s = j2* log2(j2); if (j3s != 0) j3s = j3* log2(j3); //Gives 0 in entropy!
     /// Configuration Entropy related with Faces
     TJsEntropy = - (j0s + j1s + j2s + j3s);
 
@@ -1002,6 +1159,175 @@ void eraseSubStr(std::string & mainStr, const std::string & toErase)
         mainStr.erase(pos, toErase.length());
     }
 }
+
+std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordinates(std::vector<unsigned int> &face_sequence) {
+    std::vector<std::tuple<double, double, double>> face_sequence_barycentre_coordinates;
+
+    PCC current_PCC;
+    current_PCC.Set_face_barycentre_coordinates();
+    std::vector<std::tuple<double, double, double>> all_face_coordinates = current_PCC.Get_face_barycentre_coordinates();
+
+    for(unsigned int fn = 0; fn < CellNumbs.at(2); ++fn)
+        if (std::find(face_sequence.begin(),face_sequence.end(),fn) != face_sequence.end())
+            face_sequence_barycentre_coordinates.push_back(all_face_coordinates.at(fn));
+
+    return face_sequence_barycentre_coordinates;
+} // END of
+
+std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordinates(std::vector<unsigned int> &sfaces_set, std::vector<std::tuple<double, double, double>> &all_face_coordinates) {
+    std::vector<std::tuple<double, double, double>> face_sequence_barycentre_coordinates;
+
+    for(unsigned int fn = 0; fn < CellNumbs.at(2); ++fn)
+        if (std::find(sfaces_set.begin(),sfaces_set.end(),fn) != sfaces_set.end())
+            face_sequence_barycentre_coordinates.push_back(all_face_coordinates.at(fn));
+
+    return face_sequence_barycentre_coordinates;
+} // END of
+
+std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordinates(std::set<unsigned int> &sfaces_set) {
+    std::vector<std::tuple<double, double, double>> face_sequence_barycentre_coordinates;
+
+    PCC current_PCC;
+    current_PCC.Set_face_barycentre_coordinates();
+    std::vector<std::tuple<double, double, double>> all_face_coordinates = current_PCC.Get_face_barycentre_coordinates();
+
+    for(unsigned int fn = 0; fn < CellNumbs.at(2); ++fn)
+        if (std::find(sfaces_set.begin(),sfaces_set.end(),fn) != sfaces_set.end())
+            face_sequence_barycentre_coordinates.push_back(all_face_coordinates.at(fn));
+
+    return face_sequence_barycentre_coordinates;
+} // END of
+
+std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordinates(std::set<unsigned int> &sfaces_set, std::vector<std::tuple<double, double, double>> &all_face_coordinates) {
+    std::vector<std::tuple<double, double, double>> face_sequence_barycentre_coordinates;
+
+    for(unsigned int fn = 0; fn < CellNumbs.at(2); ++fn)
+        if (std::find(sfaces_set.begin(),sfaces_set.end(),fn) != sfaces_set.end())
+            face_sequence_barycentre_coordinates.push_back(all_face_coordinates.at(fn));
+
+    return face_sequence_barycentre_coordinates;
+} // END of
+
+void Vector_of_vectors_ui_cout(std::vector<std::vector <unsigned int>> &vector, std::string text) {
+    cout << text << endl;
+    for (auto vec : vector) { // over the growth series of a macrocrack
+        //for (auto mss : macrocrack_sfaces_series) // over the growth series of a macrocrack
+        for (auto ve : vec) {
+            cout << ve << "\t";
+        }
+        cout << endl;
+    }
+} // END of Vector_of_vectors_ui_cout()
+
+void Vector_ui_cout(std::vector <unsigned int> &vector, std::string text) {
+    cout << text << endl;
+    for (auto vec : vector) { // over the growth series of a macrocrack
+        cout << vec << "\t";
+    }
+    cout << endl;
+} // END of Vector_ui_cout()
+
+/*!
+ * @details Variable get<var> for a std::tuple<double, double, double>
+ * @param direction
+ * @param t
+ * @return
+ */
+double get_i(int &direction, std::tuple<double, double, double> &t) {
+    switch (direction) {
+        case 0: return std::get<0>(t);
+        case 1: return std::get<1>(t);
+        case 2: return std::get<2>(t);
+    }
+    assert(false);
+}
+
+std::vector<std::tuple<double, double, double>> kCell_barycentre_coordinates(int k_type, std::vector<unsigned int> &kcell_sequence) {
+    std::vector<std::tuple<double, double, double>> kcell_barycentre_coordinates; // res
+    /// k_types:    0 - nodes;
+    ///             1 - edges;
+    ///             2 - faces;
+    ///             3 - polytopes.
+    std::vector<std::tuple<double, double, double>> grain_seeds_vector; // res
+
+    extern std::vector<std::tuple<double, double, double>> edge_coordinates_vector, face_coordinates_vector, polytope_coordinates_vector; // coordinate vectors defined globally
+    grain_seeds_vector = Tuple3Reader(PCCpaths.at(9)); // grain barycentres
+
+    if (k_type == 2 && face_coordinates_vector.size() == 0) {
+//            cout << "Finding " << k_type << "-cell barycentre coordinates:\t\t" << endl;
+            for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn) {
+///            for (auto fn : kCell_barycentre_coordinates)
+                kcell_barycentre_coordinates.push_back(find_aGBseed(fn, PCCpaths, CellNumbs, grain_seeds_vector));
+                if (fn % 500 == 1) { cout << "Face number coordinates \t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl; } //Out_local_logstream << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl; }
+            } // end for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn)
+    } // end of if (k_type == 2 )
+    else return face_coordinates_vector;
+
+    return kcell_barycentre_coordinates;
+} // end pf kCell_barycentre_coordinates()
+
+std::vector<std::tuple<double, double, double>> kFaceSeq_barycentre_coordinates(int k_type, std::vector<unsigned int> &kFace_sequence) {
+    std::vector<std::tuple<double, double, double>> All_face_coords, kSequence_barycentre_coordinates; // res
+    All_face_coords = Tuple3Reader(PCCpaths.at(13));
+
+    kSequence_barycentre_coordinates.clear();
+    for (auto fn: kFace_sequence) {
+        kSequence_barycentre_coordinates.push_back(All_face_coords.at(fn));
+    }
+
+    return kSequence_barycentre_coordinates;
+}
+
+std::vector<std::tuple<double, double, double>> kSequence_barycentre_coordinates(int k_type, std::vector<unsigned int> &kcell_sequence) {
+    std::vector<std::tuple<double, double, double>> kSequence_barycentre_coordinates; // res
+    /// k_types:    0 - nodes;
+    ///             1 - edges;
+    ///             2 - faces;
+    ///             3 - polytopes.
+    std::vector<std::tuple<double, double, double>> grain_seeds_vector; // res
+
+    extern std::vector<std::tuple<double, double, double>> edge_coordinates_vector, face_coordinates_vector, polytope_coordinates_vector; // coordinate vectors defined globally
+
+    if (k_type == 2) { //&& face_coordinates_vector.size() == 0
+//            cout << "Finding " << k_type << "-cell barycentre coordinates:\t\t" << endl;
+///        kSequence_barycentre_coordinates = Tuple3Reader(PCCpaths.at(13));
+
+        {
+           grain_seeds_vector = Tuple3Reader(PCCpaths.at(9)); // grain (!) barycentres
+
+           for (auto fn: kcell_sequence) {
+                kSequence_barycentre_coordinates.push_back(find_aGBseed(fn, PCCpaths, CellNumbs, grain_seeds_vector));
+                if (fn % 500 == 1) { cout << "Face number coordinates \t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
+                } //Out_local_logstream << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl; }
+            } // end for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn)
+        } // end of if (k_type == 2 )
+
+    } // else return face_coordinates_vector;
+
+    return kSequence_barycentre_coordinates;
+} // end pf kCell_barycentre_coordinates()
+
+/// shuffle_coord_vector()
+void shuffle_coord_vector(std::string name_infile, std::string name_outfile, unsigned int rows_number){
+    std::vector<tuple<double, double>> initial_coords, final_coords;
+    initial_coords = Tuple2Reader(name_infile, rows_number);
+
+    for(unsigned int i = 0; i < 5*rows_number; ++i) {
+        unsigned int new_numb = rand() % (rows_number - 1);
+        tuple<double, double> new_coord = initial_coords.at(new_numb);
+        initial_coords.erase(initial_coords.begin() + new_numb);
+        initial_coords.push_back(new_coord);
+    }
+
+    ofstream off_coords;
+    off_coords.open(name_outfile, ios::trunc);
+        for (auto fc : initial_coords)
+            off_coords << get<0>(fc) << "\t" << get<1>(fc) << endl;
+
+    off_coords.close();
+    return;
+} /// END of shuffle_coord_vector()
+
 
 /*
  *     double J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;

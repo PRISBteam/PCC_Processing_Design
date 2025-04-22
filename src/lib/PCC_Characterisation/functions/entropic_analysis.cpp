@@ -23,10 +23,10 @@ using namespace std; // standard namespace
 
 typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which declares a column-major sparse matrix type of doubles with the nickname 'SpMat'
 
-/*
+
 vector<double> EdgesStat( std::vector<unsigned int> &s_faces_sequence, std::vector<unsigned int> const& CellNumbs, Eigen::SparseMatrix<double> const& FES, char* output_dir, double &Face_Entropy_Median, double &Face_Entropy_Skrew, double &informativeness, vector<double> &j_types_fractions)
 {
-    vector<double> TJsTypes(CellNumbs.at(1),0);
+    std::vector<double> TJsTypes(CellNumbs.at(1),0);
     map<unsigned int, unsigned int> res; // Here 100 is an arbitrary number of Edge types
     map<unsigned int, unsigned int>::iterator sit; // Special iterator for this map
     double J0 = 0, J1 = 0, J2 = 0, J3 = 0, Jall = 0, j0 = 0, j1 = 0, j2 = 0, j3 = 0;
@@ -66,7 +66,7 @@ vector<double> EdgesStat( std::vector<unsigned int> &s_faces_sequence, std::vect
                         -(1.0 / j_types_fractions.size()) * (j_types_fractions[i] - j_types_fractions[j]) *
                         log2(j_types_fractions[i] / j_types_fractions[j]);
             } else Face_Entropy_Skrew += 0.0;
-
+/*
     /// Complexity/ Informativeness
     // Srand and Smax reading from files
     string input_filename_SstrRand = "Random_Entropy_100.txt"s, input_filename_SstrMAX = "Maximum_Entropy_100.txt"s;
@@ -92,6 +92,7 @@ vector<double> EdgesStat( std::vector<unsigned int> &s_faces_sequence, std::vect
 //REPAIR    cout << Configurational_Face_Entropy << " " << RandomEntropy[numb_Srand][1] << " " << MAXEntropy[numb_Smax][1] << endl;
     informativeness =  ( Configurational_Face_Entropy - RandomEntropy[numb_Srand][1])/ ( MAXEntropy[numb_Smax][1] - RandomEntropy[numb_Srand][1]);
     if (informativeness > 1) informativeness = 1;
+*/
     /// ====== Data output =====================>
     /// Opening of the output streams
     string TJs_output_filename = "TJsLab_TJsTypes.txt"s, Entropy_output_filename = "TJsLab_ConTJsEntropy.txt"s,
@@ -110,7 +111,7 @@ vector<double> EdgesStat( std::vector<unsigned int> &s_faces_sequence, std::vect
 
     return TJsTypes;
 }
-
+/**
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////// Обработка матриц соседей: начльная статистика связей и матрицы смежности /////////////////////////////////////////////////////
 	long lt=0; knn=1;
@@ -162,7 +163,7 @@ for(int i = 0; i < Edgenumb; i++)	{
 		}
         JEdgeN.close();
 
-//***cout<<"initial (HAGBs)JEdgeNeigh.txt has been created"<<endl;
+//cout<<"initial (HAGBs)JEdgeNeigh.txt has been created"<<endl;
 
 //Чистка файла под мощности тройных стыков с учетом соседей
 	JEdgeN.open("C:\\Users\\v94623eb\\Dropbox\\Projects\\Current simmulation\\Voronois\\Voronois\\VAnRes\\(HAGBs)TJspow.txt", ios::trunc);
@@ -201,7 +202,6 @@ for (int l = 0; l < 5; l++)
 
 		JENStream.open("C:\\Users\\v94623eb\\Dropbox\\Projects\\Current simmulation\\Voronois\\Voronois\\VAnRes\\(HAGBs)Jlk.txt", ios::trunc);  //			 JENStream << JEN[0][0] + JEN[1][1] + JEN[2][2] + JEN[3][3]<<"\t"<< JEN[0][1] + JEN[1][0] + JEN[0][2] + JEN[2][0] + JEN[0][3] + JEN[3][0] + JEN[1][2] + JEN[2][1] + JEN[1][3] + JEN[3][1] + JEN[2][3] + JEN[3][2]<< "\t"<< JEN[0][1] + JEN[1][0]<< "\t"<< JEN[0][2] + JEN[2][0]<< "\t"<< JEN[0][3] + JEN[0][3]<< "\t"<< JEN[1][2] + JEN[2][1]<< "\t"<< JEN[1][3] + JEN[3][1]<< "\t"<< JEN[2][3] + JEN[3][2];
 		JENStream.close();
-
 
 //*-------------------------------------------------------------------------------------
 //*------------------------------QUADRUPLE POINTS----------------------------
@@ -324,7 +324,7 @@ for (int jc = 0; jc < 10; jc++) {SumJEN += 0.5*JEN[ic][jc]; if(ic==jc) Jenii+=0.
 
 JENStream <<"\n"<<"\n"<<"\n";
 JENStream.close();
-//***cout<<"(HAGBs)JEN.txt has been created"<<endl;
+//cout<<"(HAGBs)JEN.txt has been created"<<endl;
 
 JENStream.open("C:\\Users\\v94623eb\\Dropbox\\Projects\\Current simmulation\\Voronois\\Voronois\\VAnRes\\(HAGBs)Jlk.txt", ios::app);
 //				if(i==0)	JENStream << "STRAIN" << "\t"<<"ii"<<"\t"<<"ij"<<"\t"<<"00"<<"\t"<<"11"<<"\t"<<"22"<<"\t"<<"33"<<"\t"<<"01"<<"\t"<<"02"<<"\t"<<"03"<<"\t"<<"12"<<"\t"<<"13"<<"\t"<<"23"<<endl;
@@ -334,4 +334,4 @@ JENStream << HAGBsFunc[i][0]<<"\t"<<Jenii*100.0/SumJEN<<"\t"<< Jenij*100.0/SumJE
 //			 JENStream << HAGBsFunc[i][0]<<"\t"<<JEN[0][0] + JEN[1][1] + JEN[2][2] + JEN[3][3]<<"\t"<< JEN[0][1] + JEN[0][2] + JEN[0][3] + JEN[1][2] + JEN[1][3] + JEN[2][3] << "\t"<< JEN[0][1] << "\t"<< JEN[0][2] << "\t"<< JEN[0][3] << "\t"<< JEN[1][2] << "\t"<< JEN[1][3] << "\t"<< JEN[2][3]; 	// 			 JENStream << 0*JEN[0][0] + 2*JEN[1][1] + 4*JEN[2][2] + 6*JEN[3][3]<<"\t"<< JEN[0][1] + JEN[1][0] + 2*JEN[0][2] + 2*JEN[2][0] + 3*JEN[0][3] + 3*JEN[3][0] + 3*JEN[1][2] + 3*JEN[2][1] + 4*JEN[1][3] + 4*JEN[3][1] + 5*JEN[2][3] + 5*JEN[3][2]<< "\t"<< JEN[0][1] + JEN[1][0]<< "\t"<< 2*JEN[0][2] + 2*JEN[2][0]<< "\t"<< 3*JEN[0][3] + 3*JEN[0][3]<< "\t"<< 3*JEN[1][2] + 3*JEN[2][1]<< "\t"<< 4*JEN[1][3] + 4*JEN[3][1]<< "\t"<< 5*JEN[2][3] + 5*JEN[3][2];
 JENStream <<"\n";
 JENStream.close();
-*/
+**/

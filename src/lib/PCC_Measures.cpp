@@ -29,15 +29,15 @@ typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which decla
 #include "PCC_Measures.h"
 ///------------------------------------------------------------------
 
-vector<int> Edge_types_byFaces(std::vector<unsigned int> const &CellNumbs, std::vector<unsigned int> &special_face_sequence, std::vector<double> &j_fractions, std::vector<double> &d_fractions)
+std::vector<int> Edge_types_byFaces(std::vector<unsigned int> const &CellNumbs, std::vector<unsigned int> &special_face_sequence, std::vector<double> &j_fractions, std::vector<double> &d_fractions)
 {
 // Output of the model
-    vector<int> TJsTypes(CellNumbs.at(1 + (dim - 3)), 0); // CellNumbs.at(1) is the number of Edges
+    std::vector<int> TJsTypes(CellNumbs.at(1 + (dim - 3)), 0); // CellNumbs.at(1) is the number of Edges
 
 // Obtaining Faces (coloumns) - Edges (rows) Incidence matrix B2 using the file paths.at(5 + (dim - 3))
     SpMat FES = SMatrixReader(PCCpaths.at(5 + (dim - 3)), CellNumbs.at(1 + (dim - 3)), CellNumbs.at(2 + (dim - 3))); // Edges-Faces sparse incidence matrix
 
-    for (auto f: special_face_sequence) // loop over all Special Faces
+    for (auto f : special_face_sequence) // loop over all Special Faces
         for(int e = 0; e < CellNumbs.at(1 + (dim - 3)); ++e) // loop over all Edges
             if (FES.coeff(e, f) != 0) TJsTypes.at(e)++;
 
@@ -62,6 +62,7 @@ vector<int> Edge_types_byFaces(std::vector<unsigned int> const &CellNumbs, std::
     if (j2 > 0) l2j2 = log2(j2);
     j3 = (double) J3 / Jall;
     if (j3 > 0) l2j3 = log2(j3);
+
     j_fractions.at(0) = j0; j_fractions.at(1) = j1; j_fractions.at(2) = j2; j_fractions.at(3) = j3;
 
     for (int k = 0; k < 3; ++k) {
@@ -73,8 +74,65 @@ vector<int> Edge_types_byFaces(std::vector<unsigned int> const &CellNumbs, std::
     return TJsTypes;
 }
 
+double Face_edge_index(std::vector<unsigned int> &special_face_sequence, Eigen::SparseMatrix<double> const& FES, double norm_const) {
+    double face_edge_index = 0.0;
+    std::vector<double> Face_inclusion_index(CellNumbs.at(2),0), j_fractions(4,0), d_fractions(3,0);
+    std::vector<double> TJsTypes; std::vector<int> TJsTypes_int;
+    TJsTypes_int = Edge_types_byFaces(CellNumbs, special_face_sequence, j_fractions, d_fractions);
+
+    for (int var : TJsTypes_int)
+        TJsTypes.push_back(var);
+
+    for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn) {
+        std::vector<double> j_types_neigh_fractions = GBIndex(fn, FES, TJsTypes);         //std::vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> const& FES, vector<double> const& TJsTypes) {
+        /// Inclusion index computation
+        Face_inclusion_index.at(fn) = j_types_neigh_fractions.at(1) + 2.0 * j_types_neigh_fractions.at(2) + 3.0 * j_types_neigh_fractions.at(3);
+//REPAIR        if(Face_inclusion_index.at(fn) != 0)  cout << "\tFace_inclusion_index.at(fn)\t" << Face_inclusion_index.at(fn) << endl;
+    } // end of for ( fn < CellNumbs.at(cell_type))
+
+    face_edge_index = 0.0;
+    std::vector<double> BL_indices;
+    unsigned int bli_max= *std::max_element(Face_inclusion_index.begin(),Face_inclusion_index.end());
+    for(unsigned int bl_numb = 1; bl_numb <= bli_max; ++bl_numb)
+        BL_indices.push_back(std::count(Face_inclusion_index.begin(), Face_inclusion_index.end(), bl_numb));
+
+    for(unsigned int bl_numb = 0; bl_numb < BL_indices.size(); ++bl_numb)
+        face_edge_index += BL_indices.at(bl_numb) * (double) bl_numb/ (norm_const*CellNumbs.at(2));
+
+    return face_edge_index;
+} // end of Face_edge_index
+
+double Node_edge_index(std::vector<unsigned int> &special_face_sequence, Eigen::SparseMatrix<double> const& ENS, double norm_const) { // based on Edges vector
+    double node_edge_index = 0.0;
+    std::vector<double> Node_inclusion_index(CellNumbs.at(0),0), j_fractions(4,0), d_fractions(3,0);
+    std::vector<double> TJsTypes; std::vector<int> TJsTypes_int;
+    TJsTypes_int = Edge_types_byFaces(CellNumbs, special_face_sequence, j_fractions, d_fractions);
+
+    for (int var : TJsTypes_int)
+        TJsTypes.push_back(var);
+
+    for (unsigned int fn = 0; fn < CellNumbs.at(0); ++fn) {
+        std::vector<double> j_types_neigh_fractions = NodeIndex(fn, ENS, TJsTypes);
+        /// Inclusion index computation
+        Node_inclusion_index.at(fn) = j_types_neigh_fractions.at(1) + 2.0 * j_types_neigh_fractions.at(2) + 3.0 * j_types_neigh_fractions.at(3);
+    } // end of for ( fn < CellNumbs.at(cell_type))
+
+    node_edge_index = 0.0;
+    std::vector<double> QL_indices;
+
+    unsigned int bli_max= *std::max_element(Node_inclusion_index.begin(),Node_inclusion_index.end());
+    for(unsigned int bl_numb = 1; bl_numb < bli_max; ++bl_numb)
+        QL_indices.push_back(std::count(Node_inclusion_index.begin(),Node_inclusion_index.end(), bl_numb));
+
+//    for(unsigned int bl_numb = 1; bl_numb <= bli_max; ++bl_numb)
+    for(unsigned int bl_numb = 0; bl_numb < QL_indices.size(); ++bl_numb)
+        node_edge_index += QL_indices.at(bl_numb) * std::exp((double) bl_numb)/ (norm_const*CellNumbs.at(0));
+
+    return node_edge_index;
+} // end of Node_edge_index
+
 /// * Function calculates the vector<int> "EdgeTypes" of types Edges in the PCC using its FES incidence matrix and special faces sequence (special_faces_sequence) * ///
-std::vector<double> j_fractions_vector(std::vector<int> const &TJsTypes){ // based on Edges vector
+std::vector<double> j_fractions_vector(std::vector<double> const &TJsTypes){ // based on Edges vector
 std::vector<double> j_fractions_vector(4); // Function output: TJs fractions
 
 unsigned int J0 = 0, J1 = 0, J2 = 0, J3 = 0;
@@ -97,7 +155,7 @@ j_fractions_vector.at(3) = (double) J3 / Jall;
 return j_fractions_vector;
 } // end of j_fractions()
 
-std::vector<double> d_fractions_vector(vector<int> const &TJsTypes){ // based on Edges vector
+std::vector<double> d_fractions_vector(vector<double> const &TJsTypes){ // based on Edges vector
 std::vector<double> j_fractions(4), d_fractions_vector(4); // Function output: TJs fractions
 /// j_fractions calculation
 j_fractions = j_fractions_vector(TJsTypes);
@@ -111,7 +169,7 @@ d_fractions_vector.at(2) = j_fractions.at(3) / (1.0 - j_fractions.at(0));
 return d_fractions_vector;
 } // end of d_fractions()
 
-double Configuration_Entropy(vector<int> const &TJsTypes){ // based on Edges vector
+double Configuration_Entropy(vector<double> &TJsTypes){ // based on Edges vector
 double Configuration_Face_Entropy = 0.0; // Function output: Configuration Entropy related with Faces
 
 unsigned int J0 = 0, J1 = 0, J2 = 0, J3 = 0;
