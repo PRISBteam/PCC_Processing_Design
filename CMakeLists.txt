@@ -9,6 +9,7 @@ add_executable( PCC_Processing_Design
         src/lib/ini/ini_readers.cpp
         src/lib/ini/ini_materials_reader.cpp
 
+
         src/lib/PCC_Support_Functions.cpp
         src/lib/PCC_Objects.cpp
         src/lib/PCC_Measures.cpp
@@ -30,10 +31,9 @@ add_executable( PCC_Processing_Design
 
         src/lib/PCC_Writer/PCC_Writer.cpp
         src/lib/PCC_Writer/functions/Writer_functions.cpp
-        src/lib/ini/ini_materials_reader.cpp
 
         src/tasks/fibre_composite_seed_generator.cpp
         src/tasks/calculation_face_edge_barycentre_coordinates.cpp
         src/tasks/macrocrack_growth.cpp
         src/tasks/energy_levels.cpp
-)
+        )

@@ -1,0 +1,14 @@
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+PCC standard ID:		pcc1s
+
+Simulation mode:		TASK
+Output directory:		../results/
+PCC source directory:		../PCC_sources/Voronoi_10k/
+
+ON    | PCC_Subcomplex
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+ON    | PCC_Writer
+
+==========================================================================================================================================================================
