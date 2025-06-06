@@ -1,25 +1,25 @@
 ///******************************************************************************************************************************///
 ///************************   Polytopal Cell Complex (PCC) Processing Design :: (CPD code) (c)   *******************************///
 ///****************************************************************************************************************************///
-///*                                        Version 4.0 | 15/04/2024                                                         *///
+///*                                        Version 4.0 | 4/06/2025                                                         *///
 ///**************************************************************************************************************************///
 ///************************************ Dr Elijah Borodin, Manchester, UK **************************************************///
-///**************************************** Spring 2022 - Winter 2024  ****************************************************///
+///**************************************** Spring 2022 - Spring 2025  ****************************************************///
 ///***********************************************************************************************************************///
 ///*
 ///*    Code source:    https://github.com/PRISBteam/PCC_Processing_Design/
 ///*    Documentation:  https://prisbteam.github.io/
 ///*    PCC sources:    https://materia.team/
 ///*
-///*  The project provides a reliable tool for 1. Obtaining, 2. Analysing and 3. Optimising of 'design vectors' as the sequences                         *///
+///*  The project provides a reliable tool for (1) Generating, (2) Analysing and (3) Optimising of 'design vectors' as the sequences                      *///
 ///*  of k-cells containing in the k-skeletons, where k = {0,1,2,3}, of a Polytopal Cell Complex (PCC). Such PCCs can be created by external             *///
-///*  codes based on the tessellation of 2D or 3D spaces by an agglomeration of polytopes (polygons in the 2D case or polyhedrons in 3D).                *///
-///*  Graphs and networks (without loops) are considered as 1-complexes (1-PCCs) and also available for analysis similarly to the the 2D and 3D cases.   *///
+///*  codes based on the tessellation of 2D or 3D spaces by an agglomeration of polytopes (polygons in the 2D case or polyhedrons in 3D).               *///
+///*  Graphs and networks (without loops) are considered as 1-complexes (1-PCCs) and also available for analysis similarly to the 2D and 3D cases.     *///
 
-///* Key terminology:                                                                                                                                                               *///
-/// Tessellation's elements     ::   'nodes, 'edges', 'faces', 'polytopes' (with their measures - lengths, areas and volumes - and barycenter coordinates)                         ///
-/// PCC's elements              ::   'k-cells' containing in 'k-skeletons', where k = {0,1,2,3}, with their degree fractions, and incident (k-1)-cells and (k+1)-cells.           ///
-/// Material's elements         ::   'quadruple points', 'grain boundary junctions', 'grain boundaries', and 'grains' (with their orientations and barycenter coordinates often taken from EBSD or X-ray analysis)  ///
+///* Key terminology:                                                                                                                                                                                                 *///
+/// Tessellation's elements     ::   'nodes, 'edges', 'faces', 'polytopes' (with their measures - lengths, areas and volumes - and barycenter coordinates)                                                            ///
+/// PCC's elements              ::   'k-cells' containing in 'k-skeletons', where k = {0,1,2,3}, with their types, fractions, and incident (k-1)-cells and (k+1)-cells.                                              ///
+/// Material's elements         ::   'quadruple points', 'grain boundary junctions', 'grain boundaries', and 'grains' (with their orientations and barycenter coordinates often get by EBSD or X-ray analysis)      ///
 
 ///* ----------------------------------------- *
 ///* Standard C++ (STL) libraries
@@ -32,16 +32,20 @@
 #include <set>
 
 ///* ------------------------------------------------------------------------------- *
-///* Attached user-defined C++ libraries (must be copied in the directory for STL):
+///* Attached user-defined C++ libraries:
 ///* ------------------------------------------------------------------------------- *
 /// Eigen source: https://eigen.tuxfamily.org/ (2024)
-#include <Eigen/Core>
-#include <Eigen/Dense>
-#include <Eigen/SparseCore>
+// Alternative way - the libraries must be preliminary copied in the local STL directory (!)
+// #include <Eigen/Core> #include <Eigen/Dense> #include <Eigen/SparseCore>
+#include "../src/lib/external/Eigen/Core"
+#include "../src/lib/external/Eigen/Dense"
+#include "../src/lib/external/Eigen/SparseCore"
 
 /// Spectra source: https://spectralib.org/ (2024)
-#include <Spectra/GenEigsSolver.h>
-#include <Spectra/SymEigsSolver.h>
+// Alternative way - the libraries must be preliminary copied in the local STL directory (!)
+// #include <Spectra/GenEigsSolver.h> #include <Spectra/SymEigsSolver.h>
+#include "../src/lib/external/Spectra/GenEigsSolver.h"
+#include "../src/lib/external/Spectra/SymEigsSolver.h"
 
 /// Open MP library https://www.openmp.org/resources/openmp-compilers-tools/
 // Included only in the parallelized version of the code
@@ -65,8 +69,8 @@ std::string source_path = "../config/"s; char* sourcepath = const_cast<char*>(so
 std::string main_type; // 'mode' from the config/main.ini file: 'LIST' for the execution one by one all the active (ON in the config file) project modules; 'TUTORIAL' as a specific educational mode; 'PERFORMANCE_TEST' as a special test for a computer performance and its ability to work with large PCCs, and the 'TASK' mode, where user-defined task scripts described in separate 'tasks/*.cpp' files are included with all the necessary modules and functions from the project's libraries.
 
 std::vector<std::string> PCCpaths; // The vector containing the paths to all the PCC's matrices, measures and other supplementary data files
-std::string source_dir, output_dir; // Input directory (if the initial configuration must be read from file) and output directory for the Writer module and the project log file as it is written in the 'config/main.ini' file
-std::string sim_task; // Path to the corresponding 'tasks/*.cpp' file containing a 'simulation task' (for 'TASK' execution mode only) as it is written in the 'config/main.ini' file
+std::string source_dir, output_dir; // Input directory (if the initial configuration must be read from a file) and output directory for the Writer module and the project Log file as it is written in the 'config/main.ini' file
+std::string sim_task; // Path to the corresponding 'tasks/*.cpp' file containing a 'simulation task' (for 'TASK' execution mode only!) as it is written in the 'config/main.ini' file
 
 /// Global 'log.txt' file output
 std::ofstream Out_logfile_stream; // 'Processing_Design.log' file output of the entire computation process as a copy of the console output
@@ -86,6 +90,7 @@ std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_co
 std::vector<double> edge_lengths_vector, face_areas_vector, polyhedron_volumes_vector; // Global vectors of measures: edge lengths, face areas and polyhedra volumes
 
 /// Time interval variables for different parts (modulus) of the CPD code
+// ::Main, ::Subcomplex, ::Multiphysics, ::Processing, ::Characterisation, ::Writing
 double Main_time = 0.0, S_time = 0.0, M_time = 0.0, P_time = 0.0, C_time = 0.0, W_time = 0.0;
 
 /// * ===================== MODULES and LIBRARIES ==============================* ///
@@ -110,8 +115,8 @@ double Main_time = 0.0, S_time = 0.0, M_time = 0.0, P_time = 0.0, C_time = 0.0, 
 /*! Processing module assigned special IDs for the various elements (Nodes, Edges, Faces, Polytopes/Polyhedrons) of the space tessellation */
 /* Output: module generates a design_sequences as the lists containing the sequences of k-cells possessing "special" IDs including
  * (1) ASSIGNED: k-Cells, k={0,1,2,3}, corresponding to different generation principles (random, maximum entropy,.. etc.),
- * (2) IMPOSED: m-Cells (where m < k) directly labelled based on the HIGH-ORDER k-Cell IDs
- * (3) INDUCED: i-Cells generated as a result of some KINETIC process. They are always DEPEND on the ASSIGNED design 's_cell_sequences' of special k-Cells and maybe also on the induced 's_induced_cell_sequences' of m-Cells */
+ * (2) INDUCED: m-Cells (where m < k) directly labelled based on the HIGH-ORDER k-Cell IDs
+ * (3) GENERATED: i-Cells generated as a result of some KINETIC process. They are always depending on the ASSIGNED design 's_cell_sequences' of special k-Cells and maybe also on the induced 's_induced_cell_sequences' of m-Cells */
 #include "lib/PCC_Processing/PCC_Processing.h"
 
 /*! The module provides vectors with the characteristics (entropic, spectral, etc.) representing evolution of state vectors as it given by the PCC_Processing module */
