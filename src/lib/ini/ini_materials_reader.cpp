@@ -119,7 +119,7 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
 
 /// Output into .log file
     Out_logfile_stream << endl << ".............................*  MATRIX MATERIAL  *.................................. " << endl << endl;
-    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
+//    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
     Out_logfile_stream << "Material source: " << source_path + "CPD_material_database/"s + Mid + ".ini"s << endl;
     Out_logfile_stream << "Material ID: " << Mid << endl;
     Out_logfile_stream << "Material type: " << material_type << endl;
@@ -133,7 +133,7 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
     if (strength > pow(10,-100)) Out_logfile_stream << "Strength [MPa] .................... " << strength/pow(10,6) << endl;
     if (fracture_toughness > pow(10,-100)) Out_logfile_stream << "Fracture toughness [MPa*sqrt(metre)] .................... " << fracture_toughness << endl;
 
-    Out_logfile_stream.close();
+//    Out_logfile_stream.close();
 
 } // END of material_database_reader() function
 
@@ -277,7 +277,7 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
 
 /// Output into .log file
     Out_logfile_stream << endl << ".............................*  MATRIX MATERIAL  *.................................. " << endl << endl;
-    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
+//    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
     Out_logfile_stream << "Material source: " << source_path + "CPD_material_database/"s + Mid + ".ini"s << endl;
     Out_logfile_stream << "Material ID: " << Mid << endl;
     Out_logfile_stream << "Material type: " << material_type << endl;
@@ -297,5 +297,5 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
     if (inclusion1_mass_density > pow(10,-100)) Out_logfile_stream << "Inclusion density [kg/m^3] .............. " << inclusion1_mass_density << endl;
     if (inclusion1_coh_energy > pow(10,-100)) Out_logfile_stream << "Agglomeration cohesion energy density [J/m^2] .............. " << inclusion1_coh_energy << endl;
 
-    Out_logfile_stream.close();
+//    Out_logfile_stream.close();
 } // END of material_database_reader() function

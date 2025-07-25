@@ -33,7 +33,7 @@ using namespace std;
 extern std::ofstream Out_logfile_stream;
 extern std::string output_dir;
 extern std::vector<unsigned int> CellNumbs;
-extern std::vector<std::string> PCCpaths;
+extern std::vector<std::string> paths_to_PCC_matrices;
 /*!
  * @details
  */
@@ -71,13 +71,13 @@ ProcessedComplex Macrocrack_growth(Config &configuration) {
     Out_logfile_stream << "START of the PCC Processing module " << endl;
 
     SpMat ENS(CellNumbs.at(0), CellNumbs.at(1));
-    ENS = SMatrixReader(PCCpaths.at(4), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Nodes-Edges
+    ENS = SMatrixReader(paths_to_PCC_matrices.at(4), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Nodes-Edges
 
     SpMat FES(CellNumbs.at(1), CellNumbs.at(2));
-    FES = SMatrixReader(PCCpaths.at(5), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
+    FES = SMatrixReader(paths_to_PCC_matrices.at(5), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
 
     SpMat GFS(CellNumbs.at(2), CellNumbs.at(3));
-    GFS = SMatrixReader(PCCpaths.at(6), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
+    GFS = SMatrixReader(paths_to_PCC_matrices.at(6), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Grains
 
 
     /// INCUSION POWDERS

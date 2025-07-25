@@ -73,7 +73,7 @@ The <i>\src</i> "source" directory contains several subfolders with libraries:
 The main part of the “user interface” contains a few *.ini files governing the behaviour of each of the modules. Among them:
 <ol>
 <li> Main </li>
-Provides a common “environment” for all the other project parts. Currently, it is the only .cpp file compiling in the project (see CMakeLists.txt), including all the other project libraries. All the variables, names and PCCpaths are defined here and then it calls all the other modules marked “ON” in the main.ini file.
+Provides a common “environment” for all the other project parts. Currently, it is the only .cpp file compiling in the project (see CMakeLists.txt), including all the other project libraries. All the variables, names and paths_to_PCC_matrices are defined here and then it calls all the other modules marked “ON” in the main.ini file.
 <li> Processing </li>
 The central part of the code - generates labelling of a PCC k-cells of different dimensions according to some governing principles. 
 <li> Characterisation </li>
@@ -88,7 +88,7 @@ Some other modules like Multiphysics (stress and energies), Subcomplex (a subdiv
 <h3> main.ini </h3>
 [general] <br>
 <ul>
-<li> “dim = 3” or 2 - is the problem dimension for 3D or 2D space tessellations, respectively. </li>
+<li> “PCC_dimension = 3” or 2 - is the problem dimension for 3D or 2D space tessellations, respectively. </li>
 <li> “source = … \“ set the path to the directory containing PCC in its algebraic representation as a set of all adjacency and incidence matrices with some additional data about the corresponding space tessellation such as polyhedra volumes, face areas, face normals, etc. </li>
 It is important to use “\” symbol at the end of the source path!
 <li> “output=…\” set the output directory for the Writer module - where all the calculation results will be written. </li>

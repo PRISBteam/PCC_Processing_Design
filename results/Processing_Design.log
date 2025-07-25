@@ -1,14 +1,309 @@
 
 The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
 PCC standard ID:		pcc1s
 
-Simulation mode:		TASK
-Output directory:		../results/
-PCC source directory:		../PCC_sources/Voronoi_10k/
-
 ON    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
 OFF    | PCC_Processing
 OFF    | PCC_Characterisation
-ON    | PCC_Writer
+OFF    | PCC_Design
+OFF    | PCC_Writer
 
 ==========================================================================================================================================================================
+0-cells #	6234
+1-cells #	12464
+2-cells #	7231
+3-cells #	1000
+_____________________________________________________________________________________
+[0] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A0.txt
+[1] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A1.txt
+[2] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A2.txt
+[3] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A3.txt
+[4] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B1.txt
+[5] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B2.txt
+[6] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B3.txt
+[7] PCCpaths:	../PCC_sources/Voronoi_1k/measures/face_areas.txt
+[8] PCCpaths:	../PCC_sources/Voronoi_1k/measures/polyhedron_volumes.txt
+[9] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/polyhedron_seeds.txt
+[10] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/vertex_seeds.txt
+[11] PCCpaths:	../PCC_sources/Voronoi_1k/other/face_normals.txt
+[12] PCCpaths:	PCC reading ERROR: there is no 'edge_seeds' file in the PCC directory
+[13] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/face_seeds.txt
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	
+PCC standard ID:		pcc1s
+
+ON    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+==========================================================================================================================================================================
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+ON    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+==========================================================================================================================================================================
+0-cells #	6234
+1-cells #	12464
+2-cells #	7231
+3-cells #	1000
+_____________________________________________________________________________________
+[0] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A0.txt
+[1] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A1.txt
+[2] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A2.txt
+[3] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A3.txt
+[4] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B1.txt
+[5] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B2.txt
+[6] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B3.txt
+[7] PCCpaths:	../PCC_sources/Voronoi_1k/measures/face_areas.txt
+[8] PCCpaths:	../PCC_sources/Voronoi_1k/measures/polyhedron_volumes.txt
+[9] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/polyhedron_seeds.txt
+[10] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/vertex_seeds.txt
+[11] PCCpaths:	../PCC_sources/Voronoi_1k/other/face_normals.txt
+[12] PCCpaths:	PCC reading ERROR: there is no 'edge_seeds' file in the PCC directory
+[13] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/face_seeds.txt
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+ON    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+ON    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+ON    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		
+Output directory:		../results/
+PCC source directory:	
+PCC standard ID:		
+
+OFF    | PCC_Subcomplex
+ON    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		
+Output directory:		../results/
+PCC source directory:	
+PCC standard ID:		
+
+OFF    | PCC_Subcomplex
+ON    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		PERFORMANCE_TEST
+Output directory:		../results/
+PCC source directory:	
+PCC standard ID:		
+
+OFF    | PCC_Subcomplex
+ON    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		PERFORMANCE_TEST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_250/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+ON    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		PERFORMANCE_TEST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1000/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		PERFORMANCE_TEST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		PERFORMANCE_TEST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		PERFORMANCE_TEST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		PERFORMANCE_TEST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		PERFORMANCE_TEST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		PERFORMANCE_TEST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		PERFORMANCE_TEST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		PERFORMANCE_TEST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+

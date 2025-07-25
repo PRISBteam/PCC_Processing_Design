@@ -1,10 +1,10 @@
 ///******************************************************************************************************************************///
 ///************************   Polytopal Cell Complex (PCC) Processing Design :: (CPD code) (c)   *******************************///
 ///****************************************************************************************************************************///
-///*                                        Version 4.0 | 4/06/2025                                                         *///
+///*                                        Version 5.0 | 12/06/2025                                                         *///
 ///**************************************************************************************************************************///
 ///************************************ Dr Elijah Borodin, Manchester, UK **************************************************///
-///**************************************** Spring 2022 - Spring 2025  ****************************************************///
+///**************************************** Spring 2022 - Summer 2025  ****************************************************///
 ///***********************************************************************************************************************///
 ///*
 ///*    Code source:    https://github.com/PRISBteam/PCC_Processing_Design/
@@ -34,21 +34,22 @@
 ///* ------------------------------------------------------------------------------- *
 ///* Attached user-defined C++ libraries:
 ///* ------------------------------------------------------------------------------- *
+
 /// Eigen source: https://eigen.tuxfamily.org/ (2024)
-// Alternative way - the libraries must be preliminary copied in the local STL directory (!)
-// #include <Eigen/Core> #include <Eigen/Dense> #include <Eigen/SparseCore>
+/* Alternative way - the libraries must be preliminary copied in the local STL directory (!)
+/* #include <Eigen/Core> #include <Eigen/Dense> #include <Eigen/SparseCore> */
 #include "../src/lib/external/Eigen/Core"
 #include "../src/lib/external/Eigen/Dense"
 #include "../src/lib/external/Eigen/SparseCore"
 
 /// Spectra source: https://spectralib.org/ (2024)
-// Alternative way - the libraries must be preliminary copied in the local STL directory (!)
-// #include <Spectra/GenEigsSolver.h> #include <Spectra/SymEigsSolver.h>
+/* Alternative way - the libraries must be preliminary copied in the local STL directory (!)
+/* #include <Spectra/GenEigsSolver.h> #include <Spectra/SymEigsSolver.h> */
 #include "../src/lib/external/Spectra/GenEigsSolver.h"
 #include "../src/lib/external/Spectra/SymEigsSolver.h"
 
 /// Open MP library https://www.openmp.org/resources/openmp-compilers-tools/
-// Included only in the parallelized version of the code
+// Included only in the parallelized version of the code.
 
 ///------------------------------------------
 using namespace std; // standard/STL namespace
@@ -64,78 +65,113 @@ typedef MatrixXd DMat; // <Eigen> library class, which declares a dense matrix t
 /// * ======================================== GLOBAL PROJECT VARIABLES ======================================== *///
 /// * ------ Declaration of GLOBAL variables which can be seen in all the project modules and libraries -------- *///
 
-/// Technical variables
-std::string source_path = "../config/"s; char* sourcepath = const_cast<char*>(source_path.c_str()); // 'source_path' is a path to the directory reading from the 'config/main.ini' file
-std::string main_type; // 'mode' from the config/main.ini file: 'LIST' for the execution one by one all the active (ON in the config file) project modules; 'TUTORIAL' as a specific educational mode; 'PERFORMANCE_TEST' as a special test for a computer performance and its ability to work with large PCCs, and the 'TASK' mode, where user-defined task scripts described in separate 'tasks/*.cpp' files are included with all the necessary modules and functions from the project's libraries.
+/// Technical variables::
+std::string source_path = "../config/"s; char* sourcepath = const_cast<char*>(source_path.c_str()); // 'source_path' is a path to the directory read from the 'config/main.ini' file
+std::string main_type;  // 'mode' parameter read from the config/main.ini file:
+                        //| * 'LIST' for the execution one by one all the active (ON in the config file) project modules;
+                        //| * 'TUTORIAL' as a specific educational mode;
+                        //| * 'PERFORMANCE_TEST' as a special test for a computer's performance and its ability to work with large PCCs, and
+                        //| * 'TASK' mode, where user-defined task scripts described in separate 'tasks/*.cpp' files are included with all the necessary modules and functions from the project's libraries.
 
-std::vector<std::string> PCCpaths; // The vector containing the paths to all the PCC's matrices, measures and other supplementary data files
-std::string source_dir, output_dir; // Input directory (if the initial configuration must be read from a file) and output directory for the Writer module and the project Log file as it is written in the 'config/main.ini' file
-std::string sim_task; // Path to the corresponding 'tasks/*.cpp' file containing a 'simulation task' (for 'TASK' execution mode only!) as it is written in the 'config/main.ini' file
+std::vector<std::string> paths_to_PCC_matrices;   // The vector containing the paths to all the PCC's matrices, measures and other supplementary data files
+std::string source_dir, output_dir;     // Input directory [source_dir] to be used if the initial configuration must be read from the file, and output directory [output_dir] for the Writer module and the project Log file as it is written in the 'config/main.ini' file
+std::string simulation_tasks_dir;       // Path to the corresponding 'tasks/*.cpp' file containing a 'simulation task' (for 'TASK' execution mode only!) as it is written in the 'config/main.ini' file
+
+// The execution time interval variables for different parts (modulus) of the CPD code:
+double Main_execution_time = 0.0, Subcomplex_execution_time = 0.0, Multiphysics_execution_time = 0.0, Processing_execution_time = 0.0, Characterisation_execution_time = 0.0, Design_execution_time = 0.0, Writer_execution_time = 0.0;
 
 /// Global 'log.txt' file output
-std::ofstream Out_logfile_stream; // 'Processing_Design.log' file output of the entire computation process as a copy of the console output
+std::ofstream main_logfile_stream, subcomplex_logfile_stream, multiphysics_logfile_stream, processing_logfile_stream, characterisation_logfile_stream, design_logfile_stream, writer_logfile_stream;
+// 'Processing_Design.log' file output of the entire computation process as a not exact copy of the console output
+std::ofstream Out_logfile_stream;
+// TODO: DELETE obsolete 'Out_logfile_stream'
 
-/// PCC - related variables
-int dim; // Tessellation dimension corresponding to the maximal 'k' in the PCC's k-cells: dim = 1 for graphs and networks, dim = 2 for the 2D plane polygonal tessellations, and dim = 3 for the 3D bulk volumetric tessellations, as it is specified in the 'config/main.ini' file.
+/// PCC:: (- related variables)
+int PCC_dimension;                  // Tessellation dimension corresponding to the maximal value of 'k' in the PCC's k-cell ranks:
+    // *  1 -- for graphs and networks,
+    // *  2 -- for the 2D plane polygonal tessellations, and
+    // *  3 -- for the 3D bulk volumetric tessellations, as it is specified in the 'config/main.ini' file.
 
-/// Combinatorial
-std::vector<unsigned int> CellNumbs; // the vector named CellNumbs containing the numbers of k-cells of different types 'k'. It is read from the 'number_of_cells.txt' file of a PCC.
-// First line here is the number of nodes (0-cells), second - edges (1-cells), third - faces (2-cells) (in the 2D and 3D cases only), fourth - polyhedra (3-cells) (in the 3D case only)
+/// Combinatorial::
+std::vector<unsigned int> CellNumbs;    // vector named CellNumbs containing the numbers of k-cells of different types 'k'. It is read from the 'number_of_cells.txt' file of a PCC (see the corresponding PCC standard for more details).
+    //  first line in the CellNumbs.txt file must be the number of nodes (0-cells),
+    //  second - edges (1-cells),
+    //  third - faces (2-cells) (in the 2D and 3D cases only),
+    //  fourth - polyhedra (3-cells) (in the 3D case only).
 
-/// Geometry
+/// Geometry::
 std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, polytope_coordinates_vector; // vectors containing barycenter Cartesian coordinates of the corresponding tessellation's elements
 // Global vectors of Cartesian coordinates for: (1) vertex coordinates, (2) barycentres of edges, (3) barycentres of faces and (4) barycentres of polyhedrons
 
-/// Measures
+/// Metricised PCC-related values:: (metric is needed)
 std::vector<double> edge_lengths_vector, face_areas_vector, polyhedron_volumes_vector; // Global vectors of measures: edge lengths, face areas and polyhedra volumes
-
-/// Time interval variables for different parts (modulus) of the CPD code
-// ::Main, ::Subcomplex, ::Multiphysics, ::Processing, ::Characterisation, ::Writing
-double Main_time = 0.0, S_time = 0.0, M_time = 0.0, P_time = 0.0, C_time = 0.0, W_time = 0.0;
 
 /// * ===================== MODULES and LIBRARIES ==============================* ///
 ///* =========================================================================== *///
-// * A task for the future: include all the code modules and functions as a single C++ library here placed in the STL directory #include <cpd_lib>
 
-/*! Various useful functions (mostly supplementary) are defined here */
-#include "lib/PCC_Support_Functions.h" // It must be here - first in this list of libraries (!)
-
-/*! Various set measures are defined here */
-#include "lib/PCC_Measures.h"
+/*! Various supplementary useful functions are defined here */
+#include "lib/processing_design_lib/PCC_Support_Functions.h" // It must be here - first in this list of libraries (!)
 
 /*! An Objects library contains classes of various objects related to the PCC's substructures and k-cells */
-#include "lib/PCC_Objects.h"
+#include "lib/processing_design_lib/PCC_Objects.h"
 
-/*! Section module calculates reduced PCC subcomplexes (parts of the initial PCC including plain cuts) inheriting reduced sequences of special cells and 'state vectors' of the original PCC */
-#include "lib/PCC_Subcomplex/PCC_Subcomplex.h"
+/*! Various set combinatorial measures are defined here */
+#include "lib/processing_design_lib/PCC_Measures.h"
 
-/*! Multiphysics module set elastic and thermal energies associated with all k-cells in a PCC taking data from the "CPD_material_database" and multiphysics.ini files */
-#include "lib/PCC_Multiphysics/PCC_Multiphysics.h"
+// * Each 'Module' have its own *.ini file for tailored input and *.log for tailored output defined by user */
+// * There are only 2 'Principal' modules -- Processing and Design -- creating 'processing_vector' and 'design_vector' output containing 'history' of all the 'pcc_structure' changes  */
+// ----------------------------------------------------------------------------------------------------------
+// * The numeration order of the Modules is strict throughout the CPD code:
+    //|   I.   Main               (technical)
+    //|   II.  Subcomplex         (supplementary)
+    //|   III. Multiphysics       (supplementary)
+    //|   IV.  Processing         (principal)
+    //|   V.   Characterisation   (supplementary)
+    //|   VI.  Design             (principal)
+    //|   VII. Writer             (supplementary)
 
-/*! Processing module assigned special IDs for the various elements (Nodes, Edges, Faces, Polytopes/Polyhedrons) of the space tessellation */
-/* Output: module generates a design_sequences as the lists containing the sequences of k-cells possessing "special" IDs including
+/*! SUBCOMPLEX module calculates reduced PCC subcomplexes as parts of the initial PCC, inheriting (reduced) sequences of special cells and 'state vectors' of the original PCC */
+/* Supplementary project module */
+#include "lib/processing_design_lib/PCC_Subcomplex/PCC_Subcomplex.h"
+
+/*! MULTIPHYSICS module set self, elastic and thermal energies with any energy-related values associated with all k-cells in a PCC taking data from the "CPD_material_database" and config/multiphysics.ini files */
+/* Supplementary project module */
+#include "lib/processing_design_lib/PCC_Multiphysics/PCC_Multiphysics.h"
+
+/*! PROCESSING module assigned special IDs (labels, colours) for various PCC cells -- Nodes, Edges, Faces, Polytopes/Polyhedrons in the corresponding tessellation of space */
+/* Principal project module */
+#include "lib/processing_design_lib/PCC_Processing/PCC_Processing.h"
+/* Output: module generates a 'processed_structure_sequences' as the lists containing the sequences of k-cells possessing 'special' IDs (labels, colours), including
  * (1) ASSIGNED: k-Cells, k={0,1,2,3}, corresponding to different generation principles (random, maximum entropy,.. etc.),
- * (2) INDUCED: m-Cells (where m < k) directly labelled based on the HIGH-ORDER k-Cell IDs
- * (3) GENERATED: i-Cells generated as a result of some KINETIC process. They are always depending on the ASSIGNED design 's_cell_sequences' of special k-Cells and maybe also on the induced 's_induced_cell_sequences' of m-Cells */
-#include "lib/PCC_Processing/PCC_Processing.h"
+ * (2) INDUCED: m-Cells (where m < k) directly labelled based on the HIGHER-ORDER k-Cell IDs (labels)
+ * (3) GENERATED: g-Cells generated as a result of some KINETIC process. They always depend on the ASSIGNED design 's_cell_sequences' vectors of 'special' k-Cells and/or INDUCED vectors of 's_generated_cell_sequences' */
 
-/*! The module provides vectors with the characteristics (entropic, spectral, etc.) representing evolution of state vectors as it given by the PCC_Processing module */
-#include "lib/PCC_Characterisation/PCC_Characterisation.h"
+/*! DESIGN module implements the optimisation of the assigned and induced State Vectors generated by the Processing module according to some 'goal' functions */
+/* Principal project module */
+#include "lib/processing_design_lib/PCC_Design/PCC_Design.h"
+// Provides vector (or list) of the 'designed_structure_sequences' as the lists of structures formed of the state vectors, containing 'special' and/or 'induced' types) in order of their 'evolution' towards an 'optimum' configuration.
 
-/* Writer module performs formatted output of various data structures generated by other modules */
-#include "lib/PCC_Writer/PCC_Writer.h"
+/*! CHARACTERISATION module provides vectors with the characteristics (entropic, spectral, etc.) representing evolution of the PCC state vectors (PCC 'STATE') as provided by the output of the PCC_Processing module */
+/* Supplementary project module */
+#include "lib/processing_design_lib/PCC_Characterisation/PCC_Characterisation.h"
+// Calculates various combinatorial measures associated with various PCC structures and networks
+
+/*! WRITER module performs formatted output of various data structures generated by the PCC_Processing (PCC state vectors) and PCC_Design (PCC design vectors) modules */
+/* Supplementary project module */
+#include "lib/processing_design_lib/PCC_Writer/PCC_Writer.h"
+// Provides formatted output of the sequences of the (1) state vectors, (2) structures made of them, and (3) structural characteristics both -- for the 'processed_structure_sequences' and the 'designed_structure_sequences'
 
 /// PCC special structure-related variables :: see class 'Config' in Objects.h and Object.cpp files
-Config initial_configuration, configuration; // Initial configuration as an object of the 'Config' class described in Objects.cpp project library
+Config initial_configuration, configuration; // Configuration is an object of the 'Config' class described in the Objects.cpp project library
 
 /*!
- * @brief TUTORIAL :: educational course active in the 'TUTORIAL' CPD code execution mode, please see 'config/main.ini' file.
+ * @brief TUTORIAL :: An educational course active in the 'TUTORIAL' execution mode of the CPD code; please see 'config/main.ini' file for more details.
  * @param initial_configuration
  */
 void tutorial(Config &initial_configuration);
 
 /*!
- * @brief PERFORMANCE_TEST :: testing mode of the CPD code execution, please see 'config/main.ini' file.
+ * @brief PERFORMANCE_TEST :: A global testing mode of the CPD code; please see 'config/main.ini' file for more details.
  * @param initial_configuration
  */
 void performance_test(Config &initial_configuration);
@@ -144,55 +180,72 @@ void performance_test(Config &initial_configuration);
 //* (.h files) * @brief, @param and @return
 //* (.cpp files) * @details (detailed descriptions)
 /*!
-* @details Implement the whole program execution according to the specifications written in 'config/_.ini' files.
-* In particular, the LIST mode call the execution of the project modules one by one and compute the execution time for each of them.
-* @param void
-* @return 0 and the output to console and log file, if successful
+ * @details MAIN module of the CPD code implements the whole program execution according to the specifications written in the 'config/*.ini' files.
+ * In particular, the LIST mode calls for the execution of the project modules one by one (if active) and computes the execution time for each of them.
+ * The TASK mode is a flexible research tool, allowing the use of tailored user code (by #include < *.h >), using libraries, classes and functions included in the CPD code.
+ * The TUTORIAL and PERFORMANCE_TEST modes implement the educational and hardware testing mode essential for the first execution of the code on a new computation cluster.  * @param void
+ * @return 0 and the output to console and the *.log files, if successful.
 */
 int main() {
-    cout << "------------------------------------------------------------------------------------------------" << endl;
+// * ------------------ #Print ------------------------------------
+    cout << endl << "---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------" << endl << endl;
+// * --------------------------------------------------------------
+// Output Year/Day/Time of the computation to cout
+    time_t timestamp = time(&timestamp);
+    struct tm datetime = *localtime(&timestamp);
+    cout << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
 
-/// ========== Elapsing time Main =========== ///
-    unsigned int Mn_time = clock();
-    Main_time = (double) Mn_time;
-    cout << endl; Out_logfile_stream << endl;
-    cout << "Main execution time before modules is equal to  " << Main_time/ pow(10.0,6.0) <<  "  seconds" << endl;
-    Out_logfile_stream << "Main execution time before modules is equal to  " << Main_time/ pow(10.0,6.0) <<  "  seconds" << endl;
-    cout << endl;
+/// ========== Elapsing time of the MAIN module =========== ///
+    Main_execution_time = (double) clock();
 
 /// Initial configuration reader and information output to the screen and into the 'Processing_Design.log' file
-    initial_configuration.Read_config(); // Read_config() method of the class Config defined in Objects.h and described in Objects.cpp
+    initial_configuration.Read_config(initial_configuration); // Read_config() method of the class Config defined in Objects.h and described in Objects.cpp
 
 /// Setting values of the global variables:: all the methods below are in the class Config defined in Objects.h and described in Objects.cpp
     std::vector<int> ConfigVector = initial_configuration.Get_ConfVector();
-    dim = initial_configuration.Get_dim();
+    PCC_dimension = initial_configuration.Get_dim();
     source_dir = initial_configuration.Get_source_dir();
     output_dir = initial_configuration.Get_output_dir();
-    PCCpaths = initial_configuration.Get_paths();
+    paths_to_PCC_matrices = initial_configuration.Get_paths();
     main_type = initial_configuration.Get_main_type();
-    sim_task = initial_configuration.Get_sim_task();
+    simulation_tasks_dir = initial_configuration.Get_sim_task();
  /// ============================================================================== ///
+    cout << "H E R E " << PCC_dimension << endl;
+    exit(5);
 
-/// Global log file output:
-    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
-    Out_logfile_stream << "------------------------------------------------------------------------------------------------" << endl;
+// ------------------ #Print -----------------------
+    main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::trunc); // the main_logfile_stream.log stream will be closed at the end of the main function
+    main_logfile_stream << endl << "---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------" << endl << endl;
+
+    // Output Year/Day/Time of the computation
+    main_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
+    {
+        std::string print_to_string = "Main execution time before modules is equal to  "s + std::to_string(Main_execution_time / pow(10.0, 6.0)) + "  seconds"s;
+        cout << print_to_string << endl << endl;
+        main_logfile_stream << print_to_string << endl << endl;
+    }
+// -------------------------------------------------
 
 /// ========================================================================================================================================== ///
 /// ================================================= PERFORMANCE_TEST MODE STARTS HERE ================================================================== ///
 /// ========================================================================================================================================== ///
     if (main_type == "PERFORMANCE_TEST"s) { // testing mode 'PERFORMANCE_TEST' which should be further replaced in the 'config/main.ini' file with the 'PERFORMANCE_TEST' and then the 'TASK' or the 'LIST' modes
-        cout << "==================================================================================================================================================" << endl; Out_logfile_stream << "==============================================================================================================================================================" << endl;
-        cout << "\t\t\t\t\t\t\t\t\t\t[\tStart of the PCC Processing Design code \t]\t\t\t\t\t\t\t\t\t\t" << endl << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl; Out_logfile_stream << "\t\t\t\t\t[\tStart of the PCC Processing Design code\t]\t\t\t\t\t" << endl << "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+        cout << "==================================================================================================================================================" << endl;
+        main_logfile_stream << "==============================================================================================================================================================" << endl;
+        cout << "\t\t\t\t\t\t\t\t\t\t[\tStart of the PCC Processing Design code \t]\t\t\t\t\t\t\t\t\t\t" << endl << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+        main_logfile_stream << "\t\t\t\t\t[\tStart of the PCC Processing Design code\t]\t\t\t\t\t" << endl << "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
 
         performance_test(initial_configuration); // output the 'performance_test.txt' file to the 'output_dir' showing the relative code execution times of the present server comparing with some reference execution times and suggest the preferable PCC sizes for various simulation tasks
-} /// END of the SIMULATION MODE "PERFORMANCE_TEST" as specified in the config/main.ini file
+    } /// END of the SIMULATION MODE "PERFORMANCE_TEST" as specified in the config/main.ini file
 
 /// ========================================================================================================================================== ///
 /// ================================================= TUTORIAL MODE STARTS HERE ================================================================== ///
 /// ========================================================================================================================================== ///
     else if (main_type == "TUTORIAL"s) { // TUTORIAL feature to facilitate the first acquaintance with the code: only in the 'TUTORIAL' execution type = the 'mode' variable in the config/main.ini file.
-        cout << "==================================================================================================================================================" << endl; Out_logfile_stream << "==============================================================================================================================================================" << endl;
-        cout << "\t\t\t\t\t\t\t\t\t\t[\tStart of the PCC Processing Design code \t]\t\t\t\t\t\t\t\t\t\t" << endl << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl; Out_logfile_stream << "\t\t\t\t\t[\tStart of the PCC Processing Design code\t]\t\t\t\t\t" << endl << "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+        cout << "==================================================================================================================================================" << endl;
+        main_logfile_stream << "==============================================================================================================================================================" << endl;
+        cout << "\t\t\t\t\t\t\t\t\t\t[\tStart of the PCC Processing Design code \t]\t\t\t\t\t\t\t\t\t\t" << endl << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+        main_logfile_stream << "\t\t\t\t\t[\tStart of the PCC Processing Design code\t]\t\t\t\t\t" << endl << "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
 
         tutorial(initial_configuration);
     } /// END of the SIMULATION MODE "TUTORIAL" as specified in the config/main.ini file
@@ -202,8 +255,10 @@ int main() {
 /// ========================================================================================================================================== ///
     else if ( main_type == "LIST"s ) { // In the LIST mode all the functions are calling one after another without additional loops and intermediate data output
     /// For all the more complicated simulation cases the TASK mode should be used - see it following next after the 'LIST' module.
-        cout << "==================================================================================================================================================" << endl; Out_logfile_stream << "=======================================================================================================================================================================================================================================" << endl;
-        cout << "\t\t\t\t\t\t\t\t\t\t[\tStart of the PCC Processing Design code \t]\t\t\t\t\t\t\t\t\t\t" << endl << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl; Out_logfile_stream << "\t\t\t\t\t[\tStart of the PCC Processing Design code\t]\t\t\t\t\t" << endl << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+        cout << "==================================================================================================================================================" << endl;
+        main_logfile_stream << "=======================================================================================================================================================================================================================================" << endl;
+        cout << "\t\t\t\t\t\t\t\t\t\t[\tStart of the PCC Processing Design code \t]\t\t\t\t\t\t\t\t\t\t" << endl << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+        main_logfile_stream << "\t\t\t\t\t[\tStart of the PCC Processing Design code\t]\t\t\t\t\t" << endl << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
 
     /// Initialisation of the current_configuration as equal to the initial_configuration
         configuration = initial_configuration;
@@ -212,99 +267,131 @@ int main() {
         std::vector<Subcomplex> pcc_subcomplexes; // vector containing all the PCC subcomplexes (cuts, k-order grain neighbours, etc)
 
         if (ConfigVector.at(1) == 1) { // if the 'PCC_Section' parameter is switched 'ON' in the config/main.ini file
-            Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
-            cout << "-------------------------------------------------------------------------" << endl;             Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
-            cout << " START of the PCC Subcomplex module " << endl; Out_logfile_stream << " START of the PCC Subcomplex module " << endl;
+            main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
+            cout << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            cout << " START of the PCC Subcomplex module " << endl;
+            main_logfile_stream << " START of the PCC Subcomplex module " << endl;
 
-            pcc_subcomplexes = PCC_Subcomplex(configuration);
+///            pcc_subcomplexes = PCC_Subcomplex(configuration);
 
             cout << " pcc_subcomplexes size =  " << pcc_subcomplexes.size() << endl;
 
             // ================ Elapsing time for the Subcomplex module ================
             unsigned int Subcomplex_time = clock();
-            S_time = (double) Subcomplex_time - Main_time;
-            cout << "Section time is equal to  " << S_time/ pow(10.0,6.0) <<  "  seconds" << endl;
+            Subcomplex_execution_time = (double) Subcomplex_time - Main_execution_time;
+            cout << "Section time is equal to  " << Subcomplex_execution_time / pow(10.0, 6.0) << "  seconds" << endl;
             cout << "-------------------------------------------------------" << endl;
-            Out_logfile_stream << "Section time is equal to  " << S_time/ pow(10.0,6.0) <<  "  seconds" << endl;
-            Out_logfile_stream << "-------------------------------------------------------" << endl;
-            Out_logfile_stream.close();
+            main_logfile_stream << "Section time is equal to  " << Subcomplex_execution_time / pow(10.0, 6.0) << "  seconds" << endl;
+            main_logfile_stream << "-------------------------------------------------------" << endl;
+            main_logfile_stream.close();
         } // end if(SectionON)
 
         /// ====================== II. PCC Multiphysics module ======================
         std::vector<CellEnergies> new_cells_energies; // a class described in PCC_Objects.h contained (1) all the k-cell elastic energies and (2) all the k-cell thermal energies in the PCC
         // Example: vector<CellEnergies> for several crack lengths in a PCC
 
-        if (ConfigVector.at(4) == 1) { // if the 'PCC_Multiphysics' parameter is switched 'ON' in the config/main.ini file
-            Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
-            cout << "-------------------------------------------------------------------------" << endl;             Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
-            cout << "START of the PCC Multiphysics module " << endl << endl; Out_logfile_stream << "START of the PCC Multiphysics module " << endl << endl;
+        if (ConfigVector.at(2) == 1) { // if the 'PCC_Multiphysics' parameter is switched 'ON' in the config/main.ini file
+            main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
+            cout << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            cout << "START of the PCC Multiphysics module " << endl << endl;
+            main_logfile_stream << "START of the PCC Multiphysics module " << endl << endl;
 
             /// Defects
             std::vector<Macrocrack> crack_growth_series; // series of objects of the class Macrocrack with different lengths simulating a crack growth
 
-            new_cells_energies = PCC_Multiphysics(configuration, pcc_subcomplexes, crack_growth_series);
+///            new_cells_energies = PCC_Multiphysics(configuration, pcc_subcomplexes, crack_growth_series);
 
             // ================ Elapsing time for the Processing module ================
             unsigned int Multiphysics_time = clock();
-            M_time = (double) Multiphysics_time - S_time - Main_time;
-            cout << endl << "Multiphysics time is equal to  " << M_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl; //cout << "-------------------------------------------------------------------------" << endl;
-            Out_logfile_stream << endl << "Multiphysics time is equal to  " << M_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl; //Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
-            Out_logfile_stream.close();
+            Multiphysics_execution_time = (double) Multiphysics_time - Subcomplex_execution_time - Main_execution_time;
+            cout << endl << "Multiphysics time is equal to  " << Multiphysics_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl; //cout << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream << endl << "Multiphysics time is equal to  " << Multiphysics_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl; //Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream.close();
         } // end if(MultiphysicsON)
 
         /// ====================== II. PCC Processing module ======================
         CellDesign new_cells_design; // a class described in PCC_Objects.h contained (1) all special k-cell sequences and (2) all the design_<*>_vectors for all k-cells in the PCC
 
-        if (ConfigVector.at(2) == 1) { // if the 'PCC_Processing' parameter is switched 'ON' in the config/main.ini file
-            Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
-            cout << "-------------------------------------------------------------------------" << endl;             Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
-            cout << "START of the PCC Processing module " << endl; Out_logfile_stream << "START of the PCC Processing module " << endl;
+        if (ConfigVector.at(3) == 1) { // if the 'PCC_Processing' parameter is switched 'ON' in the config/main.ini file
+            main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
+            cout << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            cout << "START of the PCC Processing module " << endl;
+            main_logfile_stream << "START of the PCC Processing module " << endl;
 
-            new_cells_design = PCC_Processing(configuration);
+///            new_cells_design = PCC_Processing(configuration);
 
         // ================ Elapsing time for the Processing module ================
             unsigned int Processing_time = clock();
-            P_time = (double) Processing_time - S_time - M_time - Main_time;
-            cout << "Processing time is equal to  " << P_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl; //cout << "-------------------------------------------------------------------------" << endl;
-            Out_logfile_stream << "Processing time is equal to  " << P_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl; //Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
-            Out_logfile_stream.close();
+            Processing_execution_time = (double) Processing_time - Subcomplex_execution_time - Multiphysics_execution_time - Main_execution_time;
+            cout << "Processing time is equal to  " << Processing_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl; //cout << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream << "Processing time is equal to  " << Processing_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl; //Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream.close();
         } // end if(ProcessingON)
 
     /// ====================== III. PCC Characterisation module ======================
         ProcessedComplex pcc_processed;  // a class described in PCC_Objects.h
 
-        if (ConfigVector.at(3) == 1) { // if the 'PCC_Characterisation' parameter is switched 'ON' in the config/main.ini file
-            Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
-            cout << "-------------------------------------------------------------------------" << endl;             Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
-            cout << "START of the PCC Characterisation module" << endl; Out_logfile_stream << "START of the PCC Characterisation module" << endl;
-            cout << "=========================================================================" << endl; Out_logfile_stream << "==============================================================================================================================================================" << endl;
+        if (ConfigVector.at(4) == 1) { // if the 'PCC_Characterisation' parameter is switched 'ON' in the config/main.ini file
+            main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
+            cout << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            cout << "START of the PCC Characterisation module" << endl; main_logfile_stream << "START of the PCC Characterisation module" << endl;
+            cout << "=========================================================================" << endl;
+            main_logfile_stream << "==============================================================================================================================================================" << endl;
 
-            pcc_processed = PCC_StructureCharacterisation(new_cells_design);
+///            pcc_processed = PCC_StructureCharacterisation(new_cells_design);
 
         // ===== Elapsing time for the Characterisation module ================
             unsigned int Characterisation_time = clock();
-            C_time = (double) Characterisation_time - S_time - M_time - P_time - Main_time;
-            cout << "Characterisation time is equal to  " << C_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl; //cout << "-------------------------------------------------------------------------" << endl;
-            Out_logfile_stream << "Characterisation time is equal to  " << C_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl; //Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
-            Out_logfile_stream.close();
+            Characterisation_execution_time = (double) Characterisation_time - Subcomplex_execution_time - Multiphysics_execution_time - Processing_execution_time - Main_execution_time;
+            cout << "Characterisation time is equal to  " << Characterisation_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl; //cout << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream << "Characterisation time is equal to  " << Characterisation_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl; //Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream.close();
         }// end if(CharacterisationON)
 
-    /// ====================== IV. PCC Writer module ======================
-        if (ConfigVector.at(6) == 1) { // if the 'PCC_Writer' parameter is switched 'ON' in the config/main.ini file
-            Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
-            cout << "-------------------------------------------------------------------------" << endl;             Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
-            cout << "START of the PCC Writer module" << endl; Out_logfile_stream << "START of the PCC Writer module" << endl;
-            cout << "=========================================================================" << endl; Out_logfile_stream << "==============================================================================================================================================================" << endl;
+        /// ====================== IV. PCC Design module ======================
+        if (ConfigVector.at(5) == 1) { // if the 'PCC_Design' parameter is switched 'ON' in the config/main.ini file
+            cout << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream << "-------------------------------------------------------------------------" << endl;
 
-            PCC_Writer(new_cells_energies, new_cells_design, pcc_processed);
+            cout << "START of the PCC Design module" << endl;
+            main_logfile_stream << "START of the PCC Design module" << endl;
+            cout << "=========================================================================" << endl;
+            main_logfile_stream << "==============================================================================================================================================================" << endl;
+
+            std::vector<std::vector<int>> pcc_design;
+///            pcc_design = PCC_Design(configuration);
+
+            // ===== Elapsing time for the PCC Design module ================
+            unsigned int Design_time = clock();
+            Design_execution_time = (double) Design_time - Subcomplex_execution_time - Main_execution_time - Subcomplex_execution_time - Multiphysics_execution_time - Processing_execution_time - Characterisation_execution_time;
+            cout << "Design time is equal to  " << Characterisation_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl; //cout << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream << "Design time is equal to  " << Characterisation_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl; //Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+        } // end if(DesignON)
+
+        /// ====================== V. PCC Writer module ======================
+        if (ConfigVector.at(6) == 1) { // if the 'PCC_Writer' parameter is switched 'ON' in the config/main.ini file
+            main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
+            cout << "-------------------------------------------------------------------------" << endl;
+            main_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            cout << "START of the PCC Writer module" << endl;
+            main_logfile_stream << "START of the PCC Writer module" << endl;
+            cout << "=========================================================================" << endl;
+            main_logfile_stream << "==============================================================================================================================================================" << endl;
+
+// alternative:           PCC_Writer(new_cells_energies, new_cells_design, pcc_processed);
+///            PCC_Writer(new_cells_design);
 
         // ================ Elapsing time for the Writer module ================
             unsigned int Writer_time = clock();
-            W_time = (double) Writer_time - Main_time - S_time - M_time  - P_time - C_time;
-            cout << "Writer time is equal to  " << W_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl;
-            Out_logfile_stream.close();
+            Writer_execution_time = (double) Writer_time - Main_execution_time - Subcomplex_execution_time - Multiphysics_execution_time - Processing_execution_time - Characterisation_execution_time - Design_execution_time;
+            cout << "Writer time is equal to  " << Writer_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl;
         } // end if(WriterON)
 
+        main_logfile_stream.close();
     } /// END of the SIMULATION MODE "LIST" as specified in the config/main.ini file
 
 
@@ -329,11 +416,14 @@ exit(0);
         shuffle_coord_vector(indir2, f2, 10283);
 **/
 
-#include "tasks/macrocrack_growth.h"
+/////////////
+/// #include "tasks/macrocrack_growth.h"
+////////////
+
         /// Initialisation of the current_configuration as equal to the initial_configuration
         configuration = initial_configuration;
 
-        Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
+        main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
 
         vector<unsigned int> node_coordinates_seq, face_coordinates_seq, polytope_coordinates_seq;
         //      for(unsigned int i = 0; i < CellNumbs.at(0); ++i) { node_coordinates_seq.push_back(i); }
@@ -344,7 +434,7 @@ exit(0);
         }
 
 ///        face_coordinates_vector = kCell_barycentre_coordinates(2, face_coordinates_seq);
-        face_coordinates_vector = Tuple3Reader(PCCpaths.at(13));
+        face_coordinates_vector = Tuple3Reader(paths_to_PCC_matrices.at(13));
         if(face_coordinates_vector.size() == 0)
             face_coordinates_vector = kSequence_barycentre_coordinates(2, face_coordinates_seq);
 
@@ -364,16 +454,16 @@ exit(0);
 
         agglomeration_stat_out.open(output_dir + "Agglomeration_stats.txt"s, ios::app);
 
-        cracked_pcc = Macrocrack_growth(configuration); //, macrocrack_growth_series);
+///        cracked_pcc = Macrocrack_growth(configuration); //, macrocrack_growth_series);
 
         ///  cout << "SIZE\t " << cracked_pcc.Get_macrocrack_sfaces_series().at(0).size() << endl; exit(0);
         std::ofstream Cracked_pcc_out, Cracked_betti_pcc_out;
         cout << "-------------------------------------------------------------------------" << endl;
-        Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+        main_logfile_stream << "-------------------------------------------------------------------------" << endl;
         cout << "START of the Writer " << endl;
-        Out_logfile_stream << "START of the Writer " << endl;
+        main_logfile_stream << "START of the Writer " << endl;
         cout << "=========================================================================" << endl;
-        Out_logfile_stream
+        main_logfile_stream
                 << "=============================================================================================================================================================="
                 << endl;
 
@@ -497,7 +587,7 @@ exit(0);
         }
 
         Cracked_pcc_out.close();
-        Out_logfile_stream.close();
+        main_logfile_stream.close();
 
         agglomeration_stat_out.close();
 
@@ -506,16 +596,24 @@ exit(0);
     } /// END of the SIMULATION MODE "TASK" as specified in the config/main.ini file
 /// ==========================================================================================================================================
     cout << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl << "\t\t\t\t\t\t\t\t\t\t[\tThe end of the PCC Processing Design\t]\t\t\t\t\t\t\t\t\t\t" << endl << "==================================================================================================================================================" << endl;
-    Out_logfile_stream << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl << "\t\t\t\t\t\t\t\t\t\t[\tThe end of the PCC Processing Design\t]\t\t\t\t\t\t\t\t\t\t" << endl << "==================================================================================================================================================" << endl;
+    main_logfile_stream << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl << "\t\t\t\t\t\t\t\t\t\t[\tThe end of the PCC Processing Design\t]\t\t\t\t\t\t\t\t\t\t" << endl << "==================================================================================================================================================" << endl;
 
 /// ================ Total CPD code Elapsing time ================ ///
     unsigned int end_time = clock();
     double fulltime = (double) end_time;
-    cout << "Total " << dim << "D " << "runtime of the CPD code is equal to  " << fulltime / pow(10.0, 6.0) << "  seconds" << endl;
-    Out_logfile_stream<< "Total " << dim << "D " << "runtime of the CPD code is equal to  " << fulltime / pow(10.0, 6.0) << "  seconds" << endl;
-    cout << "-------------------------------------------------------------------------" << endl; Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+    cout << "Total " << PCC_dimension << "D " << "runtime of the CPD code is equal to  " << fulltime / pow(10.0, 6.0) << "  seconds" << endl;
+    main_logfile_stream << "Total " << PCC_dimension << "D " << "runtime of the CPD code is equal to  " << fulltime / pow(10.0, 6.0) << "  seconds" << endl;
+    cout << "-------------------------------------------------------------------------" << endl;
+    main_logfile_stream << "-------------------------------------------------------------------------" << endl;
 
-    Out_logfile_stream.close(); // closing off-stream 'Processing_Design.log' file
+    // closing all project off-streams
+    main_logfile_stream.close();
+    subcomplex_logfile_stream.close();
+    multiphysics_logfile_stream.close();
+    processing_logfile_stream.close();
+    characterisation_logfile_stream.close();
+    design_logfile_stream.close();
+    writer_logfile_stream.close();
 
     return 0; // success!
 } /// The END of the Main function
@@ -560,22 +658,22 @@ void performance_test(Config &initial_configuration) { // execution test functio
 
     int counter_max = 50000; //number of calculation series
 
-    Out_performance_test_stream.open(output_dir + "performance_test.txt"s, ios::trunc); // creates 'performance_test.txt' file in the 'output_dir'
+    Out_performance_test_stream.open(output_dir + "cpd_code_performance_test.txt"s, ios::trunc); // creates 'performance_test.txt' file in the 'output_dir'
     Out_performance_test_stream.close();
 
-    Out_performance_test_stream.open(output_dir + "performance_test.txt"s, ios::app); // open for writing 'performance_test.txt' file in the 'output_dir'
+    Out_performance_test_stream.open(output_dir + "cpd_code_performance_test.txt"s, ios::app); // open for writing 'performance_test.txt' file in the 'output_dir'
     Out_performance_test_stream << "------------------------------------------------------------------------------------------------" << endl;
 
     CellDesign new_cells_design;
     for (int counter = 0; counter < counter_max; counter++ ) { // TEST LOOP
         prev_time = clock();
         std::vector<int> ConfigVector = configuration.Get_ConfVector();
-        dim = configuration.Get_dim();
+        PCC_dimension = configuration.Get_dim();
         source_dir = configuration.Get_source_dir();
         output_dir = configuration.Get_output_dir();
-        PCCpaths = configuration.Get_paths();
+        paths_to_PCC_matrices = configuration.Get_paths();
         /// ---------------------------------------------------------------------- ///
-        new_cells_design = PCC_Processing(configuration);
+///        new_cells_design = PCC_Processing(configuration);
 
         /// ============= Elapsing time Processing ================ ///
         new_time = clock();
@@ -587,7 +685,7 @@ void performance_test(Config &initial_configuration) { // execution test functio
         Out_performance_test_stream << "Processing iteration " << counter + 1 << " tooks  " << processing_execution_time/ pow(10.0,6.0) <<  "  seconds" << endl << endl;
 
         cout << endl << "Processing iteration " << counter + 1 << " tooks  " << processing_execution_time/ pow(10.0,6.0) <<  "  seconds" << endl; cout << "-------------------------------------------------------------------------" << endl;
-        Out_logfile_stream << endl << "Processing iteration " << counter + 1 << " tooks  " << processing_execution_time/ pow(10.0,6.0) <<  "  seconds" << endl << "-------------------------------------------------------------------------" << endl;
+        Out_performance_test_stream << endl << "Processing iteration " << counter + 1 << " tooks  " << processing_execution_time/ pow(10.0,6.0) <<  "  seconds" << endl << "-------------------------------------------------------------------------" << endl;
 
     } // end of for (int counter = 0; counter < counter_max; counter++ ) loop
 
@@ -595,10 +693,14 @@ void performance_test(Config &initial_configuration) { // execution test functio
     Out_performance_test_stream << endl << "Full execution time for " <<  counter_max << " iterations is equal to  " << full_processing_time/ pow(10.0,6.0) <<  "  seconds" << endl;
 
     cout << "Full execution time for " <<  counter_max << " iterations is equal to  " << full_processing_time/ pow(10.0,6.0) <<  "  seconds" << endl;
-    cout << "-------------------------------------------------------------------------" << endl; Out_logfile_stream << "Processing time is equal to  " << P_time/ pow(10.0,6.0) <<  "  seconds" << endl; Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+    cout << "-------------------------------------------------------------------------" << endl;
+    main_logfile_stream << "Processing time is equal to  " << Processing_execution_time / pow(10.0, 6.0) << "  seconds" << endl;
+    main_logfile_stream << "-------------------------------------------------------------------------" << endl;
 
     Out_performance_test_stream.close(); // close output to the 'performance_test.txt' file
 
 } /// END of the performance_test() function
+
+
 
                                             /// *** H E A P *** ///
