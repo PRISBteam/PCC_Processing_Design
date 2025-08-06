@@ -1,6 +1,6 @@
 ///================================ PCC Processing module ======================================================================================///
 ///============================================================================================================================================///
-///* The interface use functions from Processing_<***>_functions.h C++ libraries to generate quasi-random or non-random processes.           *///
+///* The interface use functions from PCC_Processing/functions C++ libraries to generate quasi-random or non-random processes.           *///
 ///* ---------------------------------------------------------------------------------------------------------------------------------------*///
 ///* Created by Dr Elijah Borodin at the University of Manchester 2022-2024 years as a module of the PCC Processing Design code (CPD code) *///
 ///* A part of the MATERiA codes project (https://github.com/PRISBteam) supported by EPSRC UK via grant EP/V022687/1 in 2022-2023 years   *///

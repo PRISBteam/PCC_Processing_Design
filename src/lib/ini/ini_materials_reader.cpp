@@ -16,7 +16,7 @@ extern std::string output_dir;
 extern std::ofstream Out_logfile_stream;
 
 /// ================== # 1 # Materials - reading and output ==================
-void material_database_reader(std::string &Mid, std::string &material_type, double &mass_density, double &melting_point, double &cohesion_energy, double &Young_modulus, double &Poisson_ratio, double &yield_strength, double &strength, double &fracture_toughness, double &gb_width, double &gb_inclusion1_adh_energy) {
+void material_database_reader(std::string &Mid, std::string &material_type, double &mass_density, double &melting_point, double &cohesion_energy, double &Young_modulus, double &Poisson_ratio, double &yield_strength, double &strength, double &fracture_toughness, double &gb_width, double &gb_inclusion1_adh_energy, double &lagbs_corrosion_current, double &hagbs_corrosion_current, double &sigma3_corrosion_current) {
 
     // ini files reader - external (MIT license) library
     mINI::INIFile file(source_path + "CPD_material_database/"s + Mid + ".ini"s);
@@ -38,6 +38,20 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
             gb_width = stod(materials_ini.get("structural").get("gb_width"));
             gb_width *= pow(10,(-9));
         } }
+
+    /// [corrosion]
+    if (materials_ini.has("corrosion_current")) {
+        auto& collection = materials_ini["corrosion_current"];
+        if (collection.has("low_angle_gb")) {
+            lagbs_corrosion_current = stod(materials_ini.get("corrosion_current").get("low_angle_gb"));
+        }
+        if (collection.has("high_angle_gb")) {
+            hagbs_corrosion_current = stod(materials_ini.get("corrosion_current").get("high_angle_gb"));
+        }
+        if (collection.has("sigma3_gb")) {
+            sigma3_corrosion_current = stod(materials_ini.get("corrosion_current").get("sigma3_gb"));
+        }
+    }
 
 /// [thermodynamical]
 // II. mass density
@@ -116,6 +130,9 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
     if (yield_strength > pow(10,-100)) cout << "Yield strength [MPa]  .................... " << yield_strength/pow(10,6) << endl;
     if (strength > pow(10,-100)) cout << "Strength [MPa] .................... " << strength/pow(10,6) << endl;
     if (fracture_toughness > pow(10,-100)) cout << "Fracture toughness [MPa*sqrt(metre)] .................... " << fracture_toughness << endl;
+    if (lagbs_corrosion_current > 0) cout << "LAGBs corrosion current [ ] .................... " << lagbs_corrosion_current << endl;
+    if (hagbs_corrosion_current > 0) cout << "HAGBs corrosion current [ ] .................... " << hagbs_corrosion_current << endl;
+    if (sigma3_corrosion_current > 0) cout << "Sigma3 corrosion current [ ] .................... " << sigma3_corrosion_current << endl;
 
 /// Output into .log file
     Out_logfile_stream << endl << ".............................*  MATRIX MATERIAL  *.................................. " << endl << endl;
@@ -132,6 +149,9 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
     if (yield_strength > pow(10,-100)) Out_logfile_stream << "Yield strength [MPa]  .................... " << yield_strength/pow(10,6) << endl;
     if (strength > pow(10,-100)) Out_logfile_stream << "Strength [MPa] .................... " << strength/pow(10,6) << endl;
     if (fracture_toughness > pow(10,-100)) Out_logfile_stream << "Fracture toughness [MPa*sqrt(metre)] .................... " << fracture_toughness << endl;
+    if (lagbs_corrosion_current > 0) Out_logfile_stream << "LAGBs corrosion current [ ] .................... " << lagbs_corrosion_current << endl;
+    if (hagbs_corrosion_current > 0) Out_logfile_stream << "HAGBs corrosion current [ ] .................... " << hagbs_corrosion_current << endl;
+    if (sigma3_corrosion_current > 0) Out_logfile_stream << "Sigma3 corrosion current [ ] .................... " << sigma3_corrosion_current << endl;
 
 //    Out_logfile_stream.close();
 
@@ -151,15 +171,14 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
         auto& collection = materials_ini["structural"];
         if (collection.has("material_type")) {
             material_type = materials_ini.get("structural").get("material_type");
-        } }
+        }
 
     // Grain Boundary width
-    if (materials_ini.has("structural")) {
-        auto& collection = materials_ini["structural"];
         if (collection.has("gb_width")) {
             gb_width = stod(materials_ini.get("structural").get("gb_width"));
             gb_width *= pow(10,(-9));
-        } }
+        }
+    }
 
 /// [thermodynamical]
 // II. mass density
@@ -167,19 +186,16 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
         auto& collection = materials_ini["thermodynamical"];
         if (collection.has("mass_density")) {
             mass_density = stod(materials_ini.get("thermodynamical").get("mass_density"));
-        } }
+        }
 // III. melting_point
-    if (materials_ini.has("thermodynamical")) {
-        auto& collection = materials_ini["thermodynamical"];
         if (collection.has("melting_point")) {
             melting_point = stod(materials_ini.get("thermodynamical").get("melting_point"));
-        } }
+        }
 // Grain boundary energy
-    if (materials_ini.has("thermodynamical")) {
-        auto& collection = materials_ini["thermodynamical"];
         if (collection.has("gb_cohesion_energy")) {
             cohesion_energy = stod(materials_ini.get("thermodynamical").get("gb_cohesion_energy"));
-        } }
+        }
+    }
 
 /// [mechanical]
 // IV. Young modulus
@@ -188,33 +204,26 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
         if (collection.has("Young_modulus")) {
             Young_modulus = stod(materials_ini.get("mechanical").get("Young_modulus"));
             Young_modulus = Young_modulus*pow(10,9);
-        } }
+        }
 // V. Poisson ratio
-    if (materials_ini.has("mechanical")) {
-        auto& collection = materials_ini["mechanical"];
         if (collection.has("Poisson_ratio")) {
             Poisson_ratio = stod(materials_ini.get("mechanical").get("Poisson_ratio"));
-        } }
+        }
 // VI. yield strength
-    if (materials_ini.has("mechanical")) {
-        auto& collection = materials_ini["mechanical"];
         if (collection.has("yield_strength")) {
             yield_strength = stod(materials_ini.get("mechanical").get("yield_strength"));
             yield_strength = yield_strength*pow(10,6);
-        } }
+        }
 // VII. strength
-    if (materials_ini.has("mechanical")) {
-        auto& collection = materials_ini["mechanical"];
         if (collection.has("strength")) {
             strength = stod(materials_ini.get("mechanical").get("strength"));
             strength = strength*pow(10,6);
-        } }
+        }
 // VIII. fracture_toughness
-    if (materials_ini.has("mechanical")) {
-        auto& collection = materials_ini["mechanical"];
         if (collection.has("fracture_toughness")) {
             fracture_toughness = stod(materials_ini.get("mechanical").get("fracture_toughness"));
-        } }
+        }
+    }
 
 /// [inclusions]
 // IX. gb-inclusion1 adhesion energy
@@ -222,7 +231,8 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
         auto& collection = materials_ini["inclusions"];
         if (collection.has("gb_adhesion_energy")) {
             gb_inclusion1_adh_energy = stod(materials_ini.get("inclusions").get("gb_adhesion_energy"));
-        } }
+        }
+    }
 
     /// ============================== Inclusion materials reader ==========================
     mINI::INIFile file2(source_path + "CPD_material_database/"s + I1id + ".ini"s);

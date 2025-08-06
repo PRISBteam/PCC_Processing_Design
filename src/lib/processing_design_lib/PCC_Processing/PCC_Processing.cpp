@@ -1,6 +1,6 @@
 ///======================================= PCC Processing module ================================================================================ ///
 ///============================================================================================================================================= ///
-///* The interface use functions from Processing_<***>_functions.h C++ libraries to generate quasi-random or non-random processes of           *///
+///* The interface use functions from PCC_Processing/functions C++ libraries to generate quasi-random or non-random processes of           *///
 ///* labelling of the k-cells ( k={0,1,2,3} ) of the pre-constructed polytopal cell complex (PCC) 'M' using the whole set of incidence        *///
 ///* and adjacency matrices                                                                                                                   *///
 ///* ---------------------------------------------------------------------------------------------------------------------------------------*///
@@ -39,6 +39,8 @@ extern std::string source_path;
 extern std::string output_dir;
 extern std::vector<std::string> paths_to_PCC_matrices;
 extern int PCC_dimension;
+//extern struct processing_config;
+extern struct processing_configuration processing_config;
 
 #include "PCC_Processing.h"
 ///* ========================================================= PCC PROCESSING FUNCTION ======================================================= *///
@@ -66,163 +68,185 @@ CellDesign PCC_Processing(Config &configuration) {
     std::vector<std::vector<unsigned int>> induced_x_series; // vector of series of induced k-cells (like crack paths)
     std::vector<Agglomeration> agglomeration_x_sequence; // vector of agglomerations
 
-    double mu_L = 1.0, sigma_L = 0.0; // mean and dispersion for a lengthy defect sequences distribution - used only in the case of the log-normal distribution for 'L' PCC_Processing execution mode ('pp_mode' in the config/processing.ini file).
-    unsigned int bins_number_L = 10;
-
-    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
+    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
     cout << "=========================================================================" << endl; Out_logfile_stream << "==============================================================================================================================================================" << endl;
 
     // Reading of the configuration from the 'config/processing.ini' file
 //    config_reader_processing(sequence_source_paths, max_sfractions_vectors, max_ifractions_vectors, mu_L, sigma_L, bins_number_L, stype_vector, itype_vector, pindex_vector); // void function
-    processing_config processing_ini_data;
-    config_reader_processing(processing_ini_data);
-    /* @param sequence_source_paths
-    * @param max_fractions_vectors
-    * @param max_cfractions_vectors
-    * @param mu
-    * @param sigma
-    * @param bins_numb
-    * @param ptype_vector
-    * @param ctype_vector
-    * @param pindex_vector
-*/
-/// Read configuration from processing.ini file :: the number of special cell types and calculation parameters.
-    std::vector<vector<double>> max_sfractions_vectors(4), max_ifractions_vectors(4); // double vectors containing maximal values of fractions for Processing module execution :: [0][..] - nodes, [1][..] - edges, [2][..] - faces, [3][..] - polyhedrons
-    std::vector<string> stype_vector(4), itype_vector(4); // special_types and induced_types vector of strings corresponding to the Processing execution type ON/OFF in 'config/main.ini file' - {0,1} for all the possible 'k' values of k-cell read from the file 'config/processing.ini'; In the both vectors :: [0] - nodes, [1] - edges, [2] - faces, [3] - polyhedrons
-    std::vector<string> sequence_source_paths(4); // k-sequence paths for the reading them from file(s) - used only in the 'S' PCC_Processing execution mode ('pp_mode' in the config/processing.ini file)
+    config_reader_processing(configuration);
+
+    /// Read configuration from processing.ini file :: the number of special cell types and calculation parameters.
+    std::vector<std::string> stype_vector(4), itype_vector(4); // special_types and induced_types vector of strings corresponding to the Processing execution type ON/OFF in 'config/main.ini file' - {0,1} for all the possible 'k' values of k-cell read from the file 'config/processing.ini'; In the both vectors :: [0] - nodes, [1] - edges, [2] - faces, [3] - polyhedrons
+    stype_vector.at(0) = configuration.Get_processing_pn_mode();
+    stype_vector.at(1) = configuration.Get_processing_pe_mode();
+    stype_vector.at(2) = configuration.Get_processing_pf_mode();
+    stype_vector.at(3) = configuration.Get_processing_pp_mode();
+
+    itype_vector.at(0) = configuration.Get_processing_in_mode();
+    itype_vector.at(1) = configuration.Get_processing_ie_mode();
+    itype_vector.at(2) = configuration.Get_processing_if_mode();
+    itype_vector.at(3) = configuration.Get_processing_ip_mode();
+
     bool multiplexity = 0; // Bool variable indicating one (multiplexity = 0) or many (multiplexity = 1) labels can be assigned for each k-cell in a PCC
     std::vector<double> pindex_vector(4); // supplementary index used for multiplexity bool parameter - read from the 'config/processing.ini' file
+    pindex_vector.at(0) = configuration.Get_processing_n_multiplexity();
+    pindex_vector.at(1) = configuration.Get_processing_e_multiplexity();
+    pindex_vector.at(2) = configuration.Get_processing_f_multiplexity();
+    pindex_vector.at(3) = configuration.Get_processing_p_multiplexity();
 
-    for(auto sv : processing_ini_data.max_fractions_vectors)
-        max_sfractions_vectors.push_back(sv);
-    for(auto iv : processing_ini_data.max_cfractions_vectors)
-        max_sfractions_vectors.push_back(sv);
+    std::vector<string> sequence_source_paths(4); // k-sequence paths for the reading them from file(s) - used only in the 'S' PCC_Processing execution mode ('pp_mode' in the config/processing.ini file)
+    sequence_source_paths.at(0) = configuration.Get_processing_n_source_path();
+    sequence_source_paths.at(1) = configuration.Get_processing_e_source_path();
+    sequence_source_paths.at(2) = configuration.Get_processing_f_source_path();
+    sequence_source_paths.at(3) = configuration.Get_processing_p_source_path();
+
+    std::vector<vector<double>> max_sfractions_vectors(4), max_ifractions_vectors(4); // double vectors containing maximal values of fractions for Processing module execution :: [0][..] - nodes, [1][..] - edges, [2][..] - faces, [3][..] - polyhedrons
+    max_sfractions_vectors.at(0) = configuration.Get_processing_pn_max_fractions();
+    max_sfractions_vectors.at(1) = configuration.Get_processing_pe_max_fractions();
+    max_sfractions_vectors.at(2) = configuration.Get_processing_pf_max_fractions();
+    max_sfractions_vectors.at(3) = configuration.Get_processing_pp_max_fractions();
+
+    max_ifractions_vectors.at(0) = configuration.Get_processing_in_max_fractions();
+    max_ifractions_vectors.at(1) = configuration.Get_processing_ie_max_fractions();
+    max_ifractions_vectors.at(2) = configuration.Get_processing_if_max_fractions();
+    max_ifractions_vectors.at(3) = configuration.Get_processing_ip_max_fractions();
+
+//    double mu; double sigma; unsigned int bins_numb;
+    double mu_L = 1.0, sigma_L = 0.0; // mean and dispersion for a lengthy defect sequences distribution - used only in the case of the log-normal distribution for 'L' PCC_Processing execution mode ('pp_mode' in the config/processing.ini file).
+    unsigned int bins_number_L = 10;
+    mu_L = configuration.Get_processing_mu();
+    sigma_L = configuration.Get_processing_sigma();
+    bins_number_L = configuration.Get_processing_bins_number();
+
+    bool is_processing_log_file = 0;
+    is_processing_log_file = configuration.Get_is_processing_log_file();
 
 ///* Cases for Processing types // cell type k :: 0 - nodes, 1 - edges, 2 - faces, 3 -polyhedrons - must coincide with the indexing of the CellNumbs.at(cell_type) vector (!) *///
 ///* ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- *///
 /// Here '(dim - 3)' term is important for 1D and 2D cases (!) as in these cases there are no polyhedrons or even faces (2D) in the PCC                                      ///
-    for (int cell_type = (3 + (PCC_dimension - 3)); cell_type >= 0; --cell_type) { // Loop over all types of k-cells in the PCC
+       for (int cell_type = (3 + (PCC_dimension - 3)); cell_type >= 0; --cell_type) { // Loop over all types of k-cells in the PCC
 
-        special_x_sequence.clear(); special_x_series.clear(); // clearence of vectors for each new cell type
-        agglomeration_x_sequence.clear(); // clearence of agglomeration file
+           special_x_sequence.clear(); special_x_series.clear(); // clearence of vectors for each new cell type
+           agglomeration_x_sequence.clear(); // clearence of agglomeration file
 
-    /// I. Beginning of the processing of 'special' k-cells
-    ///=======================================================
-        if (stype_vector.at(cell_type) == "R" && max_sfractions_vectors.at(cell_type).size() > 0) { //  Random separate cells generation processing
-            cout << "Random (R) mode processing in operation: cell_type : "s << cell_type << endl; Out_logfile_stream << "Random (R) mode processing in operation: cell_type : "s << cell_type << endl;
+       /// I. Beginning of the processing of 'special' k-cells
+       ///=======================================================
 
-            multiplexity = (bool) pindex_vector.at(cell_type); // convert 'pindex' read from the 'config/processing.ini' file for the specific 'cell_type' to a bool variable 'multiplexity'.
-            special_x_series = Processing_Random(cell_type, Configuration_sState, max_sfractions_vectors, multiplexity); // defined in the assigned labelling library; "\functions" subfolder
+           if (stype_vector.at(cell_type) == "R" && max_sfractions_vectors.at(cell_type).size() > 0) { //  Random separate cells generation processing
+               cout << "Random (R) mode processing in operation: cell_type : "s << cell_type << endl; Out_logfile_stream << "Random (R) mode processing in operation: cell_type : "s << cell_type << endl;
 
-        /// Writing 'special_x_sequence' - each k-cell number appeared only once in the sequence. Configuration_sState and State Vectors show possible 'agglomeration' - several similar label per k-cell
-            special_x_sequence.clear();
-            for (auto it = Configuration_sState[cell_type].begin(); it != Configuration_sState[cell_type].end(); ++it)
-                if(*it > 0) {
-                    special_x_sequence.push_back(distance(Configuration_sState[cell_type].begin(), it)); // add new element to the special_x_cells_sequence
-                } // end if(it)
+               multiplexity = (bool) pindex_vector.at(cell_type); // convert 'pindex' read from the 'config/processing.ini' file for the specific 'cell_type' to a bool variable 'multiplexity'.
+               special_x_series = Processing_Random(cell_type, Configuration_sState, max_sfractions_vectors, multiplexity); // defined in the assigned labelling library; "\functions" subfolder
 
-            if(multiplexity != 0) {  /// Agglomerations counter
-                std::vector<unsigned int> probe_state_vector(CellNumbs.at(cell_type), 0); // probe vector of the total x_series size filled with 0s
-                std::fill(probe_state_vector.begin(), probe_state_vector.end(),0);
-                for (auto kcell_seq: special_x_series) {// each strip/chain in the series of strips
-                    for (unsigned int kcell: kcell_seq) { // in each strip/chain
-                        probe_state_vector.at(kcell) += 1; // change element of the State Vector
-                    }
-                }
+           /// Writing 'special_x_sequence' - each k-cell number appeared only once in the sequence. Configuration_sState and State Vectors show possible 'agglomeration' - several similar label per k-cell
+               special_x_sequence.clear();
+               for (auto it = Configuration_sState[cell_type].begin(); it != Configuration_sState[cell_type].end(); ++it)
+                   if(*it > 0) {
+                       special_x_sequence.push_back(distance(Configuration_sState[cell_type].begin(), it)); // add new element to the special_x_cells_sequence
+                   } // end if(it)
 
-                for (auto it = probe_state_vector.begin(); it != probe_state_vector.end(); ++it) {
-                    if (*it > 1) {
-                        agglomeration_x_sequence.push_back( {(unsigned int) distance(probe_state_vector.begin(), it),*it} ); // Agglomeration(unsigned int AFace, unsigned int AglPower);
-//REPAIR     cout << " number2: " << agglomeration_x_sequence.back().Get_agglomeration_kcell_number()<< " power2: " << agglomeration_x_sequence.back().Get_agglomeration_power() << endl;
-                    } // end if()
-                } // end for()
-            } // end of if(multiplexity != 0) - agglomerations counter
+               if(multiplexity != 0) {  /// Agglomerations counter
+                   std::vector<unsigned int> probe_state_vector(CellNumbs.at(cell_type), 0); // probe vector of the total x_series size filled with 0s
+                   std::fill(probe_state_vector.begin(), probe_state_vector.end(),0);
+                   for (auto kcell_seq: special_x_series) {// each strip/chain in the series of strips
+                       for (unsigned int kcell: kcell_seq) { // in each strip/chain
+                           probe_state_vector.at(kcell) += 1; // change element of the State Vector
+                       }
+                   }
 
-        } // End of 'R' type simulations - // end  if (stype_vector.at(cell_type) == "R" && ..)
+                   for (auto it = probe_state_vector.begin(); it != probe_state_vector.end(); ++it) {
+                       if (*it > 1) {
+                           agglomeration_x_sequence.push_back( {(unsigned int) distance(probe_state_vector.begin(), it),*it} ); // Agglomeration(unsigned int AFace, unsigned int AglPower);
+   //REPAIR     cout << " number2: " << agglomeration_x_sequence.back().Get_agglomeration_kcell_number()<< " power2: " << agglomeration_x_sequence.back().Get_agglomeration_power() << endl;
+                       } // end if()
+                   } // end for()
+               } // end of if(multiplexity != 0) - agglomerations counter
 
-        else if (stype_vector.at(cell_type) == "L" && max_sfractions_vectors.at(cell_type).size() > 0) { //  Random lengthy strips (chains) of cells generation processing
-            cout << "Random strips/chains (L) mode processing in operation: cell_type : "s << cell_type << endl << endl; Out_logfile_stream << "Random strips/chains (L) mode processing in operation: cell_type : "s << cell_type << endl << endl;
-            cout << "Average (mu) and dispersion (sigma): " << endl << mu_L << "  " << sigma_L << endl << "Number of bins: " << bins_number_L << endl; Out_logfile_stream << "Average (mu) and dispersion (sigma): " << endl << mu_L << "  " << sigma_L << endl << "Number of bins: " << bins_number_L << endl;
-            /// Obtaining the distribution of strip/chain lengths
-            std::vector<double> strip_lenghts_distribution = Log_normal_distribution(mu_L, sigma_L, bins_number_L); // double valued "continuous" distribution, where Log_normal_distribution() function is for obtaining strip_lenghts_distribution
+           } // End of 'R' type simulations - // end  if (stype_vector.at(cell_type) == "R" && ..)
 
-// REPAIR             ofstream Distributions_stream; Distributions_stream.open(output_dir + "Strip_distributions.txt"s, ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
-            cell_strip_distribution.clear(); // clearing strip/chain length distribution vector for new 'cell_type' iterations
-            for (auto itr = strip_lenghts_distribution.begin(); itr != strip_lenghts_distribution.end(); ++itr) {
-// REPAIR                cout << " strip_lenghts_distribution " << max_sfractions_vectors[cell_type][0] * CellNumbs.at(cell_type) * (*itr) << endl;
-///                    cell_strip_distribution.push_back(vop.at(0) * CellNumbs.at(2) * (*itr) / (std::distance(strip_lenghts_distribution.begin(), itr) + 1.0)); // only for the first 'Xmax_fraction1' in the 'config/processing.ini' file values of max k-cell fractions
-                cell_strip_distribution.push_back( (max_sfractions_vectors.at(cell_type).at(0) * CellNumbs.at(2) * (*itr) * 5.0/ (double) bins_number_L) / (std::distance(strip_lenghts_distribution.begin(), itr) + 1.0)); // only for the first 'Xmax_fraction1' in the 'config/processing.ini' file values of max k-cell fractions
-//                    cout << cell_strip_distribution.back() << "  ";
-            }
+           else if (stype_vector.at(cell_type) == "L" && max_sfractions_vectors.at(cell_type).size() > 0) { //  Random lengthy strips (chains) of cells generation processing
+               cout << "Random strips/chains (L) mode processing in operation: cell_type : "s << cell_type << endl << endl; Out_logfile_stream << "Random strips/chains (L) mode processing in operation: cell_type : "s << cell_type << endl << endl;
+               cout << "Average (mu) and dispersion (sigma): " << endl << mu_L << "  " << sigma_L << endl << "Number of bins: " << bins_number_L << endl; Out_logfile_stream << "Average (mu) and dispersion (sigma): " << endl << mu_L << "  " << sigma_L << endl << "Number of bins: " << bins_number_L << endl;
+               /// Obtaining the distribution of strip/chain lengths
+               std::vector<double> strip_lenghts_distribution = Log_normal_distribution(mu_L, sigma_L, bins_number_L); // double valued "continuous" distribution, where Log_normal_distribution() function is for obtaining strip_lenghts_distribution
 
-            /// Output of the strip/chain lengths distribution
-            double itr_sum = 0, num = 1;
-// REPAIR               for (auto idtr = strip_lenghts_distribution.begin(); idtr != strip_lenghts_distribution.end(); ++idtr) {
-            for (auto idtr = cell_strip_distribution.begin(); idtr != cell_strip_distribution.end(); ++idtr) {
-                cout << *idtr << "  "; Out_logfile_stream << *idtr << "  ";
+   // REPAIR             ofstream Distributions_stream; Distributions_stream.open(output_dir + "Strip_distributions.txt"s, ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
+               cell_strip_distribution.clear(); // clearing strip/chain length distribution vector for new 'cell_type' iterations
+               for (auto itr = strip_lenghts_distribution.begin(); itr != strip_lenghts_distribution.end(); ++itr) {
+   // REPAIR                cout << " strip_lenghts_distribution " << max_sfractions_vectors[cell_type][0] * CellNumbs.at(cell_type) * (*itr) << endl;
+   ///                    cell_strip_distribution.push_back(vop.at(0) * CellNumbs.at(2) * (*itr) / (std::distance(strip_lenghts_distribution.begin(), itr) + 1.0)); // only for the first 'Xmax_fraction1' in the 'config/processing.ini' file values of max k-cell fractions
+                   cell_strip_distribution.push_back( (max_sfractions_vectors.at(cell_type).at(0) * CellNumbs.at(2) * (*itr) * 5.0/ (double) bins_number_L) / (std::distance(strip_lenghts_distribution.begin(), itr) + 1.0)); // only for the first 'Xmax_fraction1' in the 'config/processing.ini' file values of max k-cell fractions
+   //                    cout << cell_strip_distribution.back() << "  ";
+               }
 
-// REPAIR       Distributions_stream << *idtr << " \t";
-                itr_sum += *idtr*num; //*(std::distance(cell_strip_distribution.begin(), idtr) + 1.0);
-                ++ num;
-            }
-// REPAIR             Distributions_stream << endl;
-            cout << endl << "Inclusion strip number:\t\t" << itr_sum << "\t\tSpecial faces Number:\t\t" << CellNumbs.at(2)*max_sfractions_vectors.at(cell_type).at(0) << endl << endl; //<< "\t\tDifference:\t\t" << abs(itr_sum - CellNumbs.at(2)*vop.at(0))*100.0/ double(CellNumbs.at(2)*vop.at(0))
-            Out_logfile_stream << endl << "Inclusion strip number:\t\t" << itr_sum << "\t\tSpecial faces Number:\t\t" << CellNumbs.at(2)*max_sfractions_vectors.at(cell_type).at(0) << endl << endl;
-            itr_sum = 0;
-// REPAIR     }    Distributions_stream.close(); //exit(0);
+               /// Output of the strip/chain lengths distribution
+               double itr_sum = 0, num = 1;
+   // REPAIR               for (auto idtr = strip_lenghts_distribution.begin(); idtr != strip_lenghts_distribution.end(); ++idtr) {
+               for (auto idtr = cell_strip_distribution.begin(); idtr != cell_strip_distribution.end(); ++idtr) {
+                   cout << *idtr << "  "; Out_logfile_stream << *idtr << "  ";
 
-            /// Random_Strips_Distribution() function call
-            special_x_series = Processing_Random_Strips(cell_type, cell_strip_distribution, Configuration_sState, max_sfractions_vectors); // series of k-cells for each strip/chain
+   // REPAIR       Distributions_stream << *idtr << " \t";
+                   itr_sum += *idtr*num; //*(std::distance(cell_strip_distribution.begin(), idtr) + 1.0);
+                   ++ num;
+               }
+   // REPAIR             Distributions_stream << endl;
+               cout << endl << "Inclusion strip number:\t\t" << itr_sum << "\t\tSpecial faces Number:\t\t" << CellNumbs.at(2)*max_sfractions_vectors.at(cell_type).at(0) << endl << endl; //<< "\t\tDifference:\t\t" << abs(itr_sum - CellNumbs.at(2)*vop.at(0))*100.0/ double(CellNumbs.at(2)*vop.at(0))
+               Out_logfile_stream << endl << "Inclusion strip number:\t\t" << itr_sum << "\t\tSpecial faces Number:\t\t" << CellNumbs.at(2)*max_sfractions_vectors.at(cell_type).at(0) << endl << endl;
+               itr_sum = 0;
+   // REPAIR     }    Distributions_stream.close(); //exit(0);
 
-            /// Writing 'special_x_sequence' - each k-cell number appeared only once in the sequence. Configuration_sState and State Vectors show possible 'agglomeration' - several similar label per k-cell
-            for (auto it = Configuration_sState[cell_type].begin(); it != Configuration_sState[cell_type].end(); ++it)
-                if(*it > 0) {
-                    special_x_sequence.push_back(distance(Configuration_sState[cell_type].begin(), it)); // add new element to the s_cells_sequence
-                } // end if()
+               /// Random_Strips_Distribution() function call
+               special_x_series = Processing_Random_Strips(cell_type, cell_strip_distribution, Configuration_sState, max_sfractions_vectors); // series of k-cells for each strip/chain
 
-            /// Agglomeration counter
-            std::vector<unsigned int> probe_state_vector(CellNumbs.at(cell_type)); // probe vector of the total x_series size filled with 0s
-            std::fill(probe_state_vector.begin(), probe_state_vector.end(),0);
-            for (auto kcell_seq : special_x_series) {// each strip/chain in the series of strips
-                for (unsigned int kcell : kcell_seq) { // in each strip/chain
-                    probe_state_vector.at(kcell) += 1; // change element of the State Vector
-                }
-            }
+               /// Writing 'special_x_sequence' - each k-cell number appeared only once in the sequence. Configuration_sState and State Vectors show possible 'agglomeration' - several similar label per k-cell
+               for (auto it = Configuration_sState[cell_type].begin(); it != Configuration_sState[cell_type].end(); ++it)
+                   if(*it > 0) {
+                       special_x_sequence.push_back(distance(Configuration_sState[cell_type].begin(), it)); // add new element to the s_cells_sequence
+                   } // end if()
 
-            for (unsigned int kcell : probe_state_vector) {
-                for (auto it = probe_state_vector.begin(); it != probe_state_vector.end(); ++it) {
-                    if (*it > 1) {
-                        agglomeration_x_sequence.push_back( {(unsigned int) distance(probe_state_vector.begin(),it), *it} ); // Agglomeration(unsigned int AFace, unsigned int AglPower);
-//REPAIR cout << " number2: " << agglomeration_x_sequence.back().Get_agglomeration_kcell_number()<< " power2: " << agglomeration_x_sequence.back().Get_agglomeration_power() << endl;
-                    } // end if()
-                } // end for()
-            } // end for (unsigned int kcell : probe_state_vector)
+               /// Agglomeration counter
+               std::vector<unsigned int> probe_state_vector(CellNumbs.at(cell_type)); // probe vector of the total x_series size filled with 0s
+               std::fill(probe_state_vector.begin(), probe_state_vector.end(),0);
+               for (auto kcell_seq : special_x_series) {// each strip/chain in the series of strips
+                   for (unsigned int kcell : kcell_seq) { // in each strip/chain
+                       probe_state_vector.at(kcell) += 1; // change element of the State Vector
+                   }
+               }
 
-        } // End of 'L' type simulations - else if (stype_vector.at(cell_type) == "L" && .. )
-  /*
-        else if (stype_vector.at(cell_type) == "F" && max_sfractions_vectors[cell_type].size() > 0) { // Maximum <functional> production
-            // processing index :: 0 - direct special faces assignment;  1 - crystallographic ; 2 - configurational TJs-based entropy (deviatoric); //        if (pindex_vector.at(cell_type) == 0) { //        } else if (pindex_vector.at(cell_type) == 1) {
-            cout << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl; Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
-          // if(cell_type == 2 + (dim - 3))             // cell type = 2 -> faces
-//            double Configuration_Entropy(std::vector<int> const &TJsTypes);
-            double (*conf_entropy_jfractions) (std::vector<double> const&j_fractions);
-            conf_entropy_jfractions = Configuration_Entropy;
+               for (unsigned int kcell : probe_state_vector) {
+                   for (auto it = probe_state_vector.begin(); it != probe_state_vector.end(); ++it) {
+                       if (*it > 1) {
+                           agglomeration_x_sequence.push_back( {(unsigned int) distance(probe_state_vector.begin(),it), *it} ); // Agglomeration(unsigned int AFace, unsigned int AglPower);
+   //REPAIR cout << " number2: " << agglomeration_x_sequence.back().Get_agglomeration_kcell_number()<< " power2: " << agglomeration_x_sequence.back().Get_agglomeration_power() << endl;
+                       } // end if()
+                   } // end for()
+               } // end for (unsigned int kcell : probe_state_vector)
 
-//            double Configuration_Entropy(std::vector<int> const &TJsTypes);
-            double (*conf_entropy_jtypes) (std::vector<double> const&TJsTypes);
-            conf_entropy_jtypes = Configuration_Entropy;
+           } // End of 'L' type simulations - else if (stype_vector.at(cell_type) == "L" && .. )
+     /*
+           else if (stype_vector.at(cell_type) == "F" && max_sfractions_vectors[cell_type].size() > 0) { // Maximum <functional> production
+               // processing index :: 0 - direct special faces assignment;  1 - crystallographic ; 2 - configurational TJs-based entropy (deviatoric); //        if (pindex_vector.at(cell_type) == 0) { //        } else if (pindex_vector.at(cell_type) == 1) {
+               cout << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl; Out_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
+             // if(cell_type == 2 + (dim - 3))             // cell type = 2 -> faces
+   //            double Configuration_Entropy(std::vector<int> const &TJsTypes);
+               double (*conf_entropy_jfractions) (std::vector<double> const&j_fractions);
+               conf_entropy_jfractions = Configuration_Entropy;
 
-            //std::vector<unsigned int> Processing_maxFunctional(int cell_type, std::vector<std::vector<int>> &Configuration_State, std::vector<std::vector<double>> const &max_fractions_vectors, bool multiplexity);
-            special_x_sequence = Processing_maxFunctional(cell_type, Configuration_sState, max_sfractions_vectors, multiplexity, conf_entropy_jtypes);
-        } // End of 'F' type simulations (elseif)
+   //            double Configuration_Entropy(std::vector<int> const &TJsTypes);
+               double (*conf_entropy_jtypes) (std::vector<double> const&TJsTypes);
+               conf_entropy_jtypes = Configuration_Entropy;
 
-        else if (stype_vector.at(cell_type) == "D" && max_sfractions_vectors[cell_type].size() > 0) { // Maximum <functional> production
-            cout << "Min (MAX-deviator) Functional processing in operation: cell_type : "s << cell_type << endl; Out_logfile_stream << "Min (MAX-deviator) Functional processing in operation: cell_type : "s << cell_type << endl;
-///            if (max_fractions_vectors.at(cell_type).size() > 0)
-///            special_x_sequence = Processing_minConfEntropy(2, Configuration_sState, max_fractions_vectors, pindex_vector.at(2));
+               //std::vector<unsigned int> Processing_maxFunctional(int cell_type, std::vector<std::vector<int>> &Configuration_State, std::vector<std::vector<double>> const &max_fractions_vectors, bool multiplexity);
+               special_x_sequence = Processing_maxFunctional(cell_type, Configuration_sState, max_sfractions_vectors, multiplexity, conf_entropy_jtypes);
+           } // End of 'F' type simulations (elseif)
 
-        } // End of 'D' [S min] type simulations (elseif)
-*/
+           else if (stype_vector.at(cell_type) == "D" && max_sfractions_vectors[cell_type].size() > 0) { // Maximum <functional> production
+               cout << "Min (MAX-deviator) Functional processing in operation: cell_type : "s << cell_type << endl; Out_logfile_stream << "Min (MAX-deviator) Functional processing in operation: cell_type : "s << cell_type << endl;
+   ///            if (max_fractions_vectors.at(cell_type).size() > 0)
+   ///            special_x_sequence = Processing_minConfEntropy(2, Configuration_sState, max_fractions_vectors, pindex_vector.at(2));
+
+           } // End of 'D' [S min] type simulations (elseif)
+   */
         else if (stype_vector.at(cell_type) == "S") { /// Reading structure from file
             vector<unsigned int> special_x_design;
             char* kseq_sourcepath = const_cast<char*>(sequence_source_paths.at(cell_type).c_str());
@@ -243,7 +267,7 @@ CellDesign PCC_Processing(Config &configuration) {
             cout << "S processing mode! Special_x_sequence size: " << special_x_sequence.size() << endl << endl;
             cout << " Fraction " << cell_type << "-cells: " << (double) special_x_sequence.size()/ CellNumbs.at(cell_type) << endl;
 
-/**
+/*
             // Cut up to max_fraction (!!)
             std::vector<unsigned int> temp_x_sequence = special_x_sequence; // temporarily new vector
             double total_max_sCell_fraction_processing = 0;
@@ -259,7 +283,8 @@ CellDesign PCC_Processing(Config &configuration) {
             for(unsigned int p : temp_x_sequence)
                 special_x_sequence.push_back(p);
             temp_x_sequence.clear();
-**/
+*/
+
         // Update of the corresponding Configuration State vector
             Configuration_sState[cell_type].clear();
             std::vector<int> State_vector(CellNumbs.at(cell_type), 0);
@@ -288,7 +313,7 @@ CellDesign PCC_Processing(Config &configuration) {
 
         else if(max_sfractions_vectors[cell_type].size() > 0) cout << "ERROR [Processing] : unknown simulation type - please replace with 'R', 'L', 'F', 'D' or 'S'..!" << endl;
 
-        ///* ONLY for 2-cells or 'grain boundaries' *///
+        /// ONLY for 2-cells or 'grain boundaries' ///
         if (cell_type == (2 + (PCC_dimension - 3))) { // '..+ (dim - 3)' because in the 2D case, boundaries become edges (!) and grains become faces of the corresponding 2D tessellation
 
             if (stype_vector.at(cell_type) == "Cm" &&

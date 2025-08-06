@@ -75,10 +75,17 @@ void config_reader_design(bool &is_log_file);
 
 // === # 6 # === //
 /*!
- * @brief config_reader_writer :: read input parameters from the project file config/writer.ini necessary for the code execution.
+ * @brief config_reader_writer :: read input parameters from the project file config/writer.ini necessary for the code output.
  * @param writer_specifications
  * @return void
  */
 void config_reader_writer(std::vector<int> &writer_specifications, bool &is_log_file);
+
+// === # 7 # === //
+/*!
+ * @brief config_reader_kinetics :: read input parameters from the project file config/kinetics.ini necessary for the Kinetics module execution.
+ * @param configuration
+ */
+void config_reader_kinetics(Config &configuration);
 
 #endif //PCC_PROCESSING_DESIGN_INI_READERS_H

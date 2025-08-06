@@ -67,22 +67,34 @@ private:
         std::string Mid_matrix;
         std::string Mid_inclusion;
         std::tuple<double, double, double> sample_dimensions;
-        double tau;
+        double multiphysics_time_scale;
         Eigen::MatrixXd external_stress_tensor;
+        double ambient_temperature;
         std::vector<double> macrocrack_ini;
         bool is_multiphysics_log_file;
     } multiphysics_config;
 
     struct processing_configuration {
-        std::vector<std::string> sequence_source_paths;
-        std::vector<std::vector<double>> max_fractions_vectors;
-        std::vector<std::vector<double>> max_cfractions_vectors;
-        double mu; double sigma; unsigned int bins_numb;
-        std::vector<std::string> ptype_vector;
-        std::vector<std::string> ctype_vector;
-        std::vector<double> pindex_vector;
+        std::string pp_mode, pf_mode, pe_mode, pn_mode;
+        std::string ip_mode, if_mode, ie_mode, in_mode;
+        int p_multiplexity, f_multiplexity, e_multiplexity, n_multiplexity;
+        std::string pp_source_path, pf_source_path, pe_source_path, pn_source_path;
+        //        std::vector<std::string> p_sequence_source_paths;
+        std::vector<double> pn_max_fractions, pe_max_fractions, pf_max_fractions, pp_max_fractions;
+        std::vector<double> in_max_fractions, ie_max_fractions, if_max_fractions, ip_max_fractions;
+
+        double mu; double sigma; unsigned int bins_number;
         bool is_processing_log_file;
     } processing_config;
+
+    struct kinetics_configuration {
+        std::string nk_mode, ek_mode, fk_mode, pk_mode;
+        std::string material_id;
+        double kinetics_time_scale;
+//        double stress;
+//        double temperature;
+        bool is_kinetics_log_file;
+    }kinetics_config;
 
     int config_dim;
 //    std::string config_source_dir, config_output_dir; // Input and output directories as it is written in the 'config/main.ini' file
@@ -104,36 +116,96 @@ private:
     std::vector<std::vector<unsigned int>> Configuration_cState;
 
 public:
-    // main
+    /// main
     void Set_main_type(std::string &main_type_str);
     void Set_pcc_source_dir(std::string &pcc_source_directory);
     void Set_pcc_standard_id(std::string &pcc_standard_id);
-    // subcomplex
+    /// subcomplex
     void Set_cut_length(double &new_cut_lenth);
     void Set_grain_neighbour_orders(unsigned int &new_grain_neighbour_orders);
     void Set_is_subcomplex_log_file(bool new_is_log_file);
 
-    // multiphysics
+    /// multiphysics
     void Set_Mid_matrix(std::string &Mid_matrix);
     void Set_Mid_inclusion(std::string &Mid_inclusion);
-    void Set_sample_dimensions(std::tuple<double, double, double> &sample_dimensions);
-    void Set_tau(double &tau);
-    void Set_external_stress_tensor(Eigen::MatrixXd &external_stress_tensor);
+    void Set_multiphysics_sample_dimensions(std::tuple<double, double, double> &sample_dimensions);
+    std::tuple<double, double, double>  Get_multiphysics_sample_dimensions(void);
+    void Set_multiphysics_time_scale(double &tau);
+    void Set_multiphysics_external_stress_tensor(Eigen::MatrixXd &external_stress_tensor);
+    Eigen::MatrixXd Get_multiphysics_external_stress_tensor(void);
     void Set_macrocrack_ini(std::vector<double> &macrocrack_ini);
     void Set_is_multiphysics_log_file(bool is_log_file);
 
-    //processing
-    void Set_sequence_source_paths(std::vector<std::string> &sequence_source_paths);
-    void Set_max_fractions_vectors(std::vector<std::vector<double>> &max_fractions_vectors);
-    void Set_max_cfractions_vectors(std::vector<std::vector<double>> &max_cfractions_vectors);
-    void Set_mu(double &mu);
-    void Set_sigma(double &sigma);
-    void Set_bins_numb(unsigned int &bins_numb);
-    void Set_ptype_vector(std::vector<std::string> &ptype_vector);
-    void Set_ctype_vector(std::vector<std::string> &ctype_vector);
-    void Set_pindex_vector(std::vector<double> &pindex_vector);
-    void Set_is_processing_log_file(bool is_processing_log_file);
+    void Set_multiphysics_temperature(double &new_temperature);
+    double Get_multiphysics_temperature(void) const;
 
+    ///processing
+    void Set_processing_pp_mode(std::string &new_pp_mode);
+    void Set_processing_pf_mode(std::string &new_pf_mode);
+    void Set_processing_pe_mode(std::string &new_pe_mode);
+    void Set_processing_pn_mode(std::string &new_pn_mode);
+    std::string Get_processing_pp_mode(void);
+    std::string Get_processing_pf_mode(void);
+    std::string Get_processing_pe_mode(void);
+    std::string Get_processing_pn_mode(void);
+
+    void Set_processing_ip_mode(std::string &new_ip_mode);
+    void Set_processing_if_mode(std::string &new_if_mode);
+    void Set_processing_ie_mode(std::string &new_ie_mode);
+    void Set_processing_in_mode(std::string &new_in_mode);
+    std::string Get_processing_ip_mode(void);
+    std::string Get_processing_if_mode(void);
+    std::string Get_processing_ie_mode(void);
+    std::string Get_processing_in_mode(void);
+
+    void Set_processing_p_multiplexity(int &pp_multiplexity_value);
+    void Set_processing_f_multiplexity(int &pf_multiplexity_value);
+    void Set_processing_e_multiplexity(int &pe_multiplexity_value);
+    void Set_processing_n_multiplexity(int &pn_multiplexity_value);
+    int Get_processing_p_multiplexity(void);
+    int Get_processing_f_multiplexity(void);
+    int Get_processing_e_multiplexity(void);
+    int Get_processing_n_multiplexity(void);
+
+    void Set_processing_p_source_path(std::string &new_p_source_path);
+    void Set_processing_f_source_path(std::string &new_f_source_path);
+    void Set_processing_e_source_path(std::string &new_e_source_path);
+    void Set_processing_n_source_path(std::string &new_n_source_path);
+    std::string Get_processing_p_source_path(void);
+    std::string Get_processing_f_source_path(void);
+    std::string Get_processing_e_source_path(void);
+    std::string Get_processing_n_source_path(void);
+
+    void Set_processing_pn_max_fractions(std::vector<double> &new_pn_max_fractions);
+    void Set_processing_pe_max_fractions(std::vector<double> &new_pe_max_fractions);
+    void Set_processing_pf_max_fractions(std::vector<double> &new_pf_max_fractions);
+    void Set_processing_pp_max_fractions(std::vector<double> &new_pp_max_fractions);
+    std::vector<double> Get_processing_pn_max_fractions(void);
+    std::vector<double> Get_processing_pe_max_fractions(void);
+    std::vector<double> Get_processing_pf_max_fractions(void);
+    std::vector<double> Get_processing_pp_max_fractions(void);
+
+    void Set_processing_in_max_fractions(std::vector<double> &new_in_max_fractions);
+    void Set_processing_ie_max_fractions(std::vector<double> &new_ie_max_fractions);
+    void Set_processing_if_max_fractions(std::vector<double> &new_if_max_fractions);
+    void Set_processing_ip_max_fractions(std::vector<double> &new_ip_max_fractions);
+    std::vector<double> Get_processing_in_max_fractions(void);
+    std::vector<double> Get_processing_ie_max_fractions(void);
+    std::vector<double> Get_processing_if_max_fractions(void);
+    std::vector<double> Get_processing_ip_max_fractions(void);
+
+    void Set_processing_mu(double &new_mu);
+    void Set_processing_sigma(double &new_sigma);
+    void Set_processing_bins_number(unsigned int &new_bins_numb);
+    double Get_processing_mu(void);
+    double Get_processing_sigma(void);
+    unsigned int Get_processing_bins_number(void);
+
+//    void Set_ptype_vector(std::vector<std::string> &ptype_vector);
+//    void Set_ctype_vector(std::vector<std::string> &ctype_vector);
+//    void Set_pindex_vector(std::vector<double> &pindex_vector);
+    void Set_is_processing_log_file(bool is_processing_log_file);
+    bool Get_is_processing_log_file(void);
 
     void Read_config(Config &main_configuration); // Read the 'initial configuration' of the problem set in all the relevant '*.ini' files containing in the '\config' project directory using the functions from the 'ini_readers.cpp' project library (and only from there)
     void Set_config(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<std::vector<int>> Configuration_State, std::vector<std::vector<int>> Configuration_cState); // manual setting of the configuration
@@ -154,6 +226,27 @@ public:
 
     std::vector<std::vector<unsigned int>> Get_Configuration_sState() const; //!@return Configuration_sState
     std::vector<std::vector<unsigned int>> Get_Configuration_iState() const; //!@return Configuration_iState
+
+    ///kinetics
+    void Set_kinetics_nk_mode(std::string &new_nk_mode);
+    void Set_kinetics_ek_mode(std::string &new_nk_mode);
+    void Set_kinetics_fk_mode(std::string &new_nk_mode);
+    void Set_kinetics_pk_mode(std::string &new_nk_mode);
+    std::string Get_kinetics_nk_mode(void);
+    std::string Get_kinetics_ek_mode(void);
+    std::string Get_kinetics_fk_mode(void);
+    std::string Get_kinetics_pk_mode(void);
+
+    void Set_kinetics_material_id(std::string &new_mat_id);
+    std::string Get_kinetics_material_id(void);
+
+    void Set_is_kinetics_log_file(bool is_kinetics_log_file);
+    bool Get_is_kinetics_log_file(void);
+
+// corrosion
+    void Set_kinetics_time_scale(double &new_time_parameter);
+    double Get_kinetics_time_scale(void) const;
+
 };
 // ConfigVector (../config/main.ini) contains ALL the control variables needed for the program execution
 
@@ -240,6 +333,10 @@ private:
     double sface_energy_agglomeration;
     double inclusion_mass_density;
 
+    double lagbs_corrosion_current;
+    double hagbs_corrosion_current;
+    double sigma3_corrosion_current;
+
 public:
     Material(std::string Mid); // constructor 1
     Material(std::string Mid, std::string Iid); // constructor 2
@@ -266,6 +363,11 @@ public:
     double Get_inclusion_agglomeration_energy(void) const;
     double Get_inclusion_mass_density(void) const;
 
+// Corrosion
+    double Get_lagbs_corrosion_current(void) const;
+    double Get_hagbs_corrosion_current(void) const;
+    double Get_sigma3_corrosion_current(void) const;
+
 };
 
 /// ========== END of class Materials functions description
@@ -276,6 +378,7 @@ class CellEnergies {
 private:
     double von_Mises_elastic_stress = 0.0;
     double homogeneous_elastic_energy = 0.0;
+    double ambient_temperature = 0.0;
 
     /// Energies for each cell in a PCC
     std::vector<double> p_elastic_energies, f_elastic_energies, e_elastic_energies, n_elastic_energies; // elastic energies of k-cells defined at their barycentres
@@ -286,8 +389,10 @@ public:
     /// Set of variables
     CellEnergies() {}; // constructor
     void Set_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress); // [Pa]
+    void Get_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress); // [Pa]
+    void Set_ambient_temperature(double &new_ambient_temperature); // [K]
+    double Get_ambient_temperature(void); // [K]
     void Set_homogeneous_elastic_energy(std::tuple<double, double, double> &sample_dimensions, double &von_Mises_elastic_stress, Material &matrix_material); // [J]
-
     void Set_p_elastic_energies(std::vector<double> p_el_energies); // in [J]
     void Set_f_elastic_energies(std::vector<double> f_el_energies); // in [J]
     void Set_e_elastic_energies(std::vector<double> e_el_energies); // in [J]

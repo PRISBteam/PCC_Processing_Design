@@ -75,15 +75,23 @@ void Config::Set_Mid_matrix(std::string &new_Mid_matrix){
 void Config::Set_Mid_inclusion(std::string &new_Mid_inclusion){
     multiphysics_config.Mid_inclusion = new_Mid_inclusion;
 }
-void Config::Set_sample_dimensions(std::tuple<double, double, double> &new_sample_dimensions){
+void Config::Set_multiphysics_sample_dimensions(std::tuple<double, double, double> &new_sample_dimensions){
     multiphysics_config.sample_dimensions = new_sample_dimensions;
 }
-void Config::Set_tau(double &new_tau){
-    multiphysics_config.tau = new_tau;
+std::tuple<double, double, double> Config::Get_multiphysics_sample_dimensions(void){
+    return multiphysics_config.sample_dimensions;
 }
-void Config::Set_external_stress_tensor(Eigen::MatrixXd &new_external_stress_tensor){
+
+void Config::Set_multiphysics_time_scale(double &new_tau){
+    multiphysics_config.multiphysics_time_scale = new_tau;
+}
+void Config::Set_multiphysics_external_stress_tensor(Eigen::MatrixXd &new_external_stress_tensor){
     multiphysics_config.external_stress_tensor = new_external_stress_tensor;
 }
+Eigen::MatrixXd Config::Get_multiphysics_external_stress_tensor(void){
+    return multiphysics_config.external_stress_tensor;
+}
+
 void Config::Set_macrocrack_ini(std::vector<double> &new_macrocrack_ini){
     multiphysics_config.macrocrack_ini = new_macrocrack_ini;
 }
@@ -91,43 +99,254 @@ void Config::Set_is_multiphysics_log_file(bool new_is_log_file){
     multiphysics_config.is_multiphysics_log_file = new_is_log_file;
 }
 
+void Config::Set_multiphysics_temperature(double &new_temperature){
+    multiphysics_config.ambient_temperature = new_temperature;
+
+}
+double Config::Get_multiphysics_temperature(void) const{
+    return multiphysics_config.ambient_temperature;
+}
+
 //processing
-void Config::Set_sequence_source_paths(std::vector<std::string> &new_sequence_source_paths){
-    processing_config.sequence_source_paths = new_sequence_source_paths;
+void Config::Set_processing_pp_mode(std::string &new_pp_mode){
+    processing_config.pp_mode = new_pp_mode;
 }
-void Config::Set_max_fractions_vectors(std::vector<std::vector<double>> &new_max_fractions_vectors){
-    processing_config.max_fractions_vectors = new_max_fractions_vectors;
+void Config::Set_processing_pf_mode(std::string &new_pf_mode){
+    processing_config.pf_mode = new_pf_mode;
 }
-void Config::Set_max_cfractions_vectors(std::vector<std::vector<double>> &new_max_cfractions_vectors){
-    processing_config.max_cfractions_vectors = new_max_cfractions_vectors;
+void Config::Set_processing_pe_mode(std::string &new_pe_mode){
+    processing_config.pe_mode = new_pe_mode;
 }
-void Config::Set_mu(double &new_mu){
+void Config::Set_processing_pn_mode(std::string &new_pn_mode){
+    processing_config.pn_mode = new_pn_mode;
+}
+
+std::string Config::Get_processing_pp_mode(void){
+    return processing_config.pp_mode;
+}
+std::string Config::Get_processing_pf_mode(void){
+    return processing_config.pf_mode;
+}
+std::string Config::Get_processing_pe_mode(void){
+    return processing_config.pe_mode;
+}
+std::string Config::Get_processing_pn_mode(void){
+    return processing_config.pn_mode;
+}
+
+void Config::Set_processing_ip_mode(std::string &new_ip_mode){
+    processing_config.ip_mode = new_ip_mode;
+}
+void Config::Set_processing_if_mode(std::string &new_if_mode){
+    processing_config.if_mode = new_if_mode;
+}
+void Config::Set_processing_ie_mode(std::string &new_ie_mode){
+    processing_config.ie_mode = new_ie_mode;
+}
+void Config::Set_processing_in_mode(std::string &new_in_mode){
+    processing_config.in_mode = new_in_mode;
+}
+
+std::string Config::Get_processing_ip_mode(void){
+    return processing_config.ip_mode;
+}
+std::string Config::Get_processing_if_mode(void){
+    return processing_config.if_mode;
+}
+std::string Config::Get_processing_ie_mode(void){
+    return processing_config.ie_mode;
+}
+std::string Config::Get_processing_in_mode(void){
+    return processing_config.in_mode;
+}
+
+void Config::Set_processing_p_multiplexity(int &pp_multiplexity_value){
+    processing_config.p_multiplexity = pp_multiplexity_value;
+}
+void Config::Set_processing_f_multiplexity(int &pf_multiplexity_value){
+    processing_config.f_multiplexity = pf_multiplexity_value;
+}
+void Config::Set_processing_e_multiplexity(int &pe_multiplexity_value){
+    processing_config.e_multiplexity = pe_multiplexity_value;
+}
+void Config::Set_processing_n_multiplexity(int &pn_multiplexity_value){
+    processing_config.n_multiplexity = pn_multiplexity_value;
+}
+int Config::Get_processing_p_multiplexity(void){
+    return processing_config.p_multiplexity;
+}
+int Config::Get_processing_f_multiplexity(void){
+    return processing_config.f_multiplexity;
+}
+int Config::Get_processing_e_multiplexity(void){
+    return processing_config.e_multiplexity;
+}
+int Config::Get_processing_n_multiplexity(void){
+    return processing_config.n_multiplexity;
+}
+
+void Config::Set_processing_p_source_path(std::string &new_p_source_path){
+    processing_config.pp_source_path = new_p_source_path;
+}
+void Config::Set_processing_f_source_path(std::string &new_f_source_path){
+    processing_config.pf_source_path = new_f_source_path;
+}
+void Config::Set_processing_e_source_path(std::string &new_e_source_path){
+    processing_config.pe_source_path = new_e_source_path;
+}
+void Config::Set_processing_n_source_path(std::string &new_n_source_path){
+    processing_config.pn_source_path = new_n_source_path;
+}
+std::string Config::Get_processing_p_source_path(void){
+    return processing_config.pp_source_path;
+}
+std::string Config::Get_processing_f_source_path(void){
+    return processing_config.pf_source_path;
+}
+std::string Config::Get_processing_e_source_path(void){
+    return processing_config.pe_source_path;
+}
+std::string Config::Get_processing_n_source_path(void){
+    return processing_config.pn_source_path;
+}
+
+//Get_processing_pn_max_fractions()
+//Get_processing_in_max_fractions()
+
+
+void Config::Set_processing_pn_max_fractions(std::vector<double> &new_pn_max_fractions){
+    processing_config.pn_max_fractions = new_pn_max_fractions;
+}
+void Config::Set_processing_pe_max_fractions(std::vector<double> &new_pe_max_fractions){
+    processing_config.pe_max_fractions = new_pe_max_fractions;
+}
+void Config::Set_processing_pf_max_fractions(std::vector<double> &new_pf_max_fractions){
+    processing_config.pf_max_fractions = new_pf_max_fractions;
+}
+void Config::Set_processing_pp_max_fractions(std::vector<double> &new_pp_max_fractions){
+    processing_config.pp_max_fractions = new_pp_max_fractions;
+}
+std::vector<double> Config::Get_processing_pn_max_fractions(void){
+    return processing_config.pn_max_fractions;
+}
+std::vector<double> Config::Get_processing_pe_max_fractions(void){
+    return processing_config.pe_max_fractions;
+}
+std::vector<double> Config::Get_processing_pf_max_fractions(void){
+    return processing_config.pf_max_fractions;
+}
+std::vector<double> Config::Get_processing_pp_max_fractions(void){
+    return processing_config.pp_max_fractions;
+}
+
+
+void Config::Set_processing_in_max_fractions(std::vector<double> &new_in_max_fractions){
+    processing_config.in_max_fractions = new_in_max_fractions;
+}
+void Config::Set_processing_ie_max_fractions(std::vector<double> &new_ie_max_fractions){
+    processing_config.ie_max_fractions = new_ie_max_fractions;
+}
+void Config::Set_processing_if_max_fractions(std::vector<double> &new_if_max_fractions){
+    processing_config.if_max_fractions = new_if_max_fractions;
+}
+void Config::Set_processing_ip_max_fractions(std::vector<double> &new_ip_max_fractions){
+    processing_config.ip_max_fractions = new_ip_max_fractions;
+}
+std::vector<double> Config::Get_processing_in_max_fractions(void){
+    return processing_config.in_max_fractions;
+}
+std::vector<double> Config::Get_processing_ie_max_fractions(void){
+    return processing_config.ie_max_fractions;
+}
+std::vector<double> Config::Get_processing_if_max_fractions(void){
+    return processing_config.if_max_fractions;
+}
+std::vector<double> Config::Get_processing_ip_max_fractions(void){
+    return processing_config.ip_max_fractions;
+}
+
+// distribution
+void Config::Set_processing_mu(double &new_mu) {
     processing_config.mu = new_mu;
 }
-void Config::Set_sigma(double &new_sigma){
+void Config::Set_processing_sigma(double &new_sigma) {
     processing_config.sigma = new_sigma;
 }
-void Config::Set_bins_numb(unsigned int &new_bins_numb){
-    processing_config.bins_numb = new_bins_numb;
+void Config::Set_processing_bins_number(unsigned int &new_bins_numb) {
+    processing_config.bins_number = new_bins_numb;
 }
-void Config::Set_ptype_vector(std::vector<std::string> &new_ptype_vector){
-    processing_config.ptype_vector = new_ptype_vector;
+
+double Config::Get_processing_mu(void){
+    return processing_config.mu;
 }
-void Config::Set_ctype_vector(std::vector<std::string> &new_ctype_vector){
-    processing_config.ctype_vector = new_ctype_vector;
+double Config::Get_processing_sigma(void){
+    return processing_config.sigma;
 }
-void Config::Set_pindex_vector(std::vector<double> &new_pindex_vector){
-    processing_config.pindex_vector = new_pindex_vector;
+unsigned int Config::Get_processing_bins_number(void){
+    return processing_config.bins_number;
 }
+
 void Config::Set_is_processing_log_file(bool new_is_processing_log_file){
     processing_config.is_processing_log_file = new_is_processing_log_file;
 }
+bool Config::Get_is_processing_log_file(void){
+    return processing_config.is_processing_log_file;
+}
 
+/// multiphysics
 Config::multiphysics_configuration Config::Get_multiphysics_config() const {
     return multiphysics_config;
 }
 Config::processing_configuration Config::Get_processing_config() const {
     return processing_config;
+}
+
+/// kinetics
+void Config::Set_kinetics_nk_mode(std::string &new_nk_mode){
+    kinetics_config.nk_mode = new_nk_mode;
+}
+void Config::Set_kinetics_ek_mode(std::string &new_ek_mode){
+    kinetics_config.ek_mode = new_ek_mode;
+}
+void Config::Set_kinetics_fk_mode(std::string &new_fk_mode){
+    kinetics_config.fk_mode = new_fk_mode;
+}
+void Config::Set_kinetics_pk_mode(std::string &new_pk_mode){
+    kinetics_config.pk_mode = new_pk_mode;
+}
+std::string Config::Get_kinetics_nk_mode(void){
+    return kinetics_config.nk_mode;
+}
+std::string Config::Get_kinetics_ek_mode(void){
+    return kinetics_config.ek_mode;
+}
+std::string Config::Get_kinetics_fk_mode(void){
+    return kinetics_config.fk_mode;
+}
+std::string Config::Get_kinetics_pk_mode(void){
+    return kinetics_config.pk_mode;
+
+}
+
+void Config::Set_kinetics_material_id(std::string &new_mat_id){
+    kinetics_config.material_id = new_mat_id;
+}
+std::string Config::Get_kinetics_material_id(void){
+    return kinetics_config.material_id;
+}
+
+void Config::Set_is_kinetics_log_file(bool new_is_kinetics_log_file){
+    kinetics_config.is_kinetics_log_file = new_is_kinetics_log_file;
+}
+bool Config::Get_is_kinetics_log_file(void){
+    return kinetics_config.is_kinetics_log_file;
+}
+
+void Config::Set_kinetics_time_scale(double &new_time_parameter){
+    kinetics_config.kinetics_time_scale = new_time_parameter;
+}
+double Config::Get_kinetics_time_scale(void) const{
+    return kinetics_config.kinetics_time_scale;
 }
 
 int Config::Get_dim() const {
@@ -1153,6 +1372,13 @@ void CellEnergies::Set_von_Mises_stress(std::tuple<double, double, double, doubl
     von_Mises_elastic_stress =  std::sqrt(0.5 * (pow((sxx - syy), 2.0) + pow((sxx - szz), 2.0) + pow((syy - szz), 2.0) + 6 * pow(sxy, 2.0)));
     }
 
+void CellEnergies::Set_ambient_temperature(double &new_ambient_temperature){
+        ambient_temperature = new_ambient_temperature;
+    }
+double CellEnergies::Get_ambient_temperature(void){
+        return ambient_temperature;
+    }
+
 void CellEnergies::Set_homogeneous_elastic_energy(std::tuple<double, double, double> &sample_dimensions, double &von_Mises_elastic_stress, Material &matrix_material) { // [J]
     homogeneous_elastic_energy = pow(von_Mises_elastic_stress,2)*std::get<0>(sample_dimensions)*std::get<1>(sample_dimensions)*std::get<2>(sample_dimensions)/ (2.0*matrix_material.Get_Young_modulus());
     }
@@ -1209,7 +1435,7 @@ std::vector<double> CellEnergies::Get_n_self_energies(void) const {
 */
 // Constructor
 Material::Material(std::string Mid) {
-    material_database_reader(Mid, material_type, mass_density, melting_point, gb_cohesion_energy, Young_modulus, Poisson_ratio, yield_strength, strength, fracture_toughness, gb_width, gb_inclusion1_adh_energy);
+    material_database_reader(Mid, material_type, mass_density, melting_point, gb_cohesion_energy, Young_modulus, Poisson_ratio, yield_strength, strength, fracture_toughness, gb_width, gb_inclusion1_adh_energy, lagbs_corrosion_current, hagbs_corrosion_current, sigma3_corrosion_current);
 }
 
 Material::Material(std::string Mid, std::string Iid) {
@@ -1220,7 +1446,6 @@ Material::Material(std::string Mid, std::string Iid) {
 std::string Material::Get_material_type(void) const {
      return material_type;
 }
-
 double Material::Get_gb_width(void) const {
     return gb_width;
 }
@@ -1229,11 +1454,9 @@ double Material::Get_gb_width(void) const {
 double Material::Get_mass_density(void) const {
     return mass_density;
 }
-
 double Material::Get_melting_point(void) const {
     return melting_point;
 }
-
 double Material::Get_gb_cohesion_energy(void) const {
     return gb_cohesion_energy;
 }
@@ -1242,27 +1465,21 @@ double Material::Get_gb_cohesion_energy(void) const {
 double Material::Get_Young_modulus(void) const {
     return Young_modulus;
 }
-
 double Material::Get_Poisson_ratio(void) const {
     return Poisson_ratio;
 }
-
 double Material::Get_Yield_strength(void) const {
     return yield_strength;
 }
-
 double Material::Get_Strength(void) const {
     return strength;
 }
-
 double Material::Get_Fracture_toughness(void) const {
     return fracture_toughness;
 }
-
 double Material::Get_gb_inclusion1_adh_energy(void) const {
     return gb_inclusion1_adh_energy;
 }
-
 std::string Material::Get_inclusion_type(void) const {
     return inclusion_type;
 }
@@ -1273,6 +1490,16 @@ double Material::Get_inclusion_agglomeration_energy(void) const {
 
 double Material::Get_inclusion_mass_density(void) const {
     return inclusion_mass_density;
+}
+
+double Material::Get_lagbs_corrosion_current(void) const {
+    return lagbs_corrosion_current;
+}
+double Material::Get_hagbs_corrosion_current(void) const{
+    return hagbs_corrosion_current;
+}
+double Material::Get_sigma3_corrosion_current(void) const{
+    return sigma3_corrosion_current;
 }
 
 /// ========== END of class Material functions description

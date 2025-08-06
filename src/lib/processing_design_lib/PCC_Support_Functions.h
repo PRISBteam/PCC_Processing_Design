@@ -152,6 +152,14 @@ std::vector<std::tuple<double, double, double>> kSequence_barycentre_coordinates
 std::vector<std::tuple<double, double, double>> kFaceSeq_barycentre_coordinates(int k_type, std::vector<unsigned int> &kFace_sequence);
 
 /*!
+ * @brief Creates {0,1,2,..} State Vector based on the sequences of special cell numbers provided by the Processing module.
+ * @param cell_sequence
+ * @param cell_type
+ * @return
+ */
+std::vector<int> state_vector_by_sequence(std::vector<unsigned int> const &cell_sequence, int cell_type); // cell_type: 0 -nodes, 1 - edges, 2 - faces, 3 - polyhedrons
+
+/*!
  * @brief Shuffle (coordinates) data rows inside the file
  * @param name_infile
  * @param name_outfile

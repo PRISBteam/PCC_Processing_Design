@@ -17,7 +17,7 @@
 #include <Eigen/SparseCore>
 
 // local libraries
-#include "../../ini/ini_materials_reader.h" // material and inclusion parameters readers by their IDs
+#include "../../../ini/ini_materials_reader.h" // material and inclusion parameters readers by their IDs
 #include "../../PCC_Objects.h"
 #include "../../PCC_Support_Functions.h" // It must be here - first in this list (!)
 

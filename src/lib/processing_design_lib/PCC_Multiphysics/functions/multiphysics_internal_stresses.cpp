@@ -36,8 +36,6 @@ extern std::string output_dir;
 
 /// ======# 1 #================= void Multiphysics_crack_stress_field() function ==============================================================///
 
-using namespace std;
-
 /// Just three overloaded templates for "sign()" function [taken from the internet]
 template <typename TP> inline constexpr
 int sign(TP u, std::false_type is_signed) {

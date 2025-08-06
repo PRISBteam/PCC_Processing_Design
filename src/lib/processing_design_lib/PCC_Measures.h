@@ -3,7 +3,12 @@ std::vector<int> Edge_types_byFaces(std::vector<unsigned int> const &CellNumbs, 
 
 std::vector<double> j_fractions_vector(std::vector<int> const &TJsTypes); // based on Edges vector
 
+std::vector<double> face_edge_local_indices(std::vector<unsigned int> &special_face_sequence, Eigen::SparseMatrix<double> const& FES);
+
 double Face_edge_index(std::vector<unsigned int> &special_face_sequence, Eigen::SparseMatrix<double> const& FES, double norm_const = 1.0); // based on Edges vector
+
+std::vector<double> face_edge_normalised_local_indices(std::vector<unsigned int> &special_face_sequence, Eigen::SparseMatrix<double> const& FES);
+// std::vector<double> edge_node_normalised_local_indices(std::vector<unsigned int> &special_edge_sequence, Eigen::SparseMatrix<double> const& ENS);
 
 double Node_edge_index(std::vector<unsigned int> &special_face_sequence, Eigen::SparseMatrix<double> const& ENS, double norm_const = 1.0); // based on Edges vector
 

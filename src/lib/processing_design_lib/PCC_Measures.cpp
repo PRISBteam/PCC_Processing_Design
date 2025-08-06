@@ -74,6 +74,29 @@ std::vector<int> Edge_types_byFaces(std::vector<unsigned int> const &CellNumbs, 
     return TJsTypes;
 }
 
+std::vector<double> face_edge_normalised_local_indices(std::vector<unsigned int> &special_face_sequence, Eigen::SparseMatrix<double> const& FES){
+    std::vector<double> BL_normalised_indices(CellNumbs.at(2));
+
+//    double face_edge_index = 0.0;
+    std::vector<double> Face_inclusion_index(CellNumbs.at(2),0), j_fractions(4,0), d_fractions(3,0);
+    std::vector<double> TJsTypes; std::vector<int> TJsTypes_int;
+
+    TJsTypes_int = Edge_types_byFaces(CellNumbs, special_face_sequence, j_fractions, d_fractions);
+
+    for (int var : TJsTypes_int)
+        TJsTypes.push_back(var);
+
+    for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn) {
+        std::vector<double> j_types_neigh_fractions = GBIndex(fn, FES, TJsTypes);         //std::vector<double> GBIndex(unsigned int face_number, Eigen::SparseMatrix<double> const& FES, vector<double> const& TJsTypes) {
+
+        // computation of inclusion index
+        BL_normalised_indices.at(fn) = ( j_types_neigh_fractions.at(1) + 2.0 * j_types_neigh_fractions.at(2) + 3.0 * j_types_neigh_fractions.at(3))/ CellNumbs.at(2);
+    } // end of for ( fn < CellNumbs.at(cell_type))
+
+    return BL_normalised_indices;
+}
+
+
 double Face_edge_index(std::vector<unsigned int> &special_face_sequence, Eigen::SparseMatrix<double> const& FES, double norm_const) {
     double face_edge_index = 0.0;
     std::vector<double> Face_inclusion_index(CellNumbs.at(2),0), j_fractions(4,0), d_fractions(3,0);

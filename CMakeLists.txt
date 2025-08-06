@@ -15,13 +15,8 @@ add_executable( PCC_Processing_Design
         src/lib/PCC_Objects.cpp
         src/lib/PCC_Measures.cpp
 
+
         #[===[
-
-
-src/lib/PCC_Processing/PCC_Processing.cpp
-src/lib/PCC_Processing/functions/processing_assigned_labelling.cpp
-src/lib/PCC_Processing/functions/processing_induced_labelling.cpp
-src/lib/PCC_Processing/functions/processing_indexing.cpp
 
 src/lib/PCC_Subcomplex/PCC_Subcomplex.cpp
 src/lib/PCC_Subcomplex/functions/subcomplex_cross_section.cpp

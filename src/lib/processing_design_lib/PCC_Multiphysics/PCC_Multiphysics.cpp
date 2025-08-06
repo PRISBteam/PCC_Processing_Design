@@ -61,6 +61,7 @@ std::vector<CellEnergies> PCC_Multiphysics(Config &configuration, std::vector<Su
 
     std::string Mid_matrix, Mid_inclusion;
     std::tuple<double, double, double> sample_dimensions; // [m]
+
     double tau; // [seconds]
     Eigen::MatrixXd external_stress_tensor(3,3); // [Pa]
     std::vector<double> macrocrack_ini;

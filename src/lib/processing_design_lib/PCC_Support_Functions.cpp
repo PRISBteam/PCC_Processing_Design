@@ -1140,12 +1140,12 @@ double Get_TJsEntropy(std::vector<unsigned int> &special_faces_seq, std::vector<
 };
 
 std::vector<int> state_vector_by_sequence(std::vector<unsigned int> const &cell_sequence, int cell_type) { // cell_type: 0 -nodes, 1 - edges, 2 - faces, 3 - polyhedrons
-std::vector<int> state_vector(CellNumbs.at(cell_type), 0); // including 2D case
+    std::vector<int> state_vector(CellNumbs.at(cell_type), 0); // including 2D case
 
-for(auto cs : cell_sequence)
-state_vector.at(cs) = 1;
+    for(auto cs : cell_sequence)
+        state_vector.at(cs) = 1;
 
-return state_vector;
+    return state_vector;
 }
 
 /// ARCHIVE ///
