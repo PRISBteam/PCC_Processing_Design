@@ -345,6 +345,17 @@ int main() {
 
             p_cells_history = PCC_Kinetics(configuration, new_cells_design);
 
+            // TODO: TEMPORARY MODULE OUTPUT
+            std::ofstream corrosion_output;
+            corrosion_output.open(output_dir + "surface_corrosion_output.txt"s, ios::trunc);
+
+            for (auto pch : p_cells_history) {
+                corrosion_output << pch.at(0) << "\t" << pch.at(1) << "\t" << pch.at(2) << endl;
+                cout << pch.at(0) << "\t" << pch.at(1) << "\t" << pch.at(2) << endl;
+            }
+            corrosion_output.close();
+
+
             // ================ Elapsing time for the Kinetics module ================
             unsigned int Kinetics_time = clock();
             Kinetics_execution_time = (double) Kinetics_time - Processing_execution_time - Subcomplex_execution_time - Multiphysics_execution_time - Main_execution_time;

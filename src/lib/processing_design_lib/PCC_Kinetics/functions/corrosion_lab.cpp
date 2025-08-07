@@ -80,16 +80,22 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
     std::vector<double> corrosion_GB_normalised_coefficients(gb_number,0), CL_normalised_coefficients(gb_number,1);
     std::vector<unsigned int> special_f_sequence = processing_cells_design.Get_f_special_sequence();
     std::vector<unsigned int> special_g_sequence(gb_number,0);
-    if (processing_cells_design.Get_f_induced_sequence().size() > 0)
-        std::vector<unsigned int> special_g_sequence = processing_cells_design.Get_f_induced_sequence();
-    corrosion_GB_normalised_coefficients = face_edge_normalised_local_indices(special_f_sequence, FES); // function from Measures.h
+//    if (processing_cells_design.Get_f_induced_sequence().size() > 0)
+//        std::vector<unsigned int> special_g_sequence = processing_cells_design.Get_f_induced_sequence();
+//    corrosion_GB_normalised_coefficients = face_edge_normalised_local_indices(special_f_sequence, FES); // function from Measures.h
 /// TODO:    if (special_g_sequence.size() > 0)
 ///       CL_normalised_coefficients = face_edge_normalised_local_indices(special_g_sequence, FES); // function from Measures.h
     //GB size
-    std::vector<std::tuple<double, double, double>> face_barycentres_vector; // coordinate vectors defined globally
-    face_barycentres_vector = Tuple3Reader(paths_to_PCC_matrices.at(13)); // grain barycentres
+    std::vector<unsigned int> all_face_numbers;
+    for (unsigned int fn = 0; fn < CellNumbs.at(face_cell_type); ++fn)
+        all_face_numbers.push_back(fn);
 
-    std::vector<double> face_areas_vector;
+        std::vector<std::tuple<double, double, double>> face_barycentres_vector; // coordinate vectors defined globally
+    face_barycentres_vector = Tuple3Reader(paths_to_PCC_matrices.at(13)); // grain barycentres
+    if (face_barycentres_vector.size() == 0)
+        face_barycentres_vector = face_sequence_barycentre_coordinates(all_face_numbers);
+
+        std::vector<double> face_areas_vector;
     const char *cfav = paths_to_PCC_matrices.at(7).c_str(); // face areas in 3-PCC
     face_areas_vector = VectorDReader(cfav);
     //    const char *fncv = paths_to_PCC_matrices.at(13).c_str(); // face barycentres
@@ -153,61 +159,78 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
     std::vector<double> corrosion_time_vector(gb_number,0);
 
     do {
+        corrosion_time += time_step;
+
         corrosion_GB_normalised_coefficients = face_edge_normalised_local_indices(special_corr_sequence, FES); // function from Measures.h
+
 /// corrosion RATE
-        for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
-                gb_corrosion_rate.at(gbn) = config.Get_kinetics_time_scale() * gb_corrosion_current.at(gbn) * corrosion_GB_normalised_coefficients.at(gbn)*exp(gb_equivalent_stress.at(gbn)*CL_normalised_coefficients.at(gbn)*corrosion_activation_volume/(Boltzmann_constant*gb_temperature.at(gbn)));
+        for (unsigned int gbn = 0; gbn < gb_number; ++gbn) { // config.Get_kinetics_time_scale() *
+            gb_corrosion_rate.at(gbn) = gb_corrosion_current.at(gbn) *
+                                        corrosion_GB_normalised_coefficients.at(gbn) *
+                                        exp(gb_equivalent_stress.at(gbn) * CL_normalised_coefficients.at(gbn) *
+                                            corrosion_activation_volume /
+                                            (Boltzmann_constant * gb_temperature.at(gbn)));
 //                cout << "gb_corrosion_rate.at(gbn)" << "\t\t" << gb_corrosion_rate.at(gbn) << endl;
 //                cout << "face_sizes.at(gbn)" << "\t\t" << face_areas_vector.at(gbn) << endl;
-            }
 
-            std::vector<double> time_vector(gb_number,1); // finding MAX
-            for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
-                if (gb_corrosion_rate.at(gbn) > 0)
-                    time_vector.at(gbn) = std::pow(10,17)*face_areas_vector.at(gbn) / gb_corrosion_rate.at(gbn);
-            }
+            /// update number of corrosive GBs
+            if (gb_corrosion_rate.at(gbn) > 0 &&
+                std::find(special_corr_sequence.begin(), special_corr_sequence.end(), gbn) == special_corr_sequence.end())
+                special_corr_sequence.push_back(gbn);
+        }
+///        for(auto klp : special_corr_sequence) // function from Measures.h
+///            cout << "klp\t" << klp << endl;
+///        exit(90);
+
+        std::vector<double> time_vector(gb_number, 1); // finding MAX
+        for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
+            if (gb_corrosion_rate.at(gbn) > 0)
+                time_vector.at(gbn) = face_areas_vector.at(gbn) / gb_corrosion_rate.at(gbn);
+        }
 /// corrosion TIME STEP
-    time_step_coeff = config.Get_kinetics_time_scale(); // taken from 'kinetic_time_scale' in the config/Kinetic.ini file
-    time_step = time_step_coeff* *std::min_element(time_vector.begin(),time_vector.end());
+        time_step_coeff = config.Get_kinetics_time_scale(); // taken from 'kinetic_time_scale' in the config/Kinetic.ini file
+        time_step = time_step_coeff * (*std::min_element(time_vector.begin(), time_vector.end()));
+// REPAIR: cout << time_step << endl; exit(11);
 
 /// corrosion GB DAMAGE
         for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
-            corrosion_gb_damage.at(gbn) = corrosion_gb_damage.at(gbn) + time_step * gb_corrosion_rate.at(gbn)/face_areas_vector.at(gbn);
+            corrosion_gb_damage.at(gbn) =
+                    corrosion_gb_damage.at(gbn) + time_step * gb_corrosion_rate.at(gbn) / face_areas_vector.at(gbn);
             //cout << "gb_corrosion_rate" << "\t" << gb_corrosion_rate.at(gbn) << endl; //std::count(gb_corrosion_current.begin(),gb_corrosion_current.end(),0)/double(gb_corrosion_current.size()) << endl;
-            cout << "corrosion_gb_damage" << "\t" << corrosion_gb_damage.at(gbn) << endl; //std::count(gb_corrosion_current.begin(),gb_corrosion_current.end(),0)/double(gb_corrosion_current.size()) << endl;
-            if(corrosion_gb_damage.at(gbn) > 1) {
+////            cout << "corrosion_gb_damage" << "\t" << corrosion_gb_damage.at(gbn) << endl; //std::count(gb_corrosion_current.begin(),gb_corrosion_current.end(),0)/double(gb_corrosion_current.size()) << endl;
+            if (corrosion_gb_damage.at(gbn) > 1 && special_g_sequence.at(gbn) == 0) {
                 special_g_sequence.at(gbn) = 5;
                 corrosion_time_vector.at(gbn) = corrosion_time;
             }
         }
 /// 'cout' check
-            for (auto cs_itr = 0; cs_itr < corrosion_time_vector.size(); ++cs_itr) {
+        for (auto cs_itr = 0; cs_itr < corrosion_time_vector.size(); ++cs_itr) {
             if (corrosion_time_vector.at(cs_itr) > 0)
                 cout << "corrosion damage time at\t"
                      << std::distance(corrosion_time_vector.begin(), corrosion_time_vector.begin() + cs_itr)
                      << "\tis equal to\t" << corrosion_time_vector.at(cs_itr) << endl;
         }
 // GB corrosion time vector
+/// for(auto blc : corrosion_GB_normalised_coefficients)
+///     if(blc > 0) cout << blc << endl;
 
-        corrosion_time += time_step;
-            cout << "\t" << "Corrosion process time:\t" << corrosion_time << "\t" << "Time step:\t" << time_step << endl;
-        cout << "\t" << "Zero elements:\t" <<  std::count(corrosion_time_vector.begin(), corrosion_time_vector.end(), 0) << endl;
+        cout << "\t" << "Corrosion process time:\t" << corrosion_time << "\t" << "Time step:\t" << time_step << endl;
+        cout << "\t" << "Zero elements in the 'corrosion time vector':\t" << std::count(corrosion_time_vector.begin(), corrosion_time_vector.end(), 0) << endl;
 
-    } while( std::count(corrosion_time_vector.begin(), corrosion_time_vector.end(), 0) == 0 ); // END do while( corrosion_time < 1.0 )
+//Repair        cout << "special_corr_sequence size\t" << special_corr_sequence.size() << "\t" << "BL 0s number \t" << std::count(corrosion_GB_normalised_coefficients.begin(), corrosion_GB_normalised_coefficients.end(), 0) << endl;
+//Repair        cout << "BL size\t" << 1.0 - std::count(corrosion_GB_normalised_coefficients.begin(), corrosion_GB_normalised_coefficients.end(), 0)/ double(gb_number) << endl;
 
+        //cout << "BL size\t" << 1.0 - std::count(corrosion_GB_normalised_coefficients.begin(), corrosion_GB_normalised_coefficients.end(), 0)/double(gb_number) << endl;
+        //        cout << "BL size\t" << 1.0 - std::count(corrosion_GB_normalised_coefficients.begin(), corrosion_GB_normalised_coefficients.end(), 0)/double(gb_number) << endl;
 
-// TODO: TEMPORARY MODULE OUTPUT
-    std::ofstream corrosion_output;
-    corrosion_output.open(output_dir + "surface_corrosion_otput.txt"s, ios::trunc);
+///            } while( corrosion_time < 7.0*pow(10,-12)); // END do while( corrosion_time < 1.0 )
+    } while( std::count(corrosion_time_vector.begin(), corrosion_time_vector.end(), 0) != 0 ); // END do while( corrosion_time < 1.0 )
+
+/// result
     for (unsigned int gbn = 0; gbn < gb_number; ++gbn) {
         p_cells_history.push_back(
                 {double(gbn), corrosion_time_vector.at(gbn), get<2>(face_barycentres_vector.at(gbn))});
     }
-    for (auto pch : p_cells_history) {
-        corrosion_output << pch.at(0) << "\t" << pch.at(1) << "\t" << pch.at(2) << endl;
-        cout << pch.at(0) << "\t" << pch.at(1) << "\t" << pch.at(2) << endl;
-    }
-    corrosion_output.close();
 
     return p_cells_history;
 } // END of surface_interface_corrosion()

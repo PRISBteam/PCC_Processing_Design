@@ -5060,3 +5060,1916 @@ Kinetics time is equal to  12.2803  seconds
 ==================================================================================================================================================
 Total 3D runtime of the CPD code is equal to  14.6207  seconds
 -------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 19:53.
+
+Main execution time before modules is equal to  0.060413  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.28965  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  5.71184  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  7.06397  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 19:55.
+
+Main execution time before modules is equal to  0.056797  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.65495  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  7.9558  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  9.66968  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:22.
+
+Main execution time before modules is equal to  0.063311  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.16116  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  5.11166  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  6.33726  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:23.
+
+Main execution time before modules is equal to  0.064371  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.93626  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  7.17987  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  9.18172  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:23.
+
+Main execution time before modules is equal to  0.063831  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.17156  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  5.27358  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  6.51014  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:24.
+
+Main execution time before modules is equal to  0.060795  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.13732  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  6.19861  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  7.39797  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:24.
+
+Main execution time before modules is equal to  0.056093  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.31473  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:25.
+
+Main execution time before modules is equal to  0.057927  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.38734  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:26.
+
+Main execution time before modules is equal to  0.061562  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.07453  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:28.
+
+Main execution time before modules is equal to  0.063202  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.38345  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:29.
+
+Main execution time before modules is equal to  0.064112  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.3418  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:29.
+
+Main execution time before modules is equal to  0.062424  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.65815  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:31.
+
+Main execution time before modules is equal to  0.059694  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.57107  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:31.
+
+Main execution time before modules is equal to  0.059647  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.04027  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:32.
+
+Main execution time before modules is equal to  0.061552  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.42635  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  5.3749  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  6.86411  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:32.
+
+Main execution time before modules is equal to  0.058494  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.1304  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 6; Time - 23:33.
+
+Main execution time before modules is equal to  0.060659  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.04952  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  12.4296  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  13.5413  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 9:4.
+
+Main execution time before modules is equal to  0.040145  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.69105  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  149.591  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  151.324  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 9:45.
+
+Main execution time before modules is equal to  0.034831  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.44759  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  103.428  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  104.911  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:4.
+
+Main execution time before modules is equal to  0.050216  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.90128  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:5.
+
+Main execution time before modules is equal to  0.045936  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.16481  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:6.
+
+Main execution time before modules is equal to  0.058085  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.7604  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:7.
+
+Main execution time before modules is equal to  0.052776  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.97212  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:8.
+
+Main execution time before modules is equal to  0.053978  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:8.
+
+Main execution time before modules is equal to  0.059904  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.91231  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  10.2268  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  12.2009  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:9.
+
+Main execution time before modules is equal to  0.055208  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  2.06339  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:15.
+
+Main execution time before modules is equal to  0.064918  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  2.29168  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  27.1828  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  29.5416  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:18.
+
+Main execution time before modules is equal to  0.056024  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  2.19224  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:49.
+
+Main execution time before modules is equal to  0.050283  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.5902  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:50.
+
+Main execution time before modules is equal to  0.070352  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  2.26126  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:51.
+
+Main execution time before modules is equal to  0.067708  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  2.4294  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:52.
+
+Main execution time before modules is equal to  0.069406  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  2.27135  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 10:54.
+
+Main execution time before modules is equal to  0.097307  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  5.08664  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 11:2.
+
+Main execution time before modules is equal to  0.089255  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  3.24354  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 11:6.
+
+Main execution time before modules is equal to  0.105365  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  3.58795  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 11:15.
+
+Main execution time before modules is equal to  0.117701  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  3.2215  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 11:17.
+
+Main execution time before modules is equal to  0.071840  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  2.19309  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 11:18.
+
+Main execution time before modules is equal to  0.127156  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  4.3579  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 11:20.
+
+Main execution time before modules is equal to  0.106999  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  3.27855  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 11:23.
+
+Main execution time before modules is equal to  0.097571  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  3.43632  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 11:24.
+
+Main execution time before modules is equal to  0.127603  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  5.24735  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 12:18.
+
+Main execution time before modules is equal to  0.065462  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  1.91709  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 12:19.
+
+Main execution time before modules is equal to  0.048955  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.132229  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 12:20.
+
+Main execution time before modules is equal to  0.047125  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.120029  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 12:21.
+
+Main execution time before modules is equal to  0.059656  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.169108  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 12:22.
+
+Main execution time before modules is equal to  0.072438  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.190894  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 12:23.
+
+Main execution time before modules is equal to  0.056541  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.163792  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  28.3149  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  28.5362  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 12:25.
+
+Main execution time before modules is equal to  0.053029  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.128483  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  38.4788  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  38.6617  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 12:27.
+
+Main execution time before modules is equal to  0.053754  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.098237  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 12:27.
+
+Main execution time before modules is equal to  0.088585  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.228115  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  26.8749  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  27.1925  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 12:29.
+
+Main execution time before modules is equal to  0.049088  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.099057  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  26.1644  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  26.3134  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 12:32.
+
+Main execution time before modules is equal to  0.076478  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.22946  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  42.7356  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  43.0436  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 15:42.
+
+Main execution time before modules is equal to  0.053138  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.150846  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 15:45.
+
+Main execution time before modules is equal to  0.048742  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.15286  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  8.44023  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  8.64388  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 15:53.
+
+Main execution time before modules is equal to  0.054800  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.16986  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  8.40894  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  8.63563  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 15:54.
+
+Main execution time before modules is equal to  0.048829  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.119282  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  4.25943  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  4.42852  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 15:55.
+
+Main execution time before modules is equal to  0.044639  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.124065  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 15:56.
+
+Main execution time before modules is equal to  0.051960  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.140322  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+Kinetics time is equal to  5.30708  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  5.50067  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+ON    | PCC_Processing
+OFF    | PCC_Characterisation
+OFF    | PCC_Design
+OFF    | PCC_Writer
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 7; Time - 15:56.
+
+Main execution time before modules is equal to  0.048054  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.134329  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
