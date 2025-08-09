@@ -165,8 +165,10 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
         corrosion_GB_normalised_coefficients = face_edge_normalised_local_indices(special_corr_sequence, FES); // function from Measures.h
 
 /// corrosion RATE equation
+        time_step_coeff = config.Get_kinetics_time_scale(); // taken from 'kinetic_time_scale' in the config/Kinetic.ini file
+
         for (unsigned int gbn = 0; gbn < gb_number; ++gbn) {
-            gb_corrosion_rate.at(gbn) = gb_corrosion_current.at(gbn) * corrosion_GB_normalised_coefficients.at(gbn); /// add stress&temperature effects *exp(gb_equivalent_stress.at(gbn) * CL_normalised_coefficients.at(gbn) * corrosion_activation_volume / (Boltzmann_constant * gb_temperature.at(gbn)));
+            gb_corrosion_rate.at(gbn) = time_step_coeff *  gb_corrosion_current.at(gbn) * corrosion_GB_normalised_coefficients.at(gbn); /// add stress&temperature effects *exp(gb_equivalent_stress.at(gbn) * CL_normalised_coefficients.at(gbn) * corrosion_activation_volume / (Boltzmann_constant * gb_temperature.at(gbn)));
 //                cout << "gb_corrosion_rate.at(gbn)" << "\t\t" << gb_corrosion_rate.at(gbn) << endl;
 //                cout << "face_sizes.at(gbn)" << "\t\t" << face_areas_vector.at(gbn) << endl;
 
@@ -183,8 +185,8 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
                 time_vector.at(gbn) = face_areas_vector.at(gbn) / gb_corrosion_rate.at(gbn);
         }
 /// corrosion TIME STEP
-        time_step_coeff = config.Get_kinetics_time_scale(); // taken from 'kinetic_time_scale' in the config/Kinetic.ini file
-        time_step = time_step_coeff * (*std::min_element(time_vector.begin(), time_vector.end()));
+        double tsc = 1000000.0; /// temporary
+        time_step = tsc * (*std::min_element(time_vector.begin(), time_vector.end()));
 
 /// corrosion GB DAMAGE
         for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
@@ -210,7 +212,8 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
 //Repair        cout << "BL size\t" << 1.0 - std::count(corrosion_GB_normalised_coefficients.begin(), corrosion_GB_normalised_coefficients.end(), 0)/ double(gb_number) << endl;
 
 ///            } while( corrosion_time < 7.0*pow(10,-12)); // END do while( corrosion_time < 1.0 )
-    } while( std::count(corrosion_time_vector.begin(), corrosion_time_vector.end(), 0) != 0 ); // END do while( corrosion_time < 1.0 )
+/// temporary: 0.1*corrosion_time_vector.size()
+    } while( std::count(corrosion_time_vector.begin(), corrosion_time_vector.end(), 0) > 0.1*corrosion_time_vector.size() ); // END do while( corrosion_time < 1.0 )
 
 /// result
     for (unsigned int gbn = 0; gbn < gb_number; ++gbn) {
