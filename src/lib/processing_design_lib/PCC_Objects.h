@@ -1,7 +1,7 @@
 #ifndef PCC_PROCESSING_DESIGN_PCC_OBJECTS_H
 #define PCC_PROCESSING_DESIGN_PCC_OBJECTS_H
 
-#include <Eigen/SparseCore>
+#include "../external/Eigen/SparseCore"
 #include <set>
 
 /// ==== # 4 # =============== Agglomeration class  ========================= ///

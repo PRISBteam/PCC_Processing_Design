@@ -7,7 +7,7 @@
 #include <set>
 #include <numeric>
 
-#include <Eigen/SparseCore>
+#include "../external/Eigen/SparseCore"
 
 using namespace std; // standard namespace
 using namespace Eigen; // standard namespace

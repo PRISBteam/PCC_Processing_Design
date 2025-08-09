@@ -14,8 +14,8 @@
 // #include <execution> // Require C++ 17 and above
 
 // external libraries
-#include <Eigen/Core>
-#include <Eigen/SparseCore>
+#include "../../../external/Eigen/Core"
+#include "../../../external/Eigen/SparseCore"
 
 // local libraries
 #include "../../PCC_Objects.h"

@@ -5,8 +5,8 @@
 #include <vector>
 #include <set>
 
-#include <Eigen/Core>
-#include <Eigen/SparseCore>
+#include "../external/Eigen/Core"
+#include "../external/Eigen/SparseCore"
 
 using namespace std; // standard namespace
 using namespace Eigen; // standard namespace

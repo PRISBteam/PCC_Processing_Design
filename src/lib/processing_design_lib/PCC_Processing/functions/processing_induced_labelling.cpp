@@ -13,8 +13,8 @@
 #include <random> // Require C++ 11 and above
 
 // external libraries
-#include <Eigen/Core>
-#include <Eigen/SparseCore>
+#include "../../../external/Eigen/Core"
+#include "../../../external/Eigen/SparseCore"
 
 // local libraries
 #include "../../../ini/ini_materials_reader.h" // material and inclusion parameters readers by their IDs

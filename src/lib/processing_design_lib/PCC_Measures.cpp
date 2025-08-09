@@ -10,8 +10,8 @@
 #include <vector>
 
 // external libraries (must be added to the STL directory!)
-#include <Eigen/Core>
-#include <Eigen/SparseCore>
+#include "../external/Eigen/Core"
+#include "../external/Eigen/SparseCore"
 
 // local libraries
 #include "PCC_Support_Functions.h" // It must be here - first in this list (!)
