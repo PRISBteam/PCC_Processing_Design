@@ -136,6 +136,7 @@ std::vector<int> config_reader_main(Config &configuration) {
         auto& collection = main_ini["general"];
         if (collection.has("output_dir"))
             output_dir = main_ini.get("general").get("output_dir");
+            configuration.Set_output_dir(output_dir);
     }
 
 /// Output to the screen/console

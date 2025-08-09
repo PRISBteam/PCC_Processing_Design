@@ -119,6 +119,7 @@ public:
     /// main
     void Set_main_type(std::string &main_type_str);
     void Set_pcc_source_dir(std::string &pcc_source_directory);
+    void Set_output_dir(std::string &output_directory);
     void Set_pcc_standard_id(std::string &pcc_standard_id);
     /// subcomplex
     void Set_cut_length(double &new_cut_lenth);

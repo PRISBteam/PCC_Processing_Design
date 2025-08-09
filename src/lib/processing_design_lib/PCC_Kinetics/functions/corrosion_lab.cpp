@@ -95,18 +95,18 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
     if (face_barycentres_vector.size() == 0)
         face_barycentres_vector = face_sequence_barycentre_coordinates(all_face_numbers);
 
-        std::vector<double> face_areas_vector;
+    std::vector<double> face_areas_vector;
     const char *cfav = paths_to_PCC_matrices.at(7).c_str(); // face areas in 3-PCC
     face_areas_vector = VectorDReader(cfav);
     //    const char *fncv = paths_to_PCC_matrices.at(13).c_str(); // face barycentres
-// REPAIR for (auto fav : face_areas_vector)  cout << fav << endl;  exit(0);
+   // REPAIR for (auto fav : face_areas_vector)  cout << fav << endl;  exit(0);
 
     /// read gb sizes, von Mizes (equivalent) stresses and temperatures
     config_reader_multiphysics(config);
 
     std::tuple<double, double, double> sample_dimensions = config.Get_multiphysics_sample_dimensions(); // [m]
 
-    std::vector<double> gb_equivalent_stress(CellNumbs.at(face_cell_type)),gb_temperature(CellNumbs.at(face_cell_type));
+    std::vector<double> gb_equivalent_stress(CellNumbs.at(face_cell_type)), gb_temperature(CellNumbs.at(face_cell_type));
 
     std::vector<CellEnergies> gb_energies(gb_number);
     Eigen::MatrixXd est = config.Get_multiphysics_external_stress_tensor(); // external stress tensor
@@ -120,8 +120,7 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
     }
 
     //assigning for all grain boundaries
-    for (unsigned int i = 0; i < CellNumbs.at(face_cell_type); ++i) //
-    {
+    for (unsigned int i = 0; i < CellNumbs.at(face_cell_type); ++i) {
         face_areas_vector.at(i) = face_areas_vector.at(i) * (get<0>(sample_dimensions) * get<1>(sample_dimensions)); /// WARNING! Works well only for cubic samples!
         gb_equivalent_stress.at(i) = gb_energies.at(i).Get_von_Mises_stress();
         gb_temperature.at(i) = gb_energies.at(i).Get_ambient_temperature();
@@ -130,13 +129,12 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
 /// corrosion rate
     std::vector<double> gb_corrosion_rate(gb_number);
     double Boltzmann_constant = 1.380649*pow(10,-23); // [J/K]
-    ///
+
+    ///! coefficient under stress exponent
     double corrosion_activation_volume = 1.0*pow(10,-30);
 
 ///    Corrosion process
 //================================================
-    /// initial corrosion settings
-    double corr_gb_initial_fraction = 0.2; /// 20% "hardcoded" initial condition on surface of the sample
     std::vector<unsigned int> special_corr_sequence; // corrosive grain boundaries
 
 // only surface GBs in the set
@@ -148,6 +146,8 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
 
 // initial
     unsigned int NewCellNumb = 0;
+    /// initial corrosion settings
+    double corr_gb_initial_fraction = 0.2; /// 20% "hardcoded" initial condition on surface of the sample
     for (unsigned int gbn = 0; gbn < corr_gb_initial_fraction*surface_gb_set.size(); ++gbn) {
         NewCellNumb = NewCellNumb_R(surface_gb_set.size()); /// advanced NewCellNumb_R generator of special cell IDs
         special_corr_sequence.push_back(surface_gb_set.at(NewCellNumb)); // defined in the assigned labelling library; "\functions" subfolder
@@ -157,32 +157,27 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
     std::vector<double> corrosion_gb_damage(gb_number);
     double time_step_coeff = 0, time_step = 0;
     std::vector<double> corrosion_time_vector(gb_number,0);
-
+/// ===================== START OF THE SURFACE CORROSION LOOP ============================================ ///
     do {
         corrosion_time += time_step;
 
+//! The "BL" grain boundary index counting the weighted amount of their local corrosive GB neighbours
         corrosion_GB_normalised_coefficients = face_edge_normalised_local_indices(special_corr_sequence, FES); // function from Measures.h
 
-/// corrosion RATE
-        for (unsigned int gbn = 0; gbn < gb_number; ++gbn) { // config.Get_kinetics_time_scale() *
-            gb_corrosion_rate.at(gbn) = gb_corrosion_current.at(gbn) *
-                                        corrosion_GB_normalised_coefficients.at(gbn) *
-                                        exp(gb_equivalent_stress.at(gbn) * CL_normalised_coefficients.at(gbn) *
-                                            corrosion_activation_volume /
-                                            (Boltzmann_constant * gb_temperature.at(gbn)));
+/// corrosion RATE equation
+        for (unsigned int gbn = 0; gbn < gb_number; ++gbn) {
+            gb_corrosion_rate.at(gbn) = gb_corrosion_current.at(gbn) * corrosion_GB_normalised_coefficients.at(gbn); /// add stress&temperature effects *exp(gb_equivalent_stress.at(gbn) * CL_normalised_coefficients.at(gbn) * corrosion_activation_volume / (Boltzmann_constant * gb_temperature.at(gbn)));
 //                cout << "gb_corrosion_rate.at(gbn)" << "\t\t" << gb_corrosion_rate.at(gbn) << endl;
 //                cout << "face_sizes.at(gbn)" << "\t\t" << face_areas_vector.at(gbn) << endl;
 
-            /// update number of corrosive GBs
+        /// update the number of corrosive GBs in the PCC
             if (gb_corrosion_rate.at(gbn) > 0 &&
                 std::find(special_corr_sequence.begin(), special_corr_sequence.end(), gbn) == special_corr_sequence.end())
                 special_corr_sequence.push_back(gbn);
         }
-///        for(auto klp : special_corr_sequence) // function from Measures.h
-///            cout << "klp\t" << klp << endl;
-///        exit(90);
 
-        std::vector<double> time_vector(gb_number, 1); // finding MAX
+    /// finding corrosion grain boundary DAMAGE time
+        std::vector<double> time_vector(gb_number, 1);
         for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
             if (gb_corrosion_rate.at(gbn) > 0)
                 time_vector.at(gbn) = face_areas_vector.at(gbn) / gb_corrosion_rate.at(gbn);
@@ -190,14 +185,12 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
 /// corrosion TIME STEP
         time_step_coeff = config.Get_kinetics_time_scale(); // taken from 'kinetic_time_scale' in the config/Kinetic.ini file
         time_step = time_step_coeff * (*std::min_element(time_vector.begin(), time_vector.end()));
-// REPAIR: cout << time_step << endl; exit(11);
 
 /// corrosion GB DAMAGE
         for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
             corrosion_gb_damage.at(gbn) =
                     corrosion_gb_damage.at(gbn) + time_step * gb_corrosion_rate.at(gbn) / face_areas_vector.at(gbn);
-            //cout << "gb_corrosion_rate" << "\t" << gb_corrosion_rate.at(gbn) << endl; //std::count(gb_corrosion_current.begin(),gb_corrosion_current.end(),0)/double(gb_corrosion_current.size()) << endl;
-////            cout << "corrosion_gb_damage" << "\t" << corrosion_gb_damage.at(gbn) << endl; //std::count(gb_corrosion_current.begin(),gb_corrosion_current.end(),0)/double(gb_corrosion_current.size()) << endl;
+/// updating corrosion damage vector
             if (corrosion_gb_damage.at(gbn) > 1 && special_g_sequence.at(gbn) == 0) {
                 special_g_sequence.at(gbn) = 5;
                 corrosion_time_vector.at(gbn) = corrosion_time;
@@ -206,22 +199,15 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
 /// 'cout' check
         for (auto cs_itr = 0; cs_itr < corrosion_time_vector.size(); ++cs_itr) {
             if (corrosion_time_vector.at(cs_itr) > 0)
-                cout << "corrosion damage time at\t"
-                     << std::distance(corrosion_time_vector.begin(), corrosion_time_vector.begin() + cs_itr)
-                     << "\tis equal to\t" << corrosion_time_vector.at(cs_itr) << endl;
+                cout << "corrosion damage time at grain boundary #\t"
+                     << std::distance(corrosion_time_vector.begin(), corrosion_time_vector.begin() + cs_itr) << "\tis equal to\t" << corrosion_time_vector.at(cs_itr) << endl;
         }
-// GB corrosion time vector
-/// for(auto blc : corrosion_GB_normalised_coefficients)
-///     if(blc > 0) cout << blc << endl;
 
-        cout << "\t" << "Corrosion process time:\t" << corrosion_time << "\t" << "Time step:\t" << time_step << endl;
-        cout << "\t" << "Zero elements in the 'corrosion time vector':\t" << std::count(corrosion_time_vector.begin(), corrosion_time_vector.end(), 0) << endl;
+        cout << "\t" << "Full corrosion process Time:\t" << corrosion_time << "\t" << "with the current Time Step:\t" << time_step << endl;
+        cout << "\t" << "Zero elements in the 'corrosion time vector':\t" << std::count(corrosion_time_vector.begin(), corrosion_time_vector.end(), 0) << "\t out of\t" << CellNumbs.at(face_cell_type) << endl;
 
 //Repair        cout << "special_corr_sequence size\t" << special_corr_sequence.size() << "\t" << "BL 0s number \t" << std::count(corrosion_GB_normalised_coefficients.begin(), corrosion_GB_normalised_coefficients.end(), 0) << endl;
 //Repair        cout << "BL size\t" << 1.0 - std::count(corrosion_GB_normalised_coefficients.begin(), corrosion_GB_normalised_coefficients.end(), 0)/ double(gb_number) << endl;
-
-        //cout << "BL size\t" << 1.0 - std::count(corrosion_GB_normalised_coefficients.begin(), corrosion_GB_normalised_coefficients.end(), 0)/double(gb_number) << endl;
-        //        cout << "BL size\t" << 1.0 - std::count(corrosion_GB_normalised_coefficients.begin(), corrosion_GB_normalised_coefficients.end(), 0)/double(gb_number) << endl;
 
 ///            } while( corrosion_time < 7.0*pow(10,-12)); // END do while( corrosion_time < 1.0 )
     } while( std::count(corrosion_time_vector.begin(), corrosion_time_vector.end(), 0) != 0 ); // END do while( corrosion_time < 1.0 )

@@ -53,6 +53,9 @@ void Config::Set_main_type(std::string &main_type_str){
 void Config::Set_pcc_source_dir(std::string &pcc_source_directory){
     main_config.pcc_source_dir = pcc_source_directory;
 }
+void Config::Set_output_dir(std::string &output_directory){
+    main_config.output_dir = output_directory;
+}
 void Config::Set_pcc_standard_id(std::string &pcc_standard_id){
     main_config.pcc_standard = pcc_standard_id;
 }
