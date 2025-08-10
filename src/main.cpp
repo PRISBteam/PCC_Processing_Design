@@ -29,6 +29,7 @@
 #include <string>
 #include <ctime>
 #include <vector>
+#include <cmath>
 #include <set>
 
 ///* ------------------------------------------------------------------------------- *
