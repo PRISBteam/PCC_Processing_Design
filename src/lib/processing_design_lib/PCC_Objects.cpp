@@ -352,6 +352,13 @@ void Config::Set_kinetics_time_scale(double &new_time_parameter){
 double Config::Get_kinetics_time_scale(void) const{
     return kinetics_config.kinetics_time_scale;
 }
+void Config::Set_kinetics_corrosion_rate_scale(double &new_corrosion_rate_parameter){
+    kinetics_config.kinetics_corrosion_rate_scale = new_corrosion_rate_parameter;
+}
+double Config::Get_kinetics_corrosion_rate_scale(void) const{
+    return kinetics_config.kinetics_corrosion_rate_scale;
+}
+
 
 int Config::Get_dim() const {
         return config_dim;

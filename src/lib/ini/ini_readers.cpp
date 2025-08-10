@@ -1437,13 +1437,18 @@ void config_reader_kinetics(Config &configuration) {
     }
 
     //corrosion
-    double time_constant;
+    double time_constant, corrosion_rate;
     if (kinetics_ini.has("corrosion")) {
         auto &collection = kinetics_ini["corrosion"];
         if (collection.has("kinetic_time_scale")) {
             time_constant = stod(kinetics_ini.get("corrosion").get("kinetic_time_scale"));
             configuration.Set_kinetics_time_scale(time_constant);
         }
+        if (collection.has("corrosion_rate_coeff")) {
+            corrosion_rate = stod(kinetics_ini.get("corrosion").get("corrosion_rate_coeff"));
+            configuration.Set_kinetics_corrosion_rate_scale(corrosion_rate);
+        }
+
     }
 
     // module output

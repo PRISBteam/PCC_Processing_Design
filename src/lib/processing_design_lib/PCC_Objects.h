@@ -91,6 +91,7 @@ private:
         std::string nk_mode, ek_mode, fk_mode, pk_mode;
         std::string material_id;
         double kinetics_time_scale;
+        double kinetics_corrosion_rate_scale;
 //        double stress;
 //        double temperature;
         bool is_kinetics_log_file;
@@ -247,7 +248,8 @@ public:
 // corrosion
     void Set_kinetics_time_scale(double &new_time_parameter);
     double Get_kinetics_time_scale(void) const;
-
+    void Set_kinetics_corrosion_rate_scale(double &new_corrosion_rate_parameter);
+    double Get_kinetics_corrosion_rate_scale(void) const;
 };
 // ConfigVector (../config/main.ini) contains ALL the control variables needed for the program execution
 

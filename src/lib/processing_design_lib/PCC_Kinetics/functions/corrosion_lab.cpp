@@ -166,10 +166,9 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
         corrosion_GB_normalised_coefficients = face_edge_normalised_local_indices(special_corr_sequence, FES); // function from Measures.h
 
 /// corrosion RATE equation
-        time_step_coeff = config.Get_kinetics_time_scale(); // taken from 'kinetic_time_scale' in the config/Kinetic.ini file
-
+        double corrosion_rate_coefficient = config.Get_kinetics_corrosion_rate_scale(); // taken from 'kinetics_corrosiion_rate_coeff' in the config/Kinetic.ini file
         for (unsigned int gbn = 0; gbn < gb_number; ++gbn) {
-            gb_corrosion_rate.at(gbn) = time_step_coeff *  gb_corrosion_current.at(gbn) * corrosion_GB_normalised_coefficients.at(gbn); /// add stress&temperature effects *exp(gb_equivalent_stress.at(gbn) * CL_normalised_coefficients.at(gbn) * corrosion_activation_volume / (Boltzmann_constant * gb_temperature.at(gbn)));
+            gb_corrosion_rate.at(gbn) = corrosion_rate_coefficient *  gb_corrosion_current.at(gbn) * corrosion_GB_normalised_coefficients.at(gbn); /// add stress&temperature effects *exp(gb_equivalent_stress.at(gbn) * CL_normalised_coefficients.at(gbn) * corrosion_activation_volume / (Boltzmann_constant * gb_temperature.at(gbn)));
 //                cout << "gb_corrosion_rate.at(gbn)" << "\t\t" << gb_corrosion_rate.at(gbn) << endl;
 //                cout << "face_sizes.at(gbn)" << "\t\t" << face_areas_vector.at(gbn) << endl;
 
@@ -186,8 +185,8 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
                 time_vector.at(gbn) = face_areas_vector.at(gbn) / gb_corrosion_rate.at(gbn);
         }
 /// corrosion TIME STEP
-        double tsc = 1000000.0; /// temporary
-        time_step = tsc * (*std::min_element(time_vector.begin(), time_vector.end()));
+        time_step_coeff = config.Get_kinetics_time_scale(); // taken from 'kinetic_time_scale' in the config/Kinetic.ini file
+        time_step = time_step_coeff * (*std::min_element(time_vector.begin(), time_vector.end()));
 
 /// corrosion GB DAMAGE
         for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
