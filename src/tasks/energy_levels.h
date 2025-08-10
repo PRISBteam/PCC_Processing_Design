@@ -1,0 +1,9 @@
+#ifndef PCC_PROCESSING_DESIGN_ENERGY_LEVELS_H
+#define PCC_PROCESSING_DESIGN_ENERGY_LEVELS_H
+
+/*!
+ *
+ */
+void energy_plasticity();
+
+#endif //PCC_PROCESSING_DESIGN_ENERGY_LEVELS_H
