@@ -62,83 +62,6 @@ unsigned int NewCellNumb_R_fast(unsigned int OCellsNumb){ // Random generation m
     return rand() % (OCellsNumb - 1); // Fast standard generator instead of the mt19937 Mersenne Twister 19937 - about 100-1000 times faster quasi-random generation ! // random generation of the boundary number in the range from 0 to OrdinaryCellNumbs.size()-1
 } // END of NewCellNumb_R_fast(unsigned int OCellsNumb)
 
-/*! ## 2 ##
- * @details Random generation functions for a strips of k-cells (k = cell_type). Use mt19937 Mersenne Twister 19937. This RW choose ANY faces, not necessary only ordinary ones (!)
- * @param cell_type
- * @param iniCellNumber
- * @param strip_length
- * @param Leap_friquency
- * @param Leap_dist
- * @return
- */
-std::vector<unsigned int> NewCellsStrip_RW(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, double Leap_friquency, double Leap_dist) {
-    std::vector<unsigned int> NewStripVector_RW; // function output
-    std::vector<double> neigh_Cells; // vector of doubles for all neighbours of each k-cell (k = cell_type)
-
-    /// Sparse k-Cell Adjacency matrix - reading from the file of the considered PCC
-    SpMat AFS = SMatrixReader(paths_to_PCC_matrices.at(cell_type), CellNumbs.at(cell_type), CellNumbs.at(cell_type)); // reading sparse incidence matrix from file
-    AFS = 0.5 * (AFS + Eigen::SparseMatrix<double>(AFS.transpose())); // (!) Symmetrisation: Full symmetric adjacency matrix instead of its triagonal form
-
-    NewStripVector_RW.push_back(iniCellNumber); /// Adding initial (first in the strip/chain) random cell as the end cell of the strip/chain
-
-    /// Loop over strip_length (in the current basket of the strip lengths distribution)
-    std::random_device rd; // seed for a device generating unsigned random integers
-    std::mt19937 mt(rd()); // advanced random engine based on the Mersenne Twister 19937 algorithm proposed in [M. Matsumoto and T. Nishimura, ACM Transactions on Modeling and Computer Simulation, Vol. 8, No. 1, January 1998, Pages 3–30, https://dl.acm.org/doi/pdf/10.1145/272991.272995]
-
-    for (int strip_length_counter = 0; strip_length_counter < strip_length; strip_length_counter++) {
-        for (int k = 0; k < CellNumbs.at(cell_type); ++k) { // loop over all the k-cells in the PCC: looking for all the k-cell neighbours.
-            if (AFS.coeff(NewStripVector_RW.back(), k) == 1)
-                neigh_Cells.push_back(k); // set of all the k-cell neighbours
-        } // end for()
-
-        /// New random choice between all the k-cell neighbours
-        uniform_int_distribution<size_t> uni_rand (0, neigh_Cells.size() - 1); // uniformly distributed from 0 to OCellsNumb-1 inclusive
-        NewStripVector_RW.push_back((unsigned int) neigh_Cells.at(uni_rand(mt))); // add randomly new element to the NewFacesStrip_RW face vector from the set of the k-cell neighbours
-
-        neigh_Cells.clear(); // clear the vector for the next k-cell neighbours
-    } // end of  for (int strip_length_counter = 0; strip_length_counter < f_length; strip_length_counter++) {
-
-    return NewStripVector_RW;
-} // END of NewCellsStrip_RW(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, int Leap_friquency, double Leap_dist)
-
-/*! ## 2.2 ##
- * @details Random generation functions for a strips of k-cells (k = cell_type). Use standard ('rand()' - simple and fast but not very reliable) generator of random numbers. This RW choose ANY faces, not necessary only ordinary ones (!)
- * @param cell_type
- * @param iniCellNumber
- * @param strip_length
- * @param Leap_friquency
- * @param Leap_dist
- * @return
- */
-std::vector<unsigned int> NewCellsStrip_RW_fast(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, double Leap_friquency, double Leap_dist) {
-    std::vector<unsigned int> NewStripVector_RW; // function output
-    std::vector<double> neigh_Cells; // vector of doubles for all neighbours of each k-cell (k = cell_type)
-
-    /// Sparse k-Cell Adjacency matrix - reading from the file of the considered PCC
-    SpMat AFS = SMatrixReader(paths_to_PCC_matrices.at(cell_type), CellNumbs.at(cell_type), CellNumbs.at(cell_type)); // reading sparse incidence matrix from file
-    AFS = 0.5 * (AFS + Eigen::SparseMatrix<double>(AFS.transpose())); // (!) Symmetrisation: Full symmetric adjacency matrix instead of its triagonal form
-
-    NewStripVector_RW.push_back(iniCellNumber); /// Adding initial (first in the strip/chain) random cell as the end cell of the strip/chain
-
-    /// Loop over strip_length (in the current basket of the strip lengths distribution)
-    for (int strip_length_counter = 0; strip_length_counter < strip_length; strip_length_counter++) {
-        for (int k = 0; k < CellNumbs.at(cell_type); ++k) { // loop over all the k-cells in the PCC: looking for all the k-cell neighbours.
-            if (AFS.coeff(NewStripVector_RW.back(), k) == 1)
-                neigh_Cells.push_back(k); // set of all the k-cell neighbours
-        } // end for()
-
-        /// New random choice between all the k-cell neighbours
-        NewStripVector_RW.push_back((unsigned int) neigh_Cells.at( rand() % (neigh_Cells.size() - 1) )); // add randomly new element to the NewFacesStrip_RW face vector from the set of the k-cell neighbours
-
-        neigh_Cells.clear(); // clear the vector for the next k-cell neighbours
-    } // end of  for (int strip_length_counter = 0; strip_length_counter < f_length; strip_length_counter++) {
-
-    return NewStripVector_RW;
-} // END of NewCellsStrip_RW_fast(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, int Leap_friquency, double Leap_dist)
-
-///--------------------------------------------------------------------------------
-/// Several more complex generation function (generation of k-cell sequences)
-///--------------------------------------------------------------------------------
 
 /*! ## 3 ##
  * @details The Random generation process function. S_Vector with its non-zero elements set any pre-define structure of special element feeding to the function Processing_Random.
@@ -270,6 +193,89 @@ std::vector<double> j_edge_fractions(4, 0), d_edge_fractions(3, 0);
 return special_cell_series;
 } // END of the Random generation function
 
+/*! ## 2 ##
+ * @details Random generation functions for a strips of k-cells (k = cell_type). Use mt19937 Mersenne Twister 19937. This RW choose ANY faces, not necessary only ordinary ones (!)
+ * @param cell_type
+ * @param iniCellNumber
+ * @param strip_length
+ * @param Leap_friquency
+ * @param Leap_dist
+ * @return
+ */
+
+std::vector<unsigned int> NewCellsStrip_RW(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, double Leap_friquency, double Leap_dist) {
+   std::vector<unsigned int> NewStripVector_RW; // function output
+   std::vector<double> neigh_Cells; // vector of doubles for all neighbours of each k-cell (k = cell_type)
+/**
+
+   /// Sparse k-Cell Adjacency matrix - reading from the file of the considered PCC
+   SpMat AFS = SMatrixReader(paths_to_PCC_matrices.at(cell_type), CellNumbs.at(cell_type), CellNumbs.at(cell_type)); // reading sparse incidence matrix from file
+   AFS = 0.5 * (AFS + Eigen::SparseMatrix<double>(AFS.transpose())); // (!) Symmetrisation: Full symmetric adjacency matrix instead of its triagonal form
+
+   NewStripVector_RW.push_back(iniCellNumber); /// Adding initial (first in the strip/chain) random cell as the end cell of the strip/chain
+
+   /// Loop over strip_length (in the current basket of the strip lengths distribution)
+   std::random_device rd; // seed for a device generating unsigned random integers
+   std::mt19937 mt(rd()); // advanced random engine based on the Mersenne Twister 19937 algorithm proposed in [M. Matsumoto and T. Nishimura, ACM Transactions on Modeling and Computer Simulation, Vol. 8, No. 1, January 1998, Pages 3–30, https://dl.acm.org/doi/pdf/10.1145/272991.272995]
+
+   for (int strip_length_counter = 0; strip_length_counter < strip_length; strip_length_counter++) {
+       for (int k = 0; k < CellNumbs.at(cell_type); ++k) { // loop over all the k-cells in the PCC: looking for all the k-cell neighbours.
+           if (AFS.coeff(NewStripVector_RW.back(), k) == 1)
+               neigh_Cells.push_back(k); // set of all the k-cell neighbours
+       } // end for()
+
+       /// New random choice between all the k-cell neighbours
+       uniform_int_distribution<size_t> uni_rand (0, neigh_Cells.size() - 1); // uniformly distributed from 0 to OCellsNumb-1 inclusive
+       NewStripVector_RW.push_back((unsigned int) neigh_Cells.at(uni_rand(mt))); // add randomly new element to the NewFacesStrip_RW face vector from the set of the k-cell neighbours
+
+       neigh_Cells.clear(); // clear the vector for the next k-cell neighbours
+   } // end of  for (int strip_length_counter = 0; strip_length_counter < f_length; strip_length_counter++) {
+
+ **/
+   return NewStripVector_RW;
+} // END of NewCellsStrip_RW(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, int Leap_friquency, double Leap_dist)
+
+/*! ## 2.2 ##
+* @details Random generation functions for a strips of k-cells (k = cell_type). Use standard ('rand()' - simple and fast but not very reliable) generator of random numbers. This RW choose ANY faces, not necessary only ordinary ones (!)
+* @param cell_type
+* @param iniCellNumber
+* @param strip_length
+* @param Leap_friquency
+* @param Leap_dist
+* @return
+*/
+
+std::vector<unsigned int> NewCellsStrip_RW_fast(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, double Leap_friquency, double Leap_dist) {
+    std::vector<unsigned int> NewStripVector_RW; // function output
+    std::vector<double> neigh_Cells; // vector of doubles for all neighbours of each k-cell (k = cell_type)
+/**
+
+    /// Sparse k-Cell Adjacency matrix - reading from the file of the considered PCC
+    SpMat AFS = SMatrixReader(paths_to_PCC_matrices.at(cell_type), CellNumbs.at(cell_type), CellNumbs.at(cell_type)); // reading sparse incidence matrix from file
+    AFS = 0.5 * (AFS + Eigen::SparseMatrix<double>(AFS.transpose())); // (!) Symmetrisation: Full symmetric adjacency matrix instead of its triagonal form
+
+    NewStripVector_RW.push_back(iniCellNumber); /// Adding initial (first in the strip/chain) random cell as the end cell of the strip/chain
+
+    /// Loop over strip_length (in the current basket of the strip lengths distribution)
+    for (int strip_length_counter = 0; strip_length_counter < strip_length; strip_length_counter++) {
+        for (int k = 0; k < CellNumbs.at(cell_type); ++k) { // loop over all the k-cells in the PCC: looking for all the k-cell neighbours.
+            if (AFS.coeff(NewStripVector_RW.back(), k) == 1)
+                neigh_Cells.push_back(k); // set of all the k-cell neighbours
+        } // end for()
+
+        /// New random choice between all the k-cell neighbours
+        NewStripVector_RW.push_back((unsigned int) neigh_Cells.at( rand() % (neigh_Cells.size() - 1) )); // add randomly new element to the NewFacesStrip_RW face vector from the set of the k-cell neighbours
+
+        neigh_Cells.clear(); // clear the vector for the next k-cell neighbours
+    } // end of  for (int strip_length_counter = 0; strip_length_counter < f_length; strip_length_counter++) {
+**/
+    return NewStripVector_RW;
+} // END of NewCellsStrip_RW_fast(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, int Leap_friquency, double Leap_dist)
+
+///--------------------------------------------------------------------------------
+/// Several more complex generation function (generation of k-cell sequences)
+///--------------------------------------------------------------------------------
+
 /*! ## 4 ##
  * @details
  * @param cell_type
@@ -278,8 +284,6 @@ return special_cell_series;
  * @param max_fractions_vectors
  * @return special_x_sequence
  */
-/**
-
 std::vector<std::vector<unsigned int>> Processing_Random_Strips(int cell_type, std::vector<unsigned int> &cell_strip_distribution, std::vector<std::vector<unsigned int>> &Configuration_State, std::vector<std::vector<double>> max_fractions_vectors) {
 ///================================================================= 'L' =======================================================================////
 /// ==============================================>  Random lengthy strips generation process  <===============================================////
@@ -287,6 +291,7 @@ std::vector<std::vector<unsigned int>> Processing_Random_Strips(int cell_type, s
   int NewFaceType = 1; // Random generation of types with IDs < number_of_types
   std::vector<std::vector<unsigned int>> special_cell_series;
   std::vector<unsigned int> special_cell_sequence; // output of the function
+/**
 
 /// Random Walker (RW) start
   std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(cell_type), 1); // Vector of the size equal to the total number of faces in PCC initialised with '1's
@@ -403,7 +408,7 @@ std::vector<std::vector<unsigned int>> Processing_Random_Strips(int cell_type, s
         Configuration_State[cell_type].push_back(var);
     }
     Out_logfile_stream.close();
-
+**/
     return special_cell_series;
 } // end  of Random lengthy inclusions
 
@@ -413,7 +418,7 @@ std::vector<std::vector<unsigned int>> Processing_Random_Strips(int cell_type, s
  * @param s_faces_sequence
  * @return special_x_sequence
  */
- /**
+/**
 std::vector<unsigned int> Processing_maxFunctional(int cell_type, std::vector<std::vector<unsigned int>> &Configuration_sState, std::vector<vector<double>> const &max_fractions_vectors, bool multiplexity, double(*measure)(std::vector<double> const&)) {
 ///=============================================================================================================================================////
 ///==================================================================== 'F' ===================================================================////
@@ -597,6 +602,7 @@ Configuration_sState[cell_type].push_back(var);
 
 return special_cells_sequence;
 } // END of 'F' processing mode
+**/
 
 /// (3) Maximum Functional based generation process
 /*!
