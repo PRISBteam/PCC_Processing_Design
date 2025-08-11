@@ -241,8 +241,7 @@ std::vector<std::vector<unsigned int>> Processing_Random(int const cell_type, st
         //REPAIR cout << "special_faces_fraction: \t" << special_faces_fraction << "\t\t" << endl;
 
 /// output calculation progress
-if (CellNumbs.at(cell_type) != 0 && special_cells_fraction != 0)
-    if((int) (special_cells_fraction*CellNumbs.at(cell_type)) % (int) 0.1 * CellNumbs.at(cell_type) == 0) {
+if (CellNumbs.at(cell_type) != 0 && special_cells_fraction != 0 &&(int) (special_cells_fraction*CellNumbs.at(cell_type)) % (int) 0.1 * CellNumbs.at(cell_type) == 0) {
     cout << "special " << cell_type  << "-cells fraction:      " << special_cells_fraction << endl;
     Out_logfile_stream << "special " << cell_type  << "-cells fraction:      " << special_cells_fraction << endl;
 }
