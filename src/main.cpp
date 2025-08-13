@@ -86,6 +86,8 @@ std::ofstream main_logfile_stream, subcomplex_logfile_stream, multiphysics_logfi
 // 'Processing_Design.log' file output of the entire computation process as a not exact copy of the console output
 std::ofstream Out_logfile_stream;
 // TODO: DELETE obsolete 'Out_logfile_stream'
+std::ofstream corrosion_output, face_barycentre_coord_outstream, edge_barycentre_coord_outstream;
+
 
 /// PCC:: (- related variables)
 int PCC_dimension;                  // Tessellation dimension corresponding to the maximal value of 'k' in the PCC's k-cell ranks:
@@ -344,18 +346,17 @@ int main() {
             cout << "START of the PCC Kinetics module " << endl;
             main_logfile_stream << "START of the PCC Kinetics module " << endl;
 
+            // TODO: TEMPORARY MODULE OUTPUT
+            corrosion_output.open(output_dir + "surface_corrosion_output.txt"s, ios::trunc);
+///            face_barycentre_coord_outstream.open(output_dir + "face_seeds.txt"s, ios::trunc);
+///            edge_barycentre_coord_outstream.open(output_dir + "edge_seeds.txt"s, ios::trunc);
+
             p_cells_history = PCC_Kinetics(configuration, new_cells_design);
 
-            // TODO: TEMPORARY MODULE OUTPUT
-            std::ofstream corrosion_output;
-            corrosion_output.open(output_dir + "surface_corrosion_output.txt"s, ios::trunc);
+///            edge_barycentre_coord_outstream.close();
+///            face_barycentre_coord_outstream.close();
 
-            for (auto pch : p_cells_history) {
-                corrosion_output << pch.at(0) << "\t" << pch.at(1) << "\t" << pch.at(2) << endl;
-                cout << pch.at(0) << "\t" << pch.at(1) << "\t" << pch.at(2) << endl;
-            }
-            corrosion_output.close();
-
+           corrosion_output.close();
 
             // ================ Elapsing time for the Kinetics module ================
             unsigned int Kinetics_time = clock();

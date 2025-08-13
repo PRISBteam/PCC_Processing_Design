@@ -1524,9 +1524,9 @@ void PCC::Set_edge_barycentre_coordinates(void){
     if (cell_barycentre_coordinates.size() == 0)
         cell_barycentre_coordinates.resize(4);
 
-    for (unsigned int en = 0; en < CellNumbs.at(2); ++en) {
-        cell_barycentre_coordinates.at(2).push_back(find_anEdgeSeed(en, paths_to_PCC_matrices, CellNumbs, node_coordinates_vector));
-        if (en % 500 == 1) cout << "Edge number\t\t" << en << "\tout of\t\t" << CellNumbs.at(2) << endl;
+    for (unsigned int en = 0; en < CellNumbs.at(1); ++en) {
+        cell_barycentre_coordinates.at(1).push_back(find_anEdgeSeed(en));
+        if (en % 500 == 1) cout << "Edge number\t\t" << en << "\tout of\t\t" << CellNumbs.at(1) << endl;
         }
     return;
 }
@@ -1534,32 +1534,44 @@ void PCC::Set_face_barycentre_coordinates(void) {
     if (node_coordinates_vector.size() == 0)
         node_coordinates_vector = Tuple3Reader(paths_to_PCC_matrices.at(10)); // node barycentres
 
-    if (cell_barycentre_coordinates.size() == 0) {
+    if (cell_barycentre_coordinates.size() == 0)
         cell_barycentre_coordinates.resize(4);
-        if (cell_barycentre_coordinates.at(2).size() == 0) {
-            cout << "Finding face barycentre coordinates:\t\t" << endl;
-            Out_local_logstream << "Finding face barycentre coordinates:\t\t" << endl;
+
+//        if (cell_barycentre_coordinates.at(2).size() == 0) {
+//            cout << "Finding face barycentre coordinates:\t\t" << endl;
+//            Out_local_logstream << "Finding face barycentre coordinates:\t\t" << endl;
             for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn) {
-                cell_barycentre_coordinates.at(2).push_back(
-                        find_aGBseed(fn, paths_to_PCC_matrices, CellNumbs, node_coordinates_vector));
+                cell_barycentre_coordinates.at(2).push_back(find_aGBseed(fn));
                 if (fn % 500 == 1) {
                     cout << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
                     Out_local_logstream << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
                 }
-            }
         }
 
-    }
 return;
 }
 
 std::vector<std::tuple<double, double, double>> PCC::Get_edge_barycentre_coordinates(void) {
-    return cell_barycentre_coordinates.at(1);
+    if (cell_barycentre_coordinates.size() == 0)
+        cell_barycentre_coordinates.resize(4);
+
+    if (cell_barycentre_coordinates.at(1).size() > 0.0)
+        return cell_barycentre_coordinates.at(1);
+    else Set_edge_barycentre_coordinates();
+
+        return cell_barycentre_coordinates.at(1);
+   //     throw std::invalid_argument("Error: SET 'edge_barycentre_coordinates' (!)");
 }
 std::vector<std::tuple<double, double, double>> PCC::Get_face_barycentre_coordinates(void) {
+    if (cell_barycentre_coordinates.size() == 0)
+        cell_barycentre_coordinates.resize(4);
+
     if (cell_barycentre_coordinates.at(2).size() > 0.0)
         return cell_barycentre_coordinates.at(2);
-    else throw std::invalid_argument("Error: SET 'cell_barycentre_coordinates' (!)");
+    else Set_face_barycentre_coordinates();
+
+    return cell_barycentre_coordinates.at(2);
+    //throw std::invalid_argument("Error: SET 'face_barycentre_coordinates' (!)");
 }
 /// ========== END of class PCC functions description
 

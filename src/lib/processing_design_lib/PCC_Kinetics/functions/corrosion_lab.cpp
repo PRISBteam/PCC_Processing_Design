@@ -31,6 +31,7 @@ extern std::vector<std::string> paths_to_PCC_matrices; // PCCpaths to PCC files
 extern int PCC_dimension; // PCC dimension: dim = 1 for graphs, dim = 2 for 2D plane polytopial complexes and dim = 3 for 3D bulk polyhedron complexes, as it is specified in the main.ini file.
 extern std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, polytope_coordinates_vector; // coordinate vectors defined globally
 extern std::string output_dir;
+extern std::ofstream corrosion_output, face_barycentre_coord_outstream, edge_barycentre_coord_outstream;
 
 #include "corrosion_lab.h"
 
@@ -86,16 +87,29 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
 //    corrosion_GB_normalised_coefficients = face_edge_normalised_local_indices(special_f_sequence, FES); // function from Measures.h
 /// TODO:    if (special_g_sequence.size() > 0)
 ///       CL_normalised_coefficients = face_edge_normalised_local_indices(special_g_sequence, FES); // function from Measures.h
-    //GB size
-    std::vector<unsigned int> all_face_numbers;
-    for (unsigned int fn = 0; fn < CellNumbs.at(face_cell_type); ++fn)
+    std::vector<unsigned int> all_face_numbers, all_edge_numbers;
+    for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn)
         all_face_numbers.push_back(fn);
 
-        std::vector<std::tuple<double, double, double>> face_barycentres_vector; // coordinate vectors defined globally
-    face_barycentres_vector = Tuple3Reader(paths_to_PCC_matrices.at(13)); // grain barycentres
-    if (face_barycentres_vector.size() == 0)
-        face_barycentres_vector = face_sequence_barycentre_coordinates(all_face_numbers);
+    for (unsigned int en = 0; en < CellNumbs.at(1); ++en)
+        all_edge_numbers.push_back(en);
 
+    std::vector<std::tuple<double, double, double>> face_barycentres_vector, edge_barycentres_vector; // coordinate vectors defined globally
+
+    edge_barycentres_vector = Tuple3Reader(paths_to_PCC_matrices.at(12)); // edge barycentres
+    if (edge_barycentres_vector.size() == 0) {
+        edge_barycentres_vector = edge_sequence_barycentre_coordinates(all_edge_numbers);
+        for (auto it: edge_barycentres_vector)
+            edge_barycentre_coord_outstream << get<0>(it) << "\t" << get<1>(it) << "\t" << get<2>(it) << "\t" << endl;
+    }
+
+    face_barycentres_vector = Tuple3Reader(paths_to_PCC_matrices.at(13)); // face barycentres
+    {
+        if (face_barycentres_vector.size() == 0)
+            face_barycentres_vector = face_sequence_barycentre_coordinates(all_face_numbers);
+        for (auto it: face_barycentres_vector)
+            face_barycentre_coord_outstream << get<0>(it) << "\t" << get<1>(it) << "\t" << get<2>(it) << "\t" << endl;
+    }
     std::vector<double> face_areas_vector;
     const char *cfav = paths_to_PCC_matrices.at(7).c_str(); // face areas in 3-PCC
     face_areas_vector = VectorDReader(cfav);
@@ -148,12 +162,11 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
 // initial
     unsigned int NewCellNumb = 0;
     /// initial corrosion settings
-    double corr_gb_initial_fraction = 0.2; /// 20% "hardcoded" initial condition on surface of the sample
+    double corr_gb_initial_fraction = 0.1; /// 20% "hardcoded" initial condition on surface of the sample
     for (unsigned int gbn = 0; gbn < corr_gb_initial_fraction*surface_gb_set.size(); ++gbn) {
         NewCellNumb = NewCellNumb_R(surface_gb_set.size()); /// advanced NewCellNumb_R generator of special cell IDs
         special_corr_sequence.push_back(surface_gb_set.at(NewCellNumb)); // defined in the assigned labelling library; "\functions" subfolder
     }
-
     double corrosion_time = 0.0;
     std::vector<double> corrosion_gb_damage(gb_number);
     double time_step_coeff = 0, time_step = 0;
@@ -164,6 +177,19 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
 
 //! The "BL" grain boundary index counting the weighted amount of their local corrosive GB neighbours
         corrosion_GB_normalised_coefficients = face_edge_normalised_local_indices(special_corr_sequence, FES); // function from Measures.h
+//        for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
+//            if (corrosion_GB_normalised_coefficients.at(gbn) > 0)
+ // REPAIR               cout << corrosion_GB_normalised_coefficients.at(gbn) << "\t" << get<2>(face_barycentres_vector.at(gbn)) << endl;
+//        }
+
+//    SpMat AFS(CellNumbs.at(2 + (PCC_dimension - 3)), CellNumbs.at(2 + (PCC_dimension - 3)));
+//    AFS = SMatrixReader(paths_to_PCC_matrices.at(2 + (PCC_dimension - 3)), (CellNumbs.at(2 + (PCC_dimension - 3))), (CellNumbs.at(2 + (PCC_dimension - 3)))); //all Faces
+//    AFS = 0.5 * (AFS + Eigen::SparseMatrix<double>(AFS.transpose())); // Full matrix instead of triagonal
+//
+//        for (auto it : special_corr_sequence)
+//            for (unsigned int l = 0; l < AFS.rows(); l++) // Loop over all Edges
+//                if (AFS.coeff(l,it) != 0)
+//                    cout << it << "\t" << corrosion_GB_normalised_coefficients.at(it) << "\t" << get<2>(face_barycentres_vector.at(it)) << "\t" << l << "\t" << corrosion_GB_normalised_coefficients.at(l) << "\t" << get<2>(face_barycentres_vector.at(l)) << endl;
 
 /// corrosion RATE equation
         double corrosion_rate_coefficient = config.Get_kinetics_corrosion_rate_scale(); // taken from 'kinetics_corrosiion_rate_coeff' in the config/Kinetic.ini file
@@ -196,14 +222,19 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
             if (corrosion_gb_damage.at(gbn) > 1 && special_g_sequence.at(gbn) == 0) {
                 special_g_sequence.at(gbn) = 5;
                 corrosion_time_vector.at(gbn) = corrosion_time;
+
+                //corrosion_output
+                cout << gbn << "\t" << corrosion_time_vector.at(gbn) << "\t" << get<0>(face_barycentres_vector.at(gbn)) << "\t" << get<1>(face_barycentres_vector.at(gbn)) << "\t" << get<2>(face_barycentres_vector.at(gbn)) << endl;
+                corrosion_output << gbn << "\t" << corrosion_time_vector.at(gbn) << "\t" << get<0>(face_barycentres_vector.at(gbn)) << "\t" << get<1>(face_barycentres_vector.at(gbn)) << "\t" << get<2>(face_barycentres_vector.at(gbn)) << endl;
+
+                //                cout << pch.at(0) << "\t" << pch.at(1) << "\t" << pch.at(2) << endl;
             }
         }
 /// 'cout' check
-        for (auto cs_itr = 0; cs_itr < corrosion_time_vector.size(); ++cs_itr) {
-            if (corrosion_time_vector.at(cs_itr) > 0)
-                cout << "corrosion damage time at grain boundary #\t"
-                     << std::distance(corrosion_time_vector.begin(), corrosion_time_vector.begin() + cs_itr) << "\tis equal to\t" << corrosion_time_vector.at(cs_itr) << endl;
-        }
+//        for (auto cs_itr = 0; cs_itr < corrosion_time_vector.size(); ++cs_itr) {
+//            if (corrosion_time_vector.at(cs_itr) > 0)
+           ///     cout << "corrosion damage time at grain boundary #\t" << std::distance(corrosion_time_vector.begin(), corrosion_time_vector.begin() + cs_itr) << "\tis equal to\t" << corrosion_time_vector.at(cs_itr) << endl;
+//        }
 
         cout << "\t" << "Full corrosion process Time:\t" << corrosion_time << "\t" << "with the current Time Step:\t" << time_step << endl;
         cout << "\t" << "Zero elements in the 'corrosion time vector':\t" << std::count(corrosion_time_vector.begin(), corrosion_time_vector.end(), 0) << "\t out of\t" << CellNumbs.at(face_cell_type) << endl;

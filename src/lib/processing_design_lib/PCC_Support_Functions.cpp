@@ -18,6 +18,7 @@ extern std::vector<std::string> paths_to_PCC_matrices;
 extern std::vector<unsigned int> CellNumbs; // number of cells in a PCC defined globally
 extern std::string source_path;
 extern std::string output_dir;
+extern std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, polytope_coordinates_vector; // vectors containing barycenter Cartesian coordinates of the corresponding tessellation's elements
 //std::ofstream Out_local_logstream;
 
 typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which declares a column-major sparse matrix type of doubles with the nickname 'SpMat'
@@ -133,14 +134,13 @@ vector<Eigen::Triplet<double>> TripletsReader(char* SMpath) {
 }
 
 /// DDRX support function :: GFS matrix reading and calculation of new seeds at the centres of GBs
-std::tuple<double, double, double> find_anEdgeSeed(unsigned int edgenumb, std::vector<std::string> const &paths, std::vector<unsigned int> const &CellNumbs, vector<tuple<double, double, double>> const &AllSeeds_coordinates) {
-    tuple <double, double, double> res; // find two grain neighbour for fnumber
+std::tuple<double, double, double> find_anEdgeSeed(unsigned int edgenumb) {
+    tuple <double, double, double> res;
     vector<double> xx, yy, zz;
-    //Triplet<double> res;     // find two grain neighbour for fnumber
 
     Eigen::SparseMatrix<double> ENS(CellNumbs.at(0),CellNumbs.at(1));
     /// ENS matrix reading
-    ENS = SMatrixReader(paths.at(4), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Faces-Grains
+    ENS = SMatrixReader(paths_to_PCC_matrices.at(4), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Faces-Edges
 
     std::vector<unsigned int> nodeIDs;
     for (unsigned int j = 0; j < CellNumbs.at(0); ++j) {
@@ -148,19 +148,19 @@ std::tuple<double, double, double> find_anEdgeSeed(unsigned int edgenumb, std::v
             nodeIDs.push_back(j);
     }
 
-    if(nodeIDs.size()>0) xx.push_back(get<0>(AllSeeds_coordinates.at(nodeIDs[0])));
-    if(nodeIDs.size()>1) xx.push_back(get<0>(AllSeeds_coordinates.at(nodeIDs[1])));
-    if(nodeIDs.size()>0) yy.push_back(get<1>(AllSeeds_coordinates.at(nodeIDs[0])));
-    if(nodeIDs.size()>1) yy.push_back(get<1>(AllSeeds_coordinates.at(nodeIDs[1])));
-    if(nodeIDs.size()>0) zz.push_back(get<2>(AllSeeds_coordinates.at(nodeIDs[0])));
-    if(nodeIDs.size()>1) zz.push_back(get<2>(AllSeeds_coordinates.at(nodeIDs[1])));
+    if(nodeIDs.size()>0) xx.push_back(get<0>(node_coordinates_vector.at(nodeIDs[0])));
+    if(nodeIDs.size()>1) xx.push_back(get<0>(node_coordinates_vector.at(nodeIDs[1])));
+    if(nodeIDs.size()>0) yy.push_back(get<1>(node_coordinates_vector.at(nodeIDs[0])));
+    if(nodeIDs.size()>1) yy.push_back(get<1>(node_coordinates_vector.at(nodeIDs[1])));
+    if(nodeIDs.size()>0) zz.push_back(get<2>(node_coordinates_vector.at(nodeIDs[0])));
+    if(nodeIDs.size()>1) zz.push_back(get<2>(node_coordinates_vector.at(nodeIDs[1])));
     if(nodeIDs.size()>1) res = make_tuple(0.5*(xx[0] + xx[1]), 0.5*(yy[0] + yy[1]), 0.5*(zz[0] + zz[1]));
     else if(nodeIDs.size()>0) res = make_tuple(xx[0], yy[0], zz[0]);
     else res = make_tuple(0, 0, 0);
 
     return res;
 } /// END find_anEdgeSeed()
-
+/*
 std::tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<std::string> const &paths, std::vector<unsigned int> const &CellNumbs, vector<tuple<double, double, double>> const &AllSeeds_coordinates) {
     tuple <double, double, double> res; // find two grain neighbour for fnumber
     vector<double> xx, yy, zz;
@@ -206,6 +206,56 @@ std::tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vect
     return res;
 
 } /// END of std::tuple<double, double, double> find_aGBseed() function
+*/
+std::tuple<double, double, double> find_aGBseed(unsigned int facenumb) {
+    tuple <double, double, double> face_barycentre_coordinates; // find two grain neighbour for fnumber
+    double xx = 0, yy = 0, zz = 0;
+
+    // FES (faces-edges) matrix reading
+    Eigen::SparseMatrix<double> FES(CellNumbs.at(1),CellNumbs.at(2));
+    FES = SMatrixReader(paths_to_PCC_matrices.at(5), (CellNumbs.at(1)), (CellNumbs.at(2))); //all Edges-Faces
+
+    // ENS (faces-edges) matrix reading
+    Eigen::SparseMatrix<double> ENS(CellNumbs.at(0),CellNumbs.at(1));
+    ENS = SMatrixReader(paths_to_PCC_matrices.at(4), (CellNumbs.at(0)), (CellNumbs.at(1))); //all Nodes-Edges
+
+    std::vector<unsigned int> face_edges_vector, edge_nodes_vector;
+    std::vector<std::tuple<double, double, double>> node_coordinates_vector, facenumb_node_coordinates;
+
+    node_coordinates_vector = Tuple3Reader(paths_to_PCC_matrices.at(10)); // node or vertex barycentres
+
+    //normal loop
+    face_edges_vector.clear();
+    for (unsigned int j = 0; j < CellNumbs.at(1); ++j) {
+        if (FES.coeff(j,facenumb) != 0) {
+            face_edges_vector.push_back(j);
+            }
+        }
+
+    edge_nodes_vector.clear();
+    for(auto en : face_edges_vector)
+        for (unsigned int j = 0; j < CellNumbs.at(0); ++j) {
+             if (ENS.coeff(j,en) != 0) {
+                 edge_nodes_vector.push_back(j);
+        }
+    }
+
+    facenumb_node_coordinates.clear();
+    for(auto en : edge_nodes_vector)
+        facenumb_node_coordinates.push_back(node_coordinates_vector.at(en));
+
+    unsigned int nx = 0, ny = 0, nz = 0;
+    for(auto it : facenumb_node_coordinates) {
+        xx += get<0>(it); ++nx;
+        yy += get<1>(it); ++ny;
+        zz += get<2>(it); ++nz;
+    }
+    face_barycentre_coordinates = make_tuple(xx/double(nx),yy/double(ny),zz/double(nz));
+
+    return face_barycentre_coordinates;
+
+} /// END of std::tuple<double, double, double> find_aGBseed() function
+
 
 ///* For MULTIPFYSICS functions :: Just three overloaded templates for "sign()" function templates
 template <typename TP> inline constexpr
@@ -1166,15 +1216,18 @@ std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordi
     std::vector<std::tuple<double, double, double>> face_sequence_barycentre_coordinates;
 
     PCC current_PCC;
-    current_PCC.Set_face_barycentre_coordinates();
-    std::vector<std::tuple<double, double, double>> all_face_coordinates = current_PCC.Get_face_barycentre_coordinates();
+    if (current_PCC.Get_face_barycentre_coordinates().size() == 0)
+        current_PCC.Set_face_barycentre_coordinates();
 
+    std::vector<std::tuple<double, double, double>> all_face_coordinates = current_PCC.Get_face_barycentre_coordinates();
+//    cout << " H E R E " << endl;
+//    cout << " T H E R E " << endl;
     for(unsigned int fn = 0; fn < CellNumbs.at(2); ++fn)
-        if (std::find(face_sequence.begin(),face_sequence.end(),fn) != face_sequence.end())
+        if (std::find(face_sequence.begin(), face_sequence.end(), fn) != face_sequence.end())
             face_sequence_barycentre_coordinates.push_back(all_face_coordinates.at(fn));
 
     return face_sequence_barycentre_coordinates;
-} // END of
+} // END of face_sequence_barycentre_coordinates ()
 
 std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordinates(std::vector<unsigned int> &sfaces_set, std::vector<std::tuple<double, double, double>> &all_face_coordinates) {
     std::vector<std::tuple<double, double, double>> face_sequence_barycentre_coordinates;
@@ -1184,7 +1237,7 @@ std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordi
             face_sequence_barycentre_coordinates.push_back(all_face_coordinates.at(fn));
 
     return face_sequence_barycentre_coordinates;
-} // END of
+} // END of face_sequence_barycentre_coordinates()
 
 std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordinates(std::set<unsigned int> &sfaces_set) {
     std::vector<std::tuple<double, double, double>> face_sequence_barycentre_coordinates;
@@ -1198,7 +1251,7 @@ std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordi
             face_sequence_barycentre_coordinates.push_back(all_face_coordinates.at(fn));
 
     return face_sequence_barycentre_coordinates;
-} // END of
+} // END of face_sequence_barycentre_coordinates()
 
 std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordinates(std::set<unsigned int> &sfaces_set, std::vector<std::tuple<double, double, double>> &all_face_coordinates) {
     std::vector<std::tuple<double, double, double>> face_sequence_barycentre_coordinates;
@@ -1208,7 +1261,22 @@ std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordi
             face_sequence_barycentre_coordinates.push_back(all_face_coordinates.at(fn));
 
     return face_sequence_barycentre_coordinates;
-} // END of
+} // END of face_sequence_barycentre_coordinates()
+
+std::vector<std::tuple<double, double, double>>  edge_sequence_barycentre_coordinates(std::vector<unsigned int> &edge_sequence) {
+    std::vector<std::tuple<double, double, double>> edge_sequence_barycentre_coordinates;
+
+    PCC current_PCC;
+    if (current_PCC.Get_edge_barycentre_coordinates().size() == 0)
+      current_PCC.Set_edge_barycentre_coordinates();
+    std::vector<std::tuple<double, double, double>> all_edge_coordinates = current_PCC.Get_edge_barycentre_coordinates();
+
+    for(unsigned int en = 0; en < CellNumbs.at(1); ++en)
+        if (std::find(edge_sequence.begin(),edge_sequence.end(),en) != edge_sequence.end())
+            edge_sequence_barycentre_coordinates.push_back(all_edge_coordinates.at(en));
+
+    return edge_sequence_barycentre_coordinates;
+} // END of face_sequence_barycentre_coordinates ()
 
 void Vector_of_vectors_ui_cout(std::vector<std::vector <unsigned int>> &vector, std::string text) {
     cout << text << endl;
@@ -1259,7 +1327,7 @@ std::vector<std::tuple<double, double, double>> kCell_barycentre_coordinates(int
 //            cout << "Finding " << k_type << "-cell barycentre coordinates:\t\t" << endl;
             for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn) {
 ///            for (auto fn : kCell_barycentre_coordinates)
-                kcell_barycentre_coordinates.push_back(find_aGBseed(fn, paths_to_PCC_matrices, CellNumbs, grain_seeds_vector));
+                kcell_barycentre_coordinates.push_back(find_aGBseed(fn));
                 if (fn % 500 == 1) { cout << "Face number coordinates \t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl; } //Out_local_logstream << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl; }
             } // end for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn)
     } // end of if (k_type == 2 )
@@ -1298,7 +1366,7 @@ std::vector<std::tuple<double, double, double>> kSequence_barycentre_coordinates
            grain_seeds_vector = Tuple3Reader(paths_to_PCC_matrices.at(9)); // grain (!) barycentres
 
            for (auto fn: kcell_sequence) {
-                kSequence_barycentre_coordinates.push_back(find_aGBseed(fn, paths_to_PCC_matrices, CellNumbs, grain_seeds_vector));
+                kSequence_barycentre_coordinates.push_back(find_aGBseed(fn));
                 if (fn % 500 == 1) { cout << "Face number coordinates \t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
                 } //Out_local_logstream << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl; }
             } // end for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn)

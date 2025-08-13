@@ -79,7 +79,8 @@ std::vector<double> face_edge_normalised_local_indices(std::vector<unsigned int>
 
 //    double face_edge_index = 0.0;
     std::vector<double> Face_inclusion_index(CellNumbs.at(2),0), j_fractions(4,0), d_fractions(3,0);
-    std::vector<double> TJsTypes; std::vector<int> TJsTypes_int;
+    std::vector<double> TJsTypes;
+    std::vector<int> TJsTypes_int;
 
     TJsTypes_int = Edge_types_byFaces(CellNumbs, special_face_sequence, j_fractions, d_fractions);
 
