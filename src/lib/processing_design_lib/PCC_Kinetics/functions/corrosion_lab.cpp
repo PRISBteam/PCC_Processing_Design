@@ -247,7 +247,7 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
                 corrosive_affected_faces_area_fractions.push_back(corrosive_affected_faces_area_fractions.back() + (face_areas_vector.at(gbn)/PCC_total_face_area));
 
                 //corrosion_affected_output
-                corrosion_affected_output << gbn << "\t" << corrosion_gb_damage.at(gbn) << "\t"  << corrosion_time << "\t" << get<0>(face_barycentres_vector.at(gbn)) << "\t" << get<1>(face_barycentres_vector.at(gbn)) << "\t" << get<2>(face_barycentres_vector.at(gbn)) << endl;
+                corrosion_affected_output << gbn << "\t"  << corrosion_time << "\t" << get<0>(face_barycentres_vector.at(gbn)) << "\t" << get<1>(face_barycentres_vector.at(gbn)) << "\t" << get<2>(face_barycentres_vector.at(gbn)) << endl;
                 corrosion_affected_fractions_output << corrosive_affected_faces_area_fractions.back() << "\t" << corrosion_time << endl;
                 //                cout << pch.at(0) << "\t" << pch.at(1) << "\t" << pch.at(2) << endl;
             }
