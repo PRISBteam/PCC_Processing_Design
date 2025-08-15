@@ -86,7 +86,7 @@ std::ofstream main_logfile_stream, subcomplex_logfile_stream, multiphysics_logfi
 // 'Processing_Design.log' file output of the entire computation process as a not exact copy of the console output
 std::ofstream Out_logfile_stream;
 // TODO: DELETE obsolete 'Out_logfile_stream'
-std::ofstream corrosion_output, face_barycentre_coord_outstream, edge_barycentre_coord_outstream;
+std::ofstream corrosion_output, corrosion_fractions_output, corrosion_affected_output, corrosion_affected_fractions_output, face_barycentre_coord_outstream, edge_barycentre_coord_outstream;
 
 
 /// PCC:: (- related variables)
@@ -348,15 +348,24 @@ int main() {
 
             // TODO: TEMPORARY MODULE OUTPUT
             corrosion_output.open(output_dir + "surface_corrosion_output.txt"s, ios::trunc);
-///            face_barycentre_coord_outstream.open(output_dir + "face_seeds.txt"s, ios::trunc);
-///            edge_barycentre_coord_outstream.open(output_dir + "edge_seeds.txt"s, ios::trunc);
+            corrosion_affected_output.open(output_dir + "surface_corrosion_affected_output.txt"s, ios::trunc);
+
+            face_barycentre_coord_outstream.open(output_dir + "face_seeds.txt"s, ios::trunc);
+            edge_barycentre_coord_outstream.open(output_dir + "edge_seeds.txt"s, ios::trunc);
+
+            corrosion_fractions_output.open(output_dir + "area_corrosive_damaged_fraction.txt"s, ios::trunc);
+            corrosion_affected_fractions_output.open(output_dir + "area_affected_corrosive_damaged_fraction.txt"s, ios::trunc);
 
             p_cells_history = PCC_Kinetics(configuration, new_cells_design);
 
-///            edge_barycentre_coord_outstream.close();
-///            face_barycentre_coord_outstream.close();
+            corrosion_output.close();
+            corrosion_affected_output.close();
 
-           corrosion_output.close();
+            edge_barycentre_coord_outstream.close();
+            face_barycentre_coord_outstream.close();
+
+            corrosion_fractions_output.close();
+            corrosion_affected_fractions_output.close();
 
             // ================ Elapsing time for the Kinetics module ================
             unsigned int Kinetics_time = clock();
