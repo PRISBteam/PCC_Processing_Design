@@ -32,7 +32,9 @@ extern std::vector<std::string> paths_to_PCC_matrices; // PCCpaths to PCC files
 extern int PCC_dimension; // PCC dimension: dim = 1 for graphs, dim = 2 for 2D plane polytopial complexes and dim = 3 for 3D bulk polyhedron complexes, as it is specified in the main.ini file.
 extern std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, polytope_coordinates_vector; // coordinate vectors defined globally
 extern std::string output_dir;
-extern std::ofstream corrosion_output, corrosion_fractions_output, corrosion_affected_output, corrosion_affected_fractions_output, face_barycentre_coord_outstream, edge_barycentre_coord_outstream;
+extern std::ofstream corrosion_damaged_output, corrosion_damaged_fractions_output, corrosion_affected_output, corrosion_affected_fractions_output;
+
+extern std::ofstream face_barycentre_coord_outstream, edge_barycentre_coord_outstream;
 
 #include "corrosion_lab.h"
 
@@ -234,8 +236,8 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
 
                 //corrosion_output
                 cout << gbn << "\t" << corrosion_time_vector.at(gbn) << "\t" << get<0>(face_barycentres_vector.at(gbn)) << "\t" << get<1>(face_barycentres_vector.at(gbn)) << "\t" << get<2>(face_barycentres_vector.at(gbn)) << endl;
-                corrosion_output << gbn << "\t" << corrosion_time_vector.at(gbn) << "\t" << get<0>(face_barycentres_vector.at(gbn)) << "\t" << get<1>(face_barycentres_vector.at(gbn)) << "\t" << get<2>(face_barycentres_vector.at(gbn)) << endl;
-                corrosion_fractions_output << corrosive_faces_area_fractions.back() << "\t" << corrosion_time << endl;
+                corrosion_damaged_output << gbn << "\t" << corrosion_time_vector.at(gbn) << "\t" << get<0>(face_barycentres_vector.at(gbn)) << "\t" << get<1>(face_barycentres_vector.at(gbn)) << "\t" << get<2>(face_barycentres_vector.at(gbn)) << endl;
+                corrosion_damaged_fractions_output << corrosive_faces_area_fractions.back() << "\t" << corrosion_time << endl;
                 //                cout << pch.at(0) << "\t" << pch.at(1) << "\t" << pch.at(2) << endl;
             }
 
@@ -251,7 +253,6 @@ std::vector<std::vector<double>>  surface_interface_corrosion(Config &config, Ma
                 corrosion_affected_fractions_output << corrosive_affected_faces_area_fractions.back() << "\t" << corrosion_time << endl;
                 //                cout << pch.at(0) << "\t" << pch.at(1) << "\t" << pch.at(2) << endl;
             }
-
         }
 /// 'cout' check
 //        for (auto cs_itr = 0; cs_itr < corrosion_time_vector.size(); ++cs_itr) {
