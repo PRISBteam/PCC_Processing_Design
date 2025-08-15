@@ -17,6 +17,8 @@ set(HEADER_FILES
         PCC_Kinetics/functions/corrosion_lab.h
         PCC_Kinetics/functions/irradiation_lab.h
 
+        PCC_Design/genetic_algorithm/GeneticAlgorithm.h
+
         )
 
 set(SOURCE_FILES
@@ -35,6 +37,9 @@ set(SOURCE_FILES
         PCC_Kinetics/PCC_Kinetics.cpp
         PCC_Kinetics/functions/corrosion_lab.cpp
         PCC_Kinetics/functions/irradiation_lab.cpp
+
+        PCC_Design/genetic_algorithm/GeneticAlgorithm.cpp
+
 
         #[===[
 
