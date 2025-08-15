@@ -404,7 +404,7 @@ int main() {
             main_logfile_stream << "==============================================================================================================================================================" << endl;
 
             std::vector<std::vector<int>> pcc_design;
-///            pcc_design = PCC_Design(configuration);
+            pcc_design = PCC_Design(configuration, new_cells_design);
 
             // ===== Elapsing time for the PCC Design module ================
             unsigned int Design_time = clock();

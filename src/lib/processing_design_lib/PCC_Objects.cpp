@@ -359,6 +359,55 @@ double Config::Get_kinetics_corrosion_rate_scale(void) const{
     return kinetics_config.kinetics_corrosion_rate_scale;
 }
 
+// Design module
+void Config::Set_design_cell_type(int &new_design_cell_type){
+    design_config.design_cell_type = new_design_cell_type;
+}
+int Config::Get_design_cell_type(void) const{
+    return design_config.design_cell_type;
+}
+void Config::Set_design_PCCDesign_type(std::string &PCCDesign_type){
+    design_config.design_mode = PCCDesign_type;
+}
+std::string Config::Get_design_PCCDesign_type(void) const{
+    return design_config.design_mode;
+}
+void Config::Set_design_population_size(unsigned int &population_size){
+    design_config.population_size = population_size;
+}
+unsigned int Config::Get_design_population_size(void) const{
+    return design_config.population_size;
+}
+void Config::Set_design_mutation_rate(double &mutation_rate){
+    design_config.mutation_rate = mutation_rate;
+}
+double Config::Get_design_mutation_rate(void) const{
+    return design_config.mutation_rate;
+}
+void Config::Set_design_crossover_rate(double &crossover_rate){
+    design_config.crossover_rate = crossover_rate;
+}
+double Config::Get_design_crossover_rate(void) const{
+    return design_config.crossover_rate;
+}
+void Config::Set_design_survival_rate(double &survival_rate){
+    design_config.survival_rate = survival_rate;
+}
+double Config::Get_design_survival_rate(void) const{
+    return design_config.survival_rate;
+}
+void Config::Set_design_max_generation_number(int &max_generation_number){
+    design_config.max_generation_number = max_generation_number;
+}
+int Config::Get_design_max_generation_number(void) const{
+    return design_config.max_generation_number;
+}
+void Config::Set_is_design_log_file(bool is_design_log){
+    design_config.is_design_log = is_design_log;
+}
+bool Config::Get_is_design_log_file(void) const{
+    return design_config.is_design_log;
+}
 
 int Config::Get_dim() const {
         return config_dim;

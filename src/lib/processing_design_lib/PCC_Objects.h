@@ -97,6 +97,16 @@ private:
         bool is_kinetics_log_file;
     }kinetics_config;
 
+    struct design_configuration {
+        int design_cell_type;
+        std::string design_mode;
+        unsigned int population_size;
+        double mutation_rate, crossover_rate, survival_rate;
+        int max_generation_number;
+        bool is_design_log;
+
+    }design_config;
+
     int config_dim;
 //    std::string config_source_dir, config_output_dir; // Input and output directories as it is written in the 'config/main.ini' file
 //    std::string pcc_standard; // PCC standard as specified in the technical documentation for the project
@@ -250,6 +260,25 @@ public:
     double Get_kinetics_time_scale(void) const;
     void Set_kinetics_corrosion_rate_scale(double &new_corrosion_rate_parameter);
     double Get_kinetics_corrosion_rate_scale(void) const;
+
+// design module
+    void Set_design_cell_type(int &new_design_cell_type);
+    int Get_design_cell_type(void) const;
+    void Set_design_PCCDesign_type(std::string &PCCDesign_type);
+    std::string Get_design_PCCDesign_type(void) const;
+    void Set_design_population_size(unsigned int &population_size);
+    unsigned int Get_design_population_size(void) const;
+    void Set_design_mutation_rate(double &mutation_rate);
+    double Get_design_mutation_rate(void) const;
+    void Set_design_crossover_rate(double &crossover_rate);
+    double Get_design_crossover_rate(void) const;
+    void Set_design_survival_rate(double &survival_rate);
+    double Get_design_survival_rate(void) const;
+    void Set_design_max_generation_number(int &max_generation_number);
+    int Get_design_max_generation_number(void) const;
+    void Set_is_design_log_file(bool is_design_log);
+    bool Get_is_design_log_file(void) const;
+
 };
 // ConfigVector (../config/main.ini) contains ALL the control variables needed for the program execution
 

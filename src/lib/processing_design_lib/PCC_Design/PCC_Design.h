@@ -14,6 +14,6 @@
  * @param configuration
  * @return std::vector<std::vector<int>> design_list_of_vectors
  */
-std::vector<std::vector<int>> PCC_Design(Config &configuration);
+std::vector<std::vector<int>> PCC_Design(Config &design_configuration, CellDesign &new_cells_design);
 
 #endif //PCC_PROCESSING_DESIGN_PCC_DESIGN_H

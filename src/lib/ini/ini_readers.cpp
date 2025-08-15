@@ -1254,8 +1254,65 @@ std::vector<double> config_reader_characterisation(std::vector<int> &charlabs_po
 } // END of config characterisation reader function
 
 /// ================== # 5 # Initial DESIGN module configuration - reading and output ==================
-void config_reader_design(bool &is_log_file) {
+void config_reader_design(Config &configuration) {
 
+    // ini files reader - external (MIT license) library
+    mINI::INIFile file(source_path + "design.ini"s);
+    mINI::INIStructure design_ini;
+    file.read(design_ini);
+
+    int cell_type;
+    //'0' - nodes, '1' - edges, '2' - faces, '3' - grains
+    std:: string PCCDesign_type; // Design type ('G' for 'genetic')
+
+    unsigned int population_size; // Number of 'creatures' in the initial and maybe future populations
+    double mutation_rate; // fraction of mutation in the population
+    double crossover_rate; // probability of acceptance
+    double survival_rate; // The ratio (population_size/ survival_rate) gives the number of considered newly created State Vectors at each calculation step
+    int max_generation_number; // maximal generation as a computation limit
+    std::string log_file_output; // output of results/design.log file
+
+    if (design_ini.has("genetic_algorithm")) {
+        auto &collection = design_ini["genetic_algorithm"];
+
+        if (collection.has("cell_type")) {
+            cell_type = stoi(design_ini.get("genetic_algorithm").get("cell_type"));
+            configuration.Set_design_cell_type(cell_type);
+        }
+        if (collection.has("design_mode")) {
+            PCCDesign_type = design_ini.get("genetic_algorithm").get("design_mode");
+            configuration.Set_design_PCCDesign_type(PCCDesign_type);
+        }
+        if (collection.has("population_size")) {
+            population_size = stoi(design_ini.get("genetic_algorithm").get("population_size"));
+            configuration.Set_design_population_size(population_size);
+        }
+        if (collection.has("mutation_rate")) {
+            mutation_rate = stod(design_ini.get("genetic_algorithm").get("mutation_rate"));
+            configuration.Set_design_mutation_rate(mutation_rate);
+        }
+        if (collection.has("crossover_rate")) {
+            crossover_rate = stod(design_ini.get("genetic_algorithm").get("crossover_rate"));
+            configuration.Set_design_crossover_rate(crossover_rate);
+        }
+        if (collection.has("survival_rate")) {
+            survival_rate = stod(design_ini.get("genetic_algorithm").get("survival_rate"));
+            configuration.Set_design_survival_rate(survival_rate);
+        }
+        if (collection.has("max_generation_number")) {
+            max_generation_number = stoi(design_ini.get("genetic_algorithm").get("max_generation_number"));
+            configuration.Set_design_max_generation_number(max_generation_number);
+        }
+
+        // design module output
+        if (design_ini.has("module_output")) {
+            auto& collection = design_ini["module_output"];
+            if (collection.has("module_log_file")) {
+                log_file_output = design_ini.get("module_output").get("module_log_file");
+            } }
+        if (log_file_output == "ON") configuration.Set_is_design_log_file(true);
+
+        } // end of 'if (design_ini.has("genetic_algorithm"))'
 }
 /// ================== # 6 # Initial WRITER module configuration - reading and output ==================
 void config_reader_writer(std::vector<int> &writer_specifications, bool &is_log_file) {

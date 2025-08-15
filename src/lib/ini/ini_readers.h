@@ -71,7 +71,7 @@ std::vector<double> config_reader_characterisation(std::vector<int> &charlabs_po
  * @param
  * @return void
 */
-void config_reader_design(bool &is_log_file);
+void config_reader_design(Config &design_configuration);
 
 // === # 6 # === //
 /*!

@@ -17,7 +17,8 @@ set(HEADER_FILES
         PCC_Kinetics/functions/corrosion_lab.h
         PCC_Kinetics/functions/irradiation_lab.h
 
-        PCC_Design/genetic_algorithm/GeneticAlgorithm.h
+        PCC_Design/PCC_Design.h
+        PCC_Design/functions/GeneticAlgorithm.h
 
         )
 
@@ -38,7 +39,8 @@ set(SOURCE_FILES
         PCC_Kinetics/functions/corrosion_lab.cpp
         PCC_Kinetics/functions/irradiation_lab.cpp
 
-        PCC_Design/genetic_algorithm/GeneticAlgorithm.cpp
+        PCC_Design/PCC_Design.cpp
+        PCC_Design/functions/GeneticAlgorithm.cpp
 
 
         #[===[
@@ -48,13 +50,6 @@ src/lib/processing_design_lib/PCC_Subcomplex/functions/subcomplex_cross_section.
 
 src/lib/processing_design_lib/PCC_Multiphysics/PCC_Multiphysics.cpp
 src/lib/processing_design_lib/PCC_Multiphysics/functions/multiphysics_internal_stresses.cpp
-
-src/lib/processing_design_lib/PCC_Processing/PCC_Processing.cpp
-src/lib/processing_design_lib/PCC_Processing/functions/processing_assigned_labelling.cpp
-src/lib/processing_design_lib/PCC_Processing/functions/processing_induced_labelling.cpp
-src/lib/processing_design_lib/PCC_Processing/functions/processing_indexing.cpp
-
-src/lib/processing_design_lib/PCC_Design/PCC_Design.cpp
 
 src/lib/processing_design_lib/PCC_Characterisation/PCC_Characterisation.cpp
 src/lib/processing_design_lib/PCC_Characterisation/functions/entropic_analysis.cpp

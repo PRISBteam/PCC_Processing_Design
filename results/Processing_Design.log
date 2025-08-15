@@ -4,3 +4,436 @@ Processing time is equal to  54.2484  seconds
 
 -------------------------------------------------------------------------
 START of the PCC Kinetics module 
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+ON    | PCC_Design
+OFF    | PCC_Writer
+
+==========================================================================================================================================================================
+0-cells #	6234
+1-cells #	12464
+2-cells #	7231
+3-cells #	1000
+_____________________________________________________________________________________
+[0] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A0.txt
+[1] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A1.txt
+[2] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A2.txt
+[3] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A3.txt
+[4] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B1.txt
+[5] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B2.txt
+[6] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B3.txt
+[7] PCCpaths:	../PCC_sources/Voronoi_1k/measures/face_areas.txt
+[8] PCCpaths:	../PCC_sources/Voronoi_1k/measures/polyhedron_volumes.txt
+[9] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/polyhedron_seeds.txt
+[10] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/vertex_seeds.txt
+[11] PCCpaths:	../PCC_sources/Voronoi_1k/other/face_normals.txt
+[12] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/edge_seeds.txt
+[13] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/face_seeds.txt
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 15; Time - 23:38.
+
+Main execution time before modules is equal to  0.059693  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Design module
+==============================================================================================================================================================
+Design time is equal to  0  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  0.067585  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+ON    | PCC_Design
+OFF    | PCC_Writer
+
+==========================================================================================================================================================================
+0-cells #	6234
+1-cells #	12464
+2-cells #	7231
+3-cells #	1000
+_____________________________________________________________________________________
+[0] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A0.txt
+[1] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A1.txt
+[2] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A2.txt
+[3] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A3.txt
+[4] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B1.txt
+[5] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B2.txt
+[6] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B3.txt
+[7] PCCpaths:	../PCC_sources/Voronoi_1k/measures/face_areas.txt
+[8] PCCpaths:	../PCC_sources/Voronoi_1k/measures/polyhedron_volumes.txt
+[9] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/polyhedron_seeds.txt
+[10] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/vertex_seeds.txt
+[11] PCCpaths:	../PCC_sources/Voronoi_1k/other/face_normals.txt
+[12] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/edge_seeds.txt
+[13] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/face_seeds.txt
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 15; Time - 23:53.
+
+Main execution time before modules is equal to  0.060490  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Design module
+==============================================================================================================================================================
+Design time is equal to  0  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  0.067178  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+ON    | PCC_Design
+OFF    | PCC_Writer
+
+==========================================================================================================================================================================
+0-cells #	6234
+1-cells #	12464
+2-cells #	7231
+3-cells #	1000
+_____________________________________________________________________________________
+[0] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A0.txt
+[1] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A1.txt
+[2] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A2.txt
+[3] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A3.txt
+[4] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B1.txt
+[5] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B2.txt
+[6] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B3.txt
+[7] PCCpaths:	../PCC_sources/Voronoi_1k/measures/face_areas.txt
+[8] PCCpaths:	../PCC_sources/Voronoi_1k/measures/polyhedron_volumes.txt
+[9] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/polyhedron_seeds.txt
+[10] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/vertex_seeds.txt
+[11] PCCpaths:	../PCC_sources/Voronoi_1k/other/face_normals.txt
+[12] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/edge_seeds.txt
+[13] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/face_seeds.txt
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 15; Time - 23:53.
+
+Main execution time before modules is equal to  0.055451  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Design module
+==============================================================================================================================================================
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+ON    | PCC_Design
+OFF    | PCC_Writer
+
+==========================================================================================================================================================================
+0-cells #	6234
+1-cells #	12464
+2-cells #	7231
+3-cells #	1000
+_____________________________________________________________________________________
+[0] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A0.txt
+[1] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A1.txt
+[2] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A2.txt
+[3] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A3.txt
+[4] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B1.txt
+[5] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B2.txt
+[6] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B3.txt
+[7] PCCpaths:	../PCC_sources/Voronoi_1k/measures/face_areas.txt
+[8] PCCpaths:	../PCC_sources/Voronoi_1k/measures/polyhedron_volumes.txt
+[9] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/polyhedron_seeds.txt
+[10] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/vertex_seeds.txt
+[11] PCCpaths:	../PCC_sources/Voronoi_1k/other/face_normals.txt
+[12] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/edge_seeds.txt
+[13] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/face_seeds.txt
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 15; Time - 23:55.
+
+Main execution time before modules is equal to  0.060972  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Design module
+==============================================================================================================================================================
+Design time is equal to  0  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  0.069055  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+ON    | PCC_Design
+OFF    | PCC_Writer
+
+==========================================================================================================================================================================
+0-cells #	6234
+1-cells #	12464
+2-cells #	7231
+3-cells #	1000
+_____________________________________________________________________________________
+[0] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A0.txt
+[1] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A1.txt
+[2] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A2.txt
+[3] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A3.txt
+[4] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B1.txt
+[5] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B2.txt
+[6] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B3.txt
+[7] PCCpaths:	../PCC_sources/Voronoi_1k/measures/face_areas.txt
+[8] PCCpaths:	../PCC_sources/Voronoi_1k/measures/polyhedron_volumes.txt
+[9] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/polyhedron_seeds.txt
+[10] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/vertex_seeds.txt
+[11] PCCpaths:	../PCC_sources/Voronoi_1k/other/face_normals.txt
+[12] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/edge_seeds.txt
+[13] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/face_seeds.txt
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 15; Time - 23:57.
+
+Main execution time before modules is equal to  0.077948  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Design module
+==============================================================================================================================================================
+Design time is equal to  0  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  0.083483  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+ON    | PCC_Design
+OFF    | PCC_Writer
+
+==========================================================================================================================================================================
+0-cells #	6234
+1-cells #	12464
+2-cells #	7231
+3-cells #	1000
+_____________________________________________________________________________________
+[0] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A0.txt
+[1] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A1.txt
+[2] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A2.txt
+[3] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A3.txt
+[4] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B1.txt
+[5] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B2.txt
+[6] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B3.txt
+[7] PCCpaths:	../PCC_sources/Voronoi_1k/measures/face_areas.txt
+[8] PCCpaths:	../PCC_sources/Voronoi_1k/measures/polyhedron_volumes.txt
+[9] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/polyhedron_seeds.txt
+[10] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/vertex_seeds.txt
+[11] PCCpaths:	../PCC_sources/Voronoi_1k/other/face_normals.txt
+[12] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/edge_seeds.txt
+[13] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/face_seeds.txt
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 15; Time - 23:57.
+
+Main execution time before modules is equal to  0.059059  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Design module
+==============================================================================================================================================================
+Design time is equal to  0  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  0.066242  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+ON    | PCC_Design
+OFF    | PCC_Writer
+
+==========================================================================================================================================================================
+0-cells #	6234
+1-cells #	12464
+2-cells #	7231
+3-cells #	1000
+_____________________________________________________________________________________
+[0] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A0.txt
+[1] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A1.txt
+[2] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A2.txt
+[3] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A3.txt
+[4] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B1.txt
+[5] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B2.txt
+[6] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B3.txt
+[7] PCCpaths:	../PCC_sources/Voronoi_1k/measures/face_areas.txt
+[8] PCCpaths:	../PCC_sources/Voronoi_1k/measures/polyhedron_volumes.txt
+[9] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/polyhedron_seeds.txt
+[10] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/vertex_seeds.txt
+[11] PCCpaths:	../PCC_sources/Voronoi_1k/other/face_normals.txt
+[12] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/edge_seeds.txt
+[13] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/face_seeds.txt
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 16; Time - 0:1.
+
+Main execution time before modules is equal to  0.057859  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Design module
+==============================================================================================================================================================
+Design time is equal to  0  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  0.064591  seconds
+-------------------------------------------------------------------------
+
+The problem dimension that is the maximum value k_max of k-cells in the PCC:		|		dim = 3
+Execution mode:		LIST
+Output directory:		../results/
+PCC source directory:	../PCC_sources/Voronoi_1k/
+PCC standard ID:		pcc1s
+
+OFF    | PCC_Subcomplex
+OFF    | PCC_Multiphysics
+OFF    | PCC_Processing
+OFF    | PCC_Characterisation
+ON    | PCC_Design
+OFF    | PCC_Writer
+
+==========================================================================================================================================================================
+0-cells #	6234
+1-cells #	12464
+2-cells #	7231
+3-cells #	1000
+_____________________________________________________________________________________
+[0] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A0.txt
+[1] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A1.txt
+[2] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A2.txt
+[3] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/A3.txt
+[4] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B1.txt
+[5] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B2.txt
+[6] PCCpaths:	../PCC_sources/Voronoi_1k/algebraic/B3.txt
+[7] PCCpaths:	../PCC_sources/Voronoi_1k/measures/face_areas.txt
+[8] PCCpaths:	../PCC_sources/Voronoi_1k/measures/polyhedron_volumes.txt
+[9] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/polyhedron_seeds.txt
+[10] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/vertex_seeds.txt
+[11] PCCpaths:	../PCC_sources/Voronoi_1k/other/face_normals.txt
+[12] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/edge_seeds.txt
+[13] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/face_seeds.txt
+
+
+---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------
+
+ Execution year - 2025; Month - 7; Day - 16; Time - 0:3.
+
+Main execution time before modules is equal to  0.062362  seconds
+
+=======================================================================================================================================================================================================================================
+					[	Start of the PCC Processing Design code	]					
+--------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+START of the PCC Design module
+==============================================================================================================================================================
+Design time is equal to  0  seconds
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+										[	The end of the PCC Processing Design	]										
+==================================================================================================================================================
+Total 3D runtime of the CPD code is equal to  5.75861  seconds
+-------------------------------------------------------------------------

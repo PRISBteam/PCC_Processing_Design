@@ -11,9 +11,6 @@ add_executable(PCC_Processing_Design ${SOURCE_FILES})
 include_directories(src/lib/processing_design_lib)
 add_subdirectory(src/lib/processing_design_lib)
 
-include_directories(src/lib/processing_design_lib)
-add_subdirectory(src/lib/processing_design_lib)
-
 target_link_libraries(PCC_Processing_Design processing_design_lib)
 
 add_subdirectory(src/lib/external/Google_tests)
