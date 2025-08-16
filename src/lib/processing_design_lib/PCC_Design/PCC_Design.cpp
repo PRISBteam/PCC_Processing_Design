@@ -53,53 +53,54 @@ std::vector<std::vector<int>> PCC_Design(Config &design_configuration, CellDesig
     /// initial configuration from config/design.ini file
     config_reader_design(design_configuration);
 
-    int chromosome_length = CellNumbs.at(design_configuration.Get_design_cell_type());    // The length of the state vector
-    int population_size = design_configuration.Get_design_population_size();
-    double mutation_rate = design_configuration.Get_design_mutation_rate();
-    double crossover_rate = design_configuration.Get_design_crossover_rate();
-    const std::vector<int> possible_genes = {0, 1}; // Gene pool, e.g., {0, 1}
-    int maximum_generation_number = design_configuration.Get_design_max_generation_number();
+    if (design_configuration.Get_design_mode() == "G"s && design_configuration.Get_design_max_generation_number() > 1) {
+        int chromosome_length = CellNumbs.at(design_configuration.Get_design_cell_type());    // The length of the state vector
+        int population_size = design_configuration.Get_design_population_size();
+        double mutation_rate = design_configuration.Get_design_mutation_rate();
+        double crossover_rate = design_configuration.Get_design_crossover_rate();
+        const std::vector<int> possible_genes = {0, 1, 2, 3}; // Gene pool, e.g., {0, 1}
+        int maximum_generation_number = design_configuration.Get_design_max_generation_number();
 
-    // --- Fitness Function Selection ---
-    // The desired fitness function is assigned to a std::function object.
-    // This demonstrates the flexibility of the pluggable fitness function design.
-    auto fitnessFunction = maximizingOnesFitness; /// (state_vector_by_sequence(processing_cell_design.Get_f_special_sequence(), design_configuration.Get_design_cell_type()));
-    // auto fitnessFunction = shannonEntropyFitness;
+        // --- Fitness Function Selection ---
+        // The desired fitness function is assigned to a std::function object.
+        // This demonstrates the flexibility of the pluggable fitness function design.
+        auto fitnessFunction = maximizingOnesFitness; /// (state_vector_by_sequence(processing_cell_design.Get_f_special_sequence(), design_configuration.Get_design_cell_type()));
+        // auto fitnessFunction = shannonEntropyFitness;
 
-    // --- GA Initialization ---
-    GeneticAlgorithm ga(population_size, mutation_rate, crossover_rate, fitnessFunction);
-    ga.initializePopulation(chromosome_length, possible_genes);
+        // --- GA Initialization ---
+        GeneticAlgorithm ga(population_size, mutation_rate, crossover_rate, fitnessFunction);
+        ga.initializePopulation(chromosome_length, possible_genes);
 
-    std::cout << "\nStarting evolution..." << std::endl;
-    std::cout << "Optimization Target: Maximizing the sum of genes in the state vector." << std::endl;
+        std::cout << "\nStarting evolution..." << std::endl;
+        std::cout << "Optimization Target: Maximizing the sum of genes in the state vector." << std::endl;
 
-    // --- Evolution Loop ---
-    for (int i = 0; i < maximum_generation_number; ++i) {
-        ga.evolve();
+        // --- Evolution Loop ---
+        for (int i = 0; i < maximum_generation_number; ++i) {
+            ga.evolve();
 
-        // Periodically print the progress of the optimization.
-        if ((i + 1) % 10 == 0 || i == maximum_generation_number - 1) {
-            Individual best = ga.getBestIndividual();
-            std::cout << "Generation: " << ga.getGenerationCount()
-                      << " | Best Fitness: " << best.fitness
-                      << " | Preview: ";
-            for(int k = 0; k < 10 && k < best.chromosome.size(); ++k) {
-                std::cout << best.chromosome[k];
+            // Periodically print the progress of the optimization.
+            if ((i + 1) % 10 == 0 || i == maximum_generation_number - 1) {
+                Individual best = ga.getBestIndividual();
+                std::cout << "Generation: " << ga.getGenerationCount()
+                          << " | Best Fitness: " << best.fitness
+                          << " | Preview: ";
+                for (int k = 0; k < 10 && k < best.chromosome.size(); ++k) {
+                    std::cout << best.chromosome[k];
+                }
+                std::cout << "..." << std::endl;
             }
-            std::cout << "..." << std::endl;
         }
-    }
 
-    // --- Final Results ---
-    std::cout << "\nEvolution finished." << std::endl;
-    Individual finalBest = ga.getBestIndividual();
-    std::cout << "Final Best Fitness: " << finalBest.fitness << std::endl;
-    std::cout << "Final Optimized State Vector (" << finalBest.chromosome.size() << " genes):" << std::endl;
-    for (int gene : finalBest.chromosome) {
-        std::cout << gene;
-    }
-    std::cout << std::endl;
-
+        // --- Final Results ---
+        std::cout << "\nEvolution finished." << std::endl;
+        Individual finalBest = ga.getBestIndividual();
+        std::cout << "Final Best Fitness: " << finalBest.fitness << std::endl;
+        std::cout << "Final Optimized State Vector (" << finalBest.chromosome.size() << " genes):" << std::endl;
+        for (int gene: finalBest.chromosome) {
+            std::cout << gene;
+        }
+        std::cout << std::endl;
+    } // if (design_configuration.Get_design_mode() == 'G')
 
     return design_list_of_vectors;
 }

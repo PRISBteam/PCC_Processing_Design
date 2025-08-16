@@ -82,7 +82,7 @@ std::string simulation_tasks_dir;       // Path to the corresponding 'tasks/*.cp
 double Main_execution_time = 0.0, Subcomplex_execution_time = 0.0, Multiphysics_execution_time = 0.0, Processing_execution_time = 0.0, Characterisation_execution_time = 0.0, Design_execution_time = 0.0, Writer_execution_time = 0.0, Kinetics_execution_time = 0.0;
 
 /// Global 'log.txt' file output
-std::ofstream main_logfile_stream, subcomplex_logfile_stream, multiphysics_logfile_stream, processing_logfile_stream, characterisation_logfile_stream, design_logfile_stream, writer_logfile_stream;
+std::ofstream main_logfile_stream, subcomplex_logfile_stream, multiphysics_logfile_stream, processing_logfile_stream, kinetics_logfile_stream, characterisation_logfile_stream, design_logfile_stream, writer_logfile_stream;
 // 'Processing_Design.log' file output of the entire computation process as a not exact copy of the console output
 std::ofstream Out_logfile_stream;
 // TODO: DELETE obsolete 'Out_logfile_stream'
@@ -219,12 +219,41 @@ int main() {
     simulation_tasks_dir = initial_configuration.Get_sim_task();
  /// ============================================================================== ///
 
-// ------------------ #Print -----------------------
- //   main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::trunc); // the main_logfile_stream.log stream will be closed at the end of the main function
+/// ------------------ #Print -----------------------
+    main_logfile_stream.open(output_dir + "cpd_main.log"s, ios::trunc); // the main_logfile_stream.log stream will be closed at the end of the main function
+    main_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
+
+    if (ConfigVector.at(1) == 1) {
+        subcomplex_logfile_stream.open(output_dir + "cpd_subcomplex.log"s, ios::trunc);
+        subcomplex_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
+    }
+    if (ConfigVector.at(2) == 1) {
+        multiphysics_logfile_stream.open(output_dir + "cpd_multiphysics.log"s, ios::trunc);
+        multiphysics_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
+    }
+    if (ConfigVector.at(3) == 1) {
+        processing_logfile_stream.open(output_dir + "cpd_processing.log"s, ios::trunc);
+        processing_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
+    }
+    if (ConfigVector.at(7) == 1) {
+        kinetics_logfile_stream.open(output_dir + "cpd_kinetics.log"s,ios::trunc); // this PCC_Kinetics.log stream will be closed at the end of the main.cpp module and also is used in the .ini readers
+        kinetics_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
+    }
+    if (ConfigVector.at(4) == 1) {
+        characterisation_logfile_stream.open(output_dir + "cpd_characterisation.log"s, ios::trunc);
+        characterisation_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
+    }
+    if (ConfigVector.at(5) == 1) {
+        design_logfile_stream.open(output_dir + "cpd_design.log"s, ios::trunc);
+        design_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
+    }
+    if (ConfigVector.at(6) == 1) {
+        writer_logfile_stream.open(output_dir + "cpd_writer.log"s, ios::trunc);
+        writer_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
+    }
     main_logfile_stream << endl << "---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------" << endl << endl;
 
     // Output Year/Day/Time of the computation
-    main_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
     {
         std::string print_to_string = "Main execution time before modules is equal to  "s + std::to_string(Main_execution_time / pow(10.0, 6.0)) + "  seconds"s;
         cout << print_to_string << endl << endl;
@@ -651,6 +680,7 @@ exit(0);
     subcomplex_logfile_stream.close();
     multiphysics_logfile_stream.close();
     processing_logfile_stream.close();
+    kinetics_logfile_stream.close();
     characterisation_logfile_stream.close();
     design_logfile_stream.close();
     writer_logfile_stream.close();

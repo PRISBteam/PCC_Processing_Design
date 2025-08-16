@@ -32,7 +32,7 @@ using namespace std; // standard namespace
 
 /// External variables
 extern std::vector<unsigned int> CellNumbs;
-extern ofstream Out_logfile_stream;
+extern ofstream kinetics_logfile_stream;
 extern std::string source_path;
 extern std::string output_dir;
 extern std::vector<std::string> paths_to_PCC_matrices;
@@ -50,6 +50,7 @@ extern int PCC_dimension;
  */
 ///* The interface use functions from PCC_Kinetics/functions C++ libraries to generate for each p-cell in a PCC the moment of 'time'           *///
 ///* in the [0,1] range when it changed its special 'generated' type as the result of a 'kinetic' process (e.g. corrosion or irradiation)     *///
+
 
 std::vector<vector<double>> PCC_Kinetics(Config &kinetics_configuration, CellDesign &processing_cells_design) {
 /// Main output of the module 'p_cells_history' -- a vector contained the 'time' moment in the [0,1] range when each p-cell special generated p-cell changed its type.

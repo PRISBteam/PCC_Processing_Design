@@ -120,39 +120,39 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
 /// Console Output
     cout << endl << ".............................*  NEW MATERIAL  *.................................. " << endl << endl;
     cout << "Material source: " << source_path + "CPD_material_database/"s + Mid + ".ini"s << endl;
-    cout << "Material ID: " << Mid << endl;
-    cout << "Material type: " << material_type << endl;
+    cout << "Material ID:.................... " << Mid << endl;
+    cout << "Material type:.................. " << material_type << endl;
     if (mass_density > std::pow(10,-100)) cout << "Density [kg/m^3] .................... " << mass_density << endl;
     if (melting_point > std::pow(10,-100)) cout << "Melting point [K] .................... " << melting_point << endl;
-    if (gb_width > std::pow(10,-100)) cout << "GB width [nm] .................... " << gb_width*pow(10,9) << endl;
+    if (gb_width > std::pow(10,-100)) cout << "GB width [nm] .................. " << gb_width*pow(10,9) << endl;
     if (cohesion_energy > std::pow(10,-100)) cout << "Grain boundary energy density [J/m^2] .................... " << cohesion_energy << endl;
     if (Young_modulus > std::pow(10,-100)) cout << "Young modulus [GPa] .................... " << Young_modulus/pow(10,9) << endl;
     if (Poisson_ratio > std::pow(10,-100)) cout << "Poisson ratio  .................... " << Poisson_ratio << endl;
     if (yield_strength > std::pow(10,-100)) cout << "Yield strength [MPa]  .................... " << yield_strength/pow(10,6) << endl;
     if (strength > std::pow(10,-100)) cout << "Strength [MPa] .................... " << strength/pow(10,6) << endl;
     if (fracture_toughness > std::pow(10,-100)) cout << "Fracture toughness [MPa*sqrt(metre)] .................... " << fracture_toughness << endl;
-    if (lagbs_corrosion_current > 0) cout << "LAGBs corrosion current [ ] .................... " << lagbs_corrosion_current << endl;
-    if (hagbs_corrosion_current > 0) cout << "HAGBs corrosion current [ ] .................... " << hagbs_corrosion_current << endl;
-    if (sigma3_corrosion_current > 0) cout << "Sigma3 corrosion current [ ] .................... " << sigma3_corrosion_current << endl;
+    if (lagbs_corrosion_current > std::pow(10,-100)) cout << "LAGBs corrosion current [ ] .................... " << lagbs_corrosion_current << endl;
+    if (hagbs_corrosion_current > std::pow(10,-100)) cout << "HAGBs corrosion current [ ] .................... " << hagbs_corrosion_current << endl;
+    if (sigma3_corrosion_current > std::pow(10,-100)) cout << "Sigma3 corrosion current [ ] .................... " << sigma3_corrosion_current << endl;
 
 /// Output into .log file
     Out_logfile_stream << endl << ".............................*  MATRIX MATERIAL  *.................................. " << endl << endl;
 //    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
     Out_logfile_stream << "Material source: " << source_path + "CPD_material_database/"s + Mid + ".ini"s << endl;
-    Out_logfile_stream << "Material ID: " << Mid << endl;
-    Out_logfile_stream << "Material type: " << material_type << endl;
+    Out_logfile_stream << "Material ID:.................... " << Mid << endl;
+    Out_logfile_stream << "Material type:.................. " << material_type << endl;
     if (mass_density > std::pow(10,-100)) Out_logfile_stream << "Density [kg/m^3] .................... " << mass_density << endl;
     if (melting_point > std::pow(10,-100)) Out_logfile_stream << "Melting point [K] .................... " << melting_point << endl;
-    if (gb_width > std::pow(10,-100)) Out_logfile_stream << "GB width [nm] .................... " << gb_width*pow(10,9) << endl;
+    if (gb_width > std::pow(10,-100)) Out_logfile_stream << "GB width [nm] ................. " << gb_width*pow(10,9) << endl;
     if (cohesion_energy > std::pow(10,-100)) Out_logfile_stream << "Grain boundary energy density [J/m^2] .................... " << cohesion_energy << endl;
     if (Young_modulus > std::pow(10,-100)) Out_logfile_stream << "Young modulus [GPa] .................... " << Young_modulus/pow(10,9) << endl;
     if (Poisson_ratio > std::pow(10,-100)) Out_logfile_stream << "Poisson ratio  .................... " << Poisson_ratio << endl;
     if (yield_strength > std::pow(10,-100)) Out_logfile_stream << "Yield strength [MPa]  .................... " << yield_strength/pow(10,6) << endl;
     if (strength > std::pow(10,-100)) Out_logfile_stream << "Strength [MPa] .................... " << strength/pow(10,6) << endl;
     if (fracture_toughness > std::pow(10,-100)) Out_logfile_stream << "Fracture toughness [MPa*sqrt(metre)] .................... " << fracture_toughness << endl;
-    if (lagbs_corrosion_current > 0) Out_logfile_stream << "LAGBs corrosion current [ ] .................... " << lagbs_corrosion_current << endl;
-    if (hagbs_corrosion_current > 0) Out_logfile_stream << "HAGBs corrosion current [ ] .................... " << hagbs_corrosion_current << endl;
-    if (sigma3_corrosion_current > 0) Out_logfile_stream << "Sigma3 corrosion current [ ] .................... " << sigma3_corrosion_current << endl;
+    if (lagbs_corrosion_current > std::pow(10,-100)) Out_logfile_stream << "LAGBs corrosion current [ ] .................... " << lagbs_corrosion_current << endl;
+    if (hagbs_corrosion_current > std::pow(10,-100)) Out_logfile_stream << "HAGBs corrosion current [ ] .................... " << hagbs_corrosion_current << endl;
+    if (sigma3_corrosion_current > std::pow(10,-100)) Out_logfile_stream << "Sigma3 corrosion current [ ] .................... " << sigma3_corrosion_current << endl;
 
 //    Out_logfile_stream.close();
 

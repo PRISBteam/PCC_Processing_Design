@@ -306,6 +306,7 @@ Config::processing_configuration Config::Get_processing_config() const {
 }
 
 /// kinetics
+// general
 void Config::Set_kinetics_nk_mode(std::string &new_nk_mode){
     kinetics_config.nk_mode = new_nk_mode;
 }
@@ -331,14 +332,13 @@ std::string Config::Get_kinetics_pk_mode(void){
     return kinetics_config.pk_mode;
 
 }
-
 void Config::Set_kinetics_material_id(std::string &new_mat_id){
     kinetics_config.material_id = new_mat_id;
 }
 std::string Config::Get_kinetics_material_id(void){
     return kinetics_config.material_id;
 }
-
+// kinetics output
 void Config::Set_is_kinetics_log_file(bool new_is_kinetics_log_file){
     kinetics_config.is_kinetics_log_file = new_is_kinetics_log_file;
 }
@@ -352,25 +352,51 @@ void Config::Set_kinetics_time_scale(double &new_time_parameter){
 double Config::Get_kinetics_time_scale(void) const{
     return kinetics_config.kinetics_time_scale;
 }
+// kinetics corrosion
 void Config::Set_kinetics_corrosion_rate_scale(double &new_corrosion_rate_parameter){
     kinetics_config.kinetics_corrosion_rate_scale = new_corrosion_rate_parameter;
 }
 double Config::Get_kinetics_corrosion_rate_scale(void) const{
     return kinetics_config.kinetics_corrosion_rate_scale;
 }
+// kinetics irradiation
+void Config::Set_kinetics_beam_energy_flux(double &beam_energy_flux){
+    kinetics_config.beam_energy_flux = beam_energy_flux;
+}
+double Config::Get_kinetics_beam_energy_flux(void) const{
+    return kinetics_config.beam_energy_flux;
+}
+void Config::Set_kinetics_beam_current(double &beam_current){
+    kinetics_config.beam_current = beam_current;
+}
+double Config::Get_kinetics_beam_current(void) const{
+    return kinetics_config.beam_current;
+}
+void Config::Set_kinetics_energy_dissipation_rate(double &energy_dissipation_rate){
+    kinetics_config.energy_dissipation_rate = energy_dissipation_rate;
+}
+double Config::Get_kinetics_energy_dissipation_rate(void) const{
+    return kinetics_config.energy_dissipation_rate;
+}
 
-// Design module
+/// Design module
 void Config::Set_design_cell_type(int &new_design_cell_type){
     design_config.design_cell_type = new_design_cell_type;
 }
 int Config::Get_design_cell_type(void) const{
     return design_config.design_cell_type;
 }
-void Config::Set_design_PCCDesign_type(std::string &PCCDesign_type){
+void Config::Set_design_mode(std::string &PCCDesign_type){
     design_config.design_mode = PCCDesign_type;
 }
-std::string Config::Get_design_PCCDesign_type(void) const{
+std::string Config::Get_design_mode(void) const{
     return design_config.design_mode;
+}
+void Config::Set_design_genes_diversity(int &genes_diversity){
+    design_config.design_genes_diversity = genes_diversity;
+}
+int Config::Get_design_genes_diversity(void) const{
+    return design_config.design_genes_diversity;
 }
 void Config::Set_design_population_size(unsigned int &population_size){
     design_config.population_size = population_size;

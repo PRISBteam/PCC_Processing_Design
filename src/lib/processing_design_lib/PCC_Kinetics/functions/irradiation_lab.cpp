@@ -120,6 +120,12 @@ std::vector<std::vector<double>>  interface_irradiation_damage(Config &config, M
         gb_energies.at(i).Set_ambient_temperature(ambient_temperature);
     }
 
+    config_reader_kinetics(config);
+
+    double beam_energy_flux = config.Get_kinetics_beam_energy_flux();
+    double beam_current = config.Get_kinetics_beam_current();
+    double energy_dissipation_rate = config.Get_kinetics_energy_dissipation_rate();
+
     //assigning for all grain boundaries
     for (unsigned int i = 0; i < CellNumbs.at(face_cell_type); ++i) {
         face_areas_vector.at(i) = face_areas_vector.at(i) * (get<0>(sample_dimensions) * get<1>(sample_dimensions)); /// WARNING! Works well only for cubic samples!

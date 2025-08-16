@@ -24,7 +24,7 @@ using namespace std; // standard namespace
 
 extern std::string source_path;
 extern std::string output_dir;
-extern std::ofstream main_logfile_stream, subcomplex_logfile_stream, multiphysics_logfile_stream, processing_logfile_stream, characterisation_logfile_stream, design_logfile_stream, writer_logfile_stream;
+extern std::ofstream main_logfile_stream, subcomplex_logfile_stream, multiphysics_logfile_stream, processing_logfile_stream, kinetics_logfile_stream, characterisation_logfile_stream, design_logfile_stream, writer_logfile_stream;
 
 /// ================== # 1 # Initial configuration - reading and output ==================
 //std::vector<int> config_reader_main(std::string &pcc_source_dir, std::string &output_dir, std::string &cell_complex_standard, std::string &main_type) {
@@ -1167,7 +1167,7 @@ std::vector<double> config_reader_characterisation(std::vector<int> &charlabs_po
         } }
     if (log_file_output == "ON") is_log_file = 1;
 
-    /// Console output
+/// Console output
     cout << "The Characterisation module simulation type and initial parameters:\t\t" << endl << endl;
     cout << "Polyhedrons lab ON/OFF:\t"s << charlabs_polyhedrons.at(0) << "\t\t" << endl;
     cout << "Faces lab       ON/OFF:\t"s << charlabs_faces.at(0) << "\t\t" << endl;
@@ -1270,7 +1270,16 @@ void config_reader_design(Config &configuration) {
     double crossover_rate; // probability of acceptance
     double survival_rate; // The ratio (population_size/ survival_rate) gives the number of considered newly created State Vectors at each calculation step
     int max_generation_number; // maximal generation as a computation limit
+    int genes_diversity; // number of different kinds of genes {0, 1, 2, 3, ..}
+    bool is_design_log_file = false;
     std::string log_file_output; // output of results/design.log file
+
+    if (design_ini.has("design_type")) {
+        auto &collection = design_ini["design_type"];
+        if (collection.has("design_mode")) {
+            PCCDesign_type = design_ini.get("design_type").get("design_mode");
+            configuration.Set_design_mode(PCCDesign_type);
+        } }
 
     if (design_ini.has("genetic_algorithm")) {
         auto &collection = design_ini["genetic_algorithm"];
@@ -1279,9 +1288,9 @@ void config_reader_design(Config &configuration) {
             cell_type = stoi(design_ini.get("genetic_algorithm").get("cell_type"));
             configuration.Set_design_cell_type(cell_type);
         }
-        if (collection.has("design_mode")) {
-            PCCDesign_type = design_ini.get("genetic_algorithm").get("design_mode");
-            configuration.Set_design_PCCDesign_type(PCCDesign_type);
+        if (collection.has("genes_diversity")) {
+            genes_diversity = stoi(design_ini.get("genetic_algorithm").get("genes_diversity"));
+            configuration.Set_design_genes_diversity(genes_diversity);
         }
         if (collection.has("population_size")) {
             population_size = stoi(design_ini.get("genetic_algorithm").get("population_size"));
@@ -1310,7 +1319,34 @@ void config_reader_design(Config &configuration) {
             if (collection.has("module_log_file")) {
                 log_file_output = design_ini.get("module_output").get("module_log_file");
             } }
-        if (log_file_output == "ON") configuration.Set_is_design_log_file(true);
+        if (log_file_output == "ON") {
+            configuration.Set_is_design_log_file(true);
+            is_design_log_file = true;
+        }
+
+    // Console output
+        cout << "The Design module simulation type and initial parameters:\t\t" << endl << endl;
+        cout << "Design mode:\t\t\t\t"s << PCCDesign_type << "\t\t" << endl;
+        cout << "Design cell type:\t\t\t"s << cell_type << "\t\t" << endl;
+        cout << "Diversity of gene types:\t"s << genes_diversity << "\t\t" << endl;
+        cout << "Population size:\t\t\t"s << population_size << "\t\t" << endl;
+        cout << "Mutation rate:\t\t\t\t"s << mutation_rate << "\t\t" << endl;
+        cout << "Crossover rate\t\t\t\t"s << crossover_rate << "\t\t" << endl;
+        cout << "Survival rate:\t\t\t\t"s << survival_rate << "\t\t" << endl;
+        cout << "Max generation number:\t\t"s << max_generation_number << "\t\t" << endl;
+
+    // Design logfile output
+        if(is_design_log_file) {
+            design_logfile_stream << "The Design module simulation type and initial parameters:\t\t" << endl << endl;
+            design_logfile_stream << "Design mode:\t\t\t\t"s << PCCDesign_type << "\t\t" << endl;
+            design_logfile_stream << "Design cell type:\t\t\t"s << cell_type << "\t\t" << endl;
+            design_logfile_stream << "Diversity of gene types:\t"s << genes_diversity << "\t\t" << endl;
+            design_logfile_stream << "Population size:\t\t\t"s << population_size << "\t\t" << endl;
+            design_logfile_stream << "Mutation rate:\t\t\t\t"s << mutation_rate << "\t\t" << endl;
+            design_logfile_stream << "Crossover rate\t\t\t\t"s << crossover_rate << "\t\t" << endl;
+            design_logfile_stream << "Survival rate:\t\t\t\t"s << survival_rate << "\t\t" << endl;
+            design_logfile_stream << "Max generation number:\t\t"s << max_generation_number << "\t\t" << endl;
+        }
 
         } // end of 'if (design_ini.has("genetic_algorithm"))'
 }
@@ -1462,7 +1498,7 @@ void config_reader_kinetics(Config &configuration) {
     file.read(kinetics_ini);
 
     std::string new_nk_mode, new_ek_mode, new_fk_mode, new_pk_mode;
-//subcomplex type
+//kinetics type
     if (kinetics_ini.has("kinetic_mode")) {
         auto& collection = kinetics_ini["kinetic_mode"];
         if (collection.has("node_kinetic_mode")) {
@@ -1505,10 +1541,30 @@ void config_reader_kinetics(Config &configuration) {
             corrosion_rate = stod(kinetics_ini.get("corrosion").get("corrosion_rate_coeff"));
             configuration.Set_kinetics_corrosion_rate_scale(corrosion_rate);
         }
-
     }
 
-    // module output
+    // irradiation
+    double beam_energy_flux; //energy flux in [J/s]
+    double beam_current; //beam current in [particles/s]
+    double energy_dissipation_rate; // energy dissipation of a beam with material depth
+
+    if (kinetics_ini.has("irradiation")) {
+        auto &collection = kinetics_ini["irradiation"];
+        if (collection.has("beam_energy_flux")) {
+            beam_energy_flux = stod(kinetics_ini.get("irradiation").get("beam_energy_flux"));
+            configuration.Set_kinetics_beam_energy_flux(beam_energy_flux);
+        }
+        if (collection.has("beam_current")) {
+            beam_current = stod(kinetics_ini.get("irradiation").get("beam_current"));
+            configuration.Set_kinetics_beam_current(beam_current);
+        }
+        if (collection.has("energy_dissipation_rate")) {
+            energy_dissipation_rate = stod(kinetics_ini.get("irradiation").get("energy_dissipation_rate"));
+            configuration.Set_kinetics_energy_dissipation_rate(energy_dissipation_rate);
+        }
+    }
+
+// module output
     if (kinetics_ini.has("module_output")) {
         auto& collection = kinetics_ini["module_output"];
         if (collection.has("module_log_file"))
@@ -1519,34 +1575,53 @@ void config_reader_kinetics(Config &configuration) {
 
 
 /// Output to the screen/console
-    cout << "The Subcomplex module type and initial parameters:\t\t" << endl << endl;
-    cout << "Subcomplex type:\t"s << configuration.Get_subcomplex_config().sctype << endl;
-    if (configuration.Get_subcomplex_config().sctype == "H"s) {
-        cout << "Half-plane length:\t"s << configuration.Get_subcomplex_config().cut_length << endl << endl;
+    cout << "The Kinetics module type and initial parameters:\t\t" << endl;
+    if(configuration.Get_kinetics_nk_mode() != "N"s)
+        cout << "Node kinetics type:\t\t\t\t"s << configuration.Get_kinetics_nk_mode() << endl;
+    if(configuration.Get_kinetics_ek_mode() != "N"s)
+        cout << "Edge kinetics type:\t\t\t\t"s << configuration.Get_kinetics_ek_mode() << endl;
+    if(configuration.Get_kinetics_fk_mode() != "N"s)
+        cout << "Face kinetics type:\t\t\t\t"s << configuration.Get_kinetics_fk_mode() << endl;
+    if(configuration.Get_kinetics_pk_mode() != "N"s)
+        cout << "Volume kinetics type:\t\t\t\t"s << configuration.Get_kinetics_pk_mode() << endl;
+    cout << "Material's ID:\t\t\t\t\t"s << configuration.Get_kinetics_material_id() << endl;
+    cout << "Kinetic time scale:\t\t\t\t"s << configuration.Get_kinetics_time_scale() << endl;
+    if(configuration.Get_kinetics_nk_mode() == "C"s || configuration.Get_kinetics_ek_mode() == "C"s ||
+            configuration.Get_kinetics_fk_mode() == "C"s || configuration.Get_kinetics_pk_mode() == "C"s)
+    cout << "Corrosion rate:\t\t\t\t\t"s << configuration.Get_kinetics_corrosion_rate_scale() << endl;
+    if(configuration.Get_kinetics_nk_mode() == "I"s || configuration.Get_kinetics_ek_mode() == "I"s ||
+       configuration.Get_kinetics_fk_mode() == "I"s || configuration.Get_kinetics_pk_mode() == "I"s)
+    {
+        cout << "Energy flux of the beam:\t\t"s << configuration.Get_kinetics_beam_energy_flux() << endl;
+        cout << "Beam current:\t\t\t\t\t"s << configuration.Get_kinetics_beam_current() << endl;
+        cout << "Energy dissipation rate:\t\t"s << configuration.Get_kinetics_energy_dissipation_rate() << endl;
     }
-    if (configuration.Get_subcomplex_config().sctype == "P"s || configuration.Get_subcomplex_config().sctype == "H"s) {
-        cout << "Plane orientation:\ta_coeff*X + b_coeff*Y + c_coeff*Z = D"s << endl << "Plane normal vector\t"s << "\ta =\t" << configuration.Get_subcomplex_config().plane_orientation.at(0) << "\tb =\t" << configuration.Get_subcomplex_config().plane_orientation.at(1) << "\tc =\t" << configuration.Get_subcomplex_config().plane_orientation.at(2) << "\t\tPlane position D =\t"s << configuration.Get_subcomplex_config().plane_orientation.at(3) << endl;
-    }
-    else if(configuration.Get_subcomplex_config().sctype == "N"s){
-        cout << "Grain k-neighbours order:\t"s << configuration.Get_subcomplex_config().grain_neighbour_orders << endl << endl;
-    }
-    cout << "Subcomplex module cpdlog_subcomplex.log file output:\t"s << log_file_output << endl;
+    if(configuration.Get_is_kinetics_log_file()) {
+        cout << "Kinetics *.log file output is \tON"s << endl;
 
-    if(configuration.Get_subcomplex_config().is_subcomplex_log_file) {
-        subcomplex_logfile_stream << "The Subcomplex module type and initial parameters:\t\t" << endl << endl;
-        subcomplex_logfile_stream << "Subcomplex type:\t"s << configuration.Get_subcomplex_config().sctype << endl;
-        if (configuration.Get_subcomplex_config().sctype == "H"s) {
-            subcomplex_logfile_stream << "Half-plane length:\t"s << configuration.Get_subcomplex_config().cut_length << endl << endl;
+        kinetics_logfile_stream << "The Kinetics module type and initial parameters:\t\t" << endl;
+        if(configuration.Get_kinetics_nk_mode() != "N"s)
+            kinetics_logfile_stream << "Node kinetics type:\t\t\t\t"s << configuration.Get_kinetics_nk_mode() << endl;
+        if(configuration.Get_kinetics_ek_mode() != "N"s)
+            kinetics_logfile_stream << "Edge kinetics type:\t\t\t\t"s << configuration.Get_kinetics_ek_mode() << endl;
+        if(configuration.Get_kinetics_fk_mode() != "N"s)
+            kinetics_logfile_stream << "Face kinetics type:\t\t\t\t"s << configuration.Get_kinetics_fk_mode() << endl;
+        if(configuration.Get_kinetics_pk_mode() != "N"s)
+            kinetics_logfile_stream << "Volume kinetics type:\t\t\t\t"s << configuration.Get_kinetics_pk_mode() << endl;
+        kinetics_logfile_stream << "Material's ID:\t\t\t\t\t"s << configuration.Get_kinetics_material_id() << endl;
+        kinetics_logfile_stream << "Kinetic time scale:\t\t\t\t"s << configuration.Get_kinetics_time_scale() << endl;
+        if(configuration.Get_kinetics_nk_mode() == "C"s || configuration.Get_kinetics_ek_mode() == "C"s ||
+           configuration.Get_kinetics_fk_mode() == "C"s || configuration.Get_kinetics_pk_mode() == "C"s)
+            kinetics_logfile_stream << "Corrosion rate:\t\t\t\t\t"s << configuration.Get_kinetics_corrosion_rate_scale() << endl;
+        if(configuration.Get_kinetics_nk_mode() == "I"s || configuration.Get_kinetics_ek_mode() == "I"s ||
+           configuration.Get_kinetics_fk_mode() == "I"s || configuration.Get_kinetics_pk_mode() == "I"s) {
+            kinetics_logfile_stream << "Energy flux of the beam:\t\t"s << configuration.Get_kinetics_beam_energy_flux() << endl;
+            kinetics_logfile_stream << "Beam current:\t\t\t\t\t"s << configuration.Get_kinetics_beam_current() << endl;
+            kinetics_logfile_stream << "Energy dissipation rate:\t\t"s << configuration.Get_kinetics_energy_dissipation_rate() << endl;
         }
-        if (configuration.Get_subcomplex_config().sctype == "P"s || configuration.Get_subcomplex_config().sctype == "H"s) {
-            subcomplex_logfile_stream << "Plane orientation:\ta_coeff*X + b_coeff*Y + c_coeff*Z = D"s << endl
-                                      << "Plane normal vector:\t"s << " a: " << configuration.Get_subcomplex_config().plane_orientation.at(0) << " b: "
-                                      << configuration.Get_subcomplex_config().plane_orientation.at(1) << " c: " << configuration.Get_subcomplex_config().plane_orientation.at(2)
-                                      << "\tPlane position\t" << " D: " << configuration.Get_subcomplex_config().plane_orientation.at(3) << endl;
-        } else if (configuration.Get_subcomplex_config().sctype == "N"s) {
-            subcomplex_logfile_stream << "Grain k-neighbours order:\t"s << configuration.Get_subcomplex_config().grain_neighbour_orders << endl << endl;
-        }
-    }
+
+    } else
+        cout << "Kinetics *.log file output is \tOFF"s << endl;
 
     return;
 } /// end of the 'config_reader_kinetics() function

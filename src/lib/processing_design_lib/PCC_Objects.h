@@ -88,13 +88,20 @@ private:
     } processing_config;
 
     struct kinetics_configuration {
+        // general
         std::string nk_mode, ek_mode, fk_mode, pk_mode;
         std::string material_id;
         double kinetics_time_scale;
+
+        // corrosion
         double kinetics_corrosion_rate_scale;
-//        double stress;
-//        double temperature;
+        //irradiation
+        double beam_energy_flux;
+        double beam_current;
+        double energy_dissipation_rate;
+        // module output
         bool is_kinetics_log_file;
+
     }kinetics_config;
 
     struct design_configuration {
@@ -103,6 +110,7 @@ private:
         unsigned int population_size;
         double mutation_rate, crossover_rate, survival_rate;
         int max_generation_number;
+        int design_genes_diversity;
         bool is_design_log;
 
     }design_config;
@@ -255,17 +263,27 @@ public:
     void Set_is_kinetics_log_file(bool is_kinetics_log_file);
     bool Get_is_kinetics_log_file(void);
 
-// corrosion
+// kinetics corrosion
     void Set_kinetics_time_scale(double &new_time_parameter);
     double Get_kinetics_time_scale(void) const;
     void Set_kinetics_corrosion_rate_scale(double &new_corrosion_rate_parameter);
     double Get_kinetics_corrosion_rate_scale(void) const;
 
+// kinetics irradiation
+    void Set_kinetics_beam_energy_flux(double &beam_energy_flux);
+    double Get_kinetics_beam_energy_flux(void) const;
+    void Set_kinetics_beam_current(double &beam_current);
+    double Get_kinetics_beam_current(void) const;
+    void Set_kinetics_energy_dissipation_rate(double &energy_dissipation_rate);
+    double Get_kinetics_energy_dissipation_rate(void) const;
+
 // design module
     void Set_design_cell_type(int &new_design_cell_type);
     int Get_design_cell_type(void) const;
-    void Set_design_PCCDesign_type(std::string &PCCDesign_type);
-    std::string Get_design_PCCDesign_type(void) const;
+    void Set_design_mode(std::string &PCCDesign_type);
+    std::string Get_design_mode(void) const;
+    void Set_design_genes_diversity(int &genes_diversity);
+    int Get_design_genes_diversity(void) const;
     void Set_design_population_size(unsigned int &population_size);
     unsigned int Get_design_population_size(void) const;
     void Set_design_mutation_rate(double &mutation_rate);
