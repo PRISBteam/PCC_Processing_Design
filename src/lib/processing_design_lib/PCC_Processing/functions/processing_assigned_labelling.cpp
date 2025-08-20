@@ -29,7 +29,7 @@ typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which decla
 
 extern int PCC_dimension;
 extern std::vector<unsigned int> CellNumbs;
-extern ofstream Out_logfile_stream;
+extern ofstream processing_logfile_stream;
 extern std::string source_path;
 extern std::string output_dir;
 extern std::vector<std::string> paths_to_PCC_matrices;
@@ -84,10 +84,10 @@ std::vector<std::vector<unsigned int>> Processing_Random(int const cell_type, st
     if ( total_max_sCell_fraction == 0.0) {
         return special_cell_series; /// Early exit:: END of the function execution
     } // end if()
-    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
 
     if (total_max_sCell_fraction > 1.0) { // throw exception here (!)
-        cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl; Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+        cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+        processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
     } // end if()
 
 /// =====> Initial initialisation with the previous calculation step (if any) based on the "special_faces_sequence" file read to the 'Configuration_State' vector
@@ -116,7 +116,8 @@ std::vector<std::vector<unsigned int>> Processing_Random(int const cell_type, st
     double special_cells_fraction = 1.0 - ordinary_cells_fraction; // special k-cell fraction definition based on the ordinary k-cell vector [k = cell_type]
 
     if (special_cells_fraction >= total_max_sCell_fraction) { // throw exception here (!)
-        cout << "WARNING [Processing module]:" << "The initial special cells fraction is already GREATER than the total max special cell fraction from config/processing.ini file!"s << endl; Out_logfile_stream << "WARNING [Processing module]:" << "The initial special cells fraction is already GREATER than the total max special cell fraction from config/processing.ini file!"s << endl;
+        cout << "WARNING [Processing module]:" << "The initial special cells fraction is already GREATER than the total max special cell fraction from config/processing.ini file!"s << endl;
+        processing_logfile_stream << "WARNING [Processing module]:" << "The initial special cells fraction is already GREATER than the total max special cell fraction from config/processing.ini file!"s << endl;
         return special_cell_series; /// Early exit:: END of the function execution : (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
     } // end if (special_cells_fraction >= total_max_sCell_fraction)
 
@@ -126,7 +127,7 @@ std::vector<std::vector<unsigned int>> Processing_Random(int const cell_type, st
     } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
 
 /// Calculate the number of cell TYPES in the 'max_fractions_vectors'
-    int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type ].end(), [](int c){return c > 0;});
+    int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type ].end(), [](double c){return c > 0;});
 
 /// ================= do{ ... }while loop over all ordinary cells before sCells_fraction = max_sCells_fraction fractions of special cells  =======================>
     do { // do{ ... }while(output_step) loop starting point
@@ -164,9 +165,11 @@ std::vector<std::vector<unsigned int>> Processing_Random(int const cell_type, st
         //REPAIR cout << "special_faces_fraction: \t" << special_faces_fraction << "\t\t" << endl;
 
 /// output calculation progress
-if (CellNumbs.at(cell_type) != 0 && special_cells_fraction != 0) { /// &&(int) (special_cells_fraction*CellNumbs.at(cell_type)) % (int) 0.1 * CellNumbs.at(cell_type) == 0) {
+ int double_parameter = (int) std::floor(0.05 * CellNumbs.at(cell_type));
+ if ( double_parameter == 0) double_parameter = 1000;
+ if (CellNumbs.at(cell_type) != 0 && special_cells_fraction != 0 &&  (int) std::floor(special_cells_fraction*CellNumbs.at(cell_type)) % (int) double_parameter == 1) { /// &&(int) (special_cells_fraction*CellNumbs.at(cell_type)) % (int) 0.1 * CellNumbs.at(cell_type) == 0) {
     cout << "special " << cell_type  << "-cells fraction:      " << special_cells_fraction << endl;
-    Out_logfile_stream << "special " << cell_type  << "-cells fraction:      " << special_cells_fraction << endl;
+    processing_logfile_stream << "special " << cell_type  << "-cells fraction:      " << special_cells_fraction << endl;
 }
 
 /// test output (!)
@@ -187,8 +190,6 @@ std::vector<double> j_edge_fractions(4, 0), d_edge_fractions(3, 0);
     for (unsigned int var : S_Vector ) {
         Configuration_State[cell_type].push_back(var);
     }
-
-    Out_logfile_stream.close();
 
 return special_cell_series;
 } // END of the Random generation function
@@ -322,11 +323,9 @@ std::vector<std::vector<unsigned int>> Processing_Random_Strips(int cell_type, s
       if(max_fractions_vectors[cell_type][j] > 0)
           total_max_sCell_fraction += max_fractions_vectors[cell_type][j];
 
-   Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
-
   if (total_max_sCell_fraction > 1.0) {
       cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-      Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+      processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
   }
   else if (total_max_sCell_fraction == 0.0)
       return special_cell_series;
@@ -392,7 +391,8 @@ std::vector<std::vector<unsigned int>> Processing_Random_Strips(int cell_type, s
  //      special_cells_fraction = 1.0 - ordinary_cells_fraction;
         cout << "strip_length\t" << strip_length << "\titr\t" << cell_strip_distribution.size() << endl;
 
-        cout << "special_cells_fraction: " << setprecision(3) << special_cells_fraction << ";  # of strips/chains: " << strip_counter << ";  strip/chain size: " << *itr << endl; Out_logfile_stream << "special_cells_fraction: " << setprecision(3) << special_cells_fraction << ";  # of strips/chains: " << strip_counter++ << ";  strip/chain size: " << *itr << endl;
+        cout << "special_cells_fraction: " << setprecision(3) << special_cells_fraction << ";  # of strips/chains: " << strip_counter << ";  strip/chain size: " << *itr << endl;
+        processing_logfile_stream << "special_cells_fraction: " << setprecision(3) << special_cells_fraction << ";  # of strips/chains: " << strip_counter++ << ";  strip/chain size: " << *itr << endl;
     } // end of    for (auto  itr = cell_strip_distribution.begin(); itr != cell_strip_distribution.end(); ++itr) {
 //REPAIR    for (auto a_vector: S_Vector) cout << a_vector << endl;
 /// Update of the corresponding Configuration State vector
@@ -407,7 +407,6 @@ std::vector<std::vector<unsigned int>> Processing_Random_Strips(int cell_type, s
     for (auto var : S_Vector ) {
         Configuration_State[cell_type].push_back(var);
     }
-    Out_logfile_stream.close();
 **/
     return special_cell_series;
 } // end  of Random lengthy inclusions
@@ -436,7 +435,7 @@ total_max_sCell_fraction += max_fractions_vectors[cell_type][j];
 
 if (total_max_sCell_fraction > 1.0) {
 cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
 }
 else if ( total_max_sCell_fraction == 0.0) return special_cells_sequence;
 
@@ -481,13 +480,13 @@ for (int i = 0; i < max_fractions_vectors[cell_type].size(); ++i) {
 scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type)); // type (i+1) of special x_cells
 if (special_cells_fraction >= total_max_sCell_fraction) {
 cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+processing_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
 return special_cells_sequence;
 }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
 
 // number of cell types
-int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type].end(), [](int c){return c > 0;});
+int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type].end(), [](double c){return c > 0;});
 
 /// Vectors for Edges types and Edges-related configuration entropy
 int sub_cell_type = 0;
@@ -590,8 +589,10 @@ scell_fractions_vector.at(i) = std::count(S_Vector.begin(), S_Vector.end(), (i +
 // REPAIR        if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "  SV: " << S_Vector.size() << "  ctf: " << cases_to_sfaces.size() << "  ms :  " <<  max_set.size() << "  eel: " << EntropyIncreaseList.size() << "  sss :" << special_cells_sequence.size() << " OCN:  " << OrdinaryCellNumbs.size() << endl;
 if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "special " << cell_type << "-cells fraction:  " <<  special_cells_fraction << endl;
 //        cout << "place 9" << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor((special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+ processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor((special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+ processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
 } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 
@@ -625,7 +626,7 @@ total_max_sCell_fraction += max_fractions_vectors[cell_type][j];
 
 if (total_max_sCell_fraction > 1.0) {
 cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
 }
 else if ( total_max_sCell_fraction == 0.0) return special_cells_sequence;
 
@@ -664,13 +665,13 @@ for (int i = 0; i < max_fractions_vectors[cell_type].size(); ++i) {
 scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type)); // type (i+1) of special x_cells
 if (special_cells_fraction >= total_max_sCell_fraction) {
 cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+processing_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
 return special_cells_sequence;
 }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
 
 // number of cell types
-int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type].end(), [](int c){return c > 0;});
+int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type].end(), [](double c){return c > 0;});
 
 /// Vectors for Edges types and Edges-related configuration entropy
 int sub_cell_type = 0;
@@ -768,8 +769,10 @@ scell_fractions_vector.at(i) = std::count(S_Vector.begin(), S_Vector.end(), (i +
 // REPAIR        if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "  SV: " << S_Vector.size() << "  ctf: " << cases_to_sfaces.size() << "  ms :  " <<  max_set.size() << "  eel: " << EntropyIncreaseList.size() << "  sss :" << special_cells_sequence.size() << " OCN:  " << OrdinaryCellNumbs.size() << endl;
 if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "special " << cell_type << "-cells fraction:  " <<  special_cells_fraction << endl;
 //        cout << "place 9" << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+  processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+  processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
 } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 
@@ -802,7 +805,7 @@ total_max_sCell_fraction += max_fractions_vectors[cell_type ][j];
 
 if (total_max_sCell_fraction > 1.0) {
 cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
 }
 else if ( total_max_sCell_fraction == 0.0) return special_cells_sequence;
 
@@ -819,7 +822,7 @@ special_cells_sequence = Processing_Random(cell_type, Configuration_sState, seed
 // REPAIR cout << "s_faces_sequence.size(): " << s_faces_sequence.size() / (double) CellNumbs.at(2) << endl;
 
 // number of cell types
-int number_of_types = std::count_if(max_fractions_vectors[cell_type ].begin(), max_fractions_vectors[cell_type ].end(), [](int c){return c > 0;});
+int number_of_types = std::count_if(max_fractions_vectors[cell_type ].begin(), max_fractions_vectors[cell_type ].end(), [](double c){return c > 0;});
 
 /// Vectors for Edges types and Edges-related configuration entropy
 vector<int> EdgeTypes(CellNumbs.at(1), 0); // vector<int> in the form [ 0 2 3 3 2 1 ...] with the TJs type ID as its values
@@ -940,7 +943,7 @@ for (int i = 0; i < max_fractions_vectors[cell_type ].size(); ++i) {
 scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type)); // type (i+1) of special x_cells
 if (special_cells_fraction >= total_max_sCell_fraction) {
 cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+processing_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
 return special_cells_sequence;
 }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
@@ -1047,8 +1050,10 @@ if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "special " << cell_ty
 
 cout << special_cells_fraction << endl;
 
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+ processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+ processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
 } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 
@@ -1081,7 +1086,7 @@ total_max_sCell_fraction += max_fractions_vectors[cell_type][j];
 
 if (total_max_sCell_fraction > 1.0) {
 cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
 }
 else if ( total_max_sCell_fraction == 0.0) return special_cells_sequence;
 
@@ -1098,7 +1103,7 @@ special_cells_sequence = Processing_Random(cell_type, Configuration_sState, seed
 // REPAIR cout << "s_faces_sequence.size(): " << s_faces_sequence.size() / (double) CellNumbs.at(2) << endl;
 
 // number of cell types
-int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type].end(), [](int c){return c > 0;});
+int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type].end(), [](double c){return c > 0;});
 
 /// Vectors for Edges types and Edges-related configuration entropy
 vector<int> EdgeTypes(CellNumbs.at(1 ), 0); // vector<int> in the form [ 0 2 3 3 2 1 ...] with the TJs type ID as its values
@@ -1222,7 +1227,7 @@ for (int i = 0; i < max_fractions_vectors[cell_type ].size(); ++i) {
 scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type)); // type (i+1) of special x_cells
 if (special_cells_fraction >= total_max_sCell_fraction) {
 cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+processing_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
 return special_cells_sequence;
 }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
@@ -1337,8 +1342,10 @@ scell_fractions_vector.at(i) = std::count(S_Vector.begin(), S_Vector.end(), (i +
 if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "special " << cell_type << "-cells fraction:  " <<  special_cells_fraction << endl;
 cout << special_cells_fraction << endl;
 
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+  processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+  processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
 } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 
@@ -1371,7 +1378,7 @@ total_max_sCell_fraction += max_fractions_vectors[cell_type ][j];
 
 if (total_max_sCell_fraction > 1.0) {
 cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
 }
 else if ( total_max_sCell_fraction == 0.0) return special_cells_sequence;
 
@@ -1388,7 +1395,7 @@ special_cells_sequence = Processing_Random(cell_type, Configuration_sState, seed
 // REPAIR cout << "s_faces_sequence.size(): " << s_faces_sequence.size() / (double) CellNumbs.at(2) << endl;
 
 // number of cell types
-int number_of_types = std::count_if(max_fractions_vectors[cell_type ].begin(), max_fractions_vectors[cell_type ].end(), [](int c){return c > 0;});
+int number_of_types = std::count_if(max_fractions_vectors[cell_type ].begin(), max_fractions_vectors[cell_type ].end(), [](double c){return c > 0;});
 
 /// Vectors for Edges types and Edges-related configuration entropy
 vector<int> EdgeTypes(CellNumbs.at(1), 0); // vector<int> in the form [ 0 2 3 3 2 1 ...] with the TJs type ID as its values
@@ -1521,7 +1528,7 @@ for (int i = 0; i < max_fractions_vectors[cell_type ].size(); ++i) {
 scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type)); // type (i+1) of special x_cells
 if (special_cells_fraction >= total_max_sCell_fraction) {
 cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+processing_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
 return special_cells_sequence;
 }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
@@ -1623,8 +1630,10 @@ if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "special " << cell_ty
 
 cout << special_cells_fraction << endl;
 
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+  processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+  processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
 } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 

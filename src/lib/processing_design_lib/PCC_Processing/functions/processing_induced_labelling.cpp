@@ -27,7 +27,7 @@ using namespace std; // standard namespace
 typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which declares a column-major sparse matrix type of doubles with the nickname 'SpMat'
 
 extern std::vector<unsigned int> CellNumbs;
-extern ofstream Out_logfile_stream;
+extern ofstream processing_logfile_stream;
 extern std::vector<std::string> paths_to_PCC_matrices;
 extern int PCC_dimension;
 
@@ -164,7 +164,7 @@ std::vector <unsigned int> PCC_Kinematic_cracking(int cell_type, std::vector<uns
         cout << "WARNING! [Processing_Random()]: "s << cell_type << " total_max_sCell_fraction of " << cell_type
              << "-cells in the processing.ini file = " << total_max_cCells_fraction
              << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-        Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type << " total_max_sCell_fraction of "
+        processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type << " total_max_sCell_fraction of "
                            << cell_type << "-cells in the processing.ini file = " << total_max_cCells_fraction
                            << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
     } else if (total_max_cCells_fraction == 0.0) return crack_faces_sequence;
@@ -476,7 +476,7 @@ std::vector <unsigned int> PCC_Kinematic2_cracking(int cell_type, std::vector<un
         cout << "WARNING! [Processing_Random()]: "s << cell_type << " total_max_sCell_fraction of " << cell_type
              << "-cells in the processing.ini file = " << total_max_cCells_fraction
              << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-        Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type << " total_max_sCell_fraction of "
+        processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type << " total_max_sCell_fraction of "
                            << cell_type << "-cells in the processing.ini file = " << total_max_cCells_fraction
                            << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
     } else if (total_max_cCells_fraction == 0.0) return crack_faces_sequence;
@@ -740,7 +740,7 @@ std::vector <unsigned int> PCC_Kineic_cracking(int cell_type, std::vector<unsign
         cout << "WARNING! [Processing_Random()]: "s << cell_type << " total_max_sCell_fraction of " << cell_type
              << "-cells in the processing.ini file = " << total_max_cCells_fraction
              << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-        Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type << " total_max_sCell_fraction of "
+        processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type << " total_max_sCell_fraction of "
                            << cell_type << "-cells in the processing.ini file = " << total_max_cCells_fraction
                            << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
     } else if (total_max_cCells_fraction == 0.0) return crack_faces_sequence;

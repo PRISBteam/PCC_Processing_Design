@@ -47,6 +47,10 @@ public:
  */
 class Config {
 
+public:
+    // Output only one time per simulation
+    bool main_reader_switch = true, subcomplex_reader_switch = true, multiphysics_reader_switch = true, processing_reader_switch = true, kinetics_reader_switch = true, characterisation_reader_switch = true, design_reader_switch = true, writer_reader_switch = true;
+
 private:
     struct main_configuration {
         std::string pcc_source_dir;
@@ -95,16 +99,22 @@ private:
 
         // corrosion
         double kinetics_corrosion_rate_scale;
+
         //irradiation
+        std::tuple<double,double,double> beam_direction;
+        double irradiation_damage_rate;
         double beam_energy_flux;
         double beam_current;
         double energy_dissipation_rate;
+        double observation_time;
+
         // module output
         bool is_kinetics_log_file;
 
     }kinetics_config;
 
     struct design_configuration {
+        std::string goal_function_id;
         int design_cell_type;
         std::string design_mode;
         unsigned int population_size;
@@ -270,14 +280,22 @@ public:
     double Get_kinetics_corrosion_rate_scale(void) const;
 
 // kinetics irradiation
+    void Set_kinetics_beam_direction(std::tuple<double,double,double> &new_beam_direction);
+    std::tuple<double,double,double> Get_kinetics_beam_direction(void) const;
+    void Set_kinetics_irradiation_damage_rate(double &new_irradiation_damage_rate);
+    double Get_kinetics_irradiation_damage_rate(void) const;
     void Set_kinetics_beam_energy_flux(double &beam_energy_flux);
     double Get_kinetics_beam_energy_flux(void) const;
     void Set_kinetics_beam_current(double &beam_current);
     double Get_kinetics_beam_current(void) const;
     void Set_kinetics_energy_dissipation_rate(double &energy_dissipation_rate);
     double Get_kinetics_energy_dissipation_rate(void) const;
+    void Set_kinetics_observation_time(double &new_observation_time);
+    double Get_kinetics_observation_time(void) const;
 
 // design module
+    void Set_design_goal_function_id(std::string &new_goal_function_id);
+    std::string Get_design_goal_function_id(void) const;
     void Set_design_cell_type(int &new_design_cell_type);
     int Get_design_cell_type(void) const;
     void Set_design_mode(std::string &PCCDesign_type);
@@ -303,6 +321,11 @@ public:
 /// ==== # 1 # =============== CellDesign class  ========================= ///
 class CellDesign {
 private:
+    bool is_set_p_special_sequence = false, is_set_f_special_sequence = false, is_set_e_special_sequence = false, is_set_n_special_sequence = false;
+    bool is_set_p_induced_sequence = false, is_set_f_induced_sequence = false, is_set_e_induced_sequence = false, is_set_n_induced_sequence = false;
+    bool is_set_p_special_design = false, is_set_f_special_design = false, is_set_e_special_design = false, is_set_n_special_design = false;
+    bool is_set_p_induced_design = false, is_set_f_induced_design = false, is_set_e_induced_design = false, is_set_n_induced_design = false;
+
     /// Configurations/Designs: special cells and induced cells
     std::vector<unsigned int> p_special_design, f_special_design, e_special_design, n_special_design; // state vectors of special k-cells
     std::vector<unsigned int> p_induced_design, f_induced_design, e_induced_design, n_induced_design; // state vectors of induced k-cells
@@ -346,6 +369,8 @@ public:
     std::vector<std::vector<unsigned int>> Get_f_special_series(void) const;
     std::vector<std::vector<unsigned int>> Get_e_special_series(void) const;
     std::vector<std::vector<unsigned int>> Get_n_special_series(void) const;
+
+    void Set_p_design(std::vector<unsigned int> &p_special_vector);
     std::vector<unsigned int> Get_p_design(void) const;
     std::vector<unsigned int> Get_f_design(void) const;
     std::vector<unsigned int> Get_e_design(void) const;
@@ -360,6 +385,12 @@ public:
     std::vector<std::vector<unsigned int>> Get_e_induced_series(void) const;
     std::vector<std::vector<unsigned int>> Get_n_induced_series(void) const;
 
+    // Check
+    bool Check_special_sequence(int cell_type);
+    bool Check_induced_sequence(int cell_type);
+    bool Check_special_design(int cell_type);
+    bool Check_induced_design(int cell_type);
+
 }; // END of class CellDesign
 
 /// # 7 # The class of a MATERIAL
@@ -373,6 +404,7 @@ private:
     double melting_point = 0.0;
     double gb_cohesion_energy = 0.0;
     double gb_width;
+    double Burgers_vector;
     double Young_modulus = 0.0;
     double Poisson_ratio = 0.0;
     double yield_strength = 0.0;
@@ -394,6 +426,7 @@ public:
 // Structural
     std::string Get_material_type(void) const;
     double Get_gb_width(void) const;
+    double Get_Burgers_vector(void) const;
 
 // Thermodynamic
     double Get_mass_density(void) const;

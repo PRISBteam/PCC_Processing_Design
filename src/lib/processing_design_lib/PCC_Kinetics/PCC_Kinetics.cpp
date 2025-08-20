@@ -60,15 +60,20 @@ std::vector<vector<double>> PCC_Kinetics(Config &kinetics_configuration, CellDes
 // Function output
     std::vector<std::vector<double>> p_cells_history;
 
+    cout << "=========================================================================" << endl << endl;
+    kinetics_logfile_stream << "==============================================================================================================================================================" << endl << endl;
+
     config_reader_kinetics(kinetics_configuration);
 
     std::string material_id = kinetics_configuration.Get_kinetics_material_id();
-    Material Nickel(material_id);
+    Material studied_material(material_id);
 
-    if(kinetics_configuration.Get_kinetics_fk_mode() == "C") {
-        p_cells_history = surface_interface_corrosion(kinetics_configuration, Nickel, processing_cells_design);
+    if(kinetics_configuration.Get_kinetics_fk_mode() == "C"s) {
+        p_cells_history = surface_interface_corrosion(kinetics_configuration, studied_material, processing_cells_design);
 
     }
-
+    else if(kinetics_configuration.Get_kinetics_fk_mode() == "I"s){
+        p_cells_history = interface_irradiation_damage(kinetics_configuration, studied_material, processing_cells_design);
+    }
     return p_cells_history;
 }

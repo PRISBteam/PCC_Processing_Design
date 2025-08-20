@@ -37,157 +37,192 @@ extern std::ofstream main_logfile_stream, subcomplex_logfile_stream, multiphysic
 //std::vector<int> config_reader_main(main_config &main_ini_data) {
 std::vector<int> config_reader_main(Config &configuration) {
     std::vector<int> res(8,0);
-/// [0] - > dim, [1] -> isSubcomplex, [2] -> isMultiphysics, [3] -> isProcessing, [4] -> isCharacterisation, [5] -> isDesign, [6] -> isWriter, [7] -> isKinetics
-    bool isSubcomplexON = 0, isProcessingON = 0, isCharacterisationON = 0, isKineticsON = 0, isMultiphysicsON = 0, isDesignON = 0, isWriterON = 0;
-    std::string isSubcomplex, isProcessing, isKinetics, isMultiphysics, isCharacterisation, isDesign, isWriter;
 
-    // ini files reader - external (MIT license) library
-    mINI::INIFile file(source_path + "main.ini"s);
-    mINI::INIStructure main_ini;
-    file.read(main_ini);
+/// [0] - > dim, [1] -> isSubcomplex, [2] -> isMultiphysics, [3] -> isProcessing, [4] -> isCharacterisation, [5] -> isDesign, [6] -> isWriter, [7] -> isKinetics
+        bool isSubcomplexON = 0, isProcessingON = 0, isCharacterisationON = 0, isKineticsON = 0, isMultiphysicsON = 0, isDesignON = 0, isWriterON = 0;
+        std::string isSubcomplex, isProcessing, isKinetics, isMultiphysics, isCharacterisation, isDesign, isWriter;
+
+        // ini files reader - external (MIT license) library
+        mINI::INIFile file(source_path + "main.ini"s);
+        mINI::INIStructure main_ini;
+        file.read(main_ini);
 
 // I
-    if (main_ini.has("execution_mode")) {
-        auto& collection = main_ini["execution_mode"];
-        if (collection.has("mode"))
-        {
-            std::string main_type_str;
-            if (main_ini.get("execution_mode").get("mode") == "LIST" || main_ini.get("execution_mode").get("mode") == "TUTORIAL" ||
-                    main_ini.get("execution_mode").get("mode") == "PERFORMANCE_TEST" || main_ini.get("execution_mode").get("mode") == "TASK")
-            {
-                main_type_str = main_ini.get("execution_mode").get("mode");
-                configuration.Set_main_type(main_type_str);
-                }
-            else throw std::invalid_argument("ERROR in ../src/ini/ini_readers.cpp: WRONG TYPE OF THE 'execution_mode' IN ../config/main.ini FILE; Please change the mode to one of the allowed: 'LIST', 'TUTORIAL', 'PERFORMANCE_TEST' or 'TASK' "s);
-        }
-    }
-// II
-    std::string problem_dimension;
-    if (main_ini.has("general"))
-    {
-        auto& collection = main_ini["general"];
-        if (collection.has("PCC_dimension"))
-        {
-            if(stoi(main_ini.get("general").get("PCC_dimension")) == 1 || stoi(main_ini.get("general").get("PCC_dimension")) == 2 || stoi(main_ini.get("general").get("PCC_dimension")) == 3)
-            {
-                problem_dimension = main_ini.get("general").get("PCC_dimension");
+        if (main_ini.has("execution_mode")) {
+            auto &collection = main_ini["execution_mode"];
+            if (collection.has("mode")) {
+                std::string main_type_str;
+                if (main_ini.get("execution_mode").get("mode") == "LIST" ||
+                    main_ini.get("execution_mode").get("mode") == "TUTORIAL" ||
+                    main_ini.get("execution_mode").get("mode") == "PERFORMANCE_TEST" ||
+                    main_ini.get("execution_mode").get("mode") == "TASK") {
+                    main_type_str = main_ini.get("execution_mode").get("mode");
+                    configuration.Set_main_type(main_type_str);
+                } else
+                    throw std::invalid_argument(
+                            "ERROR in ../src/ini/ini_readers.cpp: WRONG TYPE OF THE 'execution_mode' IN ../config/main.ini FILE; Please change the mode to one of the allowed: 'LIST', 'TUTORIAL', 'PERFORMANCE_TEST' or 'TASK' "s);
             }
-            else throw std::invalid_argument("ERROR in ../src/ini/ini_readers.cpp: WRONG TYPE OF DIMENSION 'PCC_dimension' IN ../config/main.ini FILE; Please change the [general] PCC_dimension parameter to one of the allowed: 1, 2 or 3 "s);
         }
-    }
-    res.at(0) = stoi(problem_dimension); // res[0]
+// II
+        std::string problem_dimension;
+        if (main_ini.has("general")) {
+            auto &collection = main_ini["general"];
+            if (collection.has("PCC_dimension")) {
+                if (stoi(main_ini.get("general").get("PCC_dimension")) == 1 ||
+                    stoi(main_ini.get("general").get("PCC_dimension")) == 2 ||
+                    stoi(main_ini.get("general").get("PCC_dimension")) == 3) {
+                    problem_dimension = main_ini.get("general").get("PCC_dimension");
+                } else
+                    throw std::invalid_argument(
+                            "ERROR in ../src/ini/ini_readers.cpp: WRONG TYPE OF DIMENSION 'PCC_dimension' IN ../config/main.ini FILE; Please change the [general] PCC_dimension parameter to one of the allowed: 1, 2 or 3 "s);
+            }
+        }
+        res.at(0) = stoi(problem_dimension); // res[0]
 
-    // III Modules ON/OFF
-    if (main_ini.has("modules"))
-    {
-        auto& collection = main_ini["modules"];
-        if (collection.has("PCC_Subcomplex"))
-            isSubcomplex = main_ini.get("modules").get("PCC_Subcomplex");
+        // III Modules ON/OFF
+        if (main_ini.has("modules")) {
+            auto &collection = main_ini["modules"];
+            if (collection.has("PCC_Subcomplex"))
+                isSubcomplex = main_ini.get("modules").get("PCC_Subcomplex");
 
-        if (collection.has("PCC_Multiphysics"))
-            isMultiphysics = main_ini.get("modules").get("PCC_Multiphysics");
+            if (collection.has("PCC_Multiphysics"))
+                isMultiphysics = main_ini.get("modules").get("PCC_Multiphysics");
 
-        if (collection.has("PCC_Processing"))
-            isProcessing = main_ini.get("modules").get("PCC_Processing");
+            if (collection.has("PCC_Processing"))
+                isProcessing = main_ini.get("modules").get("PCC_Processing");
 
-        if (collection.has("PCC_Kinetics"))
-            isKinetics = main_ini.get("modules").get("PCC_Kinetics");
+            if (collection.has("PCC_Kinetics"))
+                isKinetics = main_ini.get("modules").get("PCC_Kinetics");
 
-        if (collection.has("PCC_Characterisation"))
-            isCharacterisation = main_ini.get("modules").get("PCC_Characterisation");
+            if (collection.has("PCC_Characterisation"))
+                isCharacterisation = main_ini.get("modules").get("PCC_Characterisation");
 
-        if (collection.has("PCC_Design"))
-            isDesign = main_ini.get("modules").get("PCC_Design");
+            if (collection.has("PCC_Design"))
+                isDesign = main_ini.get("modules").get("PCC_Design");
 
-        if (collection.has("PCC_Writer"))
-            isWriter = main_ini.get("modules").get("PCC_Writer");
+            if (collection.has("PCC_Writer"))
+                isWriter = main_ini.get("modules").get("PCC_Writer");
 
-    } // end if(main_ini.has("modules"))
+        } // end if(main_ini.has("modules"))
 
 /// Forming the output RES vector
-    if (isSubcomplex == "ON") { isSubcomplexON = 1; res.at(1) = 1; } else res.at(1) = 0; // res[1] - Section -> ConfigVector.at(1) in main.cpp
-    if (isMultiphysics == "ON") { isMultiphysicsON = 1; res.at(2) = 1; } else res.at(2) = 0; // res[2] - Multiphysics -> ConfigVector.at(2) in main.cpp
-    if (isProcessing == "ON") { isProcessingON = 1; res.at(3) = 1; } else res.at(3) = 0; // res[3] - Processing -> ConfigVector.at(3) in main.cpp
-    if (isKinetics == "ON") { isKineticsON = 1; res.at(7) = 1; } else res.at(7) = 0; // res[7] - Kinetics -> ConfigVector.at(7) in main.cpp
-    if (isCharacterisation == "ON") { isCharacterisationON = 1; res.at(4) = 1; } else res.at(4) = 0; // res[4] - Characterisation -> ConfigVector.at(4) in main.cpp
-    if (isDesign == "ON") { isDesignON = 1; res.at(5) = 1; } else res.at(5) = 0; // res[5] - Design -> ConfigVector.at(5) in main.cpp
-    if (isWriter == "ON") { isWriterON = 1; res.at(6) = 1; } else res.at(6) = 0; // res[6] - Writer -> ConfigVector.at(6) in main.cpp
+        if (isSubcomplex == "ON") {
+            isSubcomplexON = 1;
+            res.at(1) = 1;
+        }
+        else res.at(1) = 0; // res[1] - Section -> ConfigVector.at(1) in main.cpp
+        if (isMultiphysics == "ON") {
+            isMultiphysicsON = 1;
+            res.at(2) = 1;
+        }
+        else res.at(2) = 0; // res[2] - Multiphysics -> ConfigVector.at(2) in main.cpp
+        if (isProcessing == "ON") {
+            isProcessingON = 1;
+            res.at(3) = 1;
+        }
+        else res.at(3) = 0; // res[3] - Processing -> ConfigVector.at(3) in main.cpp
+        if (isKinetics == "ON") {
+            isKineticsON = 1;
+            res.at(7) = 1;
+        }
+        else res.at(7) = 0; // res[7] - Kinetics -> ConfigVector.at(7) in main.cpp
+        if (isCharacterisation == "ON") {
+            isCharacterisationON = 1;
+            res.at(4) = 1;
+        }
+        else res.at(4) = 0; // res[4] - Characterisation -> ConfigVector.at(4) in main.cpp
+        if (isDesign == "ON") {
+            isDesignON = 1;
+            res.at(5) = 1;
+        }
+        else res.at(5) = 0; // res[5] - Design -> ConfigVector.at(5) in main.cpp
+        if (isWriter == "ON") {
+            isWriterON = 1;
+            res.at(6) = 1;
+        }
+        else res.at(6) = 0; // res[6] - Writer -> ConfigVector.at(6) in main.cpp
 
- // additional parameters
-    if (main_ini.has("general"))
-    {
-        auto& collection = main_ini["general"];
-        std::string pcc_source_directory;
-        if (collection.has("pcc_source_dir"))
-            pcc_source_directory = main_ini.get("general").get("pcc_source_dir");
+        // additional parameters
+        if (main_ini.has("general")) {
+            auto &collection = main_ini["general"];
+            std::string pcc_source_directory;
+            if (collection.has("pcc_source_dir"))
+                pcc_source_directory = main_ini.get("general").get("pcc_source_dir");
             configuration.Set_pcc_source_dir(pcc_source_directory);
-    }
+        }
 
-    if (main_ini.has("general"))
-    {
-        auto& collection = main_ini["general"];
-        std::string pcc_standard_id;
-        if (collection.has("pcc_standard"))
-            pcc_standard_id = main_ini.get("general").get("pcc_standard");
+        if (main_ini.has("general")) {
+            auto &collection = main_ini["general"];
+            std::string pcc_standard_id;
+            if (collection.has("pcc_standard"))
+                pcc_standard_id = main_ini.get("general").get("pcc_standard");
             configuration.Set_pcc_standard_id(pcc_standard_id);
-    } // like 'pcc1s' - the first computational standard (2024)
+        } // like 'pcc1s' - the first computational standard (2024)
 
-    if (main_ini.has("general"))
-    {
-        auto& collection = main_ini["general"];
-        if (collection.has("output_dir"))
-            output_dir = main_ini.get("general").get("output_dir");
+        if (main_ini.has("general")) {
+            auto &collection = main_ini["general"];
+            if (collection.has("output_dir"))
+                output_dir = main_ini.get("general").get("output_dir");
             configuration.Set_output_dir(output_dir);
-    }
+        }
 
 /// Output to the screen/console
-    cout << "The problem dimension that is the maximum value k_max of k-cells in the PCC\t\t|\t\t"s << "dim = " << res.at(0) << endl;
-    cout << "Execution mode:\t"s << "\t" << configuration.Get_main_config().main_type << endl;
-    cout << "Output directory:\t"s << "\t" << output_dir << endl;
-    cout << "PCC source directory:\t"s << configuration.Get_main_config().pcc_source_dir << endl;
-    cout << "PCC standard ID:\t\t"s << configuration.Get_main_config().pcc_standard << endl;
-    cout << endl;
+    if (configuration.main_reader_switch) {
+        main_logfile_stream.open(output_dir + "cpd_main.log"s, ios::trunc); // the main_logfile_stream.log stream will be closed at the end of the main function
 
-    if (isSubcomplexON == 1) cout << "ON    | PCC_Subcomplex"s << endl;
-    else cout << "OFF    | PCC_Subcomplex"s << endl;
-    if (isMultiphysicsON == 1) cout << "ON    | PCC_Multiphysics"s << endl;
-    else cout << "OFF    | PCC_Multiphysics"s << endl;
-    if (isProcessingON == 1) cout << "ON    | PCC_Processing"s << endl;
-    else cout << "OFF    | PCC_Processing"s << endl;
-    if (isKineticsON == 1) cout << "ON    | PCC_Kinetics"s << endl;
-    else cout << "OFF    | PCC_Kinetics"s << endl;
-    if (isCharacterisationON == 1) cout << "ON    | PCC_Characterisation"s << endl;
-    else cout << "OFF    | PCC_Characterisation"s << endl;
-    if (isDesignON == 1) cout << "ON    | PCC_Design"s << endl;
-    else cout << "OFF    | PCC_Design"s << endl;
-    if (isWriterON == 1) cout << "ON    | PCC_Writer"s << endl;
-    else cout << "OFF    | PCC_Writer"s << endl;
-    cout << endl;
+        cout << "The problem dimension that is the maximum value k_max of k-cells in the PCC\t\t|\t\t"s << "dim = "
+             << res.at(0) << endl;
+        cout << "Execution mode:\t"s << "\t" << configuration.Get_main_config().main_type << endl;
+        cout << "Output directory:\t"s << "\t" << output_dir << endl;
+        cout << "PCC source directory:\t"s << configuration.Get_main_config().pcc_source_dir << endl;
+        cout << "PCC standard ID:\t\t"s << configuration.Get_main_config().pcc_standard << endl;
+        cout << endl;
+
+        if (isSubcomplexON == 1) cout << "ON    | PCC_Subcomplex"s << endl;
+        else cout << "OFF    | PCC_Subcomplex"s << endl;
+        if (isMultiphysicsON == 1) cout << "ON    | PCC_Multiphysics"s << endl;
+        else cout << "OFF    | PCC_Multiphysics"s << endl;
+        if (isProcessingON == 1) cout << "ON    | PCC_Processing"s << endl;
+        else cout << "OFF    | PCC_Processing"s << endl;
+        if (isKineticsON == 1) cout << "ON    | PCC_Kinetics"s << endl;
+        else cout << "OFF    | PCC_Kinetics"s << endl;
+        if (isCharacterisationON == 1) cout << "ON    | PCC_Characterisation"s << endl;
+        else cout << "OFF    | PCC_Characterisation"s << endl;
+        if (isDesignON == 1) cout << "ON    | PCC_Design"s << endl;
+        else cout << "OFF    | PCC_Design"s << endl;
+        if (isWriterON == 1) cout << "ON    | PCC_Writer"s << endl;
+        else cout << "OFF    | PCC_Writer"s << endl;
+        cout << endl;
 
 /// Output into main.log file
-    main_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this main_logfile_stream.log stream will be closed at the end of the main function
+        main_logfile_stream << endl;
+        main_logfile_stream << "The problem dimension that is the maximum value k_max of k-cells in the PCC:\t\t|\t\t"s
+                            << "dim = " << res.at(0) << endl;
+        main_logfile_stream << "Execution mode:\t"s << "\t" << configuration.Get_main_config().main_type << endl;
+        main_logfile_stream << "Output directory:\t"s << "\t" << output_dir << endl;
+        main_logfile_stream << "PCC source directory:\t"s << configuration.Get_main_config().pcc_source_dir << endl;
+        main_logfile_stream << "PCC standard ID:\t\t"s << configuration.Get_main_config().pcc_standard << endl;
 
-    main_logfile_stream << endl;
-    main_logfile_stream << "The problem dimension that is the maximum value k_max of k-cells in the PCC:\t\t|\t\t"s << "dim = " << res.at(0) << endl;
-    main_logfile_stream << "Execution mode:\t"s << "\t" << configuration.Get_main_config().main_type << endl;
-    main_logfile_stream << "Output directory:\t"s << "\t" << output_dir << endl;
-    main_logfile_stream << "PCC source directory:\t"s << configuration.Get_main_config().pcc_source_dir << endl;
-    main_logfile_stream << "PCC standard ID:\t\t"s << configuration.Get_main_config().pcc_standard << endl;
+        main_logfile_stream << endl;
+        if (isSubcomplexON == 1) main_logfile_stream << "ON    | PCC_Subcomplex"s << endl;
+        else main_logfile_stream << "OFF    | PCC_Subcomplex"s << endl;
+        if (isMultiphysicsON == 1) main_logfile_stream << "ON    | PCC_Multiphysics"s << endl;
+        else main_logfile_stream << "OFF    | PCC_Multiphysics"s << endl;
+        if (isProcessingON == 1) main_logfile_stream << "ON    | PCC_Processing"s << endl;
+        else main_logfile_stream << "OFF    | PCC_Processing"s << endl;
+        if (isKineticsON == 1) main_logfile_stream << "ON    | PCC_Kinetics"s << endl;
+        else main_logfile_stream << "OFF    | PCC_Kinetics"s << endl;
+        if (isCharacterisationON == 1) main_logfile_stream << "ON    | PCC_Characterisation"s << endl;
+        else main_logfile_stream << "OFF    | PCC_Characterisation"s << endl;
+        if (isDesignON == 1) main_logfile_stream << "ON    | PCC_Design"s << endl;
+        else main_logfile_stream << "OFF    | PCC_Design"s << endl;
+        if (isWriterON == 1) main_logfile_stream << "ON    | PCC_Writer"s << endl;
+        else main_logfile_stream << "OFF    | PCC_Writer"s << endl;
+        main_logfile_stream << endl;
 
-    main_logfile_stream << endl;
-    if (isSubcomplexON == 1) main_logfile_stream << "ON    | PCC_Subcomplex"s << endl;
-    else main_logfile_stream << "OFF    | PCC_Subcomplex"s << endl;
-    if (isMultiphysicsON == 1) main_logfile_stream << "ON    | PCC_Multiphysics"s << endl;
-    else main_logfile_stream << "OFF    | PCC_Multiphysics"s << endl;
-    if (isProcessingON == 1) main_logfile_stream << "ON    | PCC_Processing"s << endl;
-    else main_logfile_stream << "OFF    | PCC_Processing"s << endl;
-    if (isCharacterisationON == 1) main_logfile_stream << "ON    | PCC_Characterisation"s << endl;
-    else main_logfile_stream << "OFF    | PCC_Characterisation"s << endl;
-    if (isDesignON == 1) main_logfile_stream << "ON    | PCC_Design"s << endl;
-    else main_logfile_stream << "OFF    | PCC_Design"s << endl;
-    if (isWriterON == 1) main_logfile_stream << "ON    | PCC_Writer"s << endl;
-    else main_logfile_stream << "OFF    | PCC_Writer"s << endl;
-    main_logfile_stream << endl;
+        main_logfile_stream.close();
+        configuration.main_reader_switch = false;
+    } //  END if (configuration.main_reader_switch)
 
     return res;
 } /// END of the 'config_reader_main()' function
@@ -265,34 +300,49 @@ void config_reader_subcomplex(Config &configuration) {
     if (log_file_output == "ON") configuration.Set_is_subcomplex_log_file(true);
 
 /// Output to the screen/console
-    cout << "The Subcomplex module type and initial parameters:\t\t" << endl << endl;
-    cout << "Subcomplex type:\t"s << configuration.Get_subcomplex_config().sctype << endl;
-    if (configuration.Get_subcomplex_config().sctype == "H"s) {
-        cout << "Half-plane length:\t"s << configuration.Get_subcomplex_config().cut_length << endl << endl;
-    }
-    if (configuration.Get_subcomplex_config().sctype == "P"s || configuration.Get_subcomplex_config().sctype == "H"s) {
-        cout << "Plane orientation:\ta_coeff*X + b_coeff*Y + c_coeff*Z = D"s << endl << "Plane normal vector\t"s << "\ta =\t" << configuration.Get_subcomplex_config().plane_orientation.at(0) << "\tb =\t" << configuration.Get_subcomplex_config().plane_orientation.at(1) << "\tc =\t" << configuration.Get_subcomplex_config().plane_orientation.at(2) << "\t\tPlane position D =\t"s << configuration.Get_subcomplex_config().plane_orientation.at(3) << endl;
-    }
-    else if(configuration.Get_subcomplex_config().sctype == "N"s){
-        cout << "Grain k-neighbours order:\t"s << configuration.Get_subcomplex_config().grain_neighbour_orders << endl << endl;
-    }
-    cout << "Subcomplex module cpdlog_subcomplex.log file output:\t"s << log_file_output << endl;
-
-    if(configuration.Get_subcomplex_config().is_subcomplex_log_file) {
-        subcomplex_logfile_stream << "The Subcomplex module type and initial parameters:\t\t" << endl << endl;
-        subcomplex_logfile_stream << "Subcomplex type:\t"s << configuration.Get_subcomplex_config().sctype << endl;
+    if (configuration.subcomplex_reader_switch) {
+        cout << "The Subcomplex module type and initial parameters:\t\t" << endl << endl;
+        cout << "Subcomplex type:\t"s << configuration.Get_subcomplex_config().sctype << endl;
         if (configuration.Get_subcomplex_config().sctype == "H"s) {
-            subcomplex_logfile_stream << "Half-plane length:\t"s << configuration.Get_subcomplex_config().cut_length << endl << endl;
+            cout << "Half-plane length:\t"s << configuration.Get_subcomplex_config().cut_length << endl << endl;
         }
-        if (configuration.Get_subcomplex_config().sctype == "P"s || configuration.Get_subcomplex_config().sctype == "H"s) {
-            subcomplex_logfile_stream << "Plane orientation:\ta_coeff*X + b_coeff*Y + c_coeff*Z = D"s << endl
-                                      << "Plane normal vector:\t"s << " a: " << configuration.Get_subcomplex_config().plane_orientation.at(0) << " b: "
-                                      << configuration.Get_subcomplex_config().plane_orientation.at(1) << " c: " << configuration.Get_subcomplex_config().plane_orientation.at(2)
-                                      << "\tPlane position\t" << " D: " << configuration.Get_subcomplex_config().plane_orientation.at(3) << endl;
+        if (configuration.Get_subcomplex_config().sctype == "P"s ||
+            configuration.Get_subcomplex_config().sctype == "H"s) {
+            cout << "Plane orientation:\ta_coeff*X + b_coeff*Y + c_coeff*Z = D"s << endl << "Plane normal vector\t"s
+                 << "\ta =\t" << configuration.Get_subcomplex_config().plane_orientation.at(0) << "\tb =\t"
+                 << configuration.Get_subcomplex_config().plane_orientation.at(1) << "\tc =\t"
+                 << configuration.Get_subcomplex_config().plane_orientation.at(2) << "\t\tPlane position D =\t"s
+                 << configuration.Get_subcomplex_config().plane_orientation.at(3) << endl;
         } else if (configuration.Get_subcomplex_config().sctype == "N"s) {
-            subcomplex_logfile_stream << "Grain k-neighbours order:\t"s << configuration.Get_subcomplex_config().grain_neighbour_orders << endl << endl;
+            cout << "Grain k-neighbours order:\t"s << configuration.Get_subcomplex_config().grain_neighbour_orders
+                 << endl << endl;
         }
-    }
+        cout << "Subcomplex module cpdlog_subcomplex.log file output:\t"s << log_file_output << endl;
+
+        if (configuration.Get_subcomplex_config().is_subcomplex_log_file) {
+            subcomplex_logfile_stream << "The Subcomplex module type and initial parameters:\t\t" << endl << endl;
+            subcomplex_logfile_stream << "Subcomplex type:\t"s << configuration.Get_subcomplex_config().sctype << endl;
+            if (configuration.Get_subcomplex_config().sctype == "H"s) {
+                subcomplex_logfile_stream << "Half-plane length:\t"s << configuration.Get_subcomplex_config().cut_length
+                                          << endl << endl;
+            }
+            if (configuration.Get_subcomplex_config().sctype == "P"s ||
+                configuration.Get_subcomplex_config().sctype == "H"s) {
+                subcomplex_logfile_stream << "Plane orientation:\ta_coeff*X + b_coeff*Y + c_coeff*Z = D"s << endl
+                                          << "Plane normal vector:\t"s << " a: "
+                                          << configuration.Get_subcomplex_config().plane_orientation.at(0) << " b: "
+                                          << configuration.Get_subcomplex_config().plane_orientation.at(1) << " c: "
+                                          << configuration.Get_subcomplex_config().plane_orientation.at(2)
+                                          << "\tPlane position\t" << " D: "
+                                          << configuration.Get_subcomplex_config().plane_orientation.at(3) << endl;
+            } else if (configuration.Get_subcomplex_config().sctype == "N"s) {
+                subcomplex_logfile_stream << "Grain k-neighbours order:\t"s
+                                          << configuration.Get_subcomplex_config().grain_neighbour_orders << endl
+                                          << endl;
+            }
+        }
+        configuration.subcomplex_reader_switch = false;
+    } // end if (configuration.subcomplex_reader_switch) {
 
     return;
 } /// end of the 'config_reader_subcomplex() function
@@ -623,7 +673,7 @@ void config_reader_processing(Config &configuration) {
             p3_max = stod(processing_ini.get("polyhedrons").get("pmax_fraction3"));
             pp_max_vector.push_back(p3_max);
 
-    configuration.Set_processing_pn_max_fractions(pp_max_vector);
+    configuration.Set_processing_pp_max_fractions(pp_max_vector);
     }
     // } // end of dim == 3
 
@@ -807,94 +857,122 @@ void config_reader_processing(Config &configuration) {
     std::vector<std::string> ptype_vector = {new_pn_mode, new_pe_mode, new_pf_mode, new_pp_mode};
 //    configuration.Get_processing_config().sequence_source_paths = {nseq_source, eseq_source, fseq_source, pseq_source};
     vector<double> max_fractions_output(3, 0); // temporary vector serving as an output template for max fractions
+
 /// Output to the screen/console
-    cout << "The Processing module simulation type and initial parameters:\t\t" << endl;
-    cout << endl;
-    if (ptypes_number != 0) {
-        // polyhedrons
-        cout << "Processing p_type:\t"s << configuration.Get_processing_pp_mode() << "\t with p_index:\t"s << configuration.Get_processing_p_multiplexity()<< endl;
-        if (configuration.Get_processing_pp_mode() == "L") cout << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
-        if (configuration.Get_processing_pp_mode() == "S") cout << "polyhedron sequence source: "s << pseq_source << endl;
-        cout << "Number of polyhedron types:\t"s << ptypes_number << endl;
-        std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
-        for (int i = 0; i < 3; ++i)
-            if (configuration.Get_processing_pp_max_fractions().size() > 0 && configuration.Get_processing_pp_max_fractions()[i] > 0)
-                max_fractions_output.at(i) = configuration.Get_processing_pp_max_fractions()[i];
-        cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1)
-             << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+    if (configuration.processing_reader_switch) {
+
+        cout << "The Processing module simulation type and initial parameters:\t\t" << endl;
         cout << endl;
-    }
-    if (ftypes_number != 0) {
-        // faces
-        cout << "Processing f_type:\t"s << configuration.Get_processing_pf_mode() << "\t with f_index:\t"s << configuration.Get_processing_f_multiplexity() << endl;
-        if (configuration.Get_processing_pf_mode() == "L") cout << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
-        if (configuration.Get_processing_pf_mode() == "S") cout << "face sequence source: "s << fseq_source << endl;
-        cout << "Number of face types:\t"s << ftypes_number << endl;
+        if (ptypes_number != 0) {
+            // polyhedrons
+            cout << "Processing p_type:\t"s << configuration.Get_processing_pp_mode() << "\t with p_index:\t"s
+                 << configuration.Get_processing_p_multiplexity() << endl;
+            if (configuration.Get_processing_pp_mode() == "L")
+                cout << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s
+                     << configuration.Get_processing_config().sigma << endl;
+            if (configuration.Get_processing_pp_mode() == "S")
+                cout << "polyhedron sequence source: "s << pseq_source << endl;
+            cout << "Number of polyhedron types:\t"s << ptypes_number << endl;
+            std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
+            for (int i = 0; i < 3; ++i)
+                if (configuration.Get_processing_pp_max_fractions().size() > 0 &&
+                    configuration.Get_processing_pp_max_fractions()[i] > 0)
+                    max_fractions_output.at(i) = configuration.Get_processing_pp_max_fractions()[i];
+            cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1)
+                 << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+            cout << endl;
+        }
+        if (ftypes_number != 0) {
+            // faces
+            cout << "Processing f_type:\t"s << configuration.Get_processing_pf_mode() << "\t with f_index:\t"s
+                 << configuration.Get_processing_f_multiplexity() << endl;
+            if (configuration.Get_processing_pf_mode() == "L")
+                cout << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s
+                     << configuration.Get_processing_config().sigma << endl;
+            if (configuration.Get_processing_pf_mode() == "S") cout << "face sequence source: "s << fseq_source << endl;
+            cout << "Number of face types:\t"s << ftypes_number << endl;
 // refill 0s
-        std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
-        for (int i = 0; i < 3; ++i)
-            if (configuration.Get_processing_pf_max_fractions().size() > 0 && configuration.Get_processing_pf_max_fractions()[i] > 0)
-                max_fractions_output.at(i) = configuration.Get_processing_pf_max_fractions()[i];
-        cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1) << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
-        cout << endl;
-    }
+            std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
+            for (int i = 0; i < 3; ++i)
+                if (configuration.Get_processing_pf_max_fractions().size() > 0 &&
+                    configuration.Get_processing_pf_max_fractions()[i] > 0)
+                    max_fractions_output.at(i) = configuration.Get_processing_pf_max_fractions()[i];
+            cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1)
+                 << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+            cout << endl;
+        }
 
-    if (if_max_vector.size() > 0) {
-        cout << "Processing cf_mode:\t"s << configuration.Get_processing_if_mode() << endl;
-        cout << "Number of generated face types:\t"s << cftypes_number_string << endl;
-        if (configuration.Get_processing_if_mode() == "Km") cout << "Their maximum fractions:\t"s << configuration.Get_processing_if_max_fractions()[0] << endl;
-    }
+        if (if_max_vector.size() > 0) {
+            cout << "Processing cf_mode:\t"s << configuration.Get_processing_if_mode() << endl;
+            cout << "Number of generated face types:\t"s << cftypes_number_string << endl;
+            if (configuration.Get_processing_if_mode() == "Km")
+                cout << "Their maximum fractions:\t"s << configuration.Get_processing_if_max_fractions()[0] << endl;
+        }
 
-    if (etypes_number != 0) {
-        //edges
-        cout << "Processing e_type:\t"s << configuration.Get_processing_pe_mode() << "\twith e_index:\t"s << configuration.Get_processing_e_multiplexity() << endl;
-        if (configuration.Get_processing_pe_mode() == "L") cout << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
-        if (configuration.Get_processing_pe_mode() == "S") cout << "edges sequence source: "s << eseq_source << endl;
-        cout << "Number of edge types:\t"s << etypes_number << endl;
+        if (etypes_number != 0) {
+            //edges
+            cout << "Processing e_type:\t"s << configuration.Get_processing_pe_mode() << "\twith e_index:\t"s
+                 << configuration.Get_processing_e_multiplexity() << endl;
+            if (configuration.Get_processing_pe_mode() == "L")
+                cout << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s
+                     << configuration.Get_processing_config().sigma << endl;
+            if (configuration.Get_processing_pe_mode() == "S")
+                cout << "edges sequence source: "s << eseq_source << endl;
+            cout << "Number of edge types:\t"s << etypes_number << endl;
 // refill 0s
-        std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
-        for (int i = 0; i < 3; ++i)
-            if (configuration.Get_processing_pe_max_fractions().size() > 0 && configuration.Get_processing_pe_max_fractions()[i] > 0)
-                max_fractions_output.at(i) = configuration.Get_processing_pe_max_fractions()[i];
-        cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1)
-             << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
-        cout << endl;
-    }
+            std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
+            for (int i = 0; i < 3; ++i)
+                if (configuration.Get_processing_pe_max_fractions().size() > 0 &&
+                    configuration.Get_processing_pe_max_fractions()[i] > 0)
+                    max_fractions_output.at(i) = configuration.Get_processing_pe_max_fractions()[i];
+            cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1)
+                 << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+            cout << endl;
+        }
 
-    if (ie_max_vector.size() > 0) {
-        cout << "Processing c_edge_type:\t"s << configuration.Get_processing_in_mode() << endl;
-        cout << "Number of edge crack types:\t"s << cetypes_number_string << endl;
-        if (configuration.Get_processing_in_mode() == "Km") cout << "Their maximum fractions:\t"s << configuration.Get_processing_ie_max_fractions()[0] << endl;
-    }
+        if (ie_max_vector.size() > 0) {
+            cout << "Processing c_edge_type:\t"s << configuration.Get_processing_in_mode() << endl;
+            cout << "Number of edge crack types:\t"s << cetypes_number_string << endl;
+            if (configuration.Get_processing_in_mode() == "Km")
+                cout << "Their maximum fractions:\t"s << configuration.Get_processing_ie_max_fractions()[0] << endl;
+        }
 
-    if (ntypes_number != 0) {
-        // nodes
-        cout << "Processing n_type:\t"s << configuration.Get_processing_pn_mode() << "\twith n_index:\t"s << configuration.Get_processing_n_multiplexity() << endl;
-        if (configuration.Get_processing_pn_mode() == "L") cout << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
-        if (configuration.Get_processing_pn_mode() == "S") cout << "nodes sequence source: "s << nseq_source << endl;
-        cout << "Number of node types:\t"s << ntypes_number << endl;
+        if (ntypes_number != 0) {
+            // nodes
+            cout << "Processing n_type:\t"s << configuration.Get_processing_pn_mode() << "\twith n_index:\t"s
+                 << configuration.Get_processing_n_multiplexity() << endl;
+            if (configuration.Get_processing_pn_mode() == "L")
+                cout << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s
+                     << configuration.Get_processing_config().sigma << endl;
+            if (configuration.Get_processing_pn_mode() == "S")
+                cout << "nodes sequence source: "s << nseq_source << endl;
+            cout << "Number of node types:\t"s << ntypes_number << endl;
 
-    // refill 0s
-    std::fill(max_fractions_output.begin(), max_fractions_output.end(),0);
-    for (int i = 0; i < 3; ++i)
-        if (configuration.Get_processing_pn_max_fractions().size() > 0 && configuration.Get_processing_pn_max_fractions()[i] > 0)
-            max_fractions_output.at(i) = configuration.Get_processing_pn_max_fractions()[i];
-    cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1) << "\t\t"<< max_fractions_output.at(2) << "\t\t" << endl;
-    cout<< "_________________________________________________" << endl << endl;
+            // refill 0s
+            std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
+            for (int i = 0; i < 3; ++i)
+                if (configuration.Get_processing_pn_max_fractions().size() > 0 &&
+                    configuration.Get_processing_pn_max_fractions()[i] > 0)
+                    max_fractions_output.at(i) = configuration.Get_processing_pn_max_fractions()[i];
+            cout << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1)
+                 << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+            cout << "_________________________________________________" << endl << endl;
 // Output to the screen/console
-    cout << "Processing module cpdlog_processing.log file output:\t"s << log_file_output << endl << endl;
-    }
+            cout << "Processing module cpdlog_processing.log file output:\t"s << log_file_output << endl << endl;
+        }
 
 // Output into .log file
-        if(configuration.Get_is_processing_log_file()) {
+        if (configuration.Get_is_processing_log_file()) {
             processing_logfile_stream << "The Processing module simulation type and initial parameters:\t\t" << endl;
             processing_logfile_stream << endl;
             if (ptypes_number != 0) {
                 // polyhedrons
-                processing_logfile_stream << "Processing p_type:\t"s << configuration.Get_processing_pp_mode() << "\t with p_index:\t"s
+                processing_logfile_stream << "Processing p_type:\t"s << configuration.Get_processing_pp_mode()
+                                          << "\t with p_index:\t"s
                                           << configuration.Get_processing_p_multiplexity() << endl;
                 if (configuration.Get_processing_pp_mode() == "L")
-                    processing_logfile_stream << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
+                    processing_logfile_stream << "mu = \t"s << configuration.Get_processing_config().mu << " and "
+                                              << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
                 if (configuration.Get_processing_pp_mode() == "S")
                     processing_logfile_stream << "polyhedron sequence source: "s << pseq_source << endl;
                 processing_logfile_stream << "Number of polyhedron types:\t"s << ptypes_number << endl;
@@ -904,46 +982,58 @@ void config_reader_processing(Config &configuration) {
                         configuration.Get_processing_pp_max_fractions()[i] > 0)
                         max_fractions_output.at(i) = configuration.Get_processing_pp_max_fractions()[i];
                 }
-                processing_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1) << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+                processing_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t"
+                                          << max_fractions_output.at(1) << "\t\t" << max_fractions_output.at(2)
+                                          << "\t\t" << endl;
                 processing_logfile_stream << endl;
             }
             if (ftypes_number != 0) {
                 // faces
-                processing_logfile_stream << "Processing f_type:\t"s << configuration.Get_processing_pf_mode() << "\t with f_index:\t"s
+                processing_logfile_stream << "Processing f_type:\t"s << configuration.Get_processing_pf_mode()
+                                          << "\t with f_index:\t"s
                                           << configuration.Get_processing_f_multiplexity() << endl;
                 if (configuration.Get_processing_pf_mode() == "L")
-                    processing_logfile_stream << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
+                    processing_logfile_stream << "mu = \t"s << configuration.Get_processing_config().mu << " and "
+                                              << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
                 if (configuration.Get_processing_pf_mode() == "S")
                     processing_logfile_stream << "face sequence source: "s << fseq_source << endl;
                 processing_logfile_stream << "Number of face types:\t"s << ftypes_number << endl;
 // refill 0s
                 std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
                 for (int i = 0; i < 3; ++i)
-                    if (configuration.Get_processing_pf_max_fractions().size() > 0 && configuration.Get_processing_pf_max_fractions()[i] > 0)
+                    if (configuration.Get_processing_pf_max_fractions().size() > 0 &&
+                        configuration.Get_processing_pf_max_fractions()[i] > 0)
                         max_fractions_output.at(i) = configuration.Get_processing_pf_max_fractions()[i];
-                processing_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t" << max_fractions_output.at(1) << "\t\t" << max_fractions_output.at(2) << "\t\t" << endl;
+                processing_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t"
+                                          << max_fractions_output.at(1) << "\t\t" << max_fractions_output.at(2)
+                                          << "\t\t" << endl;
                 processing_logfile_stream << endl;
             }
             if (cftypes_number_string != "0") {
-                processing_logfile_stream << "Processing c_face_type:\t"s << configuration.Get_processing_if_mode() << endl;
+                processing_logfile_stream << "Processing c_face_type:\t"s << configuration.Get_processing_if_mode()
+                                          << endl;
                 processing_logfile_stream << "Number of face crack types:\t"s << cftypes_number_string << endl;
                 if (configuration.Get_processing_if_mode() == "Km")
-                    processing_logfile_stream << "Their maximum fractions:\t"s << configuration.Get_processing_if_max_fractions()[0] << endl;
+                    processing_logfile_stream << "Their maximum fractions:\t"s
+                                              << configuration.Get_processing_if_max_fractions()[0] << endl;
             }
 
             //edges
             if (etypes_number != 0) {
-                processing_logfile_stream << "Processing e_type:\t"s << configuration.Get_processing_pe_mode() << "\twith e_index:\t"s
+                processing_logfile_stream << "Processing e_type:\t"s << configuration.Get_processing_pe_mode()
+                                          << "\twith e_index:\t"s
                                           << configuration.Get_processing_e_multiplexity() << endl;
                 if (configuration.Get_processing_pe_mode() == "L")
-                    processing_logfile_stream << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
+                    processing_logfile_stream << "mu = \t"s << configuration.Get_processing_config().mu << " and "
+                                              << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
                 if (configuration.Get_processing_pe_mode() == "S")
                     processing_logfile_stream << "edges sequence source: "s << eseq_source << endl;
                 processing_logfile_stream << "Number of edge types:\t"s << etypes_number << endl;
 // refill 0s
                 std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
                 for (int i = 0; i < 3; ++i)
-                    if (configuration.Get_processing_pe_max_fractions().size() > 0 && configuration.Get_processing_pe_max_fractions()[i] > 0)
+                    if (configuration.Get_processing_pe_max_fractions().size() > 0 &&
+                        configuration.Get_processing_pe_max_fractions()[i] > 0)
                         max_fractions_output.at(i) = configuration.Get_processing_pe_max_fractions()[i];
                 processing_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t"
                                           << max_fractions_output.at(1)
@@ -952,18 +1042,22 @@ void config_reader_processing(Config &configuration) {
             }
 
             if (ie_max_vector.size() > 0) {
-                processing_logfile_stream << "Processing c_edge_type:\t"s << configuration.Get_processing_ie_mode() << endl;
+                processing_logfile_stream << "Processing c_edge_type:\t"s << configuration.Get_processing_ie_mode()
+                                          << endl;
                 processing_logfile_stream << "Number of edge crack types:\t"s << cetypes_number_string << endl;
                 if (configuration.Get_processing_ie_mode() == "Km")
-                    processing_logfile_stream << "Their maximum fractions:\t"s << configuration.Get_processing_pn_max_fractions()[0] << endl;
+                    processing_logfile_stream << "Their maximum fractions:\t"s
+                                              << configuration.Get_processing_pn_max_fractions()[0] << endl;
             }
 
             if (ntypes_number != 0) {
                 // nodes
-                processing_logfile_stream << "Processing n_type:\t"s << configuration.Get_processing_pn_mode() << "\twith n_index:\t"s
+                processing_logfile_stream << "Processing n_type:\t"s << configuration.Get_processing_pn_mode()
+                                          << "\twith n_index:\t"s
                                           << configuration.Get_processing_n_multiplexity() << endl;
                 if (configuration.Get_processing_pn_mode() == "L")
-                    processing_logfile_stream << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
+                    processing_logfile_stream << "mu = \t"s << configuration.Get_processing_config().mu << " and "
+                                              << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
                 if (configuration.Get_processing_pn_mode() == "S")
                     processing_logfile_stream << "nodes sequence source: "s << nseq_source << endl;
                 processing_logfile_stream << "Number of node types:\t"s << ntypes_number << endl;
@@ -971,27 +1065,35 @@ void config_reader_processing(Config &configuration) {
 // refill 0s
             std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
             for (int i = 0; i < 3; ++i)
-                if (configuration.Get_processing_pe_max_fractions().size() > 0 && configuration.Get_processing_pe_max_fractions()[i] > 0)
+                if (configuration.Get_processing_pe_max_fractions().size() > 0 &&
+                    configuration.Get_processing_pe_max_fractions()[i] > 0)
                     max_fractions_output.at(i) = configuration.Get_processing_pe_max_fractions()[i];
             processing_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t"
                                       << max_fractions_output.at(1) << "\t\t" << max_fractions_output.at(2) << "\t\t"
                                       << endl;
             processing_logfile_stream << endl;
-            processing_logfile_stream << "Processing n_type:\t"s << configuration.Get_processing_pn_mode() << "\twith n_index:\t"s
+            processing_logfile_stream << "Processing n_type:\t"s << configuration.Get_processing_pn_mode()
+                                      << "\twith n_index:\t"s
                                       << configuration.Get_processing_n_multiplexity() << endl;
             if (configuration.Get_processing_pn_mode() == "L")
-                processing_logfile_stream << "mu = \t"s << configuration.Get_processing_config().mu << " and " << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
+                processing_logfile_stream << "mu = \t"s << configuration.Get_processing_config().mu << " and "
+                                          << "sigma = \t"s << configuration.Get_processing_config().sigma << endl;
             processing_logfile_stream << "Number of node types:\t"s << ntypes_number << endl;
 // refill 0s
             std::fill(max_fractions_output.begin(), max_fractions_output.end(), 0);
             for (int i = 0; i < 3; ++i)
-                if (configuration.Get_processing_pn_max_fractions().size() > 0 && configuration.Get_processing_pn_max_fractions()[i] > 0)
+                if (configuration.Get_processing_pn_max_fractions().size() > 0 &&
+                    configuration.Get_processing_pn_max_fractions()[i] > 0)
                     max_fractions_output.at(i) = configuration.Get_processing_pn_max_fractions()[i];
             processing_logfile_stream << "Their maximum fractions:\t"s << max_fractions_output.at(0) << "\t\t"
                                       << max_fractions_output.at(1) << "\t\t" << max_fractions_output.at(2) << "\t\t"
                                       << endl;
             processing_logfile_stream << "_________________________________________________" << endl << endl;
         }
+
+        configuration.processing_reader_switch = false;
+        } //     if (configuration.processing_reader_switch) {
+
     return;
 } /// END of the 'config_reader_processing' function
 
@@ -1168,88 +1270,112 @@ std::vector<double> config_reader_characterisation(std::vector<int> &charlabs_po
     if (log_file_output == "ON") is_log_file = 1;
 
 /// Console output
-    cout << "The Characterisation module simulation type and initial parameters:\t\t" << endl << endl;
-    cout << "Polyhedrons lab ON/OFF:\t"s << charlabs_polyhedrons.at(0) << "\t\t" << endl;
-    cout << "Faces lab       ON/OFF:\t"s << charlabs_faces.at(0) << "\t\t" << endl;
-    cout << "Edges lab       ON/OFF:\t"s << charlabs_edges.at(0) << "\t\t" << endl;
-    cout << "Nodes lab       ON/OFF:\t"s << charlabs_nodes.at(0) << "\t\t" << endl << endl;
-
-    if(charlabs_polyhedrons.at(0) == 1) { // Polyhedrons
-        cout << "Polyhedrons configuration entropy:\t"s << charlabs_polyhedrons.at(0) << "\t\t" << endl;
-        cout << "Conf entropy mean part:\t"s << charlabs_polyhedrons.at(1) << "\t\t" << endl;
-        cout << "Conf entropy skew part:\t"s << charlabs_polyhedrons.at(2) << "\t\t" << endl << endl;
-    } // if(charlabs_polyhedrons.at(0) == 1)
-    if(charlabs_faces.at(0) == 1) { // Faces
-        cout << "Faces configuration entropy:\t"s << charlabs_faces.at(0) << "\t\t" << endl;
-        cout << "Conf entropy mean part:\t"s << charlabs_faces.at(1) << "\t\t" << endl;
-        cout << "Conf entropy skew part:\t"s << charlabs_faces.at(2) << "\t\t" << endl;
-        cout << "Edges fractions:\t"s << charlabs_faces.at(3) << "\t\t" << endl;
-        cout << "Edges degree fractions:\t"s << charlabs_faces.at(4) << "\t\t" << endl << endl;
-    } // if(charlabs_faces.at(0) == 1)
-    if(charlabs_edges.at(0) == 1) { // Edges
-        cout << "Edges configuration entropy:\t"s << charlabs_edges.at(0) << "\t\t" << endl;
-        cout << "Conf entropy Mean (-) Skew:\t"s << charlabs_edges.at(1) << "\t\t" << endl;
-        cout << "Conf entropy mean part:\t"s << charlabs_edges.at(2) << "\t\t" << endl;
-        cout << "Conf entropy skew part:\t"s << charlabs_edges.at(3) << "\t\t" << endl;
-        cout << "Analytical solutions :\t"s << charlabs_edges.at(4) << "\t\t" << endl << endl;
-    } // if(charlabs_edges.at(0) == 1)
-    if(charlabs_nodes.at(0) == 1) { // Nodes
-        cout << "Node configuration entropy:\t"s << charlabs_nodes.at(0) << "\t\t" << endl;
-        cout << "Conf entropy mean part:\t"s << charlabs_nodes.at(1) << "\t\t" << endl;
-        cout << "Conf entropy skew part:\t"s << charlabs_nodes.at(2) << "\t\t" << endl << endl;
-    } // if(charlabs_polyhedrons.at(0) == 1)
-
-    if(charlabs_laplacians.at(0) > 0) { // Laplacians lab
-        cout << "Laplacians: number of calculation steps \t"s << charlabs_laplacians.at(0) << "\t\t" << endl;
-        cout << endl;
-    } // if(charlabs_laplacians.at(0) == 1)
-
-    if(charlabs_laplacians.at(1) == 1) { // Laplacians lab
-        cout << "Special cell Laplacians:\t"s << charlabs_laplacians.at(1) << "\t\t" << endl;
-        cout << endl;
-    } // if(charlabs_laplacians.at(0) == 1)
-
-    cout << "Characterisation module cpdlog_characterisation.log file output:\t"s << log_file_output << endl << endl;
-
-/// Output into Processing_Design.log file
-    if(is_log_file) {
-        characterisation_logfile_stream << "The Characterisation module simulation type and initial parameters:\t\t" << endl << endl;
-        characterisation_logfile_stream << "Polyhedrons lab ON/OFF:\t"s << charlabs_polyhedrons.at(0) << "\t\t" << endl;
-        characterisation_logfile_stream << "Faces lab       ON/OFF:\t"s << charlabs_faces.at(0) << "\t\t" << endl;
-        characterisation_logfile_stream << "Edges lab       ON/OFF:\t"s << charlabs_edges.at(0) << "\t\t" << endl;
-        characterisation_logfile_stream << "Nodes lab       ON/OFF:\t"s << charlabs_nodes.at(0) << "\t\t" << endl << endl;
+///    if (configuration.characterisation_reader_switch) {
+        cout << "The Characterisation module simulation type and initial parameters:\t\t" << endl << endl;
+        cout << "Polyhedrons lab ON/OFF:\t"s << charlabs_polyhedrons.at(0) << "\t\t" << endl;
+        cout << "Faces lab       ON/OFF:\t"s << charlabs_faces.at(0) << "\t\t" << endl;
+        cout << "Edges lab       ON/OFF:\t"s << charlabs_edges.at(0) << "\t\t" << endl;
+        cout << "Nodes lab       ON/OFF:\t"s << charlabs_nodes.at(0) << "\t\t" << endl << endl;
 
         if (charlabs_polyhedrons.at(0) == 1) { // Polyhedrons
-            characterisation_logfile_stream << "Polyhedrons configuration entropy:\t"s << charlabs_polyhedrons.at(0) << "\t\t" << endl;
-            characterisation_logfile_stream << "Conf entropy mean part:\t"s << charlabs_polyhedrons.at(1) << "\t\t" << endl;
-            characterisation_logfile_stream << "Conf entropy skew part:\t"s << charlabs_polyhedrons.at(2) << "\t\t" << endl << endl;
+            cout << "Polyhedrons configuration entropy:\t"s << charlabs_polyhedrons.at(0) << "\t\t" << endl;
+            cout << "Conf entropy mean part:\t"s << charlabs_polyhedrons.at(1) << "\t\t" << endl;
+            cout << "Conf entropy skew part:\t"s << charlabs_polyhedrons.at(2) << "\t\t" << endl << endl;
         } // if(charlabs_polyhedrons.at(0) == 1)
         if (charlabs_faces.at(0) == 1) { // Faces
-            characterisation_logfile_stream << "Faces configuration entropy:\t"s << charlabs_faces.at(0) << "\t\t" << endl;
-            characterisation_logfile_stream << "Conf entropy mean part:\t"s << charlabs_faces.at(1) << "\t\t" << endl;
-            characterisation_logfile_stream << "Conf entropy skew part:\t"s << charlabs_faces.at(2) << "\t\t" << endl;
-            characterisation_logfile_stream << "Edges fractions:\t"s << charlabs_faces.at(3) << "\t\t" << endl;
-            characterisation_logfile_stream << "Edges degree fractions:\t"s << charlabs_faces.at(4) << "\t\t" << endl << endl;
+            cout << "Faces configuration entropy:\t"s << charlabs_faces.at(0) << "\t\t" << endl;
+            cout << "Conf entropy mean part:\t"s << charlabs_faces.at(1) << "\t\t" << endl;
+            cout << "Conf entropy skew part:\t"s << charlabs_faces.at(2) << "\t\t" << endl;
+            cout << "Edges fractions:\t"s << charlabs_faces.at(3) << "\t\t" << endl;
+            cout << "Edges degree fractions:\t"s << charlabs_faces.at(4) << "\t\t" << endl << endl;
         } // if(charlabs_faces.at(0) == 1)
         if (charlabs_edges.at(0) == 1) { // Edges
-            characterisation_logfile_stream << "Edges configuration entropy:\t"s << charlabs_edges.at(0) << "\t\t" << endl;
-            characterisation_logfile_stream << "Conf entropy mean part:\t"s << charlabs_edges.at(1) << "\t\t" << endl;
-            characterisation_logfile_stream << "Conf entropy skew part:\t"s << charlabs_edges.at(2) << "\t\t" << endl << endl;
+            cout << "Edges configuration entropy:\t"s << charlabs_edges.at(0) << "\t\t" << endl;
+            cout << "Conf entropy Mean (-) Skew:\t"s << charlabs_edges.at(1) << "\t\t" << endl;
+            cout << "Conf entropy mean part:\t"s << charlabs_edges.at(2) << "\t\t" << endl;
+            cout << "Conf entropy skew part:\t"s << charlabs_edges.at(3) << "\t\t" << endl;
+            cout << "Analytical solutions :\t"s << charlabs_edges.at(4) << "\t\t" << endl << endl;
         } // if(charlabs_edges.at(0) == 1)
         if (charlabs_nodes.at(0) == 1) { // Nodes
-            characterisation_logfile_stream << "Node configuration entropy:\t"s << charlabs_nodes.at(0) << "\t\t" << endl;
-            characterisation_logfile_stream << "Conf entropy mean part:\t"s << charlabs_nodes.at(1) << "\t\t" << endl;
-            characterisation_logfile_stream << "Conf entropy skew part:\t"s << charlabs_nodes.at(2) << "\t\t" << endl << endl;
+            cout << "Node configuration entropy:\t"s << charlabs_nodes.at(0) << "\t\t" << endl;
+            cout << "Conf entropy mean part:\t"s << charlabs_nodes.at(1) << "\t\t" << endl;
+            cout << "Conf entropy skew part:\t"s << charlabs_nodes.at(2) << "\t\t" << endl << endl;
         } // if(charlabs_polyhedrons.at(0) == 1)
 
         if (charlabs_laplacians.at(0) > 0) { // Laplacians lab
-            characterisation_logfile_stream << "Laplacians: number of calculation steps \t"s << charlabs_laplacians.at(0) << "\t\t" << endl << endl;
+            cout << "Laplacians: number of calculation steps \t"s << charlabs_laplacians.at(0) << "\t\t" << endl;
+            cout << endl;
         } // if(charlabs_laplacians.at(0) == 1)
 
         if (charlabs_laplacians.at(1) == 1) { // Laplacians lab
-            characterisation_logfile_stream << "Special cell Laplacians:\t"s << charlabs_laplacians.at(1) << "\t\t" << endl << endl;
+            cout << "Special cell Laplacians:\t"s << charlabs_laplacians.at(1) << "\t\t" << endl;
+            cout << endl;
         } // if(charlabs_laplacians.at(0) == 1)
-    }
+
+        cout << "Characterisation module cpdlog_characterisation.log file output:\t"s << log_file_output << endl
+             << endl;
+
+/// Output into Processing_Design.log file
+        if (is_log_file) {
+            characterisation_logfile_stream << "The Characterisation module simulation type and initial parameters:\t\t"
+                                            << endl << endl;
+            characterisation_logfile_stream << "Polyhedrons lab ON/OFF:\t"s << charlabs_polyhedrons.at(0) << "\t\t"
+                                            << endl;
+            characterisation_logfile_stream << "Faces lab       ON/OFF:\t"s << charlabs_faces.at(0) << "\t\t" << endl;
+            characterisation_logfile_stream << "Edges lab       ON/OFF:\t"s << charlabs_edges.at(0) << "\t\t" << endl;
+            characterisation_logfile_stream << "Nodes lab       ON/OFF:\t"s << charlabs_nodes.at(0) << "\t\t" << endl
+                                            << endl;
+
+            if (charlabs_polyhedrons.at(0) == 1) { // Polyhedrons
+                characterisation_logfile_stream << "Polyhedrons configuration entropy:\t"s << charlabs_polyhedrons.at(0)
+                                                << "\t\t" << endl;
+                characterisation_logfile_stream << "Conf entropy mean part:\t"s << charlabs_polyhedrons.at(1) << "\t\t"
+                                                << endl;
+                characterisation_logfile_stream << "Conf entropy skew part:\t"s << charlabs_polyhedrons.at(2) << "\t\t"
+                                                << endl << endl;
+            } // if(charlabs_polyhedrons.at(0) == 1)
+            if (charlabs_faces.at(0) == 1) { // Faces
+                characterisation_logfile_stream << "Faces configuration entropy:\t"s << charlabs_faces.at(0) << "\t\t"
+                                                << endl;
+                characterisation_logfile_stream << "Conf entropy mean part:\t"s << charlabs_faces.at(1) << "\t\t"
+                                                << endl;
+                characterisation_logfile_stream << "Conf entropy skew part:\t"s << charlabs_faces.at(2) << "\t\t"
+                                                << endl;
+                characterisation_logfile_stream << "Edges fractions:\t"s << charlabs_faces.at(3) << "\t\t" << endl;
+                characterisation_logfile_stream << "Edges degree fractions:\t"s << charlabs_faces.at(4) << "\t\t"
+                                                << endl << endl;
+            } // if(charlabs_faces.at(0) == 1)
+            if (charlabs_edges.at(0) == 1) { // Edges
+                characterisation_logfile_stream << "Edges configuration entropy:\t"s << charlabs_edges.at(0) << "\t\t"
+                                                << endl;
+                characterisation_logfile_stream << "Conf entropy mean part:\t"s << charlabs_edges.at(1) << "\t\t"
+                                                << endl;
+                characterisation_logfile_stream << "Conf entropy skew part:\t"s << charlabs_edges.at(2) << "\t\t"
+                                                << endl << endl;
+            } // if(charlabs_edges.at(0) == 1)
+            if (charlabs_nodes.at(0) == 1) { // Nodes
+                characterisation_logfile_stream << "Node configuration entropy:\t"s << charlabs_nodes.at(0) << "\t\t"
+                                                << endl;
+                characterisation_logfile_stream << "Conf entropy mean part:\t"s << charlabs_nodes.at(1) << "\t\t"
+                                                << endl;
+                characterisation_logfile_stream << "Conf entropy skew part:\t"s << charlabs_nodes.at(2) << "\t\t"
+                                                << endl << endl;
+            } // if(charlabs_polyhedrons.at(0) == 1)
+
+            if (charlabs_laplacians.at(0) > 0) { // Laplacians lab
+                characterisation_logfile_stream << "Laplacians: number of calculation steps \t"s
+                                                << charlabs_laplacians.at(0) << "\t\t" << endl << endl;
+            } // if(charlabs_laplacians.at(0) == 1)
+
+            if (charlabs_laplacians.at(1) == 1) { // Laplacians lab
+                characterisation_logfile_stream << "Special cell Laplacians:\t"s << charlabs_laplacians.at(1) << "\t\t"
+                                                << endl << endl;
+            } // if(charlabs_laplacians.at(0) == 1)
+        }
+
+///        configuration.characterisation_reader_switch = false;
+///    } // if(configuration.characterisation_reader_switch)
+
     return config_characterisation_vector;
 } // END of config characterisation reader function
 
@@ -1315,41 +1441,48 @@ void config_reader_design(Config &configuration) {
 
         // design module output
         if (design_ini.has("module_output")) {
-            auto& collection = design_ini["module_output"];
+            auto &collection = design_ini["module_output"];
             if (collection.has("module_log_file")) {
                 log_file_output = design_ini.get("module_output").get("module_log_file");
-            } }
+            }
+        }
         if (log_file_output == "ON") {
             configuration.Set_is_design_log_file(true);
             is_design_log_file = true;
         }
 
-    // Console output
-        cout << "The Design module simulation type and initial parameters:\t\t" << endl << endl;
-        cout << "Design mode:\t\t\t\t"s << PCCDesign_type << "\t\t" << endl;
-        cout << "Design cell type:\t\t\t"s << cell_type << "\t\t" << endl;
-        cout << "Diversity of gene types:\t"s << genes_diversity << "\t\t" << endl;
-        cout << "Population size:\t\t\t"s << population_size << "\t\t" << endl;
-        cout << "Mutation rate:\t\t\t\t"s << mutation_rate << "\t\t" << endl;
-        cout << "Crossover rate\t\t\t\t"s << crossover_rate << "\t\t" << endl;
-        cout << "Survival rate:\t\t\t\t"s << survival_rate << "\t\t" << endl;
-        cout << "Max generation number:\t\t"s << max_generation_number << "\t\t" << endl;
+/// Console output
+        if (configuration.design_reader_switch) {
+            cout << "The Design module simulation type and initial parameters:\t\t" << endl << endl;
+            cout << "Design mode:\t\t\t\t"s << PCCDesign_type << "\t\t" << endl;
+            cout << "Design cell type:\t\t\t"s << cell_type << "\t\t" << endl;
+            cout << "Diversity of gene types:\t"s << genes_diversity << "\t\t" << endl;
+            cout << "Population size:\t\t\t"s << population_size << "\t\t" << endl;
+            cout << "Mutation rate:\t\t\t\t"s << mutation_rate << "\t\t" << endl;
+            cout << "Crossover rate\t\t\t\t"s << crossover_rate << "\t\t" << endl;
+            cout << "Survival rate:\t\t\t\t"s << survival_rate << "\t\t" << endl;
+            cout << "Max generation number:\t\t"s << max_generation_number << "\t\t" << endl;
 
-    // Design logfile output
-        if(is_design_log_file) {
-            design_logfile_stream << "The Design module simulation type and initial parameters:\t\t" << endl << endl;
-            design_logfile_stream << "Design mode:\t\t\t\t"s << PCCDesign_type << "\t\t" << endl;
-            design_logfile_stream << "Design cell type:\t\t\t"s << cell_type << "\t\t" << endl;
-            design_logfile_stream << "Diversity of gene types:\t"s << genes_diversity << "\t\t" << endl;
-            design_logfile_stream << "Population size:\t\t\t"s << population_size << "\t\t" << endl;
-            design_logfile_stream << "Mutation rate:\t\t\t\t"s << mutation_rate << "\t\t" << endl;
-            design_logfile_stream << "Crossover rate\t\t\t\t"s << crossover_rate << "\t\t" << endl;
-            design_logfile_stream << "Survival rate:\t\t\t\t"s << survival_rate << "\t\t" << endl;
-            design_logfile_stream << "Max generation number:\t\t"s << max_generation_number << "\t\t" << endl;
-        }
-
+            // Design logfile output
+            if (is_design_log_file) {
+                design_logfile_stream << "The Design module simulation type and initial parameters:\t\t" << endl
+                                      << endl;
+                design_logfile_stream << "Design mode:\t\t\t\t"s << PCCDesign_type << "\t\t" << endl;
+                design_logfile_stream << "Design cell type:\t\t\t"s << cell_type << "\t\t" << endl;
+                design_logfile_stream << "Diversity of gene types:\t"s << genes_diversity << "\t\t" << endl;
+                design_logfile_stream << "Population size:\t\t\t"s << population_size << "\t\t" << endl;
+                design_logfile_stream << "Mutation rate:\t\t\t\t"s << mutation_rate << "\t\t" << endl;
+                design_logfile_stream << "Crossover rate\t\t\t\t"s << crossover_rate << "\t\t" << endl;
+                design_logfile_stream << "Survival rate:\t\t\t\t"s << survival_rate << "\t\t" << endl;
+                design_logfile_stream << "Max generation number:\t\t"s << max_generation_number << "\t\t" << endl;
+            }
         } // end of 'if (design_ini.has("genetic_algorithm"))'
-}
+
+        configuration.design_reader_switch = false;
+    } // if(configuration.design_reader_switch)
+
+} // END of config_reader_design(Config &configuration)
+
 /// ================== # 6 # Initial WRITER module configuration - reading and output ==================
 void config_reader_writer(std::vector<int> &writer_specifications, bool &is_log_file) {
 /// writer_specifications vector ::
@@ -1453,33 +1586,38 @@ void config_reader_writer(std::vector<int> &writer_specifications, bool &is_log_
      if (log_file_output == "ON") is_log_file = 1;
 
 /// Output to the screen/console
-    cout << "The Writer module specifications:\t\t" << endl;
-    cout << "Sequences output \t\t\t\t\t"s << writer_specifications.at(0) << endl;
-    cout << "Design vectors output \t\t\t\t"s << writer_specifications.at(1) << endl;
-    cout << "Configuration Edges entropy \t\t"s << writer_specifications.at(2) << endl;
-    cout << "Special Edge fractions \t\t\t\t"s << writer_specifications.at(3) << endl;
-    cout << "Special Edge degree fractions \t\t"s << writer_specifications.at(4) << endl;
-    cout << "Analytical Edge fractions \t\t\t"s << writer_specifications.at(5) << endl;
-    cout << "Analytical Edge degree fractions \t"s << writer_specifications.at(5) << endl;
-    cout << "Analytical Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
-    cout << "Laplacians and Betti numbers \t\t"s << writer_specifications.at(7) << endl;
-    cout << "Cell Energies \t\t\t\t\t\t"s << writer_specifications.at(8) << endl << endl;
-    cout << "Writer module cpdlog_writer.log file output:\t"s << log_file_output << endl;
+///    if(configuration.writer_reader_switch) {
+        cout << "The Writer module specifications:\t\t" << endl;
+        cout << "Sequences output \t\t\t\t\t"s << writer_specifications.at(0) << endl;
+        cout << "Design vectors output \t\t\t\t"s << writer_specifications.at(1) << endl;
+        cout << "Configuration Edges entropy \t\t"s << writer_specifications.at(2) << endl;
+        cout << "Special Edge fractions \t\t\t\t"s << writer_specifications.at(3) << endl;
+        cout << "Special Edge degree fractions \t\t"s << writer_specifications.at(4) << endl;
+        cout << "Analytical Edge fractions \t\t\t"s << writer_specifications.at(5) << endl;
+        cout << "Analytical Edge degree fractions \t"s << writer_specifications.at(5) << endl;
+        cout << "Analytical Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
+        cout << "Laplacians and Betti numbers \t\t"s << writer_specifications.at(7) << endl;
+        cout << "Cell Energies \t\t\t\t\t\t"s << writer_specifications.at(8) << endl << endl;
+        cout << "Writer module cpdlog_writer.log file output:\t"s << log_file_output << endl;
 
 /// Output into .log file
-    if(is_log_file) {
-        writer_logfile_stream << "The Writer module specifications:\t\t" << endl;
-        writer_logfile_stream << "Sequences output \t\t\t\t\t"s << writer_specifications.at(0) << endl;
-        writer_logfile_stream << "Design vectors output \t\t\t\t"s << writer_specifications.at(1) << endl;
-        writer_logfile_stream << "Configuration Edges entropy \t\t\t"s << writer_specifications.at(2) << endl;
-        writer_logfile_stream << "Special Edge fractions \t\t\t\t"s << writer_specifications.at(3) << endl;
-        writer_logfile_stream << "Special Edge fractions \t\t\t\t"s << writer_specifications.at(4) << endl;
-        writer_logfile_stream << "Analytical Edge fractions \t\t\t"s << writer_specifications.at(5) << endl;
-        writer_logfile_stream << "Analytical Edge degree fractions \t"s << writer_specifications.at(5) << endl;
-        writer_logfile_stream << "Analytical Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
-        writer_logfile_stream << "Laplacians and Betti numbers \t\t"s << writer_specifications.at(7) << endl;
-        writer_logfile_stream << "Cell Energies \t\t\t\t\t\t"s << writer_specifications.at(8) << endl << endl;
-    }
+        if (is_log_file) {
+            writer_logfile_stream << "The Writer module specifications:\t\t" << endl;
+            writer_logfile_stream << "Sequences output \t\t\t\t\t"s << writer_specifications.at(0) << endl;
+            writer_logfile_stream << "Design vectors output \t\t\t\t"s << writer_specifications.at(1) << endl;
+            writer_logfile_stream << "Configuration Edges entropy \t\t\t"s << writer_specifications.at(2) << endl;
+            writer_logfile_stream << "Special Edge fractions \t\t\t\t"s << writer_specifications.at(3) << endl;
+            writer_logfile_stream << "Special Edge fractions \t\t\t\t"s << writer_specifications.at(4) << endl;
+            writer_logfile_stream << "Analytical Edge fractions \t\t\t"s << writer_specifications.at(5) << endl;
+            writer_logfile_stream << "Analytical Edge degree fractions \t"s << writer_specifications.at(5) << endl;
+            writer_logfile_stream << "Analytical Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
+            writer_logfile_stream << "Laplacians and Betti numbers \t\t"s << writer_specifications.at(7) << endl;
+            writer_logfile_stream << "Cell Energies \t\t\t\t\t\t"s << writer_specifications.at(8) << endl << endl;
+        }
+
+///        configuration.writer_reader_switch = false;
+///    } // if(configuration.writer_reader_switch)
+
     return;
 } /// END of config_reader_writer function
 
@@ -1518,38 +1656,52 @@ void config_reader_kinetics(Config &configuration) {
             configuration.Set_kinetics_pk_mode(new_pk_mode);
         }
     }
-
     // Material ID from the CPD code Database
     std::string mat_id;
-    if (kinetics_ini.has("material_id")) {
-        auto &collection = kinetics_ini["material_id"];
+    if (kinetics_ini.has("general")) {
+        auto &collection = kinetics_ini["general"];
         if (collection.has("mat_id")) {
-            mat_id = kinetics_ini.get("material_id").get("mat_id");
+            mat_id = kinetics_ini.get("general").get("mat_id");
             configuration.Set_kinetics_material_id(mat_id);
-        }
-    }
+        } }
 
-    //corrosion
     double time_constant, corrosion_rate;
-    if (kinetics_ini.has("corrosion")) {
-        auto &collection = kinetics_ini["corrosion"];
+    if (kinetics_ini.has("general")) {
+        auto &collection = kinetics_ini["general"];
         if (collection.has("kinetic_time_scale")) {
-            time_constant = stod(kinetics_ini.get("corrosion").get("kinetic_time_scale"));
+            time_constant = stod(kinetics_ini.get("general").get("kinetic_time_scale"));
             configuration.Set_kinetics_time_scale(time_constant);
         }
+
+    //corrosion
         if (collection.has("corrosion_rate_coeff")) {
             corrosion_rate = stod(kinetics_ini.get("corrosion").get("corrosion_rate_coeff"));
             configuration.Set_kinetics_corrosion_rate_scale(corrosion_rate);
-        }
-    }
+        } }
 
     // irradiation
-    double beam_energy_flux; //energy flux in [J/s]
-    double beam_current; //beam current in [particles/s]
-    double energy_dissipation_rate; // energy dissipation of a beam with material depth
+    double rx = 0.0, rz = 0.0, ry = 0.0;
+    double beam_energy_flux = 0; //energy flux in [J/s]
+    double beam_current = 0; //beam current in [particles/s]
+    double energy_dissipation_rate = 0; // energy dissipation of a beam with material depth
+    double irradiation_damage_rate = 0; // an additional coefficient of the irradition damage model
+    double observation_time = 0; // time of the module output
 
     if (kinetics_ini.has("irradiation")) {
         auto &collection = kinetics_ini["irradiation"];
+        if (collection.has("rx"))
+            rx = stod(kinetics_ini.get("irradiation").get("rx"));
+        if (collection.has("rz"))
+            rz = stod(kinetics_ini.get("irradiation").get("rz"));
+        ry = std::sqrt(1.0 - std::pow(rx,2.0) - std::pow(rz,2.0));
+        std::tuple<double, double, double> new_beam_direction = make_tuple(rx,ry,rz);
+                configuration.Set_kinetics_beam_direction(new_beam_direction);
+
+        if (collection.has("irradiation_damage_rate")) {
+            irradiation_damage_rate = stod(kinetics_ini.get("irradiation").get("irradiation_damage_rate"));
+            configuration.Set_kinetics_irradiation_damage_rate(irradiation_damage_rate);
+        }
+
         if (collection.has("beam_energy_flux")) {
             beam_energy_flux = stod(kinetics_ini.get("irradiation").get("beam_energy_flux"));
             configuration.Set_kinetics_beam_energy_flux(beam_energy_flux);
@@ -1562,9 +1714,13 @@ void config_reader_kinetics(Config &configuration) {
             energy_dissipation_rate = stod(kinetics_ini.get("irradiation").get("energy_dissipation_rate"));
             configuration.Set_kinetics_energy_dissipation_rate(energy_dissipation_rate);
         }
+        if (collection.has("observation_time")) {
+            observation_time = stod(kinetics_ini.get("irradiation").get("observation_time"));
+            configuration.Set_kinetics_observation_time(observation_time);
+        }
     }
 
-// module output
+    // module output
     if (kinetics_ini.has("module_output")) {
         auto& collection = kinetics_ini["module_output"];
         if (collection.has("module_log_file"))
@@ -1573,55 +1729,66 @@ void config_reader_kinetics(Config &configuration) {
         } }
     if (log_file_output == "ON") configuration.Set_is_kinetics_log_file(true);
 
-
 /// Output to the screen/console
-    cout << "The Kinetics module type and initial parameters:\t\t" << endl;
-    if(configuration.Get_kinetics_nk_mode() != "N"s)
-        cout << "Node kinetics type:\t\t\t\t"s << configuration.Get_kinetics_nk_mode() << endl;
-    if(configuration.Get_kinetics_ek_mode() != "N"s)
-        cout << "Edge kinetics type:\t\t\t\t"s << configuration.Get_kinetics_ek_mode() << endl;
-    if(configuration.Get_kinetics_fk_mode() != "N"s)
-        cout << "Face kinetics type:\t\t\t\t"s << configuration.Get_kinetics_fk_mode() << endl;
-    if(configuration.Get_kinetics_pk_mode() != "N"s)
-        cout << "Volume kinetics type:\t\t\t\t"s << configuration.Get_kinetics_pk_mode() << endl;
-    cout << "Material's ID:\t\t\t\t\t"s << configuration.Get_kinetics_material_id() << endl;
-    cout << "Kinetic time scale:\t\t\t\t"s << configuration.Get_kinetics_time_scale() << endl;
-    if(configuration.Get_kinetics_nk_mode() == "C"s || configuration.Get_kinetics_ek_mode() == "C"s ||
+    if(configuration.kinetics_reader_switch) {
+        cout << "The Kinetics module type and initial parameters:\t\t" << endl;
+        if (configuration.Get_kinetics_nk_mode() != "N"s)
+            cout << "Node kinetics type:\t\t\t\t"s << configuration.Get_kinetics_nk_mode() << endl;
+        if (configuration.Get_kinetics_ek_mode() != "N"s)
+            cout << "Edge kinetics type:\t\t\t\t"s << configuration.Get_kinetics_ek_mode() << endl;
+        if (configuration.Get_kinetics_fk_mode() != "N"s)
+            cout << "Face kinetics type:\t\t\t\t"s << configuration.Get_kinetics_fk_mode() << endl;
+        if (configuration.Get_kinetics_pk_mode() != "N"s)
+            cout << "Volume kinetics type:\t\t\t\t"s << configuration.Get_kinetics_pk_mode() << endl;
+        cout << "Material's ID:\t\t\t\t\t"s << configuration.Get_kinetics_material_id() << endl;
+        cout << "Kinetic time scale:\t\t\t\t"s << configuration.Get_kinetics_time_scale() << endl;
+        if (configuration.Get_kinetics_nk_mode() == "C"s || configuration.Get_kinetics_ek_mode() == "C"s ||
             configuration.Get_kinetics_fk_mode() == "C"s || configuration.Get_kinetics_pk_mode() == "C"s)
-    cout << "Corrosion rate:\t\t\t\t\t"s << configuration.Get_kinetics_corrosion_rate_scale() << endl;
-    if(configuration.Get_kinetics_nk_mode() == "I"s || configuration.Get_kinetics_ek_mode() == "I"s ||
-       configuration.Get_kinetics_fk_mode() == "I"s || configuration.Get_kinetics_pk_mode() == "I"s)
-    {
-        cout << "Energy flux of the beam:\t\t"s << configuration.Get_kinetics_beam_energy_flux() << endl;
-        cout << "Beam current:\t\t\t\t\t"s << configuration.Get_kinetics_beam_current() << endl;
-        cout << "Energy dissipation rate:\t\t"s << configuration.Get_kinetics_energy_dissipation_rate() << endl;
-    }
-    if(configuration.Get_is_kinetics_log_file()) {
-        cout << "Kinetics *.log file output is \tON"s << endl;
-
-        kinetics_logfile_stream << "The Kinetics module type and initial parameters:\t\t" << endl;
-        if(configuration.Get_kinetics_nk_mode() != "N"s)
-            kinetics_logfile_stream << "Node kinetics type:\t\t\t\t"s << configuration.Get_kinetics_nk_mode() << endl;
-        if(configuration.Get_kinetics_ek_mode() != "N"s)
-            kinetics_logfile_stream << "Edge kinetics type:\t\t\t\t"s << configuration.Get_kinetics_ek_mode() << endl;
-        if(configuration.Get_kinetics_fk_mode() != "N"s)
-            kinetics_logfile_stream << "Face kinetics type:\t\t\t\t"s << configuration.Get_kinetics_fk_mode() << endl;
-        if(configuration.Get_kinetics_pk_mode() != "N"s)
-            kinetics_logfile_stream << "Volume kinetics type:\t\t\t\t"s << configuration.Get_kinetics_pk_mode() << endl;
-        kinetics_logfile_stream << "Material's ID:\t\t\t\t\t"s << configuration.Get_kinetics_material_id() << endl;
-        kinetics_logfile_stream << "Kinetic time scale:\t\t\t\t"s << configuration.Get_kinetics_time_scale() << endl;
-        if(configuration.Get_kinetics_nk_mode() == "C"s || configuration.Get_kinetics_ek_mode() == "C"s ||
-           configuration.Get_kinetics_fk_mode() == "C"s || configuration.Get_kinetics_pk_mode() == "C"s)
-            kinetics_logfile_stream << "Corrosion rate:\t\t\t\t\t"s << configuration.Get_kinetics_corrosion_rate_scale() << endl;
-        if(configuration.Get_kinetics_nk_mode() == "I"s || configuration.Get_kinetics_ek_mode() == "I"s ||
-           configuration.Get_kinetics_fk_mode() == "I"s || configuration.Get_kinetics_pk_mode() == "I"s) {
-            kinetics_logfile_stream << "Energy flux of the beam:\t\t"s << configuration.Get_kinetics_beam_energy_flux() << endl;
-            kinetics_logfile_stream << "Beam current:\t\t\t\t\t"s << configuration.Get_kinetics_beam_current() << endl;
-            kinetics_logfile_stream << "Energy dissipation rate:\t\t"s << configuration.Get_kinetics_energy_dissipation_rate() << endl;
+            cout << "Corrosion rate:\t\t\t\t\t"s << configuration.Get_kinetics_corrosion_rate_scale() << endl;
+        if (configuration.Get_kinetics_nk_mode() == "I"s || configuration.Get_kinetics_ek_mode() == "I"s ||
+            configuration.Get_kinetics_fk_mode() == "I"s || configuration.Get_kinetics_pk_mode() == "I"s) {
+            cout << "Energy flux of the beam:\t\t"s << configuration.Get_kinetics_beam_energy_flux() << endl;
+            cout << "Beam current:\t\t\t\t\t"s << configuration.Get_kinetics_beam_current() << endl;
+            cout << "Energy dissipation rate:\t\t"s << configuration.Get_kinetics_energy_dissipation_rate() << endl;
         }
+        if (configuration.Get_is_kinetics_log_file()) {
+            cout << "Kinetics *.log file output is \tON"s << endl;
 
-    } else
-        cout << "Kinetics *.log file output is \tOFF"s << endl;
+            kinetics_logfile_stream << "The Kinetics module type and initial parameters:\t\t" << endl;
+            if (configuration.Get_kinetics_nk_mode() != "N"s)
+                kinetics_logfile_stream << "Node kinetics type:\t\t\t\t"s << configuration.Get_kinetics_nk_mode()
+                                        << endl;
+            if (configuration.Get_kinetics_ek_mode() != "N"s)
+                kinetics_logfile_stream << "Edge kinetics type:\t\t\t\t"s << configuration.Get_kinetics_ek_mode()
+                                        << endl;
+            if (configuration.Get_kinetics_fk_mode() != "N"s)
+                kinetics_logfile_stream << "Face kinetics type:\t\t\t\t"s << configuration.Get_kinetics_fk_mode()
+                                        << endl;
+            if (configuration.Get_kinetics_pk_mode() != "N"s)
+                kinetics_logfile_stream << "Volume kinetics type:\t\t\t\t"s << configuration.Get_kinetics_pk_mode()
+                                        << endl;
+            kinetics_logfile_stream << "Material's ID:\t\t\t\t\t"s << configuration.Get_kinetics_material_id() << endl;
+            kinetics_logfile_stream << "Kinetic time scale:\t\t\t\t"s << configuration.Get_kinetics_time_scale()
+                                    << endl;
+            if (configuration.Get_kinetics_nk_mode() == "C"s || configuration.Get_kinetics_ek_mode() == "C"s ||
+                configuration.Get_kinetics_fk_mode() == "C"s || configuration.Get_kinetics_pk_mode() == "C"s)
+                kinetics_logfile_stream << "Corrosion rate:\t\t\t\t\t"s
+                                        << configuration.Get_kinetics_corrosion_rate_scale() << endl;
+            if (configuration.Get_kinetics_nk_mode() == "I"s || configuration.Get_kinetics_ek_mode() == "I"s ||
+                configuration.Get_kinetics_fk_mode() == "I"s || configuration.Get_kinetics_pk_mode() == "I"s) {
+                kinetics_logfile_stream << "Energy flux of the beam:\t\t"s
+                                        << configuration.Get_kinetics_beam_energy_flux() << endl;
+                kinetics_logfile_stream << "Beam current:\t\t\t\t\t"s << configuration.Get_kinetics_beam_current()
+                                        << endl;
+                kinetics_logfile_stream << "Energy dissipation rate:\t\t"s
+                                        << configuration.Get_kinetics_energy_dissipation_rate() << endl;
+            }
+
+        } else
+            cout << "Kinetics *.log file output is \tOFF"s << endl;
+
+        configuration.kinetics_reader_switch = false;
+    } // if(configuration.kinetics_reader_switch)
 
     return;
-} /// end of the 'config_reader_kinetics() function
+} /// END of the 'config_reader_kinetics() function

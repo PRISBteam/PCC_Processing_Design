@@ -5,6 +5,8 @@
 #include <vector>
 #include <set>
 #include <cmath>
+#include <algorithm>
+//#include <numeric>
 
 #include "../external/Eigen/Core"
 #include "../external/Eigen/SparseCore"
@@ -17,8 +19,7 @@ extern std::vector<unsigned int> CellNumbs; // number of cells in a PCC defined 
 extern std::string source_path;
 extern std::string output_dir;
 extern std::vector<std::string> paths_to_PCC_matrices;
-
-std::ofstream Out_local_logstream;
+extern std::ofstream main_logfile_stream;
 
 typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which declares a column-major sparse matrix type of doubles with the nickname 'SpMat'
 
@@ -360,6 +361,18 @@ double Config::Get_kinetics_corrosion_rate_scale(void) const{
     return kinetics_config.kinetics_corrosion_rate_scale;
 }
 // kinetics irradiation
+void Config::Set_kinetics_beam_direction(std::tuple<double,double,double> &new_beam_direction){
+    kinetics_config.beam_direction = new_beam_direction;
+}
+std::tuple<double,double,double> Config::Get_kinetics_beam_direction(void) const{
+    return kinetics_config.beam_direction;
+}
+void Config::Set_kinetics_irradiation_damage_rate(double &new_irradiation_damage_rate){
+    kinetics_config.irradiation_damage_rate = new_irradiation_damage_rate;
+}
+double Config::Get_kinetics_irradiation_damage_rate(void) const{
+    return kinetics_config.irradiation_damage_rate;
+}
 void Config::Set_kinetics_beam_energy_flux(double &beam_energy_flux){
     kinetics_config.beam_energy_flux = beam_energy_flux;
 }
@@ -378,8 +391,22 @@ void Config::Set_kinetics_energy_dissipation_rate(double &energy_dissipation_rat
 double Config::Get_kinetics_energy_dissipation_rate(void) const{
     return kinetics_config.energy_dissipation_rate;
 }
+void Config::Set_kinetics_observation_time(double &new_observation_time){
+    kinetics_config.observation_time = new_observation_time;
+}
+double Config::Get_kinetics_observation_time(void) const{
+    return kinetics_config.observation_time;
+}
+
+
 
 /// Design module
+void Config::Set_design_goal_function_id(std::string &new_goal_function_id) {
+    design_config.goal_function_id = new_goal_function_id;
+}
+std::string Config::Get_design_goal_function_id(void) const {
+    return design_config.goal_function_id;
+}
 void Config::Set_design_cell_type(int &new_design_cell_type){
     design_config.design_cell_type = new_design_cell_type;
 }
@@ -475,14 +502,15 @@ int Config::Get_dim() const {
         return Configuration_cState;
     }; //!@return Configuration_sState
 
-     void Config::Read_config(Config &main_configuration){
+     void Config::Read_config(Config &main_configuration) {
          config_ConfVector = config_reader_main(main_configuration);
+         main_logfile_stream.open(output_dir + "cpd_main.log"s, ios::app); // the main_logfile_stream.log stream will be closed at the end of the main function
 
         config_dim = config_ConfVector.at(0); // [0] space dimension of the problem (dim = 1, 2 or 3);
         if (config_dim != 1 && config_dim != 2 && config_dim != 3) {
             cout << "Wrong dimension ERROR! Please change 'dim' parameter in ../config/mail.ini file to 1, 2, or 3"
                  << endl;
-            Out_local_logstream << "Wrong dimension ERROR! Please change 'dim' parameter in ../config/mail.ini file to 1, 2, or 3"
+            main_logfile_stream << "Wrong dimension ERROR! Please change 'dim' parameter in ../config/mail.ini file to 1, 2, or 3"
                     << endl;
             exit(1);
         }
@@ -528,7 +556,7 @@ int Config::Get_dim() const {
             cout
                     << "INPUT DATA ERROR (!) dim > 3 or < 1 as it specified in the ../config/main.ini file. Please, make it equal to 1, 2 or 3."
                     << endl;
-            Out_local_logstream
+            main_logfile_stream
                     << "INPUT DATA ERROR (!) dim > 3 or < 1 in the ../config/main.ini file. Please, make it equal to 1, 2 or 3."
                     << endl;
             exit(1);
@@ -596,15 +624,15 @@ int Config::Get_dim() const {
                   << " does not exists (!)" << endl;
 
 /// CellNumbs output
-        Out_local_logstream.open(main_configuration.Get_main_config().output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
+//        Out_local_logstream.open(main_configuration.Get_main_config().output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
             cout << "=====================================================================================" << endl;
-            Out_local_logstream
+             main_logfile_stream
                     << "=========================================================================================================================================================================="
                     << endl;
             unsigned int t_length = 0;
             for (int cell_numb: CellNumbs) {
                 cout << t_length << "-cells #\t" << cell_numb << endl;
-                Out_local_logstream << t_length++ << "-cells #\t" << cell_numb << endl;
+                main_logfile_stream << t_length++ << "-cells #\t" << cell_numb << endl;
             } // end for (int cell_numb : CellNumbs)
 
         Configuration_sState = {State_p_vector, State_f_vector, State_e_vector, State_n_vector },
@@ -649,13 +677,13 @@ int Config::Get_dim() const {
 /// Output PCCpaths.vector to console and logfile out
         int npath = 0;
         cout << "_____________________________________________________________________________________" << endl;
-        Out_local_logstream
+        main_logfile_stream
                 << "_____________________________________________________________________________________" << endl;
         for (auto path: config_PCCpaths) {
             cout << "[" << npath << "]" << " PCCpaths:\t" << path << endl;
-            Out_local_logstream << "[" << npath++ << "]" << " PCCpaths:\t" << path << endl;
+            main_logfile_stream << "[" << npath++ << "]" << " PCCpaths:\t" << path << endl;
         }
-        cout << endl; Out_local_logstream << endl;
+        cout << endl; main_logfile_stream << endl;
 //        cout << "Size of Configuration_sState:\t" << Configuration_sState.size() << endl; Out_local_logstream << "Size of Configuration_sState:\t" << Configuration_sState.size() << endl;
 //        cout << "Size of Configuration_cState:\t" << Configuration_cState.size() << endl; Out_local_logstream << "Size of Configuration_cState:\t" << Configuration_cState.size() << endl;
   } // end of  if (pcc_standard == "pcc1s")
@@ -663,7 +691,8 @@ int Config::Get_dim() const {
       cout << "ERROR in the reading PCC: please specify the correct 'pcc_standard' perameter in the config/main.ini file corresponding to the version of the PCC you use (please see technical documentation for more details, the first PCC standard has an ID 'pcc1s'" << endl;
       exit(1);
   }
-        Out_local_logstream.close();
+
+  main_logfile_stream.close();
     }; // Read the 'initial configuration' of the problem set in all the relevant '_.ini' files containing in the '\config' project directory using the functions from the 'ini_readers.cpp' project library (and only from there)
 
     /// --------------------------------------- *** END of void Config::Read_config() method *** ------------------------------------------------ ///
@@ -703,18 +732,31 @@ void CellDesign::Set_special_sequences(std::vector<unsigned int> psequence, std:
     void CellDesign::Set_special_sequence(std::vector<unsigned int> special_x_sequence, int cell_type){
         switch (cell_type) {
             case 3:
-                p_special_sequence = special_x_sequence;
+                if (special_x_sequence.size() > 0) {
+                    p_special_sequence = special_x_sequence;
+                    is_set_p_special_sequence = true;
+                }
                 break;
             case 2:
-                f_special_sequence = special_x_sequence;
+                if (special_x_sequence.size() > 0) {
+                    f_special_sequence = special_x_sequence;
+                    is_set_f_special_sequence = true;
+                }
                 break;
             case 1:
-                e_special_sequence = special_x_sequence;
+                if (special_x_sequence.size() > 0) {
+                    e_special_sequence = special_x_sequence;
+                    is_set_e_special_sequence = true;
+                }
                 break;
             case 0:
-                n_special_sequence = special_x_sequence;
+                if (special_x_sequence.size() > 0) {
+                    n_special_sequence = special_x_sequence;
+                    is_set_n_special_sequence = true;
+                }
                 break;
         } // end switch(cell_type)
+
     } // End of Set_special_sequence()
 
 void CellDesign::Set_agglomeration_sequence(std::vector<Agglomeration> &agglomeration_x_sequence, int cell_type) {
@@ -738,16 +780,28 @@ void CellDesign::Set_agglomeration_sequence(std::vector<Agglomeration> &agglomer
 void CellDesign::Set_induced_sequence(std::vector<unsigned int> induced_x_sequence, int cell_type){
         switch (cell_type) {
             case 3:
-                p_induced_sequence = induced_x_sequence;
+                if(induced_x_sequence.size() > 0) {
+                         p_induced_sequence = induced_x_sequence;
+                         is_set_p_induced_sequence = true;
+                     }
                 break;
             case 2:
-                f_induced_sequence = induced_x_sequence;
+                if(induced_x_sequence.size() > 0) {
+                    f_induced_sequence = induced_x_sequence;
+                    is_set_f_induced_sequence = true;
+                }
                 break;
             case 1:
-                e_induced_sequence = induced_x_sequence;
+                if(induced_x_sequence.size() > 0) {
+                    e_induced_sequence = induced_x_sequence;
+                    is_set_e_induced_sequence = true;
+                }
                 break;
             case 0:
-                n_induced_sequence = induced_x_sequence;
+                if(induced_x_sequence.size() > 0) {
+                    n_induced_sequence = induced_x_sequence;
+                    is_set_n_induced_sequence = true;
+                }
                 break;
         } // end switch(cell_type)
     } // End of Set_induced_sequence()
@@ -755,19 +809,54 @@ void CellDesign::Set_induced_sequence(std::vector<unsigned int> induced_x_sequen
     void CellDesign::Set_special_configuration(std::vector<unsigned int> special_x_configuration, int cell_type){
         switch (cell_type) {
             case 3:
-                p_special_design = special_x_configuration;
+                    // if(std::any_of(p_special_design.begin(),p_special_design.back(), 1)
+                    // std::count(p_special_design.begin(),p_special_design.back(), [](unsigned int i) { return i != 0;}); {
+                if(special_x_configuration.size() > 0) {
+                    p_special_design = special_x_configuration;
+                    is_set_p_special_design = true;
+                }
                 break;
             case 2:
-                f_special_design = special_x_configuration;
+                if(special_x_configuration.size() > 0) {
+                    f_special_design = special_x_configuration;
+                    is_set_f_special_design = true;
+                }
                 break;
             case 1:
-                e_special_design = special_x_configuration;
+                if(special_x_configuration.size() > 0) {
+                    e_special_design = special_x_configuration;
+                    is_set_e_special_design = true;
+                }
                 break;
             case 0:
-                n_special_design = special_x_configuration;
+                if(special_x_configuration.size() > 0) {
+                    n_special_design = special_x_configuration;
+                    is_set_n_special_design = true;
+                }
                 break;
         } // end switch(cell_type)
     } // End Set_special_configuration()
+
+void CellDesign::Set_induced_design(std::vector<unsigned int> induced_x_design, int cell_type){
+    switch (cell_type) {
+        case 3:
+            p_induced_design = induced_x_design;
+            is_set_p_induced_design = true;
+            break;
+        case 2:
+            f_induced_design = induced_x_design;
+            is_set_f_induced_design = true;
+            break;
+        case 1:
+            e_induced_design = induced_x_design;
+            is_set_e_induced_design = true;
+            break;
+        case 0:
+            n_induced_design = induced_x_design;
+            is_set_n_induced_design = true;
+            break;
+    } // end switch(cell_type)
+} // End Set_induced_design()
 
     void CellDesign::Set_special_series(std::vector<std::vector<unsigned int>> special_x_series, int cell_type){
         switch (cell_type) {
@@ -784,24 +873,7 @@ void CellDesign::Set_induced_sequence(std::vector<unsigned int> induced_x_sequen
                 n_special_series = special_x_series;
                 break;
         } // end switch(cell_type)
-    } // End Set_special_series()
-
-    void CellDesign::Set_induced_design(std::vector<unsigned int> induced_x_design, int cell_type){
-        switch (cell_type) {
-            case 3:
-                p_induced_design = induced_x_design;
-                break;
-            case 2:
-                f_induced_design = induced_x_design;
-                break;
-            case 1:
-                e_induced_design = induced_x_design;
-                break;
-            case 0:
-                n_induced_design = induced_x_design;
-                break;
-        } // end switch(cell_type)
-    } // End Set_induced_design()
+ } // End Set_special_series()
 
 void CellDesign::Set_induced_series(std::vector<std::vector<unsigned int>> induced_x_series, int cell_type){
     switch (cell_type) {
@@ -938,6 +1010,11 @@ std::vector<unsigned int> CellDesign::Get_p_induced_sequence(void) const {
         }
         else return n_induced_sequence;
     }
+
+ void CellDesign::Set_p_design(std::vector<unsigned int> &p_special_vector) {
+     p_special_design = p_special_vector;
+}
+
     std::vector<unsigned int> CellDesign::Get_p_design(void) const {
         if (p_special_design.size() == 0) {
             cout << "WARNING: p_special_design did not set!" << endl;
@@ -964,6 +1041,59 @@ std::vector<unsigned int> CellDesign::Get_p_induced_sequence(void) const {
         }
         else return n_special_design;
     }
+
+/// Check bool functions
+bool CellDesign::Check_special_sequence(int cell_type){
+    if (cell_type == 0 && is_set_n_special_sequence)
+        return 1;
+    else if (cell_type == 1 && is_set_e_special_sequence)
+        return 1;
+    else if (cell_type == 2 && is_set_f_special_sequence)
+        return 1;
+    else if (cell_type == 3 && is_set_p_special_sequence)
+        return 1;
+    else
+        return 0;
+}
+
+bool CellDesign::Check_induced_sequence(int cell_type){
+    if (cell_type == 0 && is_set_n_induced_sequence)
+        return 1;
+    else if (cell_type == 1 && is_set_e_induced_sequence)
+        return 1;
+    else if (cell_type == 2 && is_set_f_induced_sequence)
+        return 1;
+    else if (cell_type == 3 && is_set_p_induced_sequence)
+        return 1;
+    else
+        return 0;
+}
+
+bool CellDesign::Check_special_design(int cell_type){
+    if (cell_type == 0 && is_set_n_special_design)
+        return 1;
+    else if (cell_type == 1 && is_set_e_special_design)
+        return 1;
+    else if (cell_type == 2 && is_set_f_special_design)
+        return 1;
+    else if (cell_type == 3 && is_set_p_special_design)
+        return 1;
+    else
+        return 0;
+}
+
+bool CellDesign::Check_induced_design(int cell_type){
+    if (cell_type == 0 && is_set_n_induced_design)
+        return 1;
+    else if (cell_type == 1 && is_set_e_induced_design)
+        return 1;
+    else if (cell_type == 2 && is_set_f_induced_design)
+        return 1;
+    else if (cell_type == 3 && is_set_p_induced_design)
+        return 1;
+    else
+        return 0;
+}
 // ========== END of the class CELLS_DESIGN functions description
 
 /// --------------------------------------------------------------------------------------------------- ///
@@ -1521,7 +1651,7 @@ std::vector<double> CellEnergies::Get_n_self_energies(void) const {
 */
 // Constructor
 Material::Material(std::string Mid) {
-    material_database_reader(Mid, material_type, mass_density, melting_point, gb_cohesion_energy, Young_modulus, Poisson_ratio, yield_strength, strength, fracture_toughness, gb_width, gb_inclusion1_adh_energy, lagbs_corrosion_current, hagbs_corrosion_current, sigma3_corrosion_current);
+    material_database_reader(Mid, material_type, mass_density, melting_point, gb_cohesion_energy, Young_modulus, Poisson_ratio, yield_strength, strength, fracture_toughness, Burgers_vector, gb_width, gb_inclusion1_adh_energy, lagbs_corrosion_current, hagbs_corrosion_current, sigma3_corrosion_current);
 }
 
 Material::Material(std::string Mid, std::string Iid) {
@@ -1535,6 +1665,11 @@ std::string Material::Get_material_type(void) const {
 double Material::Get_gb_width(void) const {
     return gb_width;
 }
+double Material::Get_Burgers_vector(void) const {
+    return Burgers_vector;
+
+}
+
 
 // Thermodynamic
 double Material::Get_mass_density(void) const {
@@ -1619,7 +1754,7 @@ void PCC::Set_face_barycentre_coordinates(void) {
                 cell_barycentre_coordinates.at(2).push_back(find_aGBseed(fn));
                 if (fn % 500 == 1) {
                     cout << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
-                    Out_local_logstream << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
+                    main_logfile_stream << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
                 }
         }
 

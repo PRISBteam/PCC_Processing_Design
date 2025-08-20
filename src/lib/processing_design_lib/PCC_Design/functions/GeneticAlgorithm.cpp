@@ -8,7 +8,13 @@
 #include <cmath>   // For std::log2
 #include <vector>
 
+// local libraries
+
 #include "GeneticAlgorithm.h"
+
+#include "../../lib/processing_design_lib/PCC_Kinetics/PCC_Kinetics.h"
+#include "../../PCC_Objects.h"
+#include "../../PCC_Support_Functions.h"
 
 /*!
  * @brief A simple fitness function that calculates the sum of genes.
@@ -51,7 +57,30 @@ double shannonEntropyFitness(const std::vector<int>& chromosome) {
     return entropy;
 } // end of shannonEntropyFitness()
 
-// --- Helper for random number generation ---
+/*!
+ *
+ * @param chromosome
+ * @param design_configuration
+ * @param processing_cell_design
+ * @return
+ */
+double IrradiationDamageFitness(const std::vector<int>& chromosome, Config &design_configuration, CellDesign &processing_cell_design){
+    std::vector<std::vector<double>> p_cells_history;
+
+    std::vector<unsigned int> new_p_special_vector;
+    for (auto ps : chromosome)
+        new_p_special_vector.push_back(ps);
+
+    processing_cell_design.Set_p_design(new_p_special_vector);
+    p_cells_history = PCC_Kinetics(design_configuration, processing_cell_design);
+
+    std::cout << "IrradiationDamageFitness :: fraction\t\t" << p_cells_history.back().at(2) << std::endl;
+    return p_cells_history.back().at(2); // area fraction of fractured GBs
+}
+
+
+
+/// --- Helper for random number generation ---
 // A simple utility to get a random double between 0.0 and 1.0
 double randomDouble() {
     static std::mt19937 generator(std::random_device{}());
@@ -69,7 +98,7 @@ int randomInt(int min, int max) {
 // ==============================================================================
 // CONSTRUCTOR
 // ==============================================================================
-GeneticAlgorithm::GeneticAlgorithm(int popSize, double mutRate, double crossRate, std::function<double(const std::vector<int>&)> fitnessFunc)
+GeneticAlgorithm::GeneticAlgorithm(int popSize, double mutRate, double crossRate, std::function<double(const std::vector<int>&, Config&, CellDesign&)> fitnessFunc)
     : populationSize(popSize),
       mutationRate(mutRate),
       crossoverRate(crossRate),
@@ -101,9 +130,9 @@ void GeneticAlgorithm::initializePopulation(int chromosomeLength, const std::vec
     // Don't evaluate fitness here, let the evolve loop do it for the first time.
 }
 
-void GeneticAlgorithm::evolve() {
+void GeneticAlgorithm::evolve(Config &design_configuration, CellDesign &processing_cell_design) {
     // 1. Evaluate the fitness of the current population
-    evaluatePopulation();
+    evaluatePopulation(design_configuration, processing_cell_design);
 
     // 2. Create the next generation
     std::vector<Individual> nextGeneration;
@@ -160,9 +189,9 @@ int GeneticAlgorithm::getGenerationCount() const {
 // PRIVATE HELPER METHODS (GA OPERATORS)
 // ==============================================================================
 
-void GeneticAlgorithm::evaluatePopulation() {
+void GeneticAlgorithm::evaluatePopulation(Config &design_configuration, CellDesign &processing_cell_design) {
     for (auto& individual : population) {
-        individual.fitness = fitnessFunction(individual.chromosome);
+        individual.fitness = fitnessFunction(individual.chromosome, design_configuration, processing_cell_design);
     }
 }
 

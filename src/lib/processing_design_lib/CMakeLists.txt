@@ -42,7 +42,6 @@ set(SOURCE_FILES
         PCC_Design/PCC_Design.cpp
         PCC_Design/functions/GeneticAlgorithm.cpp
 
-
         #[===[
 
 src/lib/processing_design_lib/PCC_Subcomplex/PCC_Subcomplex.cpp

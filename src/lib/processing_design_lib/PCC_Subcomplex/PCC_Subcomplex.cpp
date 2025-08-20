@@ -61,7 +61,7 @@ std::vector<Subcomplex> several_cuts; // function output
 
     // ------------------ #Print -----------------------
     if(is_log_file_output) {
-        subcomplex_logfile_stream.open(output_dir + "cpdlog_subcomplex.log"s,
+//        subcomplex_logfile_stream.open(output_dir + "cpdlog_subcomplex.log"s,
                                        ios::trunc); // the main_logfile_stream.log stream will be closed at the end of the main function
         subcomplex_logfile_stream << endl
                                   << "---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------"

@@ -79,6 +79,7 @@ std::vector<tuple<double, double, double>> Tuple3Reader(std::string SMpath) {
         while(!inAN.eof()) {
             inAN >> a >> b >> c;
             res.push_back(std::make_tuple(a,b,c));
+// REPAIR: cout << a << "\t" << b << "\t" << c << endl;
         }
     } else cout << "WARNING: The file " << SMpath << " cannot be read" << endl; //If something goes wrong
 

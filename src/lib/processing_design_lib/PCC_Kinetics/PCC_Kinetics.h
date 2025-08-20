@@ -16,6 +16,6 @@
  * @param configuration
  * @return std::vector<double> p_cells_history
  */
-std::vector<vector<double>> PCC_Kinetics(Config &configuration, CellDesign &processing_cells_design);
+std::vector<std::vector<double>> PCC_Kinetics(Config &configuration, CellDesign &processing_cells_design);
 
 #endif //PCC_PROCESSING_DESIGN_PCC_KINETICS_H

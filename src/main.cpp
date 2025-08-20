@@ -87,6 +87,7 @@ std::ofstream main_logfile_stream, subcomplex_logfile_stream, multiphysics_logfi
 std::ofstream Out_logfile_stream;
 // TODO: DELETE obsolete 'Out_logfile_stream'
 std::ofstream corrosion_damaged_output, corrosion_damaged_fractions_output, corrosion_affected_output, corrosion_affected_fractions_output, face_barycentre_coord_outstream, edge_barycentre_coord_outstream;
+std::ofstream irradiation_damaged_output, irradiation_damaged_fractions_output;
 
 /// PCC:: (- related variables)
 int PCC_dimension;                  // Tessellation dimension corresponding to the maximal value of 'k' in the PCC's k-cell ranks:
@@ -195,10 +196,19 @@ void performance_test(Config &initial_configuration);
  * @return 0 and the output to console and the *.log files, if successful.
 */
 int main() {
-// * ------------------ #Print ------------------------------------
-    cout << endl << "---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------" << endl << endl;
-// * --------------------------------------------------------------
-// Output Year/Day/Time of the computation to cout
+    cout <<" ****************************************************************************************************************************** "s<< endl;
+    cout <<"  ************************   Polytopal Cell Complex (PCC) Processing Design :: (CPD code) (c)   ******************************* "s<< endl;
+    cout <<" **************************************************************************************************************************** "s<< endl;
+    cout <<"                                         Version 5.0 | 19/08/2025                                                          "s<< endl;
+    cout <<" ************************************************************************************************************************** "s<< endl;
+    cout <<" ************************************ Dr Elijah Borodin, Manchester, UK ************************************************** "s<< endl;
+    cout <<" **************************************** Spring 2022 - Summer 2025  **************************************************** "s<< endl;
+    cout <<" *********************************************************************************************************************** "s<< endl<< endl;
+    cout <<"     Code source:    https://github.com/PRISBteam/PCC_Processing_Design/  "s<< endl;
+    cout <<"     Documentation:  https://prisbteam.github.io/  "s<< endl;
+    cout <<"     PCC sources:    https://materia.team/  "s<< endl << endl;
+
+    // Output Year/Day/Time of the computation to cout
     time_t timestamp = time(&timestamp);
     struct tm datetime = *localtime(&timestamp);
     cout << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
@@ -219,8 +229,9 @@ int main() {
     simulation_tasks_dir = initial_configuration.Get_sim_task();
  /// ============================================================================== ///
 
-/// ------------------ #Print -----------------------
-    main_logfile_stream.open(output_dir + "cpd_main.log"s, ios::trunc); // the main_logfile_stream.log stream will be closed at the end of the main function
+/// ------------------ #Print ----------------------
+    /// ------------------ #Print -----------------------
+    main_logfile_stream.open(output_dir + "cpd_main.log"s, ios::app); // the main_logfile_stream.log stream will be closed at the end of the main function
     main_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
 
     if (ConfigVector.at(1) == 1) {
@@ -231,8 +242,9 @@ int main() {
         multiphysics_logfile_stream.open(output_dir + "cpd_multiphysics.log"s, ios::trunc);
         multiphysics_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
     }
+
+    processing_logfile_stream.open(output_dir + "cpd_processing.log"s, ios::trunc);
     if (ConfigVector.at(3) == 1) {
-        processing_logfile_stream.open(output_dir + "cpd_processing.log"s, ios::trunc);
         processing_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
     }
     if (ConfigVector.at(7) == 1) {
@@ -251,7 +263,6 @@ int main() {
         writer_logfile_stream.open(output_dir + "cpd_writer.log"s, ios::trunc);
         writer_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
     }
-    main_logfile_stream << endl << "---------------------------------- *** CPD code execution begins *** --------------------------------------------------------------" << endl << endl;
 
     // Output Year/Day/Time of the computation
     {
@@ -302,7 +313,6 @@ int main() {
         std::vector<Subcomplex> pcc_subcomplexes; // vector containing all the PCC subcomplexes (cuts, k-order grain neighbours, etc)
 
         if (ConfigVector.at(1) == 1) { // if the 'PCC_Section' parameter is switched 'ON' in the config/main.ini file
-   //         main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
             cout << "-------------------------------------------------------------------------" << endl;
             main_logfile_stream << "-------------------------------------------------------------------------" << endl;
             cout << " START of the PCC Subcomplex module " << endl;
@@ -326,7 +336,6 @@ int main() {
         // Example: vector<CellEnergies> for several crack lengths in a PCC
 
         if (ConfigVector.at(2) == 1) { // if the 'PCC_Multiphysics' parameter is switched 'ON' in the config/main.ini file
-      //      main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
             cout << "-------------------------------------------------------------------------" << endl;
             main_logfile_stream << "-------------------------------------------------------------------------" << endl;
             cout << "START of the PCC Multiphysics module " << endl << endl;
@@ -348,7 +357,6 @@ int main() {
         CellDesign new_cells_design; // a class described in PCC_Objects.h contained (1) all special k-cell sequences and (2) all the design_<*>_vectors for all k-cells in the PCC
 
         if (ConfigVector.at(3) == 1) { // if the 'PCC_Processing' parameter is switched 'ON' in the config/main.ini file
-      //      main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
             cout << "-------------------------------------------------------------------------" << endl;
             main_logfile_stream << "-------------------------------------------------------------------------" << endl;
             cout << "START of the PCC Processing module " << endl;
@@ -364,36 +372,34 @@ int main() {
         } // end if(ProcessingON)
 
         /// ====================== IV. PCC Kinetics module ======================
-        std::vector<vector<double>> p_cells_history;
+        std::vector<std::vector<double>> p_cells_history;
         /// (CellNumbs.at(0),CellNumbs.at(1),CellNumbs.at(2),CellNumbs.at(3));
 
         if (ConfigVector.at(7) == 1) { // if the 'PCC_Kinetics' parameter is switched 'ON' in the config/main.ini file
-       //     main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
             cout << "-------------------------------------------------------------------------" << endl;
             main_logfile_stream << "-------------------------------------------------------------------------" << endl;
             cout << "START of the PCC Kinetics module " << endl;
             main_logfile_stream << "START of the PCC Kinetics module " << endl;
 
             // TODO: TEMPORARY MODULE OUTPUT
-            corrosion_damaged_output.open(output_dir + "surface_corrosion_damaged_output.txt"s, ios::trunc);
-            corrosion_affected_output.open(output_dir + "surface_corrosion_affected_output.txt"s, ios::trunc);
+//            corrosion_damaged_output.open(output_dir + "surface_corrosion_damaged_output.txt"s, ios::trunc);
+//            corrosion_affected_output.open(output_dir + "surface_corrosion_affected_output.txt"s, ios::trunc);
 
-            face_barycentre_coord_outstream.open(output_dir + "face_seeds.txt"s, ios::trunc);
-            edge_barycentre_coord_outstream.open(output_dir + "edge_seeds.txt"s, ios::trunc);
+//            face_barycentre_coord_outstream.open(output_dir + "face_seeds.txt"s, ios::trunc);
+//            edge_barycentre_coord_outstream.open(output_dir + "edge_seeds.txt"s, ios::trunc);
 
-            corrosion_damaged_fractions_output.open(output_dir + "area_corrosive_damaged_fraction.txt"s, ios::trunc);
-            corrosion_affected_fractions_output.open(output_dir + "area_corrosive_affected_fraction.txt"s, ios::trunc);
+//            corrosion_damaged_fractions_output.open(output_dir + "area_corrosive_damaged_fraction.txt"s, ios::trunc);
+//            corrosion_affected_fractions_output.open(output_dir + "area_corrosive_affected_fraction.txt"s, ios::trunc);
+
+            irradiation_damaged_output.open(output_dir + "irradiation_damaged_output.txt"s, ios::trunc);
+            irradiation_damaged_fractions_output.open(output_dir + "irradiation_damaged_area_fraction.txt"s, ios::trunc);
 
             p_cells_history = PCC_Kinetics(configuration, new_cells_design);
 
-            corrosion_damaged_output.close();
-            corrosion_affected_output.close();
+            irradiation_damaged_output.close();
+            irradiation_damaged_fractions_output.close();
 
-            edge_barycentre_coord_outstream.close();
-            face_barycentre_coord_outstream.close();
-
-            corrosion_damaged_output.close();
-            corrosion_affected_fractions_output.close();
+//            corrosion_damaged_output.close();  corrosion_affected_output.close(); edge_barycentre_coord_outstream.close();  face_barycentre_coord_outstream.close(); corrosion_damaged_output.close();  corrosion_affected_fractions_output.close();
 
             // ================ Elapsing time for the Kinetics module ================
             unsigned int Kinetics_time = clock();
@@ -406,7 +412,6 @@ int main() {
         ProcessedComplex pcc_processed;  // a class described in PCC_Objects.h
 
         if (ConfigVector.at(4) == 1) { // if the 'PCC_Characterisation' parameter is switched 'ON' in the config/main.ini file
-     //       main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
             cout << "-------------------------------------------------------------------------" << endl;
             main_logfile_stream << "-------------------------------------------------------------------------" << endl;
             cout << "START of the PCC Characterisation module" << endl; main_logfile_stream << "START of the PCC Characterisation module" << endl;
@@ -444,7 +449,6 @@ int main() {
 
         /// ====================== V. PCC Writer module ======================
         if (ConfigVector.at(6) == 1) { // if the 'PCC_Writer' parameter is switched 'ON' in the config/main.ini file
-            main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::app); // this Processing_Design.log stream will be closed at the end of the main function
             cout << "-------------------------------------------------------------------------" << endl;
             main_logfile_stream << "-------------------------------------------------------------------------" << endl;
             cout << "START of the PCC Writer module" << endl;
@@ -491,8 +495,6 @@ exit(0);
 
         /// Initialisation of the current_configuration as equal to the initial_configuration
         configuration = initial_configuration;
-
-        main_logfile_stream.open(output_dir + "cpdlog_main.log"s, ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
 
         vector<unsigned int> node_coordinates_seq, face_coordinates_seq, polytope_coordinates_seq;
         //      for(unsigned int i = 0; i < CellNumbs.at(0); ++i) { node_coordinates_seq.push_back(i); }

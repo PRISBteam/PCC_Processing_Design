@@ -4,11 +4,17 @@
 #include <functional>
 #include <iostream>
 
+#include "../../PCC_Objects.h"
+#include "../../PCC_Support_Functions.h"
 
-/// mock fitness functions
-double maximizingOnesFitness(const std::vector<int>& chromosome);
 
-double shannonEntropyFitness(const std::vector<int>& chromosome);
+/// fitness functions
+double maximizingOnesFitness(const std::vector<int>& chromosome); // T
+
+double shannonEntropyFitness(const std::vector<int>& chromosome); // Sc
+
+//double IrradiationDamageFitness(const std::vector<int>& chromosome); // Ic
+double IrradiationDamageFitness(const std::vector<int>& chromosome, Config &design_configuration, CellDesign &processing_cell_design); // Ic
 
 /// Helpful additions
 double randomDouble();
@@ -42,9 +48,10 @@ public:
      * @param crossoverRate The probability of two parents creating offspring (0.0 to 1.0).
      * @param fitnessFunc A function that takes a chromosome and returns its fitness score.
      */
-    GeneticAlgorithm(int populationSize, double mutationRate, double crossoverRate,
-                     std::function<double(const std::vector<int>&)> fitnessFunc);
+//    GeneticAlgorithm(int populationSize, double mutationRate, double crossoverRate, std::function<double(const std::vector<int>&)> fitnessFunc);
 
+    GeneticAlgorithm(int populationSize, double mutationRate, double crossoverRate,
+                     std::function<double(const std::vector<int>&, Config&, CellDesign&)> fitnessFunc);
     /**
      * @brief Initializes the population with random individuals.
      * @param chromosomeLength The length of the chromosome (state vector) for each individual.
@@ -56,7 +63,7 @@ public:
      * @brief Runs a single generation of the evolutionary process.
      * This involves evaluation, selection, crossover, and mutation.
      */
-    void evolve();
+    void evolve(Config &design_configuration, CellDesign &processing_cell_design);
 
     // --- Getter Methods ---
 
@@ -79,7 +86,7 @@ private:
     double crossoverRate;
     int populationSize;
     int generationCount;
-    std::function<double(const std::vector<int>&)> fitnessFunction;
+    std::function<double(const std::vector<int>&, Config&, CellDesign&)> fitnessFunction;
     std::vector<int> genePool; // Stores the possible genes for mutation
 
     // --- Internal GA Operators ---
@@ -87,7 +94,7 @@ private:
     /**
      * @brief Calculates the fitness for each individual in the population.
      */
-    void evaluatePopulation();
+    void evaluatePopulation(Config &design_configuration, CellDesign &processing_cell_design);
 
     /**
      * @brief Selects parents for the next generation using tournament selection.

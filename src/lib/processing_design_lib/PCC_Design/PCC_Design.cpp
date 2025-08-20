@@ -23,6 +23,11 @@
 // Local
 ///---------------------------------------------------------
 #include "functions/GeneticAlgorithm.h"
+
+#include "../PCC_Objects.h"
+#include "../PCC_Measures.h"
+#include "../PCC_Support_Functions.h"
+
 ///---------------------------------------------------------
 
 using namespace std; // standard namespace
@@ -35,6 +40,7 @@ extern std::string output_dir;
 extern std::vector<std::string> paths_to_PCC_matrices; // PCCpaths to PCC files
 extern int PCC_dimension; // PCC dimension: dim = 1 for graphs, dim = 2 for 2D plane polytopial complexes and dim = 3 for 3D bulk polyhedron complexes, as it is specified in the main.ini file.
 extern std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, polytope_coordinates_vector; // coordinate vectors defined globally
+extern std::ofstream design_logfile_stream;
 
 #include "PCC_Design.h"
 ///* ========================================================= PCC SUBCOMPLEX FUNCTION ======================================================= *///
@@ -63,24 +69,39 @@ std::vector<std::vector<int>> PCC_Design(Config &design_configuration, CellDesig
 
         // --- Fitness Function Selection ---
         // The desired fitness function is assigned to a std::function object.
-        // This demonstrates the flexibility of the pluggable fitness function design.
-        auto fitnessFunction = maximizingOnesFitness; /// (state_vector_by_sequence(processing_cell_design.Get_f_special_sequence(), design_configuration.Get_design_cell_type()));
-        // auto fitnessFunction = shannonEntropyFitness;
+
+//        if (design_configuration.Get_design_goal_function_id() == "T"s) {
+//            auto fitnessFunction = maximizingOnesFitness;
+//        }
+//        else if(design_configuration.Get_design_goal_function_id() == "Sc"s) {
+//            auto fitnessFunction = shannonEntropyFitness;
+//        }
+//        else if(design_configuration.Get_design_goal_function_id() == "Ic"s) {
+//            auto fitnessFunction = IrradiationDamageFitness;
+//        }
+        auto fitnessFunction = IrradiationDamageFitness;
 
         // --- GA Initialization ---
         GeneticAlgorithm ga(population_size, mutation_rate, crossover_rate, fitnessFunction);
         ga.initializePopulation(chromosome_length, possible_genes);
 
         std::cout << "\nStarting evolution..." << std::endl;
+        design_logfile_stream << "\nStarting evolution..." << std::endl;
         std::cout << "Optimization Target: Maximizing the sum of genes in the state vector." << std::endl;
+        design_logfile_stream << "Optimization Target: Maximizing the sum of genes in the state vector." << std::endl;
 
         // --- Evolution Loop ---
         for (int i = 0; i < maximum_generation_number; ++i) {
-            ga.evolve();
+            ga.evolve(design_configuration, processing_cell_design);
 
             // Periodically print the progress of the optimization.
-            if ((i + 1) % 10 == 0 || i == maximum_generation_number - 1) {
+  ///          if ((i + 1) % 2 == 0 || i == maximum_generation_number - 1) {
                 Individual best = ga.getBestIndividual();
+
+                design_logfile_stream << "Generation: " << ga.getGenerationCount()
+                          << " | Best Fitness: " << best.fitness << endl;
+//                          << " | Preview: ";
+
                 std::cout << "Generation: " << ga.getGenerationCount()
                           << " | Best Fitness: " << best.fitness
                           << " | Preview: ";
@@ -88,7 +109,7 @@ std::vector<std::vector<int>> PCC_Design(Config &design_configuration, CellDesig
                     std::cout << best.chromosome[k];
                 }
                 std::cout << "..." << std::endl;
-            }
+  ///          }
         }
 
         // --- Final Results ---
@@ -96,10 +117,15 @@ std::vector<std::vector<int>> PCC_Design(Config &design_configuration, CellDesig
         Individual finalBest = ga.getBestIndividual();
         std::cout << "Final Best Fitness: " << finalBest.fitness << std::endl;
         std::cout << "Final Optimized State Vector (" << finalBest.chromosome.size() << " genes):" << std::endl;
+
+        design_logfile_stream << "Final Best Fitness: " << finalBest.fitness << std::endl;
+        design_logfile_stream << "Final Optimized State Vector (" << finalBest.chromosome.size() << " genes):" << std::endl;
         for (int gene: finalBest.chromosome) {
             std::cout << gene;
+            design_logfile_stream << gene;
         }
         std::cout << std::endl;
+        design_logfile_stream << std::endl;
     } // if (design_configuration.Get_design_mode() == 'G')
 
     return design_list_of_vectors;
