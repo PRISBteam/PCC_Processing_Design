@@ -64,15 +64,38 @@ void Config::Set_pcc_standard_id(std::string &pcc_standard_id){
 
 
 // subcomplex
-void Config::Set_cut_length(double &new_cut_lenth){
+void Config::Set_subcomplex_mode(std::string &subcomplex_mode){
+    subcomplex_config.sctype = subcomplex_mode;
+}
+std::string Config::Get_subcomplex_mode(void) const{
+    return subcomplex_config.sctype;
+}
+void Config::Set_subcomplex_plane(std::vector<double> &new_plane_orientation){
+    subcomplex_config.plane_orientation = new_plane_orientation;
+}
+std::vector<double> Config::Get_subcomplex_plane(void) const{
+    return subcomplex_config.plane_orientation;
+}
+void Config::Set_subcomplex_cut_length(double &new_cut_lenth){
     subcomplex_config.cut_length = new_cut_lenth;
 }
-void Config::Set_grain_neighbour_orders(unsigned int &new_grain_neighbour_orders){
+double Config::Get_subcomplex_cut_length(void) const{
+    return subcomplex_config.cut_length;
+}
+void Config::Set_subcomplex_grain_neighbour_orders(unsigned int &new_grain_neighbour_orders){
     subcomplex_config.grain_neighbour_orders = new_grain_neighbour_orders;
 }
+unsigned int Config::Get_subcomplex_grain_neighbour_orders(void) const{
+    return subcomplex_config.grain_neighbour_orders;
+}
+
 void Config::Set_is_subcomplex_log_file(bool new_is_log_file){
     subcomplex_config.is_subcomplex_log_file = new_is_log_file;
 }
+bool Config::Get_is_subcomplex_log_file(void) const{
+    return subcomplex_config.is_subcomplex_log_file;
+}
+
 // multiphysics
 void Config::Set_Mid_matrix(std::string &new_Mid_matrix){
     multiphysics_config.Mid_matrix = new_Mid_matrix;

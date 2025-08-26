@@ -150,10 +150,18 @@ public:
     void Set_pcc_source_dir(std::string &pcc_source_directory);
     void Set_output_dir(std::string &output_directory);
     void Set_pcc_standard_id(std::string &pcc_standard_id);
+
     /// subcomplex
-    void Set_cut_length(double &new_cut_lenth);
-    void Set_grain_neighbour_orders(unsigned int &new_grain_neighbour_orders);
+    void Set_subcomplex_mode(std::string &subcomplex_mode);
+    std::string Get_subcomplex_mode(void) const;
+    void Set_subcomplex_plane(std::vector<double> &new_plane_orientation);
+    std::vector<double> Get_subcomplex_plane(void) const;
+    void Set_subcomplex_cut_length(double &new_cut_lenth);
+    double Get_subcomplex_cut_length(void) const;
+    void Set_subcomplex_grain_neighbour_orders(unsigned int &new_grain_neighbour_orders);
+    unsigned int Get_subcomplex_grain_neighbour_orders(void) const;
     void Set_is_subcomplex_log_file(bool new_is_log_file);
+    bool Get_is_subcomplex_log_file(void) const;
 
     /// multiphysics
     void Set_Mid_matrix(std::string &Mid_matrix);

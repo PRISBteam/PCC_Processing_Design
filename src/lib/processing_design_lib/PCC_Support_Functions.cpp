@@ -116,6 +116,40 @@ Eigen::SparseMatrix<double> SMatrixReader(std::string SMpath, unsigned int Rows,
     return res;
 }
 
+std::vector<std::vector<int>> IntMatrixReader(std::ifstream &ifstream_to_matrix){
+    int rows, cols;
+    ifstream_to_matrix >> rows >> cols;
+
+    std::vector<std::vector<int>> int_matrix(rows, std::vector<int>(cols));
+    for(int i = 0; i < rows; ++i)
+        for(int j = 0; j < cols; ++j)
+            ifstream_to_matrix >> int_matrix[i][j];
+
+    return int_matrix;
+}
+
+std::vector<std::vector<int>> IntListReader(std::ifstream &ifstream_to_matrix){
+    std::vector<std::vector<int>> int_list; // output
+
+    std::string int_line;
+    while(std::getline(ifstream_to_matrix, int_line)) {
+
+        if (int_line.empty()) // skipping empty lines
+            continue;
+
+        std::vector<int> int_row;
+        std::istringstream iss(int_line);
+        int value;
+        while (iss >> value)
+            int_row.push_back(value);
+
+        int_list.push_back(int_row);
+    }
+
+    return int_list;
+}
+
+
 /// Function for reading triplet list from file
 vector<Eigen::Triplet<double>> TripletsReader(char* SMpath) {
     typedef Eigen::Triplet<double> Tr; // Eigen library class

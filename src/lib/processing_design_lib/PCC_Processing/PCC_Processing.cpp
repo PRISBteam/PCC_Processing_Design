@@ -111,7 +111,6 @@ CellDesign PCC_Processing(Config &configuration) {
     max_ifractions_vectors.at(2) = configuration.Get_processing_if_max_fractions();
     max_ifractions_vectors.at(3) = configuration.Get_processing_ip_max_fractions();
 
-
 // REPAIR    for( int i = 0; i < 4; ++i) {
 //        cout << i << endl;
 //        for (auto mfv : max_sfractions_vectors.at(i))
@@ -120,7 +119,6 @@ CellDesign PCC_Processing(Config &configuration) {
 //    }
 //    exit(11);
 
-//    double mu; double sigma; unsigned int bins_numb;
     double mu_L = 1.0, sigma_L = 0.0; // mean and dispersion for a lengthy defect sequences distribution - used only in the case of the log-normal distribution for 'L' PCC_Processing execution mode ('pp_mode' in the config/processing.ini file).
     unsigned int bins_number_L = 10;
     mu_L = configuration.Get_processing_mu();

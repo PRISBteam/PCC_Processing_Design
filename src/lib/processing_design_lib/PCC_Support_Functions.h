@@ -19,6 +19,12 @@ std::vector<double> VectorDReader(const char* FilePath);
 //Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsigned int Cols);
 Eigen::SparseMatrix<double> SMatrixReader(std::string SMpath, unsigned int Rows, unsigned int Cols);
 
+/// # * # Reading integer matrix from file
+std::vector<std::vector<int>> IntMatrixReader(std::ifstream &ifstream_to_matrix);
+
+/// # * # Reading list of integers (with various lengths of its rows) from file
+std::vector<std::vector<int>> IntListReader(std::ifstream &ifstream_to_matrix);
+
 /// # * # Creation Eigen::Sparse_Matrix from file
 std::vector<std::tuple<double, double, double>> Tuple3Reader(std::string SMpath);
 

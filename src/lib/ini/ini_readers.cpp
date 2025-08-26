@@ -238,6 +238,7 @@ std::vector<int> config_reader_main(Config &configuration) {
  */
 //void config_reader_subcomplex(std::string &sctype, std::vector<double> &plane_orientation, double &cut_length, unsigned int &grain_neighbour_orders, bool &is_log_file) {
 void config_reader_subcomplex(Config &configuration) {
+
     std::string log_file_output;
 
     // ini files reader - external (MIT license) library
@@ -245,29 +246,41 @@ void config_reader_subcomplex(Config &configuration) {
     mINI::INIStructure subcomplex_ini;
     file.read(subcomplex_ini);
 
+    std::string subcomplex_mode;
+    std::vector<double> subcomplex_plane;
+    double cut_length;
+    unsigned int grain_neighbour_orders;
+
 //subcomplex type
     if (subcomplex_ini.has("subcomplex_type")) {
         auto& collection = subcomplex_ini["subcomplex_type"];
         if (collection.has("subPCC_type"))
         {
-            configuration.Get_subcomplex_config().sctype = subcomplex_ini.get("subcomplex_type").get("subPCC_type");
+            subcomplex_mode = subcomplex_ini.get("subcomplex_type").get("subPCC_type");
+            configuration.Set_subcomplex_mode(subcomplex_mode);
         } }
 
     //plane orientation
+    double a_coeff = 0, b_coeff = 0, c_coeff = 0, D_coeff = 0;
     if (subcomplex_ini.has("plane_section")) {
         auto& collection = subcomplex_ini["plane_section"];
         if (collection.has("a_coeff")) {
-            configuration.Get_subcomplex_config().plane_orientation.at(0) = stod(subcomplex_ini.get("plane_section").get("a_coeff"));
+            a_coeff = stod(subcomplex_ini.get("plane_section").get("a_coeff"));
+            subcomplex_plane.push_back(a_coeff);
         }
         if (collection.has("b_coeff")) {
-            configuration.Get_subcomplex_config().plane_orientation.at(1) = stod(subcomplex_ini.get("plane_section").get("b_coeff"));
+            b_coeff = stod(subcomplex_ini.get("plane_section").get("b_coeff"));
+            subcomplex_plane.push_back(b_coeff);
         }
         if (collection.has("c_coeff")) {
-            configuration.Get_subcomplex_config().plane_orientation.at(2) = stod(subcomplex_ini.get("plane_section").get("c_coeff"));
+            c_coeff = stod(subcomplex_ini.get("plane_section").get("c_coeff"));
+            subcomplex_plane.push_back(c_coeff);
         }
         if (collection.has("D_coeff")) {
-            configuration.Get_subcomplex_config().plane_orientation.at(3) = stod(subcomplex_ini.get("plane_section").get("D_coeff"));
+            D_coeff = stod(subcomplex_ini.get("plane_section").get("D_coeff"));
+            subcomplex_plane.push_back(D_coeff);
         }
+        configuration.Set_subcomplex_plane(subcomplex_plane);
     } // end of if (subcomplex_ini.has("plane_section"))
 
     //half-plane cut length
@@ -275,20 +288,18 @@ void config_reader_subcomplex(Config &configuration) {
         auto& collection = subcomplex_ini["half_plane_section"];
         if (collection.has("half_plane_length"))
         {
-            double cut_length = stod(subcomplex_ini.get("half_plane_section").get("half_plane_length"));
-            configuration.Set_cut_length(cut_length);
-        }
-    }
+            cut_length = stod(subcomplex_ini.get("half_plane_section").get("half_plane_length"));
+            configuration.Set_subcomplex_cut_length(cut_length);
+        } }
 
     // k_order_neighbours
     if (subcomplex_ini.has("k_order_neighbours")) {
         auto& collection = subcomplex_ini["k_order_neighbours"];
         if (collection.has("neighbours_order"))
         {
-            unsigned int grain_neighbour_orders = stoi(subcomplex_ini.get("k_order_neighbours").get("neighbours_order"));
-            configuration.Set_grain_neighbour_orders(grain_neighbour_orders);
-        }
-    }
+            grain_neighbour_orders = stoi(subcomplex_ini.get("k_order_neighbours").get("neighbours_order"));
+            configuration.Set_subcomplex_grain_neighbour_orders(grain_neighbour_orders);
+        } }
 
     // module output
         if (subcomplex_ini.has("module_output")) {
@@ -302,42 +313,40 @@ void config_reader_subcomplex(Config &configuration) {
 /// Output to the screen/console
     if (configuration.subcomplex_reader_switch) {
         cout << "The Subcomplex module type and initial parameters:\t\t" << endl << endl;
-        cout << "Subcomplex type:\t"s << configuration.Get_subcomplex_config().sctype << endl;
-        if (configuration.Get_subcomplex_config().sctype == "H"s) {
-            cout << "Half-plane length:\t"s << configuration.Get_subcomplex_config().cut_length << endl << endl;
+        cout << "Subcomplex type:\t"s << configuration.Get_subcomplex_mode()<< endl;
+        if (configuration.Get_subcomplex_mode() == "H"s) {
+            cout << "Half-plane length:\t"s << configuration.Get_subcomplex_cut_length() << endl << endl;
         }
-        if (configuration.Get_subcomplex_config().sctype == "P"s ||
-            configuration.Get_subcomplex_config().sctype == "H"s) {
+        if (configuration.Get_subcomplex_mode() == "P"s ||
+            configuration.Get_subcomplex_mode() == "H"s) {
             cout << "Plane orientation:\ta_coeff*X + b_coeff*Y + c_coeff*Z = D"s << endl << "Plane normal vector\t"s
-                 << "\ta =\t" << configuration.Get_subcomplex_config().plane_orientation.at(0) << "\tb =\t"
-                 << configuration.Get_subcomplex_config().plane_orientation.at(1) << "\tc =\t"
-                 << configuration.Get_subcomplex_config().plane_orientation.at(2) << "\t\tPlane position D =\t"s
-                 << configuration.Get_subcomplex_config().plane_orientation.at(3) << endl;
-        } else if (configuration.Get_subcomplex_config().sctype == "N"s) {
-            cout << "Grain k-neighbours order:\t"s << configuration.Get_subcomplex_config().grain_neighbour_orders
-                 << endl << endl;
+                 << "\ta =\t" << configuration.Get_subcomplex_plane().at(0) << "\tb =\t"
+                 << configuration.Get_subcomplex_plane().at(1) << "\tc =\t"
+                 << configuration.Get_subcomplex_plane().at(2) << "\t\tPlane position D =\t"s
+                 << configuration.Get_subcomplex_plane().at(3) << endl;
+        } else if (configuration.Get_subcomplex_mode() == "N"s) {
+            cout << "Grain k-neighbours order:\t"s << configuration.Get_subcomplex_grain_neighbour_orders() << endl << endl;
         }
         cout << "Subcomplex module cpdlog_subcomplex.log file output:\t"s << log_file_output << endl;
 
-        if (configuration.Get_subcomplex_config().is_subcomplex_log_file) {
+        if (configuration.Get_is_subcomplex_log_file()) {
             subcomplex_logfile_stream << "The Subcomplex module type and initial parameters:\t\t" << endl << endl;
-            subcomplex_logfile_stream << "Subcomplex type:\t"s << configuration.Get_subcomplex_config().sctype << endl;
-            if (configuration.Get_subcomplex_config().sctype == "H"s) {
-                subcomplex_logfile_stream << "Half-plane length:\t"s << configuration.Get_subcomplex_config().cut_length
-                                          << endl << endl;
+            subcomplex_logfile_stream << "Subcomplex type:\t"s << configuration.Get_subcomplex_mode() << endl;
+            if (configuration.Get_subcomplex_mode() == "H"s) {
+                subcomplex_logfile_stream << "Half-plane length:\t"s << configuration.Get_subcomplex_cut_length() << endl << endl;
             }
-            if (configuration.Get_subcomplex_config().sctype == "P"s ||
-                configuration.Get_subcomplex_config().sctype == "H"s) {
+            if (configuration.Get_subcomplex_mode() == "P"s ||
+                configuration.Get_subcomplex_mode() == "H"s) {
                 subcomplex_logfile_stream << "Plane orientation:\ta_coeff*X + b_coeff*Y + c_coeff*Z = D"s << endl
                                           << "Plane normal vector:\t"s << " a: "
-                                          << configuration.Get_subcomplex_config().plane_orientation.at(0) << " b: "
-                                          << configuration.Get_subcomplex_config().plane_orientation.at(1) << " c: "
-                                          << configuration.Get_subcomplex_config().plane_orientation.at(2)
+                                          << configuration.Get_subcomplex_plane().at(0) << " b: "
+                                          << configuration.Get_subcomplex_plane().at(1) << " c: "
+                                          << configuration.Get_subcomplex_plane().at(2)
                                           << "\tPlane position\t" << " D: "
-                                          << configuration.Get_subcomplex_config().plane_orientation.at(3) << endl;
-            } else if (configuration.Get_subcomplex_config().sctype == "N"s) {
+                                          << configuration.Get_subcomplex_plane().at(3) << endl;
+            } else if (configuration.Get_subcomplex_mode() == "N"s) {
                 subcomplex_logfile_stream << "Grain k-neighbours order:\t"s
-                                          << configuration.Get_subcomplex_config().grain_neighbour_orders << endl
+                                          << configuration.Get_subcomplex_grain_neighbour_orders() << endl
                                           << endl;
             }
         }

@@ -242,9 +242,8 @@ int main() {
         multiphysics_logfile_stream.open(output_dir + "cpd_multiphysics.log"s, ios::trunc);
         multiphysics_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
     }
-
-    processing_logfile_stream.open(output_dir + "cpd_processing.log"s, ios::trunc);
     if (ConfigVector.at(3) == 1) {
+        processing_logfile_stream.open(output_dir + "cpd_processing.log"s, ios::trunc);
         processing_logfile_stream << " Execution year - " << 1900 + datetime.tm_year << "; Month - " << datetime.tm_mon << "; Day - " << datetime.tm_mday << "; Time - " << datetime.tm_hour << ":" << datetime.tm_min << "." << endl << endl;
     }
     if (ConfigVector.at(7) == 1) {
@@ -318,17 +317,20 @@ int main() {
             cout << " START of the PCC Subcomplex module " << endl;
             main_logfile_stream << " START of the PCC Subcomplex module " << endl;
 
-///            pcc_subcomplexes = PCC_Subcomplex(configuration);
+            pcc_subcomplexes = PCC_Subcomplex(configuration);
 
-            cout << " pcc_subcomplexes size =  " << pcc_subcomplexes.size() << endl;
+            cout << " pcc_subcomplexes vector size =  " << pcc_subcomplexes.size() << endl << endl;
+            main_logfile_stream << " pcc_subcomplexes vector size =  " << pcc_subcomplexes.size() << endl << endl;
 
             // ================ Elapsing time for the Subcomplex module ================
             unsigned int Subcomplex_time = clock();
             Subcomplex_execution_time = (double) Subcomplex_time - Main_execution_time;
-            cout << "Section time is equal to  " << Subcomplex_execution_time / pow(10.0, 6.0) << "  seconds" << endl;
+            cout << "Subcomplex time is equal to  " << Subcomplex_execution_time / pow(10.0, 6.0) << "  seconds" << endl;
             cout << "-------------------------------------------------------" << endl;
-            main_logfile_stream << "Section time is equal to  " << Subcomplex_execution_time / pow(10.0, 6.0) << "  seconds" << endl;
+            main_logfile_stream << endl << "Subcomplex time is equal to  " << Subcomplex_execution_time / pow(10.0, 6.0) << "  seconds" << endl;
             main_logfile_stream << "-------------------------------------------------------" << endl;
+            subcomplex_logfile_stream  << endl << "Subcomplex time is equal to  " << Subcomplex_execution_time / pow(10.0, 6.0) << "  seconds" << endl;
+
         } // end if(SectionON)
 
         /// ====================== II. PCC Multiphysics module ======================
@@ -369,6 +371,8 @@ int main() {
             Processing_execution_time = (double) Processing_time - Subcomplex_execution_time - Multiphysics_execution_time - Main_execution_time;
             cout << "Processing time is equal to  " << Processing_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl; //cout << "-------------------------------------------------------------------------" << endl;
             main_logfile_stream << "Processing time is equal to  " << Processing_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl; //Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+            processing_logfile_stream << "Processing time is equal to  " << Processing_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl; //Out_logfile_stream << "-------------------------------------------------------------------------" << endl;
+
         } // end if(ProcessingON)
 
         /// ====================== IV. PCC Kinetics module ======================
