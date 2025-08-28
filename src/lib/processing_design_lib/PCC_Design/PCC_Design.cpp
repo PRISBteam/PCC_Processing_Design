@@ -64,7 +64,6 @@ std::vector<std::vector<int>> PCC_Design(Config &design_configuration, CellDesig
         int population_size = design_configuration.Get_design_population_size();
         double mutation_rate = design_configuration.Get_design_mutation_rate();
         double crossover_rate = design_configuration.Get_design_crossover_rate();
-        const std::vector<int> possible_genes = {0, 1, 2, 3}; // Gene pool, e.g., {0, 1}
         int maximum_generation_number = design_configuration.Get_design_max_generation_number();
 
         // --- Fitness Function Selection ---
@@ -83,7 +82,20 @@ std::vector<std::vector<int>> PCC_Design(Config &design_configuration, CellDesig
 
         // --- GA Initialization ---
         GeneticAlgorithm ga(population_size, mutation_rate, crossover_rate, fitnessFunction);
-        ga.initializePopulation(chromosome_length, possible_genes);
+
+        std::vector<unsigned int> uns_initial_p_design = processing_cell_design.Get_p_design();
+        std::vector<int> initial_p_design;
+        for(auto ipd : uns_initial_p_design)
+            initial_p_design.push_back(ipd);
+
+        std::vector<int> possible_genes; // Gene pool, e.g., {0, 1, ...}
+        for (int i = 0; i < design_configuration.Get_design_genes_diversity(); ++i)
+            possible_genes.push_back(i);
+
+        if(std::count(initial_p_design.begin(),initial_p_design.end(),0) < initial_p_design.size())
+            ga.initializePopulation(chromosome_length, possible_genes, initial_p_design);
+        else
+            ga.initializePopulation(chromosome_length, possible_genes);
 
         std::cout << "\nStarting evolution..." << std::endl;
         design_logfile_stream << "\nStarting evolution..." << std::endl;
@@ -91,20 +103,31 @@ std::vector<std::vector<int>> PCC_Design(Config &design_configuration, CellDesig
         design_logfile_stream << "Optimization Target: Maximizing the sum of genes in the state vector." << std::endl;
 
         // --- Evolution Loop ---
+        std::vector<unsigned int> polytope_design;
         for (int i = 0; i < maximum_generation_number; ++i) {
             ga.evolve(design_configuration, processing_cell_design);
 
             // Periodically print the progress of the optimization.
   ///          if ((i + 1) % 2 == 0 || i == maximum_generation_number - 1) {
-                Individual best = ga.getBestIndividual();
+            Individual best = ga.getBestIndividual(design_configuration);
+///            std::cout << best.fitness << std::endl;
+///            std::exit(54);
 
-                design_logfile_stream << "Generation: " << ga.getGenerationCount()
-                          << " | Best Fitness: " << best.fitness << endl;
-//                          << " | Preview: ";
+            for(auto pn : best.chromosome)
+                polytope_design.push_back(pn);
+
+            processing_cell_design.Set_p_design(polytope_design);
+
+            best.j_fractions = ga.Get_j_fractions(best);
+
+            double conf_entropy = 0;
+            conf_entropy = Configuration_Entropy(best.j_fractions);
+
+            design_logfile_stream << "Generation: " << ga.getGenerationCount()
+                          << " | Best Fitness: " << best.fitness << " | Entropy: " << conf_entropy << " | TJ fractions: " << best.j_fractions.at(0) << "\t" << best.j_fractions.at(1) << "\t" << best.j_fractions.at(2) << "\t" << best.j_fractions.at(3) << "\t" << endl;
 
                 std::cout << "Generation: " << ga.getGenerationCount()
-                          << " | Best Fitness: " << best.fitness
-                          << " | Preview: ";
+                          << " | Best Fitness: " << best.fitness << " | Entropy: " << conf_entropy << " | TJ fractions: " << best.j_fractions.at(0) << "\t" << best.j_fractions.at(1) << "\t" << best.j_fractions.at(2) << "\t" << best.j_fractions.at(3) << "\t" << endl;
                 for (int k = 0; k < 10 && k < best.chromosome.size(); ++k) {
                     std::cout << best.chromosome[k];
                 }
@@ -114,7 +137,7 @@ std::vector<std::vector<int>> PCC_Design(Config &design_configuration, CellDesig
 
         // --- Final Results ---
         std::cout << "\nEvolution finished." << std::endl;
-        Individual finalBest = ga.getBestIndividual();
+        Individual finalBest = ga.getBestIndividual(design_configuration);
         std::cout << "Final Best Fitness: " << finalBest.fitness << std::endl;
         std::cout << "Final Optimized State Vector (" << finalBest.chromosome.size() << " genes):" << std::endl;
 

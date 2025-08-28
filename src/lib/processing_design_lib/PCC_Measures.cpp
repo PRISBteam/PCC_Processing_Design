@@ -157,7 +157,7 @@ double Node_edge_index(std::vector<unsigned int> &special_face_sequence, Eigen::
 
 /// * Function calculates the vector<int> "EdgeTypes" of types Edges in the PCC using its FES incidence matrix and special faces sequence (special_faces_sequence) * ///
 std::vector<double> j_fractions_vector(std::vector<double> const &TJsTypes){ // based on Edges vector
-std::vector<double> j_fractions_vector(4); // Function output: TJs fractions
+    std::vector<double> j_fractions_vector(4); // Function output: TJs fractions
 
 unsigned int J0 = 0, J1 = 0, J2 = 0, J3 = 0;
 double j0 = 0, j1 = 0, j2 = 0, j3 = 0, Jall = 0;

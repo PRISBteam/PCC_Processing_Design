@@ -26,6 +26,8 @@ int randomInt(int min, int max);
 struct Individual {
     std::vector<int> chromosome;
     double fitness;
+    std::vector<double> j_fractions;
+    std::vector<double> d_fractions;
 
     // 添加一个默认构造函数以简化初始化
     Individual() : fitness(0.0) {}
@@ -59,10 +61,18 @@ public:
      */
     void initializePopulation(int chromosomeLength, const std::vector<int>& possibleGenes);
 
-    /**
-     * @brief Runs a single generation of the evolutionary process.
-     * This involves evaluation, selection, crossover, and mutation.
+    /*!
+     * @brief Initializes the population by the given initial_p_design.
+     * @param chromosomeLength
+     * @param initial_p_design
+     * @param possibleGenes A vector of possible values for each gene (e.g., {0, 1}).
      */
+    void initializePopulation(int chromosomeLength, const std::vector<int>& possibleGenes, std::vector<int> &initial_p_design);
+
+        /**
+         * @brief Runs a single generation of the evolutionary process.
+         * This involves evaluation, selection, crossover, and mutation.
+         */
     void evolve(Config &design_configuration, CellDesign &processing_cell_design);
 
     // --- Getter Methods ---
@@ -71,7 +81,14 @@ public:
      * @brief Retrieves the best individual from the current population.
      * @return The individual with the highest fitness score.
      */
-    Individual getBestIndividual() const;
+    Individual getBestIndividual(Config &design_configuration) const;
+
+
+    /*!
+     * @brief Gives TJ fractions
+     * @return TJ fractions of the given structure of special 2-cells
+     */
+    std::vector<double> Get_j_fractions(Individual &best_individual) const;
 
     /**
      * @brief Gets the current generation number.

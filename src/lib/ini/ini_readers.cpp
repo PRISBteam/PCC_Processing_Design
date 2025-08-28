@@ -1398,6 +1398,8 @@ void config_reader_design(Config &configuration) {
 
     int cell_type;
     //'0' - nodes, '1' - edges, '2' - faces, '3' - grains
+    std:: string design_goal;
+    // 'min' for minimisation, and 'max' for xaimisation of the goal function output
     std:: string PCCDesign_type; // Design type ('G' for 'genetic')
 
     unsigned int population_size; // Number of 'creatures' in the initial and maybe future populations
@@ -1423,6 +1425,11 @@ void config_reader_design(Config &configuration) {
             cell_type = stoi(design_ini.get("genetic_algorithm").get("cell_type"));
             configuration.Set_design_cell_type(cell_type);
         }
+        if (collection.has("design_goal")) {
+            design_goal = design_ini.get("genetic_algorithm").get("design_goal");
+            configuration.Set_design_goal(design_goal);
+        }
+
         if (collection.has("genes_diversity")) {
             genes_diversity = stoi(design_ini.get("genetic_algorithm").get("genes_diversity"));
             configuration.Set_design_genes_diversity(genes_diversity);

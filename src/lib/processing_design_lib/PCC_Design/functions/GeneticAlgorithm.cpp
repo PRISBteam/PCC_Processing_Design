@@ -13,8 +13,14 @@
 #include "GeneticAlgorithm.h"
 
 #include "../../lib/processing_design_lib/PCC_Kinetics/PCC_Kinetics.h"
+#include "../../PCC_Processing/functions/processing_indexing.h"
 #include "../../PCC_Objects.h"
 #include "../../PCC_Support_Functions.h"
+#include "../../PCC_Measures.h"
+
+extern std::vector<unsigned int> CellNumbs;
+extern int PCC_dimension;
+extern std::vector<std::string> paths_to_PCC_matrices;
 
 /*!
  * @brief A simple fitness function that calculates the sum of genes.
@@ -74,11 +80,16 @@ double IrradiationDamageFitness(const std::vector<int>& chromosome, Config &desi
     processing_cell_design.Set_p_design(new_p_special_vector);
     p_cells_history = PCC_Kinetics(design_configuration, processing_cell_design);
 
-    std::cout << "IrradiationDamageFitness :: fraction\t\t" << p_cells_history.back().at(2) << std::endl;
-    return p_cells_history.back().at(2); // area fraction of fractured GBs
+    std::vector<double> damaged_cell_time;
+    for(auto pch : p_cells_history)
+        damaged_cell_time.push_back(pch.at(2));
+
+    auto max_time = std::max_element(damaged_cell_time.begin(),damaged_cell_time.end());
+
+    std::cout << "IrradiationDamageFitness :: damage_time\t\t" << *max_time << std::endl;
+
+    return *max_time; // area fraction of fractured GBs
 }
-
-
 
 /// --- Helper for random number generation ---
 // A simple utility to get a random double between 0.0 and 1.0
@@ -130,6 +141,22 @@ void GeneticAlgorithm::initializePopulation(int chromosomeLength, const std::vec
     // Don't evaluate fitness here, let the evolve loop do it for the first time.
 }
 
+void GeneticAlgorithm::initializePopulation(int chromosomeLength, const std::vector<int>& possibleGenes, std::vector<int> &initial_p_design) {
+    if (possibleGenes.empty()) {
+        throw std::invalid_argument("Possible genes cannot be empty.");
+    }
+    this->genePool = possibleGenes;
+    population.clear();
+    population.resize(populationSize);
+
+    for (int i = 0; i < populationSize; ++i) {
+        population[i].chromosome.resize(chromosomeLength);
+        population[i].chromosome = initial_p_design;
+    }
+    // Don't evaluate fitness here, let the evolve loop do it for the first time.
+}
+
+
 void GeneticAlgorithm::evolve(Config &design_configuration, CellDesign &processing_cell_design) {
     // 1. Evaluate the fitness of the current population
     evaluatePopulation(design_configuration, processing_cell_design);
@@ -139,7 +166,7 @@ void GeneticAlgorithm::evolve(Config &design_configuration, CellDesign &processi
     nextGeneration.reserve(populationSize);
 
     // Elitism: Keep the best individual from the current generation
-    Individual best = getBestIndividual();
+    Individual best = getBestIndividual(design_configuration);
     nextGeneration.push_back(best);
 
     // 3. Generate the rest of the new population through selection, crossover, and mutation
@@ -169,17 +196,65 @@ void GeneticAlgorithm::evolve(Config &design_configuration, CellDesign &processi
     generationCount++;
 }
 
-Individual GeneticAlgorithm::getBestIndividual() const {
+Individual GeneticAlgorithm::getBestIndividual(Config &design_configuration) const {
     if (population.empty()) {
         return Individual(); // Return an empty individual
     }
     // Find the individual with the maximum fitness
-    auto best = std::max_element(population.begin(), population.end(),
-                                 [](const Individual& a, const Individual& b) {
-                                     return a.fitness < b.fitness;
-                                 });
+    //min
+   auto best = std::min_element(population.begin(), population.end(),
+                                     [](const Individual& a, const Individual& b) {
+                                        return a.fitness < b.fitness;});
+    // max
+/// TODO: rewrite without repetition
+    if(design_configuration.Get_design_goal() == "max")
+        best = std::max_element(population.begin(), population.end(),
+                                     [](const Individual& a, const Individual& b) {
+
+                                         return a.fitness < b.fitness; });
     return *best;
 }
+
+std::vector<double> GeneticAlgorithm::Get_j_fractions(Individual &best_individual) const{
+    std::vector<double> j_fractions;
+
+    if (best_individual.j_fractions.size() > 0) {
+        return best_individual.j_fractions;
+    }
+    else {
+    std::vector<unsigned int> polytope_state_vector, face_state_vector, face_state_sequence; // contains only {0,1,2..} ID values
+    /// Indexing of GBs by Grain types
+    for(auto psv : best_individual.chromosome) // unsigned int TO int
+        polytope_state_vector.push_back(psv);
+
+        face_state_vector = TopDown_cell_indexing(2, polytope_state_vector);
+    // sequence
+    for (auto  itr = face_state_vector.begin(); itr != face_state_vector.end(); ++itr)
+        if(*itr > 0)
+            face_state_sequence.push_back(std::distance(face_state_vector.begin(),itr));
+
+        // SpMat class defined in main.cpp from the Eigen external library
+        SpMat FES(CellNumbs.at(1 + (PCC_dimension - 3)), CellNumbs.at(
+                2 + (PCC_dimension - 3))); // adapted for grain boundaries - either faces in 3-PCC or edges in 2-PCC
+        FES = SMatrixReader(paths_to_PCC_matrices.at(5 + (PCC_dimension - 3)), (CellNumbs.at(1 + (PCC_dimension - 3))),
+                            (CellNumbs.at(2 + (PCC_dimension - 3)))); //all Edges-Faces
+
+    std::vector<double> TJsTypes(CellNumbs.at(1), 0); // CellNumbs.at(1) is the number of Edges
+    for (int k = 0; k < CellNumbs.at(1); ++k) {
+        for(auto sfn : face_state_sequence) {
+            if (FES.coeff(k, sfn) != 0) {
+                    TJsTypes.at(k) += 1;
+                }
+        }
+    }
+
+//REPAIR    for(auto tjt : TJsTypes) std::cout << tjt << "\t";  std::cout << std::endl;  std::exit(65);
+
+    j_fractions = j_fractions_vector(TJsTypes); // based on Edges vector
+
+        return j_fractions;
+    }
+} // end of Get_j_fractions()
 
 int GeneticAlgorithm::getGenerationCount() const {
     return generationCount;

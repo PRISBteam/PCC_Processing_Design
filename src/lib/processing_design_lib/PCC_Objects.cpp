@@ -442,6 +442,13 @@ void Config::Set_design_mode(std::string &PCCDesign_type){
 std::string Config::Get_design_mode(void) const{
     return design_config.design_mode;
 }
+void Config::Set_design_goal(std::string &min_max_goal){
+    design_config.design_goal = min_max_goal;
+}
+std::string Config::Get_design_goal(void) const{
+    return design_config.design_goal;
+}
+
 void Config::Set_design_genes_diversity(int &genes_diversity){
     design_config.design_genes_diversity = genes_diversity;
 }

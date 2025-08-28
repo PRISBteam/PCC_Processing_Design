@@ -117,6 +117,7 @@ private:
         std::string goal_function_id;
         int design_cell_type;
         std::string design_mode;
+        std::string design_goal;
         unsigned int population_size;
         double mutation_rate, crossover_rate, survival_rate;
         int max_generation_number;
@@ -307,6 +308,8 @@ public:
     void Set_design_cell_type(int &new_design_cell_type);
     int Get_design_cell_type(void) const;
     void Set_design_mode(std::string &PCCDesign_type);
+    void Set_design_goal(std::string &min_max_goal);
+    std::string Get_design_goal(void) const;
     std::string Get_design_mode(void) const;
     void Set_design_genes_diversity(int &genes_diversity);
     int Get_design_genes_diversity(void) const;

@@ -1,7 +1,7 @@
 
 std::vector<int> Edge_types_byFaces(std::vector<unsigned int> const &CellNumbs, std::vector<unsigned int> &special_face_sequence, std::vector<double> &j_fractions, std::vector<double> &d_fractions);
 
-std::vector<double> j_fractions_vector(std::vector<int> const &TJsTypes); // based on Edges vector
+std::vector<double> j_fractions_vector(std::vector<double> const &TJsTypes); // based on Edges vector
 
 std::vector<double> face_edge_local_indices(std::vector<unsigned int> &special_face_sequence, Eigen::SparseMatrix<double> const& FES);
 
