@@ -257,7 +257,7 @@ std::vector<std::vector<double>> interface_irradiation_damage(Config &config, Ma
         cout << "\t" << "Full irradiation process Time:\t" << irradiation_time << "\t" << "with the current Time Step:\t" << time_step << endl;
         cout << "\t" << "Zero elements in the 'irradiation damage time vector':\t" << std::count(irradiation_time_vector.begin(), irradiation_time_vector.end(), 0) << "\t out of\t" << CellNumbs.at(face_cell_type) << endl;
 
-    } while( std::count(irradiation_time_vector.begin(), irradiation_time_vector.end(), 0) > 0.7*irradiation_time_vector.size() ); // END do while();
+    } while( std::count(irradiation_time_vector.begin(), irradiation_time_vector.end(), 0) > 0.8*irradiation_time_vector.size() ); // END do while();
 // } while( irradiation_time < config.Get_kinetics_observation_time()); // END do while();
 
 /// result
