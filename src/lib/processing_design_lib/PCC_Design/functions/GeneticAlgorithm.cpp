@@ -70,15 +70,17 @@ double shannonEntropyFitness(const std::vector<int>& chromosome) {
  * @param processing_cell_design
  * @return
  */
-double IrradiationDamageFitness(const std::vector<int>& chromosome, Config &design_configuration, CellDesign &processing_cell_design){
+double IrradiationDamageFitness(const std::vector<int>& chromosome, Config &design_configuration, CellDesign &processing_cell_design){ // Ic
     std::vector<std::vector<double>> p_cells_history;
 
     std::vector<unsigned int> new_p_special_vector;
     for (auto ps : chromosome)
         new_p_special_vector.push_back(ps);
 
+    std::vector<Subcomplex> empty_sub_set;
+    std::vector<CellEnergies> empty_cell_energies;
     processing_cell_design.Set_p_design(new_p_special_vector);
-    p_cells_history = PCC_Kinetics(design_configuration, processing_cell_design);
+    p_cells_history = PCC_Kinetics(design_configuration, processing_cell_design, empty_sub_set, empty_cell_energies);
 
     std::vector<double> damaged_cell_time;
     for(auto pch : p_cells_history)
@@ -124,7 +126,7 @@ GeneticAlgorithm::GeneticAlgorithm(int popSize, double mutRate, double crossRate
 // PUBLIC METHODS
 // ==============================================================================
 
-void GeneticAlgorithm::initializePopulation(int chromosomeLength, const std::vector<int>& possibleGenes) {
+void GeneticAlgorithm::initializePopulation(int chromosomeLength, const std::set<int>& possibleGenes) {
     if (possibleGenes.empty()) {
         throw std::invalid_argument("Possible genes cannot be empty.");
     }
@@ -132,16 +134,20 @@ void GeneticAlgorithm::initializePopulation(int chromosomeLength, const std::vec
     population.clear();
     population.resize(populationSize);
 
+    std::vector<int> genePoolv;
+    for(int pg : possibleGenes)
+        genePoolv.push_back(pg);
+
     for (int i = 0; i < populationSize; ++i) {
         population[i].chromosome.resize(chromosomeLength);
         for (int j = 0; j < chromosomeLength; ++j) {
-            population[i].chromosome[j] = genePool[randomInt(0, genePool.size() - 1)];
+            population[i].chromosome[j] = genePoolv.at(randomInt(0, genePool.size() - 1));
         }
     }
     // Don't evaluate fitness here, let the evolve loop do it for the first time.
 }
 
-void GeneticAlgorithm::initializePopulation(int chromosomeLength, const std::vector<int>& possibleGenes, std::vector<int> &initial_p_design) {
+void GeneticAlgorithm::initializePopulation(int chromosomeLength, const std::set<int>& possibleGenes, std::vector<int> &initial_p_design) {
     if (possibleGenes.empty()) {
         throw std::invalid_argument("Possible genes cannot be empty.");
     }
@@ -215,7 +221,43 @@ Individual GeneticAlgorithm::getBestIndividual(Config &design_configuration) con
     return *best;
 }
 
-std::vector<double> GeneticAlgorithm::Get_j_fractions(Individual &best_individual) const{
+/*!
+ *
+ * @param best_individual
+ * @return
+ */
+std::vector<double> GeneticAlgorithm::Get_s_fractions(Individual &best_individual) const{
+
+    if (best_individual.s_fractions.size() > 0) {
+        return best_individual.s_fractions;
+    }
+    else {
+        std::vector<unsigned int> polytope_state_vector;
+        /// Indexing of GBs by Grain types
+        for(auto psv : best_individual.chromosome) // unsigned int TO int
+            polytope_state_vector.push_back(psv);
+
+        //types counter
+        std::set<int> cell_types;
+        for (auto pn : polytope_state_vector)
+            cell_types.insert(pn);
+
+        std::vector<double> s_fractions(cell_types.size(),0);
+        for(int pt = 0; pt < cell_types.size(); ++pt)
+            s_fractions.at(pt) = std::count(polytope_state_vector.begin(),polytope_state_vector.end(),pt)/(double) polytope_state_vector.size();
+
+        best_individual.s_fractions = s_fractions;
+        return best_individual.s_fractions;
+    } // end else{}
+}
+
+/*!
+ *
+ * @param best_individual
+ * @return
+ */
+
+std::vector<double> GeneticAlgorithm::Get_j_fractions(Individual &best_individual) const {
     std::vector<double> j_fractions;
 
     if (best_individual.j_fractions.size() > 0) {
@@ -315,9 +357,13 @@ void GeneticAlgorithm::mutate(std::vector<int>& chromosome) {
     // TODO: This is where you implement the mutation logic.
     // For each gene in the chromosome, check if it should be mutated based on mutationRate.
     // If it should, replace it with a random gene from the genePool.
+    std::vector<int> genePoolv;
+    for(int pg : genePool)
+        genePoolv.push_back(pg);
+
     for (size_t i = 0; i < chromosome.size(); ++i) {
         if (randomDouble() < mutationRate) {
-            chromosome[i] = genePool[randomInt(0, genePool.size() - 1)];
+            chromosome[i] = genePoolv.at(randomInt(0, genePool.size() - 1));
         }
     }
 } 

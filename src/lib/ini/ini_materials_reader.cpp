@@ -27,23 +27,19 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
 /// [structural]
 // I. material type
     if (materials_ini.has("structural")) {
-        auto& collection = materials_ini["structural"];
+        auto &collection = materials_ini["structural"];
         if (collection.has("material_type")) {
             material_type = materials_ini.get("structural").get("material_type");
         }
         if (collection.has("Burgers_vector")) {
             Burgers_vector = stod(materials_ini.get("structural").get("Burgers_vector"));
         }
-    }
-
-    // Grain Boundary width
-    if (materials_ini.has("structural")) {
-        auto& collection = materials_ini["structural"];
+        // Grain Boundary width
         if (collection.has("gb_width")) {
             gb_width = stod(materials_ini.get("structural").get("gb_width"));
-            gb_width *= std::pow(10,(-9));
-        } }
-
+            gb_width *= std::pow(10, (-9));
+        }
+    }
     /// [corrosion]
     if (materials_ini.has("corrosion_current")) {
         auto& collection = materials_ini["corrosion_current"];
@@ -64,19 +60,16 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
         auto& collection = materials_ini["thermodynamical"];
         if (collection.has("mass_density")) {
             mass_density = stod(materials_ini.get("thermodynamical").get("mass_density"));
-        } }
+        }
 // III. melting_point
-    if (materials_ini.has("thermodynamical")) {
-        auto& collection = materials_ini["thermodynamical"];
         if (collection.has("melting_point")) {
             melting_point = stod(materials_ini.get("thermodynamical").get("melting_point"));
-        } }
+        }
 // Grain boundary energy
-    if (materials_ini.has("thermodynamical")) {
-        auto& collection = materials_ini["thermodynamical"];
         if (collection.has("cohesion_energy")) {
             cohesion_energy = stod(materials_ini.get("thermodynamical").get("cohesion_energy"));
-        } }
+        }
+    }
 
 /// [mechanical]
 // IV. Young modulus
@@ -85,33 +78,26 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
         if (collection.has("Young_modulus")) {
             Young_modulus = stod(materials_ini.get("mechanical").get("Young_modulus"));
             Young_modulus = Young_modulus*std::pow(10,9);
-        } }
+        }
 // V. Poisson ratio
-    if (materials_ini.has("mechanical")) {
-        auto& collection = materials_ini["mechanical"];
         if (collection.has("Poisson_ratio")) {
             Poisson_ratio = stod(materials_ini.get("mechanical").get("Poisson_ratio"));
-        } }
+        }
 // VI. yield strength
-    if (materials_ini.has("mechanical")) {
-        auto& collection = materials_ini["mechanical"];
         if (collection.has("yield_strength")) {
             yield_strength = stod(materials_ini.get("mechanical").get("yield_strength"));
             yield_strength = yield_strength*std::pow(10,6);
-        } }
+        }
 // VII. strength
-    if (materials_ini.has("mechanical")) {
-        auto& collection = materials_ini["mechanical"];
         if (collection.has("strength")) {
             strength = stod(materials_ini.get("mechanical").get("strength"));
             strength = strength*std::pow(10,6);
-        } }
+        }
 // VIII. fracture_toughness
-    if (materials_ini.has("mechanical")) {
-        auto& collection = materials_ini["mechanical"];
         if (collection.has("fracture_toughness")) {
             fracture_toughness = stod(materials_ini.get("mechanical").get("fracture_toughness"));
-        } }
+        }
+    }
 
 /// [inclusions]
 // IX. gb-inclusion1 adhesion energy
@@ -119,7 +105,8 @@ void material_database_reader(std::string &Mid, std::string &material_type, doub
         auto& collection = materials_ini["inclusions"];
         if (collection.has("gb_incl1_adhesion_energy")) {
             gb_inclusion1_adh_energy = stod(materials_ini.get("inclusions").get("gb_incl1_adhesion_energy"));
-        } }
+        }
+    }
 
 /// Console Output
     cout << endl << ".............................*  NEW MATERIAL  *.................................. " << endl << endl;

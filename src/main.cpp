@@ -346,7 +346,7 @@ int main() {
             /// Defects
             std::vector<Macrocrack> crack_growth_series; // series of objects of the class Macrocrack with different lengths simulating a crack growth
 
-///            new_cells_energies = PCC_Multiphysics(configuration, pcc_subcomplexes, crack_growth_series);
+            new_cells_energies = PCC_Multiphysics(configuration, pcc_subcomplexes, crack_growth_series);
 
             // ================ Elapsing time for the Processing module ================
             unsigned int Multiphysics_time = clock();
@@ -364,7 +364,7 @@ int main() {
             cout << "START of the PCC Processing module " << endl;
             main_logfile_stream << "START of the PCC Processing module " << endl;
 
-            new_cells_design = PCC_Processing(configuration);
+            new_cells_design = PCC_Processing(configuration, pcc_subcomplexes, new_cells_energies);
 
         // ================ Elapsing time for the Processing module ================
             unsigned int Processing_time = clock();
@@ -386,24 +386,22 @@ int main() {
             main_logfile_stream << "START of the PCC Kinetics module " << endl;
 
             // TODO: TEMPORARY MODULE OUTPUT
-//            corrosion_damaged_output.open(output_dir + "surface_corrosion_damaged_output.txt"s, ios::trunc);
-//            corrosion_affected_output.open(output_dir + "surface_corrosion_affected_output.txt"s, ios::trunc);
+            corrosion_damaged_output.open(output_dir + "macrocrack_corrosion_damaged_output.txt"s, ios::trunc);
+            corrosion_affected_output.open(output_dir + "macrocrack_corrosion_affected_output.txt"s, ios::trunc);
 
-//            face_barycentre_coord_outstream.open(output_dir + "face_seeds.txt"s, ios::trunc);
-//            edge_barycentre_coord_outstream.open(output_dir + "edge_seeds.txt"s, ios::trunc);
+            face_barycentre_coord_outstream.open(output_dir + "face_seeds.txt"s, ios::trunc);
+            edge_barycentre_coord_outstream.open(output_dir + "edge_seeds.txt"s, ios::trunc);
 
-//            corrosion_damaged_fractions_output.open(output_dir + "area_corrosive_damaged_fraction.txt"s, ios::trunc);
-//            corrosion_affected_fractions_output.open(output_dir + "area_corrosive_affected_fraction.txt"s, ios::trunc);
+            corrosion_damaged_fractions_output.open(output_dir + "area_corrosive_damaged_fraction.txt"s, ios::trunc);
+            corrosion_affected_fractions_output.open(output_dir + "area_corrosive_affected_fraction.txt"s, ios::trunc);
 
-            irradiation_damaged_output.open(output_dir + "irradiation_damaged_output.txt"s, ios::trunc);
-            irradiation_damaged_fractions_output.open(output_dir + "irradiation_damaged_area_fraction.txt"s, ios::trunc);
+//            irradiation_damaged_output.open(output_dir + "irradiation_damaged_output.txt"s, ios::trunc);
+//            irradiation_damaged_fractions_output.open(output_dir + "irradiation_damaged_area_fraction.txt"s, ios::trunc);
 
-            p_cells_history = PCC_Kinetics(configuration, new_cells_design);
+            p_cells_history = PCC_Kinetics(configuration, new_cells_design, pcc_subcomplexes, new_cells_energies);
 
-            irradiation_damaged_output.close();
-            irradiation_damaged_fractions_output.close();
-
-//            corrosion_damaged_output.close();  corrosion_affected_output.close(); edge_barycentre_coord_outstream.close();  face_barycentre_coord_outstream.close(); corrosion_damaged_output.close();  corrosion_affected_fractions_output.close();
+//            irradiation_damaged_output.close(); irradiation_damaged_fractions_output.close();
+            corrosion_damaged_output.close();  corrosion_affected_output.close(); edge_barycentre_coord_outstream.close();  face_barycentre_coord_outstream.close(); corrosion_damaged_output.close();  corrosion_affected_fractions_output.close();
 
             // ================ Elapsing time for the Kinetics module ================
             unsigned int Kinetics_time = clock();

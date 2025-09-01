@@ -72,7 +72,16 @@ private:
         std::string Mid_inclusion;
         std::tuple<double, double, double> sample_dimensions;
         double multiphysics_time_scale;
+        double stress_mode;
+        double inclusion_stress_intensity;
+        double crack_stress_intensity;
+        int cut_direction_id;
+        double min_crack_lenghts, max_crack_lenghts;
+        int number_of_cracks;
+        int number_of_crack_sizes;
         Eigen::MatrixXd external_stress_tensor;
+        double equivalent_stress;
+        double pressure;
         double ambient_temperature;
         std::vector<double> macrocrack_ini;
         bool is_multiphysics_log_file;
@@ -99,6 +108,7 @@ private:
 
         // corrosion
         double kinetics_corrosion_rate_scale;
+        double corrosion_activation_volume;
 
         //irradiation
         std::tuple<double,double,double> beam_direction;
@@ -165,16 +175,37 @@ public:
     bool Get_is_subcomplex_log_file(void) const;
 
     /// multiphysics
-    void Set_Mid_matrix(std::string &Mid_matrix);
-    void Set_Mid_inclusion(std::string &Mid_inclusion);
+    void Set_multiphysics_matrixMaterial_id(std::string &matrix_id);
+    std::string Get_multiphysics_matrixMaterial_id(void) const;
+    void Set_multiphysics_inclusionMaterial_id(std::string &inclusion_id);
+    std::string Get_multiphysics_inclusionMaterial_id(void) const;
+    void Set_multiphysics_time_scale(double &multiphysics_time_scale);
+    double Get_multiphysics_time_scale(void) const;
+    void Set_multiphysics_inclusion_stress_intensity_factor(double &inclusion_stress_intensity);
+    double Get_multiphysics_inclusion_stress_intensity_factor(void) const;
+    void Set_multiphysics_crack_stress_intensity_factor(double &crack_stress_intensity);
+    double Get_multiphysics_crack_stress_intensity_factor(void) const;
+    void Set_multiphysics_crack_stress_mode(double &stress_mode);
+    double Get_multiphysics_crack_stress_mode(void) const;
+    void Set_multiphysics_crack_grow_direction(int &cut_direction_id);
+    int Get_multiphysics_crack_grow_direction(void) const;
+    void Set_multiphysics_min_crack_lenghts(double &min_crack_lenghts);
+    double Get_multiphysics_min_crack_lenghts(void) const;
+    void Set_multiphysics_max_crack_lenghts(double &max_crack_lenghts);
+    double Get_multiphysics_max_crack_lenghts(void) const;
+    void Set_multiphysics_number_of_cracks(int &number_of_cracks);
+    int Get_multiphysics_number_of_cracks(void) const;
+    void Set_multiphysics_number_of_crack_sizes(int &number_of_crack_sizes);
+    int Get_multiphysics_number_of_crack_sizes(void) const;
+    bool Get_is_multiphysics_log_file(void) const;
     void Set_multiphysics_sample_dimensions(std::tuple<double, double, double> &sample_dimensions);
     std::tuple<double, double, double>  Get_multiphysics_sample_dimensions(void);
-    void Set_multiphysics_time_scale(double &tau);
     void Set_multiphysics_external_stress_tensor(Eigen::MatrixXd &external_stress_tensor);
     Eigen::MatrixXd Get_multiphysics_external_stress_tensor(void);
-    void Set_macrocrack_ini(std::vector<double> &macrocrack_ini);
+    double Get_multiphysics_vonMises_stress_in_MPa(Eigen::MatrixXd external_stress_tensor);
+    double Get_multiphysics_pressure_in_MPa(Eigen::MatrixXd external_stress_tensor);
+    //    void Set_macrocrack_ini(std::vector<double> &macrocrack_ini);
     void Set_is_multiphysics_log_file(bool is_log_file);
-
     void Set_multiphysics_temperature(double &new_temperature);
     double Get_multiphysics_temperature(void) const;
 
@@ -287,6 +318,8 @@ public:
     double Get_kinetics_time_scale(void) const;
     void Set_kinetics_corrosion_rate_scale(double &new_corrosion_rate_parameter);
     double Get_kinetics_corrosion_rate_scale(void) const;
+    void Set_kinetics_corrosion_activation_volume(double &corrosion_activation_volume);
+    double Get_kinetics_corrosion_activation_volume(void) const;
 
 // kinetics irradiation
     void Set_kinetics_beam_direction(std::tuple<double,double,double> &new_beam_direction);
@@ -372,6 +405,7 @@ public:
     std::vector<unsigned int> Get_f_special_sequence(void) const;
     std::vector<unsigned int> Get_e_special_sequence(void) const;
     std::vector<unsigned int> Get_n_special_sequence(void) const;
+
     std::vector<Agglomeration> Get_p_agglomeration_map(void) const;
     std::vector<Agglomeration> Get_f_agglomeration_map(void) const;
     std::vector<Agglomeration> Get_e_agglomeration_map(void) const;
@@ -470,9 +504,9 @@ public:
 // # V # The class of a CELLS_ENERGIES :: list of the energy_vectors corresponding to different dimensions 'k' of the k-cells in a PCC
 class CellEnergies {
 private:
-    double von_Mises_elastic_stress = 0.0;
+    std::vector<double> von_Mises_elastic_stress;
     double homogeneous_elastic_energy = 0.0;
-    double ambient_temperature = 0.0;
+    std::vector<double> ambient_temperature;
 
     /// Energies for each cell in a PCC
     std::vector<double> p_elastic_energies, f_elastic_energies, e_elastic_energies, n_elastic_energies; // elastic energies of k-cells defined at their barycentres
@@ -482,10 +516,11 @@ private:
 public:
     /// Set of variables
     CellEnergies() {}; // constructor
-    void Set_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress); // [Pa]
-    void Get_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress); // [Pa]
-    void Set_ambient_temperature(double &new_ambient_temperature); // [K]
-    double Get_ambient_temperature(void); // [K]
+    void Set_external_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress);
+    void Set_von_Mises_stress(std::vector<double> &equivalent_stress);
+    std::vector<double> Get_von_Mises_stress(void) const; // [Pa]
+    void Set_ambient_temperature(std::vector<double> &new_ambient_temperature); // [K]
+    std::vector<double> Get_ambient_temperature(void) const; // [K]
     void Set_homogeneous_elastic_energy(std::tuple<double, double, double> &sample_dimensions, double &von_Mises_elastic_stress, Material &matrix_material); // [J]
     void Set_p_elastic_energies(std::vector<double> p_el_energies); // in [J]
     void Set_f_elastic_energies(std::vector<double> f_el_energies); // in [J]
@@ -499,7 +534,6 @@ public:
 
 
     // Get values
-    double Get_von_Mises_stress(void); // [Pa]
     double Get_homogeneous_elastic_energy(void); // [J]
 
     std::vector<double> Get_p_elastic_energies(void) const;

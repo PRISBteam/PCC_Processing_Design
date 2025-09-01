@@ -26,8 +26,8 @@ int randomInt(int min, int max);
 struct Individual {
     std::vector<int> chromosome;
     double fitness;
+    std::vector<double> s_fractions;
     std::vector<double> j_fractions;
-    std::vector<double> d_fractions;
 
     // 添加一个默认构造函数以简化初始化
     Individual() : fitness(0.0) {}
@@ -59,7 +59,7 @@ public:
      * @param chromosomeLength The length of the chromosome (state vector) for each individual.
      * @param possibleGenes A vector of possible values for each gene (e.g., {0, 1}).
      */
-    void initializePopulation(int chromosomeLength, const std::vector<int>& possibleGenes);
+    void initializePopulation(int chromosomeLength, const std::set<int>& possibleGenes);
 
     /*!
      * @brief Initializes the population by the given initial_p_design.
@@ -67,7 +67,7 @@ public:
      * @param initial_p_design
      * @param possibleGenes A vector of possible values for each gene (e.g., {0, 1}).
      */
-    void initializePopulation(int chromosomeLength, const std::vector<int>& possibleGenes, std::vector<int> &initial_p_design);
+    void initializePopulation(int chromosomeLength, const std::set<int>& possibleGenes, std::vector<int> &initial_p_design);
 
         /**
          * @brief Runs a single generation of the evolutionary process.
@@ -83,6 +83,11 @@ public:
      */
     Individual getBestIndividual(Config &design_configuration) const;
 
+    /*!
+    * @brief Gives special face fractions
+    * @return special face fractions
+     */
+    std::vector<double> Get_s_fractions(Individual &best_individual) const;
 
     /*!
      * @brief Gives TJ fractions
@@ -104,7 +109,7 @@ private:
     int populationSize;
     int generationCount;
     std::function<double(const std::vector<int>&, Config&, CellDesign&)> fitnessFunction;
-    std::vector<int> genePool; // Stores the possible genes for mutation
+    std::set<int> genePool; // Stores the possible genes for mutation
 
     // --- Internal GA Operators ---
 

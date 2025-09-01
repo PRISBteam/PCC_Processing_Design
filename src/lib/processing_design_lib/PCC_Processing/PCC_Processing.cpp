@@ -42,6 +42,10 @@ extern int PCC_dimension;
 extern struct processing_configuration processing_config;
 extern ofstream processing_logfile_stream;
 
+/// Local support functions
+std::vector<Agglomeration> agglomerations_counter(int cell_type, std::vector<std::vector<unsigned int>> &special_x_series);
+
+
 #include "PCC_Processing.h"
 ///* ========================================================= PCC PROCESSING FUNCTION ======================================================= *///
 ///* ========================================================================================================================================= *///
@@ -53,7 +57,7 @@ extern ofstream processing_logfile_stream;
  * @param configuration
  * @return CellDesign object
  */
-CellDesign PCC_Processing(Config &configuration) {
+CellDesign PCC_Processing(Config &configuration, std::vector<Subcomplex> &pcc_subcomplexes, std::vector<CellEnergies> &new_cells_energies) {
 /// Main output of the module 'special_cells_design' (CD) - class. In particular, it contains (1) special_nodes_sequence, (2) special_edges_sequence, (3) special_faces_sequence (in the 2D and 3D cases), and (4) special_polyhedrons_sequence (in the 3D case)
     CellDesign CD;
 
@@ -133,7 +137,8 @@ CellDesign PCC_Processing(Config &configuration) {
 /// Here '(dim - 3)' term is important for 1D and 2D cases (!) as in these cases there are no polyhedrons or even faces (2D) in the PCC                                      ///
        for (int cell_type = (3 + (PCC_dimension - 3)); cell_type >= 0; --cell_type) { // Loop over all types of k-cells in the PCC
 
-           special_x_sequence.clear(); special_x_series.clear(); // clearence of vectors for each new cell type
+           special_x_sequence.clear();
+           special_x_series.clear(); // clearence of vectors for each new cell type
            agglomeration_x_sequence.clear(); // clearence of agglomeration file
 
        /// I. Beginning of the processing of 'special' k-cells
@@ -153,22 +158,20 @@ CellDesign PCC_Processing(Config &configuration) {
                        special_x_sequence.push_back(distance(Configuration_sState[cell_type].begin(), it)); // add new element to the special_x_cells_sequence
                    } // end if(it)
 
-               if(multiplexity != 0) {  /// Agglomerations counter
-                   std::vector<unsigned int> probe_state_vector(CellNumbs.at(cell_type), 0); // probe vector of the total x_series size filled with 0s
-                   std::fill(probe_state_vector.begin(), probe_state_vector.end(),0);
-                   for (auto kcell_seq: special_x_series) {// each strip/chain in the series of strips
-                       for (unsigned int kcell: kcell_seq) { // in each strip/chain
-                           probe_state_vector.at(kcell) += 1; // change element of the State Vector
-                       }
-                   }
+               CD.Set_special_series(special_x_series, cell_type); // (series, id)
+               CD.Set_special_sequence(special_x_sequence, cell_type); // (sequence, id)
 
-                   for (auto it = probe_state_vector.begin(); it != probe_state_vector.end(); ++it) {
-                       if (*it > 1) {
-                           agglomeration_x_sequence.push_back( {(unsigned int) distance(probe_state_vector.begin(), it),*it} ); // Agglomeration(unsigned int AFace, unsigned int AglPower);
-   //REPAIR     cout << " number2: " << agglomeration_x_sequence.back().Get_agglomeration_kcell_number()<< " power2: " << agglomeration_x_sequence.back().Get_agglomeration_power() << endl;
-                       } // end if()
-                   } // end for()
+
+               if(multiplexity != 0) {
+
+               /// agglomerations counter
+                   agglomeration_x_sequence = agglomerations_counter(cell_type, special_x_series);
+
                } // end of if(multiplexity != 0) - agglomerations counter
+
+               // agglomerations
+               CD.Set_agglomeration_sequence(agglomeration_x_sequence, cell_type); // (sequence, k-cell ID)
+               CD.Set_special_configuration(Configuration_sState.at(cell_type), cell_type); // (configuration/design, id) - design vector with types
 
            } // End of 'R' type simulations - // end  if (stype_vector.at(cell_type) == "R" && ..)
 
@@ -212,27 +215,19 @@ CellDesign PCC_Processing(Config &configuration) {
 
                /// Writing 'special_x_sequence' - each k-cell number appeared only once in the sequence. Configuration_sState and State Vectors show possible 'agglomeration' - several similar label per k-cell
                for (auto it = Configuration_sState[cell_type].begin(); it != Configuration_sState[cell_type].end(); ++it)
-                   if(*it > 0) {
+                   if(*it > 0)
                        special_x_sequence.push_back(distance(Configuration_sState[cell_type].begin(), it)); // add new element to the s_cells_sequence
-                   } // end if()
+
+               CD.Set_special_series(special_x_series, cell_type); // (series, id)
+               CD.Set_special_sequence(special_x_sequence, cell_type); // (sequence, id)
+
 
                /// Agglomeration counter
-               std::vector<unsigned int> probe_state_vector(CellNumbs.at(cell_type)); // probe vector of the total x_series size filled with 0s
-               std::fill(probe_state_vector.begin(), probe_state_vector.end(),0);
-               for (auto kcell_seq : special_x_series) {// each strip/chain in the series of strips
-                   for (unsigned int kcell : kcell_seq) { // in each strip/chain
-                       probe_state_vector.at(kcell) += 1; // change element of the State Vector
-                   }
-               }
+               agglomeration_x_sequence = agglomerations_counter(cell_type, special_x_series);
 
-               for (unsigned int kcell : probe_state_vector) {
-                   for (auto it = probe_state_vector.begin(); it != probe_state_vector.end(); ++it) {
-                       if (*it > 1) {
-                           agglomeration_x_sequence.push_back( {(unsigned int) distance(probe_state_vector.begin(),it), *it} ); // Agglomeration(unsigned int AFace, unsigned int AglPower);
-   //REPAIR cout << " number2: " << agglomeration_x_sequence.back().Get_agglomeration_kcell_number()<< " power2: " << agglomeration_x_sequence.back().Get_agglomeration_power() << endl;
-                       } // end if()
-                   } // end for()
-               } // end for (unsigned int kcell : probe_state_vector)
+               // agglomerations
+               CD.Set_agglomeration_sequence(agglomeration_x_sequence, cell_type); // (sequence, k-cell ID)
+               CD.Set_special_configuration(Configuration_sState.at(cell_type), cell_type); // (configuration/design, id) - design vector with types
 
            } // End of 'L' type simulations - else if (stype_vector.at(cell_type) == "L" && .. )
      /*
@@ -273,7 +268,10 @@ CellDesign PCC_Processing(Config &configuration) {
                     // cout << special_x_sequence.back() << " ";
                 }
             }
-        // (!) Output +1 like in Neper, so he numbers should be modified back as -1
+               CD.Set_special_sequence(special_x_sequence, cell_type); // (sequence, id)
+//               CD.Set_special_series(special_x_series, cell_type); // (series, id)
+
+               // (!) Output +1 like in Neper, so he numbers should be modified back as -1
 //            for (auto it = special_x_sequence.begin(); it != special_x_sequence.end(); ++it)
   //              special_x_sequence.at(distance(special_x_sequence.begin(), it)) = *it - 1;
 
@@ -323,7 +321,9 @@ CellDesign PCC_Processing(Config &configuration) {
                     special_x_sequence.push_back(distance(StateVector_indexing.begin(), it)); // add new element to the s_cells_sequence
                 } // end if(it)
             cout << " TopDown_cell_indexing() special_x_sequence size: " << special_x_sequence.size() << endl << endl;
-        } // End of 'Pind' [TopDown indexing] type simulations (elseif)
+               CD.Set_special_sequence(special_x_sequence, cell_type); // (sequence, id)
+///               CD.Set_special_series(special_x_series, cell_type); // (series, id)
+           } // End of 'Pind' [TopDown indexing] type simulations (elseif)
 
         else if(max_sfractions_vectors[cell_type].size() > 0) cout << "ERROR [Processing] : unknown simulation type - please replace with 'R', 'L', 'F', 'D' or 'S'..!" << endl;
 
@@ -336,6 +336,9 @@ CellDesign PCC_Processing(Config &configuration) {
                 processing_logfile_stream << "MaxFunctional processing in operation: cell_type : "s << cell_type << endl;
 ///                if (max_sfractions_vectors.at(cell_type).size() > 0)
 ///                    special_x_sequence = Processing_maxF_crystallographic(2, Configuration_sState, max_sfractions_vectors, pindex_vector.at(2));
+
+                CD.Set_special_sequence(special_x_sequence, cell_type); // (sequence, id)
+//                CD.Set_special_series(special_x_series, cell_type); // (series, id)
             } // end of 'Cm' type simulations (elseif)
 
             else if (stype_vector.at(cell_type) == "Cr" &&
@@ -345,6 +348,8 @@ CellDesign PCC_Processing(Config &configuration) {
 ///                if (max_sfractions_vectors.at(cell_type).size() > 0)
 ///                    special_x_sequence = Processing_maxP_crystallographic(2, Configuration_sState, max_fractions_vectors, pindex_vector.at(2));
                     //special_x_sequence = Processing_Random_crystallographic(2, Configuration_sState, max_fractions_vectors, pindex_vector.at(2));
+                CD.Set_special_sequence(special_x_sequence, cell_type); // (sequence, id)
+///                CD.Set_special_series(special_x_series, cell_type); // (series, id)
             } // end of 'Cr' type simulations (elseif)
 
             /// III. Beginning of the processing of 'induced' (of 'fractured') k-cells
@@ -354,8 +359,11 @@ CellDesign PCC_Processing(Config &configuration) {
                 cout << "Induced processing in operation: cell_type : "s << cell_type << endl;
                 processing_logfile_stream << "Induced processing in operation: cell_type : "s << cell_type << endl;
 
-                if (max_ifractions_vectors.at(cell_type).size() > 0)
-                     induced_x_sequence = PCC_Kinematic_cracking(cell_type, special_x_sequence, Configuration_cState, max_ifractions_vectors);
+                if (max_ifractions_vectors.at(cell_type).size() > 0) {
+                    std::string matrix_id = configuration.Get_multiphysics_matrixMaterial_id();
+                    std::string inclusion_id = configuration.Get_multiphysics_inclusionMaterial_id();
+                    induced_x_sequence = PCC_Kinematic_cracking(cell_type, configuration, CD, new_cells_energies, matrix_id, inclusion_id);
+                }
             } // End of 'Km' type simulations (elseif)
 
             else if (itype_vector.at(cell_type) == "Kn" && max_ifractions_vectors[cell_type].size() > 0) { // Maximum <functional> production
@@ -376,11 +384,6 @@ CellDesign PCC_Processing(Config &configuration) {
         cout << " special_x_sequence size " << special_x_sequence.size() << " cell type " << cell_type << endl << endl;
         processing_logfile_stream << " special_x_sequence size " << special_x_sequence.size() << " cell type " << cell_type << endl << endl;
     }
-        CD.Set_special_sequence(special_x_sequence, cell_type); // (sequence, id)
-        CD.Set_special_series(special_x_series, cell_type); // (series, id)
-    // agglomerations
-        CD.Set_agglomeration_sequence(agglomeration_x_sequence, cell_type); // (sequence, k-cell ID)
-        CD.Set_special_configuration(Configuration_sState.at(cell_type), cell_type); // (configuration/design, id) - design vector with types
 
     /// Induced sequences and series:
         CD.Set_induced_sequence(induced_x_sequence, cell_type); // (sequence, ctype)
@@ -449,6 +452,33 @@ CellDesign PCC_Processing(Config &configuration) {
 
     return CD;
 } /// The END of PCC_Processing() function
+
+///===================================================
+
+/*!
+ *
+ * @param cell_type
+ * @param special_x_series
+ * @return
+ */
+std::vector<Agglomeration> agglomerations_counter(int cell_type, std::vector<std::vector<unsigned int>> &special_x_series) {
+
+    std::vector<unsigned int> probe_state_vector(CellNumbs.at(cell_type), 0); // probe vector of the total x_series size filled with 0s
+    std::fill(probe_state_vector.begin(), probe_state_vector.end(), 0);
+    for (auto kcell_seq: special_x_series) // each strip/chain in the series of strips
+        for (unsigned int kcell: kcell_seq) // in each strip/chain
+            probe_state_vector.at(kcell) += 1; // change element of the State Vector
+
+    std::vector<Agglomeration> agglomeration_x_sequence;
+    for (auto it = probe_state_vector.begin(); it != probe_state_vector.end(); ++it)
+        if (*it > 1)
+            agglomeration_x_sequence.push_back(
+                    {(unsigned int) distance(probe_state_vector.begin(), it),
+                     *it}); // Agglomeration(unsigned int AFace, unsigned int AglPower);
+    //REPAIR     cout << " number2: " << agglomeration_x_sequence.back().Get_agglomeration_kcell_number()<< " power2: " << agglomeration_x_sequence.back().Get_agglomeration_power() << endl;
+    return agglomeration_x_sequence;
+} // End std::vector<Agglomeration> agglomerations_counter(std::vector<unsigned int> &special_x_series)
+
 
 /*
  *

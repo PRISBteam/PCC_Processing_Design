@@ -97,11 +97,17 @@ bool Config::Get_is_subcomplex_log_file(void) const{
 }
 
 // multiphysics
-void Config::Set_Mid_matrix(std::string &new_Mid_matrix){
-    multiphysics_config.Mid_matrix = new_Mid_matrix;
+void Config::Set_multiphysics_matrixMaterial_id(std::string &matrix_id){
+    multiphysics_config.Mid_matrix = matrix_id;
 }
-void Config::Set_Mid_inclusion(std::string &new_Mid_inclusion){
-    multiphysics_config.Mid_inclusion = new_Mid_inclusion;
+std::string Config::Get_multiphysics_matrixMaterial_id(void) const{
+    return multiphysics_config.Mid_matrix;
+}
+void Config::Set_multiphysics_inclusionMaterial_id(std::string &inclusion_id){
+    multiphysics_config.Mid_inclusion = inclusion_id;
+}
+std::string Config::Get_multiphysics_inclusionMaterial_id(void) const{
+    return multiphysics_config.Mid_inclusion;
 }
 void Config::Set_multiphysics_sample_dimensions(std::tuple<double, double, double> &new_sample_dimensions){
     multiphysics_config.sample_dimensions = new_sample_dimensions;
@@ -109,9 +115,11 @@ void Config::Set_multiphysics_sample_dimensions(std::tuple<double, double, doubl
 std::tuple<double, double, double> Config::Get_multiphysics_sample_dimensions(void){
     return multiphysics_config.sample_dimensions;
 }
-
-void Config::Set_multiphysics_time_scale(double &new_tau){
-    multiphysics_config.multiphysics_time_scale = new_tau;
+void Config::Set_multiphysics_time_scale(double &multiphysics_time_scale){
+    multiphysics_config.multiphysics_time_scale = multiphysics_time_scale;
+}
+double Config::Get_multiphysics_time_scale(void) const{
+    return multiphysics_config.multiphysics_time_scale;
 }
 void Config::Set_multiphysics_external_stress_tensor(Eigen::MatrixXd &new_external_stress_tensor){
     multiphysics_config.external_stress_tensor = new_external_stress_tensor;
@@ -119,21 +127,144 @@ void Config::Set_multiphysics_external_stress_tensor(Eigen::MatrixXd &new_extern
 Eigen::MatrixXd Config::Get_multiphysics_external_stress_tensor(void){
     return multiphysics_config.external_stress_tensor;
 }
+double Config::Get_multiphysics_vonMises_stress_in_MPa(Eigen::MatrixXd external_stress_tensor) {
 
-void Config::Set_macrocrack_ini(std::vector<double> &new_macrocrack_ini){
-    multiphysics_config.macrocrack_ini = new_macrocrack_ini;
+    double sxx = 0.0, sxy = 0.0, sxz = 0.0, syx = 0.0, syy = 0.0, syz = 0.0, szx = 0.0, szy = 0.0, szz = 0.0;
+    if (sxx < 1000000.0 || syy < 1000000.0 || szz < 1000000.0 || sxy < 1000000.0 || sxz < 1000000.0 || syx < 1000000.0 || syz < 1000000.0) {
+        sxx = external_stress_tensor(0, 0) * std::pow(10, 6);
+        sxy = external_stress_tensor(0, 1) * std::pow(10, 6);
+        sxz = external_stress_tensor(0, 2) * std::pow(10, 6);
+        syx = external_stress_tensor(1, 0) * std::pow(10, 6);
+        syy = external_stress_tensor(1, 1) * std::pow(10, 6);
+        syz = external_stress_tensor(1, 2) * std::pow(10, 6);
+        szx = external_stress_tensor(2, 0) * std::pow(10, 6);
+        szy = external_stress_tensor(2, 1) * std::pow(10, 6);
+        szz = external_stress_tensor(2, 2) * std::pow(10, 6);
+    } else    {
+        cout << endl
+             << "WARNING: Highly likely stress values in the '../config/multiphysics.ini' file are not in [MPa] as requested !!!"
+             << endl << endl;
+        main_logfile_stream << endl
+                            << "WARNING: Highly likely stress values in the '../config/multiphysics.ini' file are not in [MPa] as requested !!!"
+                            << endl << endl;
+
+        sxx = external_stress_tensor(0,0);
+        sxy = external_stress_tensor(0,1);
+        sxz = external_stress_tensor(0,2);
+        syx = external_stress_tensor(1,0);
+        syy = external_stress_tensor(1,1);
+        syz = external_stress_tensor(1,2);
+        szx = external_stress_tensor(2,0);
+        szy = external_stress_tensor(2,1);
+        szz = external_stress_tensor(2,2);
+    }
+
+    multiphysics_config.equivalent_stress = std::sqrt(0.5 * (std::pow((sxx - syy), 2.0) + std::pow((sxx - szz), 2.0) + std::pow((syy - szz), 2.0) ) + 3.0 * ( std::pow(sxy, 2.0) + std::pow(syz, 2.0) + std::pow(szx, 2.0) ) );
+
+    return multiphysics_config.equivalent_stress;
 }
-void Config::Set_is_multiphysics_log_file(bool new_is_log_file){
-    multiphysics_config.is_multiphysics_log_file = new_is_log_file;
+double Config::Get_multiphysics_pressure_in_MPa(Eigen::MatrixXd external_stress_tensor) {
+
+    double sxx = 0.0, sxy = 0.0, sxz = 0.0, syx = 0.0, syy = 0.0, syz = 0.0, szx = 0.0, szy = 0.0, szz = 0.0;
+
+    if (sxx < 1000000.0 || syy < 1000000.0 || szz < 1000000.0 || sxy < 1000000.0 || sxz < 1000000.0 || syx < 1000000.0 || syz < 1000000.0) {
+        sxx = external_stress_tensor(0, 0) * std::pow(10, 6);
+        sxy = external_stress_tensor(0, 1) * std::pow(10, 6);
+        sxz = external_stress_tensor(0, 2) * std::pow(10, 6);
+        syx = external_stress_tensor(1, 0) * std::pow(10, 6);
+        syy = external_stress_tensor(1, 1) * std::pow(10, 6);
+        syz = external_stress_tensor(1, 2) * std::pow(10, 6);
+        szx = external_stress_tensor(2, 0) * std::pow(10, 6);
+        szy = external_stress_tensor(2, 1) * std::pow(10, 6);
+        szz = external_stress_tensor(2, 2) * std::pow(10, 6);
+    } else {
+        cout << endl
+             << "WARNING: Highly likely stress values in the '../config/multiphysics.ini' file are not in [MPa] as requested !!!"
+             << endl << endl;
+        main_logfile_stream << endl
+                            << "WARNING: Highly likely stress values in the '../config/multiphysics.ini' file are not in [MPa] as requested !!!"
+                            << endl << endl;
+
+        sxx = external_stress_tensor(0,0);
+        sxy = external_stress_tensor(0,1);
+        sxz = external_stress_tensor(0,2);
+        syx = external_stress_tensor(1,0);
+        syy = external_stress_tensor(1,1);
+        syz = external_stress_tensor(1,2);
+        szx = external_stress_tensor(2,0);
+        szy = external_stress_tensor(2,1);
+        szz = external_stress_tensor(2,2);
+    }
+
+    multiphysics_config.pressure = (sxx + syy + szz) / 3.0;
+
+    return multiphysics_config.pressure;
 }
 
 void Config::Set_multiphysics_temperature(double &new_temperature){
     multiphysics_config.ambient_temperature = new_temperature;
-
 }
 double Config::Get_multiphysics_temperature(void) const{
     return multiphysics_config.ambient_temperature;
 }
+void Config::Set_multiphysics_inclusion_stress_intensity_factor(double &inclusion_stress_intensity){
+    multiphysics_config.inclusion_stress_intensity = inclusion_stress_intensity;
+}
+double Config::Get_multiphysics_inclusion_stress_intensity_factor(void) const{
+    return multiphysics_config.inclusion_stress_intensity;
+}
+void Config::Set_multiphysics_crack_stress_intensity_factor(double &crack_stress_intensity){
+    multiphysics_config.crack_stress_intensity = crack_stress_intensity;
+}
+double Config::Get_multiphysics_crack_stress_intensity_factor(void) const{
+    return multiphysics_config.crack_stress_intensity;
+}
+void Config::Set_multiphysics_crack_stress_mode(double &stress_mode){
+    multiphysics_config.stress_mode = stress_mode;
+}
+double Config::Get_multiphysics_crack_stress_mode(void) const{
+    return multiphysics_config.stress_mode;
+}
+void Config::Set_multiphysics_crack_grow_direction(int &cut_direction_id){
+    multiphysics_config.cut_direction_id = cut_direction_id;
+}
+int Config::Get_multiphysics_crack_grow_direction(void) const{
+    return multiphysics_config.cut_direction_id;
+}
+void Config::Set_multiphysics_min_crack_lenghts(double &min_crack_lenghts){
+    multiphysics_config.min_crack_lenghts = min_crack_lenghts;
+}
+double Config::Get_multiphysics_min_crack_lenghts(void) const{
+    return multiphysics_config.min_crack_lenghts;
+}
+void Config::Set_multiphysics_max_crack_lenghts(double &max_crack_lenghts){
+    multiphysics_config.max_crack_lenghts = max_crack_lenghts;
+}
+double Config::Get_multiphysics_max_crack_lenghts(void) const{
+    return multiphysics_config.max_crack_lenghts;
+}
+void Config::Set_multiphysics_number_of_cracks(int &number_of_cracks){
+    multiphysics_config.number_of_cracks = number_of_cracks;
+}
+int Config::Get_multiphysics_number_of_cracks(void) const{
+    return multiphysics_config.number_of_cracks;
+}
+void Config::Set_multiphysics_number_of_crack_sizes(int &number_of_crack_sizes){
+    multiphysics_config.number_of_crack_sizes = number_of_crack_sizes;
+}
+int Config::Get_multiphysics_number_of_crack_sizes(void) const{
+    return multiphysics_config.number_of_crack_sizes;
+}
+void Config::Set_is_multiphysics_log_file(bool new_is_log_file) {
+    multiphysics_config.is_multiphysics_log_file = new_is_log_file;
+}
+bool Config::Get_is_multiphysics_log_file(void) const{
+    return multiphysics_config.is_multiphysics_log_file;
+}
+//void Config::Set_macrocrack_ini(std::vector<double> &new_macrocrack_ini){
+//    multiphysics_config.macrocrack_ini = new_macrocrack_ini;
+//}
+
 
 //processing
 void Config::Set_processing_pp_mode(std::string &new_pp_mode){
@@ -383,6 +514,13 @@ void Config::Set_kinetics_corrosion_rate_scale(double &new_corrosion_rate_parame
 double Config::Get_kinetics_corrosion_rate_scale(void) const{
     return kinetics_config.kinetics_corrosion_rate_scale;
 }
+void Config::Set_kinetics_corrosion_activation_volume(double &corrosion_activation_volume){
+    kinetics_config.corrosion_activation_volume = corrosion_activation_volume;
+}
+double Config::Get_kinetics_corrosion_activation_volume(void) const{
+    return kinetics_config.corrosion_activation_volume;
+}
+
 // kinetics irradiation
 void Config::Set_kinetics_beam_direction(std::tuple<double,double,double> &new_beam_direction){
     kinetics_config.beam_direction = new_beam_direction;
@@ -1176,13 +1314,14 @@ bool CellDesign::Check_induced_design(int cell_type){
 void Subcomplex::Set_sub_sfaces_set(std::set <unsigned int> &new_sfaces_set){
     sub_sfaces_set = new_sfaces_set; }
 std::set <unsigned int> Subcomplex::Get_sub_sfaces_set(void) const {
-    return sub_sfaces_set; }
-
+    return sub_sfaces_set;
+    }
 void Subcomplex::Set_internal_sub_sfaces_set(std::set <unsigned int> &new_internal_sfaces_set){
-    internal_sub_sfaces_set = new_internal_sfaces_set; }
+    internal_sub_sfaces_set = new_internal_sfaces_set;
+    }
 std::set <unsigned int> Subcomplex::Get_internal_sub_sfaces_set(void) const {
-    return internal_sub_sfaces_set; }
-
+    return internal_sub_sfaces_set;
+    }
 void Subcomplex::Set_sub_sfaces_sequence(std::vector <unsigned int> const &special_faces_sequence) {
         sub_sfaces_sequence = special_faces_sequence;
     }
@@ -1603,7 +1742,7 @@ void Macrocrack::Set_sfaces_sequence(std::vector <unsigned int> const &special_f
 
 /// # V # The class of a CELLS_ENERGIES :: list of the energy_vectors corresponding to different dimensions 'k' of the k-cells in a PCC
 // Set
-void CellEnergies::Set_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress) { // [Pa]
+void CellEnergies::Set_external_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress) { // [Pa]
     double sxx = 0.0, sxy = 0.0, sxz = 0.0, syx = 0.0, syy = 0.0, syz = 0.0, szx = 0.0, szy = 0.0, szz = 0.0; // external stress tensor components [homogeneous stress state]
     std::get<0>(external_stress) = sxx;
     std::get<1>(external_stress) = sxy;
@@ -1615,13 +1754,19 @@ void CellEnergies::Set_von_Mises_stress(std::tuple<double, double, double, doubl
     std::get<7>(external_stress) = szy;
     std::get<8>(external_stress) = szz;
 
-    von_Mises_elastic_stress =  std::sqrt(0.5 * (std::pow((sxx - syy), 2.0) + std::pow((sxx - szz), 2.0) + std::pow((syy - szz), 2.0) + 6 * std::pow(sxy, 2.0)));
+///    von_Mises_elastic_stress =  std::sqrt(0.5 * (std::pow((sxx - syy), 2.0) + std::pow((sxx - szz), 2.0) + std::pow((syy - szz), 2.0) + 6 * std::pow(sxy, 2.0)));
     }
 
-void CellEnergies::Set_ambient_temperature(double &new_ambient_temperature){
+void CellEnergies::Set_von_Mises_stress(std::vector<double> &equivalent_stress) { // [Pa]
+ von_Mises_elastic_stress = equivalent_stress;
+}
+std::vector<double> CellEnergies::Get_von_Mises_stress(void) const{ // [Pa]
+    return von_Mises_elastic_stress;
+}
+void CellEnergies::Set_ambient_temperature(std::vector<double> &new_ambient_temperature){
         ambient_temperature = new_ambient_temperature;
     }
-double CellEnergies::Get_ambient_temperature(void){
+std::vector<double> CellEnergies::Get_ambient_temperature(void) const{
         return ambient_temperature;
     }
 
@@ -1648,9 +1793,7 @@ void CellEnergies::Set_n_self_energies(std::vector<double> n_self_energies) {
     f_elastic_energies = n_self_energies; }
 
 // Get
-double CellEnergies::Get_von_Mises_stress(void) { // [Pa]
-    return von_Mises_elastic_stress; }
-double CellEnergies::Get_homogeneous_elastic_energy(void) { // [J]
+    double CellEnergies::Get_homogeneous_elastic_energy(void) { // [J]
     return homogeneous_elastic_energy; }
 
 std::vector<double> CellEnergies::Get_p_elastic_energies(void) const {
@@ -1680,11 +1823,11 @@ std::vector<double> CellEnergies::Get_n_self_energies(void) const {
  *
 */
 // Constructor
-Material::Material(std::string Mid) {
+Material::Material(std::string Mid) { // material_id
     material_database_reader(Mid, material_type, mass_density, melting_point, gb_cohesion_energy, Young_modulus, Poisson_ratio, yield_strength, strength, fracture_toughness, Burgers_vector, gb_width, gb_inclusion1_adh_energy, lagbs_corrosion_current, hagbs_corrosion_current, sigma3_corrosion_current);
 }
 
-Material::Material(std::string Mid, std::string Iid) {
+Material::Material(std::string Mid, std::string Iid) { // material_id and inclusion_id
     material_database_reader(Mid, material_type, mass_density, melting_point, gb_cohesion_energy, Young_modulus, Poisson_ratio, yield_strength, strength, fracture_toughness, gb_width, gb_inclusion1_adh_energy, Iid, inclusion_type, sface_energy_agglomeration, inclusion_mass_density);
 }
 

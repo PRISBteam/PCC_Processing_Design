@@ -48,7 +48,7 @@ extern ofstream irradiation_damaged_output, irradiation_damaged_fractions_output
  * according to the damage rate depending on interface properties, thermodynamic parameters and local combinatorics of affected cells
  * @param p_cells_history
  */
-std::vector<std::vector<double>> interface_irradiation_damage(Config &config, Material &material, CellDesign &processing_cells_design){
+std::vector<std::vector<double>> interface_irradiation_damage(Config &config, CellDesign &processing_cells_design, std::vector<CellEnergies> &gb_energies){
 // change p_cells_history.at(2) -- times when faces (2-cells) change their generated types to 'fractured' due to irradiation damage process
     std::vector<std::vector<double>> p_cells_history;
 
@@ -126,16 +126,13 @@ std::vector<std::vector<double>> interface_irradiation_damage(Config &config, Ma
     /// Externally applied Stress and Temperature
     std::vector<double> gb_equivalent_stress(CellNumbs.at(face_cell_type)), gb_temperature(CellNumbs.at(face_cell_type));
 
-    std::vector<CellEnergies> gb_energies(gb_number);
     Eigen::MatrixXd est = config.Get_multiphysics_external_stress_tensor(); // external stress tensor
     double ambient_temperature = config.Get_multiphysics_temperature(); // external ambient temperature
     std::tuple<double, double, double, double, double, double, double, double, double>
             external_gb_stress = make_tuple(est(0,0), est(0,1),est(1,2),est(1,0),est(1,1),est(1,1),est(2,0),est(2,1),est(2,2));
 
-    for (unsigned int i = 0; i < CellNumbs.at(face_cell_type); ++i){
-        gb_energies.at(i).Set_von_Mises_stress(external_gb_stress);
-        gb_energies.at(i).Set_ambient_temperature(ambient_temperature);
-    }
+    gb_equivalent_stress = gb_energies.at(0).Get_von_Mises_stress();
+    gb_temperature = gb_energies.at(0).Get_ambient_temperature();
 
     config_reader_kinetics(config);
     double irradiation_damage_rate_coeff = config.Get_kinetics_irradiation_damage_rate();
@@ -144,6 +141,9 @@ std::vector<std::vector<double>> interface_irradiation_damage(Config &config, Ma
     double energy_dissipation_rate = config.Get_kinetics_energy_dissipation_rate();
     double observation_output_time = config.Get_kinetics_observation_time();
 
+    std::string Mid_matrix = config.Get_kinetics_material_id();
+    Material material(Mid_matrix);
+
     /// METRICS assigning for all grain boundaries
     std::vector<double> gb_volumes(gb_number,0);
     double gb_width = material.Get_gb_width()*std::pow(10,-9); // in nanometres in the material database
@@ -151,8 +151,6 @@ std::vector<std::vector<double>> interface_irradiation_damage(Config &config, Ma
         face_areas_vector.at(i) = face_areas_vector.at(i) * (get<0>(sample_dimensions) * get<1>(sample_dimensions)); /// WARNING! Works well only for cubic samples!
         gb_volumes.at(i) = face_areas_vector.at(i) * gb_width;
         projected_face_areas.at(i) = projected_face_areas.at(i) * (get<0>(sample_dimensions) * get<1>(sample_dimensions));
-        gb_equivalent_stress.at(i) = gb_energies.at(i).Get_von_Mises_stress();
-        gb_temperature.at(i) = gb_energies.at(i).Get_ambient_temperature();
     }
 
 /// irradiation interfaces DAMAGE RATE

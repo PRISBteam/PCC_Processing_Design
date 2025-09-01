@@ -1340,9 +1340,9 @@ void Vector_ui_cout(std::vector <unsigned int> &vector, std::string text) {
  */
 double get_i(int &direction, std::tuple<double, double, double> &t) {
     switch (direction) {
-        case 1: return std::get<0>(t);
-        case 2: return std::get<1>(t);
-        case 3: return std::get<2>(t);
+        case 0: return std::get<0>(t);
+        case 1: return std::get<1>(t);
+        case 2: return std::get<2>(t);
     }
     assert(false);
 }

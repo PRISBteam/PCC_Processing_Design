@@ -88,9 +88,9 @@ std::vector<std::vector<int>> PCC_Design(Config &design_configuration, CellDesig
         for(auto ipd : uns_initial_p_design)
             initial_p_design.push_back(ipd);
 
-        std::vector<int> possible_genes; // Gene pool, e.g., {0, 1, ...}
-        for (int i = 0; i < design_configuration.Get_design_genes_diversity(); ++i)
-            possible_genes.push_back(i);
+        std::set<int> possible_genes; // Gene pool, e.g., {0, 1, ...}
+        for (int i = 0; i < initial_p_design.size(); ++i)
+            possible_genes.insert(i);
 
         if(std::count(initial_p_design.begin(),initial_p_design.end(),0) < initial_p_design.size())
             ga.initializePopulation(chromosome_length, possible_genes, initial_p_design);
@@ -118,15 +118,24 @@ std::vector<std::vector<int>> PCC_Design(Config &design_configuration, CellDesig
 
             processing_cell_design.Set_p_design(polytope_design);
 
+            best.s_fractions = ga.Get_s_fractions(best);
+
             best.j_fractions = ga.Get_j_fractions(best);
 
             double conf_entropy = 0;
             conf_entropy = Configuration_Entropy(best.j_fractions);
 
-            design_logfile_stream << "Generation: " << ga.getGenerationCount()
-                          << " | Best Fitness: " << best.fitness << " | Entropy: " << conf_entropy << " | TJ fractions: " << best.j_fractions.at(0) << "\t" << best.j_fractions.at(1) << "\t" << best.j_fractions.at(2) << "\t" << best.j_fractions.at(3) << "\t" << endl;
+//            design_logfile_stream << "Generation: " << ga.getGenerationCount()
+//                          << " | Best Fitness: " << best.fitness << " | Entropy: " << conf_entropy << " | TJ fractions: " << best.j_fractions.at(0) << "\t" << best.j_fractions.at(1) << "\t" << best.j_fractions.at(2) << "\t" << best.j_fractions.at(3) << "\t" << endl;
 
-                std::cout << "Generation: " << ga.getGenerationCount()
+            best.s_fractions.clear();
+            design_logfile_stream << "Generation: " << ga.getGenerationCount()
+                                  << " | Best Fitness: " << best.fitness << " | Entropy: " << conf_entropy << " | Special cell fractions: ";
+            for (int i = 0; i < best.s_fractions.size(); ++i)
+                design_logfile_stream << best.s_fractions.at(i) << "\t";
+            design_logfile_stream << endl;
+
+            std::cout << "Generation: " << ga.getGenerationCount()
                           << " | Best Fitness: " << best.fitness << " | Entropy: " << conf_entropy << " | TJ fractions: " << best.j_fractions.at(0) << "\t" << best.j_fractions.at(1) << "\t" << best.j_fractions.at(2) << "\t" << best.j_fractions.at(3) << "\t" << endl;
                 for (int k = 0; k < 10 && k < best.chromosome.size(); ++k) {
                     std::cout << best.chromosome[k];

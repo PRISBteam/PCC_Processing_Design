@@ -15,6 +15,6 @@
  * @param configuration
  * @return CellDesign object
  */
-CellDesign PCC_Processing(Config &configuration);
+CellDesign PCC_Processing(Config &configuration, std::vector<Subcomplex> &pcc_subcomplexes, std::vector<CellEnergies> &new_cells_energies);
 
 #endif //PCC_PROCESSING_DESIGN_PCC_PROCESSING_H

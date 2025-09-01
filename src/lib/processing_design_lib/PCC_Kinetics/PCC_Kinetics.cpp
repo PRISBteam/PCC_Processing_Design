@@ -52,7 +52,7 @@ extern int PCC_dimension;
 ///* in the [0,1] range when it changed its special 'generated' type as the result of a 'kinetic' process (e.g. corrosion or irradiation)     *///
 
 
-std::vector<vector<double>> PCC_Kinetics(Config &kinetics_configuration, CellDesign &processing_cells_design) {
+std::vector<vector<double>> PCC_Kinetics(Config &kinetics_configuration, CellDesign &processing_cells_design, std::vector<Subcomplex> &pcc_sub, std::vector<CellEnergies> &gb_energies) {
 /// Main output of the module 'p_cells_history' -- a vector contained the 'time' moment in the [0,1] range when each p-cell special generated p-cell changed its type.
 /// First line 0-cells, Second line 1-cells, Third line 2-cells, and Fourth line - 3-cells (for 3-PCCs only)
 /// The length of each line corresponds to the number of cells in the PCC.
@@ -65,15 +65,14 @@ std::vector<vector<double>> PCC_Kinetics(Config &kinetics_configuration, CellDes
 
     config_reader_kinetics(kinetics_configuration);
 
-    std::string material_id = kinetics_configuration.Get_kinetics_material_id();
-    Material studied_material(material_id);
-
-    if(kinetics_configuration.Get_kinetics_fk_mode() == "C"s) {
-        p_cells_history = surface_interface_corrosion(kinetics_configuration, studied_material, processing_cells_design);
-
+    if(kinetics_configuration.Get_kinetics_fk_mode() == "Cs"s) {
+        p_cells_history = surface_interface_corrosion(kinetics_configuration, processing_cells_design, gb_energies);
+    }
+    else if(kinetics_configuration.Get_kinetics_fk_mode() == "Cc"s){
+        p_cells_history = macrocrack_interface_corrosion(kinetics_configuration, processing_cells_design, pcc_sub, gb_energies);
     }
     else if(kinetics_configuration.Get_kinetics_fk_mode() == "I"s){
-        p_cells_history = interface_irradiation_damage(kinetics_configuration, studied_material, processing_cells_design);
+        p_cells_history = interface_irradiation_damage(kinetics_configuration, processing_cells_design, gb_energies);
     }
     return p_cells_history;
 }

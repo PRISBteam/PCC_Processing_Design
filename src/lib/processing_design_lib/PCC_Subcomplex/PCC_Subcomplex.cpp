@@ -126,13 +126,15 @@ std::vector<Subcomplex> PCC_Subcomplex(Config &configuration) { // sub_polytope_
 
         Subcomplex new_subcomplex; // new subcomplex with its ID
 /// Setting all quantities to the subcomplex new_subPCC with id = 0
+        new_subcomplex.Set_internal_sub_faces_set(internal_sub_faces_set);
         new_subcomplex.Set_sub_polytope_set(sub_polytope_set);
         new_subcomplex.Set_sub_faces_set(sub_faces_set);
         new_subcomplex.Set_sub_internal_face_coordinates(internal_faces_coordinates);
         new_subcomplex.Set_sub_polytope_coordinates(subcomplex_polytope_coordinates);
 
         subcomplexes_vector.push_back(new_subcomplex);
-    }
+
+    } // end of the 'H' mode
     else if(subcomplex_mode == "N") {
         bool subtype_reading = false;
 
@@ -212,6 +214,7 @@ std::vector<Subcomplex> PCC_Subcomplex(Config &configuration) { // sub_polytope_
 
         Subcomplex new_subcomplex; // new subcomplex with its ID
 /// Setting all quantities to the subcomplex new_subPCC with id = 0
+        new_subcomplex.Set_internal_sub_faces_set(internal_sub_faces_set);
         new_subcomplex.Set_sub_polytope_set(sub_polytope_set);
         new_subcomplex.Set_sub_faces_set(sub_faces_set);
         new_subcomplex.Set_sub_internal_face_coordinates(internal_faces_coordinates);

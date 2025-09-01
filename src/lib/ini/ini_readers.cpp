@@ -383,16 +383,20 @@ void config_reader_multiphysics(Config &configuration) {
 
 // I
 // Material ID for the CPD code Database
-/**
+    std::string Mid_matrix, Mid_inclusion1;
     if (multiphysics_ini.has("material_id")) {
         auto &collection = multiphysics_ini["material_id"];
-        if (collection.has("Mid_matrix"))
-            configuration.Get_multiphysics_config().Mid_matrix = multiphysics_ini.get("material_id").get("Mid_matrix");
+        if (collection.has("Mid_matrix")) {
+            Mid_matrix = multiphysics_ini.get("material_id").get("Mid_matrix");
+            configuration.Set_multiphysics_matrixMaterial_id(Mid_matrix);
+        }
 // Material ID for the CPD code Database
-        if (collection.has("Mid_inclusion1"))
-            configuration.Get_multiphysics_config().Mid_inclusion = multiphysics_ini.get("material_id").get("Mid_inclusion1");
+        if (collection.has("Mid_inclusion1")) {
+            Mid_inclusion1 = multiphysics_ini.get("material_id").get("Mid_inclusion1");
+            configuration.Set_multiphysics_inclusionMaterial_id(Mid_inclusion1);
+        }
     }
-**/
+
 // II
 // sequences and designs output
     if (multiphysics_ini.has("sample_dimensions")) {
@@ -441,11 +445,13 @@ void config_reader_multiphysics(Config &configuration) {
         if (collection.has("szz"))
             szz = stod(multiphysics_ini.get("stress_tensor").get("szz"));
         //    Eigen::MatrixXd &new_external_stress_tensor
-        Eigen::MatrixXd Stress_tensor(3, 3); // Declare a 3x3 dynamic matrix
-        Stress_tensor << sxx, sxy, sxz,
+        Eigen::MatrixXd stress_tensor(3, 3); // Declare a 3x3 dynamic matrix
+        stress_tensor << sxx, sxy, sxz,
                           syx, syy, syz,
                           szx, szy, szz; // dense matrix elements row by row
-        configuration.Set_multiphysics_external_stress_tensor(Stress_tensor);
+        configuration.Set_multiphysics_external_stress_tensor(stress_tensor);
+        configuration.Get_multiphysics_vonMises_stress_in_MPa(stress_tensor);
+        configuration.Get_multiphysics_pressure_in_MPa(stress_tensor);
     } // end of  if (multiphysics_ini.has("stress_tensor"))
 
  // V
@@ -468,144 +474,132 @@ void config_reader_multiphysics(Config &configuration) {
         }
     }
     if (log_file_output == "ON") configuration.Set_is_multiphysics_log_file(true);
-/**
-    double vonMises_stress = 0.0, pressure = 0.0;
-    if (sxx > 1000000.0 || syy > 1000000.0 || szz > 1000000.0 || sxy > 1000000.0 || sxz > 1000000.0 || syx > 1000000.0 || syz > 1000000.0)
-    {
-        cout << endl
-             << "WARNING: Highly likely stress values in the '../config/multiphysics.ini' file are not in [MPa] as requested !!!"
-             << endl << endl;
-        multiphysics_logfile_stream << endl
-                           << "WARNING: Highly likely stress values in the '../config/multiphysics.ini' file are not in [MPa] as requested !!!"
-                           << endl << endl;
-    }
-    configuration.Get_multiphysics_config().external_stress_tensor(0,0) = sxx*pow(10,6);
-    configuration.Get_multiphysics_config().external_stress_tensor(0,1) = sxy*pow(10,6);
-    configuration.Get_multiphysics_config().external_stress_tensor(0,2) = sxz*pow(10,6);
-    configuration.Get_multiphysics_config().external_stress_tensor(1,0) = syx*pow(10,6);
-    configuration.Get_multiphysics_config().external_stress_tensor(1,1) = syy*pow(10,6);
-    configuration.Get_multiphysics_config().external_stress_tensor(1,2) = syz*pow(10,6);
-    configuration.Get_multiphysics_config().external_stress_tensor(2,0) = szx*pow(10,6);
-    configuration.Get_multiphysics_config().external_stress_tensor(2,1) = szy*pow(10,6);
-    configuration.Get_multiphysics_config().external_stress_tensor(2,2) = szz*pow(10,6);
-    vonMises_stress = std::sqrt(0.5 * (pow((configuration.Get_multiphysics_config().external_stress_tensor(0,0) - configuration.Get_multiphysics_config().external_stress_tensor(1,1)), 2.0) + pow((configuration.Get_multiphysics_config().external_stress_tensor(0,0) - configuration.Get_multiphysics_config().external_stress_tensor(2,2)), 2.0) + pow((configuration.Get_multiphysics_config().external_stress_tensor(1,1) - configuration.Get_multiphysics_config().external_stress_tensor(2,2)), 2.0) ) + 3.0 * ( pow(configuration.Get_multiphysics_config().external_stress_tensor(0,1), 2.0) + pow(configuration.Get_multiphysics_config().external_stress_tensor(1,2), 2.0) + pow(configuration.Get_multiphysics_config().external_stress_tensor(2,0), 2.0) ));
-    pressure = (configuration.Get_multiphysics_config().external_stress_tensor(0,0) + configuration.Get_multiphysics_config().external_stress_tensor(1,1) + configuration.Get_multiphysics_config().external_stress_tensor(2,2)) / 3.0;
 
-    configuration.Get_multiphysics_config().macrocrack_ini.resize(7,0);
+    double inclusion_stress_intensity_factor = 0.0, crack_stress_intensity_factor = 0.0;
+    if (multiphysics_ini.has("microcracks")) {
+        auto &collection = multiphysics_ini["microcracks"];
+
+        if (collection.has("inclusion_stress_intensity_factor"))
+            inclusion_stress_intensity_factor = stod(multiphysics_ini.get("microcracks").get("inclusion_stress_intensity_factor"));
+            configuration.Set_multiphysics_inclusion_stress_intensity_factor(inclusion_stress_intensity_factor);
+
+        if (collection.has("crack_stress_intensity_factor"))
+            crack_stress_intensity_factor = stod(multiphysics_ini.get("microcracks").get("crack_stress_intensity_factor"));
+            configuration.Set_multiphysics_crack_stress_intensity_factor(crack_stress_intensity_factor);
+    }
+
     std::string grow_direction;
-    double number_of_crack_sizes = 0.0, max_crack_lenghts = 0.0, min_crack_lenghts = 0.0, crack_stress_mode = 0.0, macrocrack_number = 0.0;
+    int macrocrack_number = 0, number_of_crack_sizes = 0, grow_direction_id;
+    double max_crack_lenghts = 0.0, min_crack_lenghts = 0.0, crack_stress_mode = 0.0;
     if (multiphysics_ini.has("macrocracks")) {
         auto &collection = multiphysics_ini["macrocracks"];
+
         if (collection.has("number_of_macrocracks"))
-            macrocrack_number = stod(multiphysics_ini.get("macrocracks").get("number_of_macrocracks"));
-    }
-    if(macrocrack_number > 0){
-        if (multiphysics_ini.has("macrocracks")) {
-            auto &collection = multiphysics_ini["macrocracks"];
+            macrocrack_number = stoi(multiphysics_ini.get("macrocracks").get("number_of_macrocracks"));
+            configuration.Set_multiphysics_number_of_cracks(macrocrack_number);
+
+        if (macrocrack_number > 0) {
             if (collection.has("crack_stress_mode"))
                 crack_stress_mode = stod(multiphysics_ini.get("macrocracks").get("crack_stress_mode"));
-        }
+            configuration.Set_multiphysics_crack_stress_mode(crack_stress_mode);
 
-        if (multiphysics_ini.has("macrocracks")) {
-            auto &collection = multiphysics_ini["macrocracks"];
             if (collection.has("grow_direction"))
                 grow_direction = multiphysics_ini.get("macrocracks").get("grow_direction");
-        }
 
-        if (multiphysics_ini.has("macrocracks")) {
-            auto &collection = multiphysics_ini["macrocracks"];
+            //grow_direction: '0' - for x-axis, '1' - for y-axis, '2' - for z-axis
+            if(grow_direction == "xx"s) grow_direction_id = 0;
+            else if (grow_direction == "yy"s) grow_direction_id = 1;
+            else if (grow_direction == "zz"s) grow_direction_id = 2;
+            else {
+                cout << "ERROR: 'grow_direction' parameter in config/multiphysics.ini must be 'x', 'y' or 'z'. Please change accordingly!"<< endl;
+                multiphysics_logfile_stream << "ERROR: 'grow_direction' parameter in config/multiphysics.ini must be 'x', 'y' or 'z'. Please change accordingly!"<< endl;
+            }
+            configuration.Set_multiphysics_crack_grow_direction(grow_direction_id); //; '1' - for x-axis, '2' - for y-axis, '3' - for z-axis
+
             if (collection.has("min_crack_lenghts"))
                 min_crack_lenghts = stod(multiphysics_ini.get("macrocracks").get("min_crack_lenghts"));
-        }
-        if (multiphysics_ini.has("macrocracks")) {
-            auto &collection = multiphysics_ini["macrocracks"];
+            configuration.Set_multiphysics_min_crack_lenghts(min_crack_lenghts);
+
             if (collection.has("max_crack_lenghts"))
                 max_crack_lenghts = stod(multiphysics_ini.get("macrocracks").get("max_crack_lenghts"));
-        }
-        if (multiphysics_ini.has("macrocracks")) {
-            auto &collection = multiphysics_ini["macrocracks"];
-            if (collection.has("number_of_crack_sizes"))
-                number_of_crack_sizes = stod(multiphysics_ini.get("macrocracks").get("number_of_crack_sizes"));
-        }
-    } // end of if(macrocrack_number > 0)
+            configuration.Set_multiphysics_max_crack_lenghts(max_crack_lenghts);
 
-    configuration.Get_multiphysics_config().macrocrack_ini.at(0) = macrocrack_number;
-    configuration.Get_multiphysics_config().macrocrack_ini.at(1) = crack_stress_mode;
-    configuration.Get_multiphysics_config().macrocrack_ini.at(2) = max_crack_lenghts;
-    configuration.Get_multiphysics_config().macrocrack_ini.at(3) = min_crack_lenghts;
-    configuration.Get_multiphysics_config().macrocrack_ini.at(4) = number_of_crack_sizes;
-    if(grow_direction == "x"s) configuration.Get_multiphysics_config().macrocrack_ini.at(6) = 1;
-    else if (grow_direction == "y"s) configuration.Get_multiphysics_config().macrocrack_ini.at(6) = 2;
-    else if (grow_direction == "z"s) configuration.Get_multiphysics_config().macrocrack_ini.at(6) = 3;
-    else {
-        cout << "ERROR: 'grow_direction' parameter in config/multiphysics.ini must be 'x', 'y' or 'z'. Please change accordingly!"<< endl;
-        multiphysics_logfile_stream << "ERROR: 'grow_direction' parameter in config/multiphysics.ini must be 'x', 'y' or 'z'. Please change accordingly!"<< endl;
-    }
+            if (collection.has("number_of_crack_sizes"))
+                number_of_crack_sizes = stoi(multiphysics_ini.get("macrocracks").get("number_of_crack_sizes"));
+            configuration.Set_multiphysics_number_of_crack_sizes(number_of_crack_sizes);
+
+        } // end of if (macrocrack_number > 0)
+    } // of  if (multiphysics_ini.has("macrocracks"))
 
 /// Output to the screen/console
     cout << "______________________________________________________________________________________" << endl;
     cout << "The Multiphysics module specifications:\t\t" << endl;
-    cout << "Sample dimensions are \t\t\t"s << " x: " << std::get<0>(configuration.Get_multiphysics_config().sample_dimensions) << " [m] "s << ", y: "
-         << std::get<1>(configuration.Get_multiphysics_config().sample_dimensions) << " [m] "s << ", z: " << std::get<2>(configuration.Get_multiphysics_config().sample_dimensions) << " [m] "s << endl;
-    cout << "Characteristic time is \t\t\t"s << " tau: " << configuration.Get_multiphysics_config().multiphysics_time_scale * pow(10, 6) << " [microseconds] "s << endl;
+    cout << "Sample dimensions are \t\t\t"s << " x: " << std::get<0>(configuration.Get_multiphysics_sample_dimensions()) << " [m] "s << ", y: "
+         << std::get<1>(configuration.Get_multiphysics_sample_dimensions()) << " [m] "s << ", z: " << std::get<2>(configuration.Get_multiphysics_sample_dimensions()) << " [m] "s << endl;
+    cout << "Characteristic time is \t\t\t"s << " tau: " << configuration.Get_multiphysics_time_scale() * pow(10, 6) << " [microseconds] "s << endl;
 
     // Homogeneous External Stress State
-    cout << "Pressure is equal to \t\t\t"s << " P: "<< pressure/pow(10,6) << " [MPa] "s  << endl;
-    cout << "Von Mises stress is equal to \t"s << " Sv: " << vonMises_stress/pow(10,6) << " [MPa] "s << endl;
+    double eq_stress_val = configuration.Get_multiphysics_pressure_in_MPa(configuration.Get_multiphysics_external_stress_tensor());
+    double pressure_val = configuration.Get_multiphysics_vonMises_stress_in_MPa(configuration.Get_multiphysics_external_stress_tensor());
+    cout << "Pressure is equal to \t\t\t"s << " P: "<< eq_stress_val << " [MPa] "s  << endl;
+    cout << "Von Mises stress is equal to \t"s << " Sv: " << pressure_val << " [MPa] "s << endl;
 
-    if (pressure || vonMises_stress > 0) {
+    if (eq_stress_val || pressure_val > 0) {
         cout << "External Stress [MPa]: "s << endl;
-        cout << configuration.Get_multiphysics_config().external_stress_tensor << endl;
+        cout << configuration.Get_multiphysics_external_stress_tensor() << endl;
     }
     cout << endl;
     if(macrocrack_number > 0) {
-        cout << "Number of macrocracks  \t\t\t\t"s << configuration.Get_multiphysics_config().macrocrack_ini.at(0) << endl;
-        cout << "Crack grow_direction (0->x,1->y,2->z): \t\t"s << configuration.Get_multiphysics_config().macrocrack_ini.at(6) << endl;
-        cout << "Crack mode  \t\t\t\t\t"s << configuration.Get_multiphysics_config().macrocrack_ini.at(1) << endl;
-        cout << "MAX crack lenghts (fraction)  \t\t"s << configuration.Get_multiphysics_config().macrocrack_ini.at(2) << endl;
-        cout << "MIN crack lenghts (fraction)  \t\t"s << configuration.Get_multiphysics_config().macrocrack_ini.at(3) << endl;
-        cout << "Series of crack sizes (number)  \t"s << configuration.Get_multiphysics_config().macrocrack_ini.at(4) << endl;
+        cout << "Number of macrocracks  \t\t\t\t"s << configuration.Get_multiphysics_number_of_cracks() << endl;
+        cout << "Crack grow_direction (0->xx,1->yy,2->zz): \t\t"s << configuration.Get_multiphysics_crack_grow_direction() << endl;
+        cout << "Crack mode  \t\t\t\t\t"s << configuration.Get_multiphysics_crack_stress_mode() << endl;
+        cout << "MIN crack lenghts (fraction)  \t\t"s << configuration.Get_multiphysics_min_crack_lenghts() << endl;
+        cout << "MAX crack lenghts (fraction)  \t\t"s << configuration.Get_multiphysics_max_crack_lenghts() << endl;
+       if(configuration.Get_multiphysics_number_of_crack_sizes() > 1)
+        cout << "Series of crack sizes (number)  \t"s << configuration.Get_multiphysics_number_of_crack_sizes() << endl;
     }
     cout << endl;
-    cout << "Multiphysics module cpdlog_multiphysics.log file output:\t"s << log_file_output << endl;
+    cout << "Multiphysics module cpdlog_multiphysics.log file output:\t"s << configuration.Get_is_multiphysics_log_file() << endl;
     cout << endl;
 
 // Output into .log file
-    if(configuration.Get_multiphysics_config().is_multiphysics_log_file) {
+    if(configuration.Get_is_multiphysics_log_file()) {
         multiphysics_logfile_stream
                 << "______________________________________________________________________________________"
                 << endl;
         multiphysics_logfile_stream << "The Multiphysics module specifications:\t\t" << endl;
-        multiphysics_logfile_stream << "Sample dimensions are \t\t\t"s << " x: " << std::get<0>(configuration.Get_multiphysics_config().sample_dimensions)
-                                    << " [m] "s << ", y: "
-                                    << std::get<1>(configuration.Get_multiphysics_config().sample_dimensions) << " [m] "s << ", z: "
-                                    << std::get<2>(configuration.Get_multiphysics_config().sample_dimensions) << " [m] "s << endl;
-        multiphysics_logfile_stream << "Characteristic time is \t\t\t"s << " tau: " << configuration.Get_multiphysics_config().multiphysics_time_scale * pow(10, 6)
-                                    << " [microseconds] "s << endl;
+        multiphysics_logfile_stream << "______________________________________________________________________________________" << endl;
+        multiphysics_logfile_stream << "The Multiphysics module specifications:\t\t" << endl;
+        multiphysics_logfile_stream << "Sample dimensions are \t\t\t"s << " x: " << std::get<0>(configuration.Get_multiphysics_sample_dimensions()) << " [m] "s << ", y: "
+             << std::get<1>(configuration.Get_multiphysics_sample_dimensions()) << " [m] "s << ", z: " << std::get<2>(configuration.Get_multiphysics_sample_dimensions()) << " [m] "s << endl;
+        multiphysics_logfile_stream << "Characteristic time is \t\t\t"s << " tau: " << configuration.Get_multiphysics_time_scale() * pow(10, 6) << " [microseconds] "s << endl;
 
         // Homogeneous External Stress State
-        multiphysics_logfile_stream << "Pressure is equal to \t\t\t"s << " P: " << pressure / pow(10, 6) << " [MPa] "s
-                                    << endl;
-        multiphysics_logfile_stream << "Von Mises stress is equal to \t"s << " Sv: " << vonMises_stress / pow(10, 6)
-                                    << " [MPa] "s << endl;
+        double eq_stress_val = configuration.Get_multiphysics_pressure_in_MPa(configuration.Get_multiphysics_external_stress_tensor());
+        double pressure_val = configuration.Get_multiphysics_vonMises_stress_in_MPa(configuration.Get_multiphysics_external_stress_tensor());
+        multiphysics_logfile_stream << "Pressure is equal to \t\t\t"s << " P: "<< eq_stress_val << " [MPa] "s  << endl;
+        multiphysics_logfile_stream << "Von Mises stress is equal to \t"s << " Sv: " << pressure_val << " [MPa] "s << endl;
 
-        if (pressure || vonMises_stress > 0) {
+        if (eq_stress_val || pressure_val > 0) {
             multiphysics_logfile_stream << "External Stress [MPa]: "s << endl;
-            multiphysics_logfile_stream << configuration.Get_multiphysics_config().external_stress_tensor << endl;
+            multiphysics_logfile_stream << configuration.Get_multiphysics_external_stress_tensor() << endl;
         }
         multiphysics_logfile_stream << endl;
-        if (macrocrack_number > 0) {
-            multiphysics_logfile_stream << "Number of macrocracks  \t\t\t\t"s << configuration.Get_multiphysics_config().macrocrack_ini.at(0) << endl;
-            multiphysics_logfile_stream << "Crack grow_direction (0->x,1->y,2->z): \t\t"s << configuration.Get_multiphysics_config().macrocrack_ini.at(6)
-                                        << endl;
-            multiphysics_logfile_stream << "Crack mode  \t\t\t\t\t\t"s << configuration.Get_multiphysics_config().macrocrack_ini.at(1) << endl;
-            multiphysics_logfile_stream << "MAX crack lenghts (fraction)  \t\t"s << configuration.Get_multiphysics_config().macrocrack_ini.at(2) << endl;
-            multiphysics_logfile_stream << "MIN crack lenghts (fraction)  \t\t"s << configuration.Get_multiphysics_config().macrocrack_ini.at(3) << endl;
-            multiphysics_logfile_stream << "Series of crack sizes (number)  \t"s << configuration.Get_multiphysics_config().macrocrack_ini.at(4) << endl;
+        if(macrocrack_number > 0) {
+            multiphysics_logfile_stream << "Number of macrocracks  \t\t\t\t"s << configuration.Get_multiphysics_number_of_cracks() << endl;
+            multiphysics_logfile_stream << "Crack grow_direction (0->xx,1->yy,2->zz): \t\t"s << configuration.Get_multiphysics_crack_grow_direction() << endl;
+            multiphysics_logfile_stream << "Crack mode  \t\t\t\t\t"s << configuration.Get_multiphysics_crack_stress_mode() << endl;
+            multiphysics_logfile_stream << "MIN crack lenghts (fraction)  \t\t"s << configuration.Get_multiphysics_min_crack_lenghts() << endl;
+            multiphysics_logfile_stream << "MAX crack lenghts (fraction)  \t\t"s << configuration.Get_multiphysics_max_crack_lenghts() << endl;
+            if(configuration.Get_multiphysics_number_of_crack_sizes() > 1)
+                multiphysics_logfile_stream << "Series of crack sizes (number)  \t"s << configuration.Get_multiphysics_number_of_crack_sizes() << endl;
         }
+        multiphysics_logfile_stream << endl;
+        multiphysics_logfile_stream << "Multiphysics module cpdlog_multiphysics.log file output:\t"s << configuration.Get_is_multiphysics_log_file() << endl;
+        multiphysics_logfile_stream << endl;
         multiphysics_logfile_stream << endl;
     }
-    **/
+
     return;
 } /// end of the 'config_reader_multiphysics()' function
 
@@ -1679,21 +1673,26 @@ void config_reader_kinetics(Config &configuration) {
         if (collection.has("mat_id")) {
             mat_id = kinetics_ini.get("general").get("mat_id");
             configuration.Set_kinetics_material_id(mat_id);
-        } }
-
-    double time_constant, corrosion_rate;
-    if (kinetics_ini.has("general")) {
-        auto &collection = kinetics_ini["general"];
+        }
+        double time_constant;
         if (collection.has("kinetic_time_scale")) {
             time_constant = stod(kinetics_ini.get("general").get("kinetic_time_scale"));
             configuration.Set_kinetics_time_scale(time_constant);
         }
-
-    //corrosion
+    }
+        //corrosion
+    if (kinetics_ini.has("corrosion")) {
+        auto &collection = kinetics_ini["corrosion"];
+        double corrosion_rate, corrosion_activation_volume;
         if (collection.has("corrosion_rate_coeff")) {
             corrosion_rate = stod(kinetics_ini.get("corrosion").get("corrosion_rate_coeff"));
             configuration.Set_kinetics_corrosion_rate_scale(corrosion_rate);
-        } }
+        }
+        if (collection.has("corrosion_activation_volume")) {
+            corrosion_activation_volume = stod(kinetics_ini.get("corrosion").get("corrosion_activation_volume"));
+            configuration.Set_kinetics_corrosion_activation_volume(corrosion_activation_volume);
+        }
+    }
 
     // irradiation
     double rx = 0.0, rz = 0.0, ry = 0.0;

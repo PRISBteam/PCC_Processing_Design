@@ -16,7 +16,7 @@
  * @param pcc_subcomplexes
  * @return CellEnergies object
  */
-std::vector<CellEnergies> PCC_Multiphysics(Config &configuration, std::vector<Subcomplex> &pcc_subcomplexes);
-std::vector<CellEnergies> PCC_Multiphysics(Config &configuration, std::vector<Subcomplex> &pcc_subcomplexes, std::vector<Macrocrack> &crack_growth_series);
+//std::vector<CellEnergies> PCC_Multiphysics(Config &multiphysics_configuration, std::vector<Subcomplex> &pcc_subcomplexes);
+std::vector<CellEnergies> PCC_Multiphysics(Config &multiphysics_configuration, std::vector<Subcomplex> &pcc_subcomplexes, std::vector<Macrocrack> &crack_growth_series);
 
 #endif //PCC_PROCESSING_DESIGN_PCC_MULTIPHYSICS_H
