@@ -21,6 +21,7 @@
 #include "../../../ini/ini_materials_reader.h" // material and inclusion parameters readers by their IDs
 #include "../../PCC_Objects.h"
 #include "../../PCC_Support_Functions.h" // It must be here - first in this list (!)
+#include "processing_assigned_labelling.h" // for the std::vector<std::vector<unsigned int>> Processing_Random(int const cell_type, std::vector<std::vector<unsigned int>> &Configuration_State, std::vector<std::vector<double>> const &max_fractions_vectors, bool multiplexity);
 
 using namespace std; // standard namespace
 
@@ -33,7 +34,7 @@ extern int PCC_dimension;
 
 #include "processing_induced_labelling.h"
 
-/// ================== # 1 # Kinetic function for multiple cracking ==================
+/// ================== # 1 # Kinematic function for multiple cracking ==================
 /*!
  * @details
  * @param cell_type
@@ -288,6 +289,115 @@ else if (cell_type == 3)
 
     return crack_faces_sequence;
 } /// END of Kinetic_cracking
+
+
+
+// #3# Metropolis cracking
+//vector<unsigned int> DCC_Metropolis_cracking(vector<vector<double>> &stress_tensor, vector<vector<double>> &norms_vector, vector<vector<double>> &tang_vector, double &Temperature, std::vector<unsigned int> &CellNumbs, long iteration_number, vector<double> &slip_vector, double alpha, double lambda){
+vector<unsigned int> Metropolis(vector<vector<double>> &stress_tensor, vector<vector<double>> &norms_vector, vector<vector<double>> &tang_vector, double &Temperature, std::vector<unsigned int> &CellNumbs, long iteration_number, vector<double> &slip_vector, double alpha, double lambda){
+    /// I. Constant initial state initialisation
+    //zero vectors required for Processing_Random() input
+    std::vector <unsigned int> SlipState_Vector(CellNumbs.at(2),0), s_faces_sequence(CellNumbs.at(2),0);
+    double Rc = 8.31; //gas constant
+
+ // ================> Initial p = 0.5 Face seeds
+/// TODO:    std::vector<std::vector<unsigned int>> Configuration_sState = configuration.Get_Configuration_sState(); // definition of the local State Vectors of special cells with values from the object of Config class
+///    std::vector<std::vector<unsigned int>> Configuration_cState = configuration.Get_Configuration_iState(); // definition of the local State Vectors of induced cells with values from the object of Config class
+///    Processing_Random(cell_type, std::vector<std::vector<unsigned int>> &Configuration_State, std::vector<std::vector<double>> const &max_fractions_vectors, bool multiplexity);
+
+    // 1. Loop over all the Faces
+    srand((unsigned) time(NULL)); // The function initialize random seed from the computer time (MUST BE BEFORE THE FOR LOOP!)
+
+    for (long i = 0; i < iteration_number; ++i) {
+        // 2. Random choice of a new Face
+        long NewSlipNumber = rand() % (CellNumbs.at(2) -2); // Random generation of the boundary number in the range from 0 to CellNumbs.at(2)
+
+        // 3. If dH < 0 energetically favourable -> Accept trial and change the type
+        if (SlipState_Vector.at(NewSlipNumber) == 1) {
+            SlipState_Vector.at(NewSlipNumber) = 0;
+        } //if
+            // 4. Else if dH > 0 consider the acceptance probability
+        else if (SlipState_Vector.at(NewSlipNumber) == 0) {
+            // Model variables
+            double Snt = 0.0, s2 = 0.0;
+            vector<vector<double>> sik{ {0,0,0}, {0,0,0}, {0,0,0} };
+//            cout << NewSlipNumber << "\t" << slip_vector.at(NewSlipNumber) << endl;
+            //exit(457);
+            for (int i = 0; i < 3; ++i) {
+                for (int j = 0; j < 3; ++j) {
+                    sik[i][j] = 0.5 * slip_vector.at(NewSlipNumber) * (norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j] +
+                                                                       norms_vector.at(NewSlipNumber)[j] * tang_vector.at(NewSlipNumber)[i]);
+                    Snt += stress_tensor[i][j] * sik[i][j];
+
+                    s2 += 0.5 * pow(slip_vector.at(NewSlipNumber),2) * (norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j]*norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j] +
+                                                                        norms_vector.at(NewSlipNumber)[i] * tang_vector.at(NewSlipNumber)[j]*norms_vector.at(NewSlipNumber)[j] * tang_vector.at(NewSlipNumber)[i]);
+                }
+            }
+            /// New ACCEPTANCE PROBABILITY
+            double P_ac = 0.0;
+            if (s2 != 0) {
+                double P_ac = exp(-(alpha * pow(slip_vector.at(NewSlipNumber),2) - Snt - lambda * slip_vector.at(NewSlipNumber)) / (Rc * Temperature));
+                if (P_ac > 1) P_ac = 1.0;
+            } else P_ac = 0;
+            // cout << "Alpha\t" << alpha * pow(slip_vector.at(NewSlipNumber),2) - Snt  << "\t SNT\t" << Snt << "\tProb\t" << exp(-(alpha * s2 - Snt - lambda * slip_vector.at(NewSlipNumber)) / (Rc * Temperature)) << endl;
+
+            double rv = (rand() / (RAND_MAX + 1.0)); // Generate random value in the range [0,1]
+            if (rv <= P_ac) {
+                //   if (P_ac > 0) cout << "P_ac =\t" << P_ac << "\trandom number\t" << rv << endl;
+                SlipState_Vector.at(NewSlipNumber) = 1;
+            } else SlipState_Vector.at(NewSlipNumber) = 0;
+
+        } // end of  else if (SlipState_Vector.at(NewSlipNumber) == 0)
+
+    } // for loop (i < iteration_number)
+
+    return SlipState_Vector;
+} /// end of Metropolis function
+/// -----------------------------------------------------------------------------------------------------------------///
+
+// support function for the Metropolis function
+vector<vector<double>> lt_vector(vector<vector<double>> &stress_tensor, vector<vector<double>> norms_vector) {
+    vector<vector<double>> tv, tnv, ttv, lt; // traction vector tv and its normal (tnv) and tangent (ttv) components + tangential vector to the slip plane lt
+
+//for (auto kl : stress_tensor.at(1))    cout << kl << endl;
+    for (unsigned int fnumb = 0; fnumb < norms_vector.size(); ++fnumb) { // loop over all the slip elements in the complex
+
+        double tv0 = std::inner_product(stress_tensor.at(0).begin(), stress_tensor.at(0).end(),
+                                   norms_vector.at(fnumb).begin(), 0);
+        double tv1 = std::inner_product(stress_tensor.at(1).begin(), stress_tensor.at(1).end(),
+                                   norms_vector.at(fnumb).begin(), 0);
+        double tv2 = std::inner_product(stress_tensor.at(2).begin(), stress_tensor.at(2).end(),
+                                   norms_vector.at(fnumb).begin(), 0);
+        tv.push_back({tv0, tv1, tv2});
+
+        double tnv0 = std::inner_product(tv.at(fnumb).begin(), tv.at(fnumb).end(), norms_vector.at(fnumb).begin(), 0) *
+                      norms_vector[fnumb][0];
+        double tnv1 = std::inner_product(tv.at(fnumb).begin(), tv.at(fnumb).end(), norms_vector.at(fnumb).begin(), 0) *
+                      norms_vector[fnumb][1];
+        double tnv2 = std::inner_product(tv.at(fnumb).begin(), tv.at(fnumb).end(), norms_vector.at(fnumb).begin(), 0) *
+                      norms_vector[fnumb][2];
+        tnv.push_back({tnv0, tnv1, tnv2});
+        double ttv0 = tv0 - tnv0, ttv1 = tv1 - tnv1, ttv2 = tv2 - tnv2;
+        ttv.push_back({ttv0, ttv1, ttv2});
+
+        double  lt0 = 0.0, lt1 = 0.0, lt2 = 0.0;
+        if (std::inner_product(ttv.at(fnumb).begin(), ttv.at(fnumb).end(), ttv.at(fnumb).begin(), 0.0L) != 0) {
+            lt0 =
+                    ttv0 / sqrt(std::inner_product(ttv.at(fnumb).begin(), ttv.at(fnumb).end(), ttv.at(fnumb).begin(), 0.0L));
+            lt1 =
+                    ttv1 / sqrt(std::inner_product(ttv.at(fnumb).begin(), ttv.at(fnumb).end(), ttv.at(fnumb).begin(), 0.0L));
+            lt2 =
+                    ttv2 / sqrt(std::inner_product(ttv.at(fnumb).begin(), ttv.at(fnumb).end(), ttv.at(fnumb).begin(), 0.0L));
+        }
+        lt.push_back({lt0, lt1, lt2});
+
+    } // end of for(fnumb < norms_vector.size())
+
+    return lt;
+} /// end of lt_vector() function
+/// -------------------------------------------------------------------------------------- ///
+
+
 /*
         //Recalculation of the NEW TJs types
         if (dim == 3) TJsTypes = EdgesTypesCalc(CellNumbs, s_faces_sequence, FES);

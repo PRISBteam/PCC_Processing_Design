@@ -372,6 +372,33 @@ std::vector<unsigned int> SetToVector(std::set<unsigned int> &s) {
     return v;
 }
 
+/*!
+ * @details
+ * @param subcomplex_instream
+ */
+///void DesignVectorToGraph(std::ifstream &subcomplex_instream) {
+
+///    std::vector<std::tuple<unsigned int, unsigned int>> vector_of_edges;
+///    std::vector<std::vector<int>> design_state_vector;
+
+    // read
+///    if (subcomplex_instream.is_open()) {
+///        design_state_vector = IntListReader(subcomplex_instream);
+///    }
+///    for (int cell_type = 0; cell_type < 4; ++cell_type) {
+///        if(cell_type == 2) {
+///            SpMat AFS = SMatrixReader(PCCpaths.at(2 + (dim - 3)), (CellNumbs.at(2)), (CellNumbs.at(2))); //all Faces
+///            ///  Full symmetric AFS matrix instead of triagonal
+///            AFS = 0.5 * (AFS + SparseMatrix<double>(AFS.transpose()));
+
+///            vector_of_edges = f(design_state_vector)
+///        }
+///    }
+///    ofstream out;
+///    out >>
+
+///} // end of void DesignVectorToGraph(std::ifstream &subcomplex_instream)
+
 
 /*!
  * @details Log-normal distribution generator (for the RStrips_Distribution() processing function).

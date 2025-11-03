@@ -34,6 +34,12 @@ std::set<unsigned int> convertToSet(std::vector<unsigned int> &v);
 /// # * # Set to Vector simple converter
 std::vector<unsigned int> SetToVector(std::set<unsigned int> &v);
 
+/*!
+ * @brief Read design state vector and creates a correspoinding graph
+ * @param subcomplex_instream
+ */
+void DesignVectorToGraph(std::ifstream &subcomplex_instream);
+
 
 /*! ## 3 ##
  * @brief Log-normal distribution generator used for the RStrips_Distribution() processing function.
