@@ -1,0 +1,29 @@
+ Execution year - 2026; Month - 4; Day - 11; Time - 12:11.
+
+==============================================================================================================================================================
+Random (R) mode processing in operation: cell_type : 3
+
+Random (R) mode processing in operation: cell_type : 2
+special 2-cells fraction:      0.000138293
+special 2-cells fraction:      0.0502005
+special 2-cells fraction:      0.0999862
+special 2-cells fraction:      0.150048
+special 2-cells fraction:      0.199834
+special 2-cells fraction:      0.249896
+special 2-cells fraction:      0.299682
+ special_x_sequence size 2170 cell type 2
+
+
+f-sequence size: 2170
+f-design vector size: 7231
+
+Random (R) mode processing in operation: cell_type : 1
+
+e-design vector size: 12464
+
+Random (R) mode processing in operation: cell_type : 0
+
+n-design vector size: 6234
+
+Processing time is equal to  0.782529  seconds
+
