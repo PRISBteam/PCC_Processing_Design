@@ -10,6 +10,6 @@
  * @param sample_dimensions
  * @return local energy density of faces (2-cells)
  */
-std::vector<double> Multiphysics_crack_stress_field(Macrocrack &new_crack, Material &matrix_material, Eigen::MatrixXd &external_stress, std::tuple<double, double, double> &sample_dimensions);
+std::vector<double> Multiphysics_crack_stress_field(Macrocrack &new_crack, Material &matrix_material, Eigen::MatrixXd &external_stress, std::vector<double> &equivalent_stress_faces, std::tuple<double, double, double> &sample_dimensions);
 
 #endif //PCC_PROCESSING_DESIGN_MULTIPHYSICS_INTERNAL_STRESS_H

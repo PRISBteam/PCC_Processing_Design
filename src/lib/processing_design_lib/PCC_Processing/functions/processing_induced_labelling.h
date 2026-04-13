@@ -15,7 +15,9 @@
  * @param max_cfractions_vectors
  * @return
  */
-std::vector <unsigned int> PCC_Kinematic_cracking(int cell_type, std::vector<unsigned int> &s_faces_sequence, std::vector<std::vector<unsigned int>> &Configuration_cState, std::vector<std::vector<double>> const &max_cfractions_vectors);
+//std::vector <unsigned int> PCC_Kinematic_cracking(int cell_type, std::vector<unsigned int> &s_faces_sequence, std::vector<std::vector<unsigned int>> &Configuration_cState, std::vector<std::vector<double>> const &max_cfractions_vectors);
+std::vector <unsigned int> PCC_Kinematic_cracking(int cell_type, Config &configuration, CellDesign &processed_pcc, std::vector<CellEnergies> &new_cells_energies, std::string &Mid_matrix, std::string &Mid_inclusion);
+
 
 /*!
  * @brief

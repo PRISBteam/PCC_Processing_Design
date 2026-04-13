@@ -52,53 +52,58 @@ extern int PCC_dimension;
  * @param pcc_subcomplexes
  * @return
  */
-std::vector<CellEnergies> PCC_Multiphysics(Config &configuration, std::vector<Subcomplex> &pcc_subcomplexes, std::vector<Macrocrack> &crack_growth_series) {
+std::vector<CellEnergies> PCC_Multiphysics(Config &multiphysics_configuration, std::vector<Subcomplex> &pcc_subcomplexes, std::vector<Macrocrack> &crack_growth_series) {
 /// Main output of the module Cell Energies (CE) class object. In particular, it contains (1) elastic external energies (and stress state), (2) elastic internal energies (and stress state), (3) thermal cell energies
-    std::vector<CellEnergies> CE_vector;
-    CellEnergies face_energies;
-
-    std::vector<double> self_f_energy_densities, self_f_energies;
-    std::vector<double> current_f_energy_densities, current_f_energies;
-
-    std::string Mid_matrix, Mid_inclusion;
-    std::tuple<double, double, double> sample_dimensions; // [m]
-
-    double tau; // [seconds]
-    Eigen::MatrixXd external_stress_tensor(3,3); // [Pa]
-    std::vector<double> macrocrack_ini;
+    std::vector<CellEnergies> CE_vector; // modeule output
 
     const char *cfav = paths_to_PCC_matrices.at(7).c_str(); const char *cncv = paths_to_PCC_matrices.at(10).c_str();
     face_areas_vector = VectorDReader(cfav);
 // REPAIR for (auto fav : face_areas_vector)  cout << fav << endl;  exit(0);
-    main_config multiphysics_ini_data;
-    config_reader_multiphysics(multiphysics_ini_data);
-    Material matrix_material(Mid_matrix); // set a material from the '../config/CPD_material_database/'
-//  Material inclusion_material(Mid_inclusion); // set a material from the '../config/CPD_material_database/'
 
-/// Cohesion energy for each face (2-cell/grain boundary)
+/// config READER from the config/multiphysics.ini file
+    config_reader_multiphysics(multiphysics_configuration);
+
+    // matrix and inclusion material IDs
+    std::string Mid_matrix = multiphysics_configuration.Get_multiphysics_matrixMaterial_id();
+    std::string Mid_inclusion = multiphysics_configuration.Get_multiphysics_inclusionMaterial_id();
+
+    // set a matrix (base) material from the '../config/CPD_material_database/*.ini' file
+    Material matrix_material(Mid_matrix);
+    // set a material of inclusions (if necessary) from the '../config/CPD_material_database/*.ini'
+    Material inclusion_material(Mid_inclusion);
+
+    // basic energy vectors for faces
+    CellEnergies face_energies;
+    std::vector<double> self_f_energy_densities, self_f_energies;
+    std::vector<double> current_f_energy_densities, current_f_energies;
+
+/// Cohesion energy for each face (2-cell)
     for(unsigned int i = 0; i < CellNumbs.at(2); ++i) // set the SAME cohesion energy
         self_f_energies.push_back(matrix_material.Get_gb_cohesion_energy()*face_areas_vector.at(i));
 /// CellEnergy parameter 'vector<double> f_self_energies' for all 2-cells
     face_energies.Set_f_self_energies(self_f_energies);
 
-    /// ======================================================= MACROCRACKS =================================
-    double    crack_stress_mode = macrocrack_ini.at(1);
-    int macrocrack_grow_direction = macrocrack_ini.at(6);
-    double    max_crack_lenghts = macrocrack_ini.at(2);
-    double    min_crack_lenghts = macrocrack_ini.at(3);
-    double    number_of_crack_sizes = 1;
-    if(macrocrack_ini.at(4) > 1)
-        number_of_crack_sizes = macrocrack_ini.at(4);
+    std::tuple<double, double, double> sample_dimensions = multiphysics_configuration.Get_multiphysics_sample_dimensions(); // smample sizes in [m]
+    double tau = multiphysics_configuration.Get_multiphysics_time_scale(); // time in [seconds]
+    Eigen::MatrixXd external_stress_tensor(3,3);
+    external_stress_tensor = multiphysics_configuration.Get_multiphysics_external_stress_tensor(); // stress tensor in [Pa]
+
+    // ======================================================= MACROCRACKS =================================
+    double    crack_stress_mode = multiphysics_configuration.Get_multiphysics_crack_stress_mode(); //macrocrack_ini.at(1);
+    int macrocrack_grow_direction = multiphysics_configuration.Get_multiphysics_crack_grow_direction(); // macrocrack_ini.at(6);
+    double    min_crack_lenghts = multiphysics_configuration.Get_multiphysics_min_crack_lenghts(); //macrocrack_ini.at(3);
+    double    max_crack_lenghts = multiphysics_configuration.Get_multiphysics_max_crack_lenghts(); //macrocrack_ini.at(2);
+    int    number_of_crack_sizes = multiphysics_configuration.Get_multiphysics_number_of_crack_sizes(); //1;
 
     Subcomplex half_plane_crack_pcc;
-    for(int subn = 0; subn < pcc_subcomplexes.size(); ++subn) { /// LOOP over all MACROCRACKS in a PCC
+///* ------------------------ LOOP over all MACROCRACKS in a PCC ------------------------ *///
+    for(int subn = 0; subn < pcc_subcomplexes.size(); ++subn) {
+/// Another loop over the all Macrocrack sizes
+        for (int cl = 1; cl<= number_of_crack_sizes; ++cl) { // as specified in the config/multiphysics.ini file
+            double current_crack_length = max_crack_lenghts * double(cl) / double(number_of_crack_sizes);
+//REPAIR cout << "current_crack_length\t" << current_crack_length << endl; exit(0);
 
-        for (int cl = 1; cl<= number_of_crack_sizes; ++cl) {
-//?/            double current_crack_length = (max_crack_lenghts - min_crack_lenghts) * double(cl) / number_of_crack_sizes;
-            double current_crack_length = max_crack_lenghts * double(cl) / number_of_crack_sizes;
-///REPAIR cout << "current_crack_length\t" << current_crack_length << endl;
-// exit(0);
-            /// Half-plane individual sub-complex for each of the macrocrack lengths
+            /// Half-plane individual sub-complex for each of the Macrocrack lengths
             half_plane_crack_pcc = Get_half_plane(pcc_subcomplexes.at(subn), current_crack_length, macrocrack_grow_direction);
 
             cout << " half_plane_crack_pcc.Get_internal_sub_faces_set().size() " << half_plane_crack_pcc.Get_internal_sub_faces_set().size() << endl;
@@ -116,7 +121,8 @@ std::vector<CellEnergies> PCC_Multiphysics(Config &configuration, std::vector<Su
 
             }
 
-            current_f_energy_densities = Multiphysics_crack_stress_field(crack_growth_series.back(), matrix_material, external_stress_tensor, sample_dimensions);
+            std::vector<double> equivalent_stress_faces; // voMizes stress
+            current_f_energy_densities = Multiphysics_crack_stress_field(crack_growth_series.back(), matrix_material, external_stress_tensor, equivalent_stress_faces,sample_dimensions);
 
 //REPAIR            cout << " Energies: "; for (double cfd : current_f_energy_densities) { std::cout << cfd << "  "; } cout << endl;
 
@@ -131,12 +137,18 @@ std::vector<CellEnergies> PCC_Multiphysics(Config &configuration, std::vector<Su
 //            for (double cfe : current_f_energies) {
 //                std::cout << cfe << "  ";         }
 //            cout << endl;
+        double ambient_temperature = multiphysics_configuration.Get_multiphysics_temperature();
+        std::vector<double> temperature_faces(CellNumbs.at(2),ambient_temperature);
 
+        face_energies.Set_ambient_temperature(temperature_faces);
+        face_energies.Set_von_Mises_stress(equivalent_stress_faces);
 /// CellEnergy parameter 'vector<double> current_f_energies' for all 2-cells
-            face_energies.Set_f_elastic_energies(current_f_energies);
+        face_energies.Set_f_elastic_energies(current_f_energies);
             CE_vector.push_back(face_energies);
-
     } // end of for(pcc_subcomplexes.size())
+
+    return CE_vector;
+}
 
 /*
 
@@ -181,6 +193,3 @@ std::vector<CellEnergies> PCC_Multiphysics(Config &configuration, std::vector<Su
     for(unsigned int fnumber = 0; fnumber < CellNumbs.at(2); ++fnumber)
             face_coordinates.push_back(find_aGBseed(fnumber, paths, CellNumbs, grain_coordinates));
 */
-
-    return CE_vector;
-}

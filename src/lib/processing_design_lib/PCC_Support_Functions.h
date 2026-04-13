@@ -19,6 +19,12 @@ std::vector<double> VectorDReader(const char* FilePath);
 //Eigen::SparseMatrix<double> SMatrixReader(char* SMpath, unsigned int Rows, unsigned int Cols);
 Eigen::SparseMatrix<double> SMatrixReader(std::string SMpath, unsigned int Rows, unsigned int Cols);
 
+/// # * # Reading integer matrix from file
+std::vector<std::vector<int>> IntMatrixReader(std::ifstream &ifstream_to_matrix);
+
+/// # * # Reading list of integers (with various lengths of its rows) from file
+std::vector<std::vector<int>> IntListReader(std::ifstream &ifstream_to_matrix);
+
 /// # * # Creation Eigen::Sparse_Matrix from file
 std::vector<std::tuple<double, double, double>> Tuple3Reader(std::string SMpath);
 
@@ -27,6 +33,12 @@ std::set<unsigned int> convertToSet(std::vector<unsigned int> &v);
 
 /// # * # Set to Vector simple converter
 std::vector<unsigned int> SetToVector(std::set<unsigned int> &v);
+
+/*!
+ * @brief Read design state vector and creates a correspoinding graph
+ * @param subcomplex_instream
+ */
+void DesignVectorToGraph(std::ifstream &subcomplex_instream);
 
 
 /*! ## 3 ##
@@ -41,11 +53,11 @@ std::vector<unsigned int> SetToVector(std::set<unsigned int> &v);
 std::vector<double> Log_normal_distribution (double mu_f, double sigm_f, int bins_number);
 
 /// # 5 # Finding barycenter coordinates as a tuple<double, double, double> for a given 'facenumb' face
-std::tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<std::string> const &paths, std::vector<unsigned int> const &CellNumbs, std::vector<std::tuple<double, double, double>> const &AllSeeds_coordinates);
-
+//std::tuple<double, double, double> find_aGBseed(unsigned int facenumb, std::vector<std::string> const &paths, std::vector<unsigned int> const &CellNumbs, std::vector<std::tuple<double, double, double>> const &AllSeeds_coordinates);
+std::tuple<double, double, double> find_aGBseed(unsigned int facenumb);
 /// # 5 # Finding barycenter coordinates as a tuple<double, double, double> for a given 'edgenumb' edge
-std::tuple<double, double, double> find_anEdgeSeed(unsigned int edgenumb, std::vector<std::string> const &paths, std::vector<unsigned int> const &CellNumbs, std::vector<std::tuple<double, double, double>> const &AllSeeds_coordinates);
-
+//std::tuple<double, double, double> find_anEdgeSeed(unsigned int edgenumb, std::vector<std::string> const &paths, std::vector<unsigned int> const &CellNumbs, std::vector<std::tuple<double, double, double>> const &AllSeeds_coordinates);
+std::tuple<double, double, double> find_anEdgeSeed(unsigned int edgenumb);
 
 template <typename TP> inline constexpr
 int sign(TP x, std::false_type is_signed);
@@ -124,6 +136,14 @@ std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordi
  */
 std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordinates(std::set<unsigned int> &sfaces_set);
 std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordinates(std::set<unsigned int> &sfaces_set, std::vector<std::tuple<double, double, double>> &all_face_coordinates);
+
+/*!
+ *
+ * @param edge_sequence
+ * @return
+ */
+std::vector<std::tuple<double, double, double>>  edge_sequence_barycentre_coordinates(std::vector<unsigned int> &edge_sequence);
+
 
 /*!
  * @brief cout for a vector of type 'unsigned int'

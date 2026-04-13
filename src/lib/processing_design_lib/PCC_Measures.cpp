@@ -79,7 +79,8 @@ std::vector<double> face_edge_normalised_local_indices(std::vector<unsigned int>
 
 //    double face_edge_index = 0.0;
     std::vector<double> Face_inclusion_index(CellNumbs.at(2),0), j_fractions(4,0), d_fractions(3,0);
-    std::vector<double> TJsTypes; std::vector<int> TJsTypes_int;
+    std::vector<double> TJsTypes;
+    std::vector<int> TJsTypes_int;
 
     TJsTypes_int = Edge_types_byFaces(CellNumbs, special_face_sequence, j_fractions, d_fractions);
 
@@ -156,7 +157,7 @@ double Node_edge_index(std::vector<unsigned int> &special_face_sequence, Eigen::
 
 /// * Function calculates the vector<int> "EdgeTypes" of types Edges in the PCC using its FES incidence matrix and special faces sequence (special_faces_sequence) * ///
 std::vector<double> j_fractions_vector(std::vector<double> const &TJsTypes){ // based on Edges vector
-std::vector<double> j_fractions_vector(4); // Function output: TJs fractions
+    std::vector<double> j_fractions_vector(4); // Function output: TJs fractions
 
 unsigned int J0 = 0, J1 = 0, J2 = 0, J3 = 0;
 double j0 = 0, j1 = 0, j2 = 0, j3 = 0, Jall = 0;

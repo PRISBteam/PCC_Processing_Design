@@ -47,6 +47,10 @@ public:
  */
 class Config {
 
+public:
+    // Output only one time per simulation
+    bool main_reader_switch = true, subcomplex_reader_switch = true, multiphysics_reader_switch = true, processing_reader_switch = true, kinetics_reader_switch = true, characterisation_reader_switch = true, design_reader_switch = true, writer_reader_switch = true;
+
 private:
     struct main_configuration {
         std::string pcc_source_dir;
@@ -68,7 +72,16 @@ private:
         std::string Mid_inclusion;
         std::tuple<double, double, double> sample_dimensions;
         double multiphysics_time_scale;
+        double stress_mode;
+        double inclusion_stress_intensity;
+        double crack_stress_intensity;
+        int cut_direction_id;
+        double min_crack_lenghts, max_crack_lenghts;
+        int number_of_cracks;
+        int number_of_crack_sizes;
         Eigen::MatrixXd external_stress_tensor;
+        double equivalent_stress;
+        double pressure;
         double ambient_temperature;
         std::vector<double> macrocrack_ini;
         bool is_multiphysics_log_file;
@@ -88,13 +101,40 @@ private:
     } processing_config;
 
     struct kinetics_configuration {
+        // general
         std::string nk_mode, ek_mode, fk_mode, pk_mode;
         std::string material_id;
         double kinetics_time_scale;
-//        double stress;
-//        double temperature;
+
+        // corrosion
+        double kinetics_corrosion_rate_scale;
+        double corrosion_activation_volume;
+
+        //irradiation
+        std::tuple<double,double,double> beam_direction;
+        double irradiation_damage_rate;
+        double beam_energy_flux;
+        double beam_current;
+        double energy_dissipation_rate;
+        double observation_time;
+
+        // module output
         bool is_kinetics_log_file;
+
     }kinetics_config;
+
+    struct design_configuration {
+        std::string goal_function_id;
+        int design_cell_type;
+        std::string design_mode;
+        std::string design_goal;
+        unsigned int population_size;
+        double mutation_rate, crossover_rate, survival_rate;
+        int max_generation_number;
+        int design_genes_diversity;
+        bool is_design_log;
+
+    }design_config;
 
     int config_dim;
 //    std::string config_source_dir, config_output_dir; // Input and output directories as it is written in the 'config/main.ini' file
@@ -121,22 +161,51 @@ public:
     void Set_pcc_source_dir(std::string &pcc_source_directory);
     void Set_output_dir(std::string &output_directory);
     void Set_pcc_standard_id(std::string &pcc_standard_id);
+
     /// subcomplex
-    void Set_cut_length(double &new_cut_lenth);
-    void Set_grain_neighbour_orders(unsigned int &new_grain_neighbour_orders);
+    void Set_subcomplex_mode(std::string &subcomplex_mode);
+    std::string Get_subcomplex_mode(void) const;
+    void Set_subcomplex_plane(std::vector<double> &new_plane_orientation);
+    std::vector<double> Get_subcomplex_plane(void) const;
+    void Set_subcomplex_cut_length(double &new_cut_lenth);
+    double Get_subcomplex_cut_length(void) const;
+    void Set_subcomplex_grain_neighbour_orders(unsigned int &new_grain_neighbour_orders);
+    unsigned int Get_subcomplex_grain_neighbour_orders(void) const;
     void Set_is_subcomplex_log_file(bool new_is_log_file);
+    bool Get_is_subcomplex_log_file(void) const;
 
     /// multiphysics
-    void Set_Mid_matrix(std::string &Mid_matrix);
-    void Set_Mid_inclusion(std::string &Mid_inclusion);
+    void Set_multiphysics_matrixMaterial_id(std::string &matrix_id);
+    std::string Get_multiphysics_matrixMaterial_id(void) const;
+    void Set_multiphysics_inclusionMaterial_id(std::string &inclusion_id);
+    std::string Get_multiphysics_inclusionMaterial_id(void) const;
+    void Set_multiphysics_time_scale(double &multiphysics_time_scale);
+    double Get_multiphysics_time_scale(void) const;
+    void Set_multiphysics_inclusion_stress_intensity_factor(double &inclusion_stress_intensity);
+    double Get_multiphysics_inclusion_stress_intensity_factor(void) const;
+    void Set_multiphysics_crack_stress_intensity_factor(double &crack_stress_intensity);
+    double Get_multiphysics_crack_stress_intensity_factor(void) const;
+    void Set_multiphysics_crack_stress_mode(double &stress_mode);
+    double Get_multiphysics_crack_stress_mode(void) const;
+    void Set_multiphysics_crack_grow_direction(int &cut_direction_id);
+    int Get_multiphysics_crack_grow_direction(void) const;
+    void Set_multiphysics_min_crack_lenghts(double &min_crack_lenghts);
+    double Get_multiphysics_min_crack_lenghts(void) const;
+    void Set_multiphysics_max_crack_lenghts(double &max_crack_lenghts);
+    double Get_multiphysics_max_crack_lenghts(void) const;
+    void Set_multiphysics_number_of_cracks(int &number_of_cracks);
+    int Get_multiphysics_number_of_cracks(void) const;
+    void Set_multiphysics_number_of_crack_sizes(int &number_of_crack_sizes);
+    int Get_multiphysics_number_of_crack_sizes(void) const;
+    bool Get_is_multiphysics_log_file(void) const;
     void Set_multiphysics_sample_dimensions(std::tuple<double, double, double> &sample_dimensions);
     std::tuple<double, double, double>  Get_multiphysics_sample_dimensions(void);
-    void Set_multiphysics_time_scale(double &tau);
     void Set_multiphysics_external_stress_tensor(Eigen::MatrixXd &external_stress_tensor);
     Eigen::MatrixXd Get_multiphysics_external_stress_tensor(void);
-    void Set_macrocrack_ini(std::vector<double> &macrocrack_ini);
+    double Get_multiphysics_vonMises_stress_in_MPa(Eigen::MatrixXd external_stress_tensor);
+    double Get_multiphysics_pressure_in_MPa(Eigen::MatrixXd external_stress_tensor);
+    //    void Set_macrocrack_ini(std::vector<double> &macrocrack_ini);
     void Set_is_multiphysics_log_file(bool is_log_file);
-
     void Set_multiphysics_temperature(double &new_temperature);
     double Get_multiphysics_temperature(void) const;
 
@@ -244,9 +313,51 @@ public:
     void Set_is_kinetics_log_file(bool is_kinetics_log_file);
     bool Get_is_kinetics_log_file(void);
 
-// corrosion
+// kinetics corrosion
     void Set_kinetics_time_scale(double &new_time_parameter);
     double Get_kinetics_time_scale(void) const;
+    void Set_kinetics_corrosion_rate_scale(double &new_corrosion_rate_parameter);
+    double Get_kinetics_corrosion_rate_scale(void) const;
+    void Set_kinetics_corrosion_activation_volume(double &corrosion_activation_volume);
+    double Get_kinetics_corrosion_activation_volume(void) const;
+
+// kinetics irradiation
+    void Set_kinetics_beam_direction(std::tuple<double,double,double> &new_beam_direction);
+    std::tuple<double,double,double> Get_kinetics_beam_direction(void) const;
+    void Set_kinetics_irradiation_damage_rate(double &new_irradiation_damage_rate);
+    double Get_kinetics_irradiation_damage_rate(void) const;
+    void Set_kinetics_beam_energy_flux(double &beam_energy_flux);
+    double Get_kinetics_beam_energy_flux(void) const;
+    void Set_kinetics_beam_current(double &beam_current);
+    double Get_kinetics_beam_current(void) const;
+    void Set_kinetics_energy_dissipation_rate(double &energy_dissipation_rate);
+    double Get_kinetics_energy_dissipation_rate(void) const;
+    void Set_kinetics_observation_time(double &new_observation_time);
+    double Get_kinetics_observation_time(void) const;
+
+// design module
+    void Set_design_goal_function_id(std::string &new_goal_function_id);
+    std::string Get_design_goal_function_id(void) const;
+    void Set_design_cell_type(int &new_design_cell_type);
+    int Get_design_cell_type(void) const;
+    void Set_design_mode(std::string &PCCDesign_type);
+    void Set_design_goal(std::string &min_max_goal);
+    std::string Get_design_goal(void) const;
+    std::string Get_design_mode(void) const;
+    void Set_design_genes_diversity(int &genes_diversity);
+    int Get_design_genes_diversity(void) const;
+    void Set_design_population_size(unsigned int &population_size);
+    unsigned int Get_design_population_size(void) const;
+    void Set_design_mutation_rate(double &mutation_rate);
+    double Get_design_mutation_rate(void) const;
+    void Set_design_crossover_rate(double &crossover_rate);
+    double Get_design_crossover_rate(void) const;
+    void Set_design_survival_rate(double &survival_rate);
+    double Get_design_survival_rate(void) const;
+    void Set_design_max_generation_number(int &max_generation_number);
+    int Get_design_max_generation_number(void) const;
+    void Set_is_design_log_file(bool is_design_log);
+    bool Get_is_design_log_file(void) const;
 
 };
 // ConfigVector (../config/main.ini) contains ALL the control variables needed for the program execution
@@ -254,6 +365,11 @@ public:
 /// ==== # 1 # =============== CellDesign class  ========================= ///
 class CellDesign {
 private:
+    bool is_set_p_special_sequence = false, is_set_f_special_sequence = false, is_set_e_special_sequence = false, is_set_n_special_sequence = false;
+    bool is_set_p_induced_sequence = false, is_set_f_induced_sequence = false, is_set_e_induced_sequence = false, is_set_n_induced_sequence = false;
+    bool is_set_p_special_design = false, is_set_f_special_design = false, is_set_e_special_design = false, is_set_n_special_design = false;
+    bool is_set_p_induced_design = false, is_set_f_induced_design = false, is_set_e_induced_design = false, is_set_n_induced_design = false;
+
     /// Configurations/Designs: special cells and induced cells
     std::vector<unsigned int> p_special_design, f_special_design, e_special_design, n_special_design; // state vectors of special k-cells
     std::vector<unsigned int> p_induced_design, f_induced_design, e_induced_design, n_induced_design; // state vectors of induced k-cells
@@ -289,6 +405,7 @@ public:
     std::vector<unsigned int> Get_f_special_sequence(void) const;
     std::vector<unsigned int> Get_e_special_sequence(void) const;
     std::vector<unsigned int> Get_n_special_sequence(void) const;
+
     std::vector<Agglomeration> Get_p_agglomeration_map(void) const;
     std::vector<Agglomeration> Get_f_agglomeration_map(void) const;
     std::vector<Agglomeration> Get_e_agglomeration_map(void) const;
@@ -297,6 +414,8 @@ public:
     std::vector<std::vector<unsigned int>> Get_f_special_series(void) const;
     std::vector<std::vector<unsigned int>> Get_e_special_series(void) const;
     std::vector<std::vector<unsigned int>> Get_n_special_series(void) const;
+
+    void Set_p_design(std::vector<unsigned int> &p_special_vector);
     std::vector<unsigned int> Get_p_design(void) const;
     std::vector<unsigned int> Get_f_design(void) const;
     std::vector<unsigned int> Get_e_design(void) const;
@@ -311,6 +430,12 @@ public:
     std::vector<std::vector<unsigned int>> Get_e_induced_series(void) const;
     std::vector<std::vector<unsigned int>> Get_n_induced_series(void) const;
 
+    // Check
+    bool Check_special_sequence(int cell_type);
+    bool Check_induced_sequence(int cell_type);
+    bool Check_special_design(int cell_type);
+    bool Check_induced_design(int cell_type);
+
 }; // END of class CellDesign
 
 /// # 7 # The class of a MATERIAL
@@ -324,6 +449,7 @@ private:
     double melting_point = 0.0;
     double gb_cohesion_energy = 0.0;
     double gb_width;
+    double Burgers_vector;
     double Young_modulus = 0.0;
     double Poisson_ratio = 0.0;
     double yield_strength = 0.0;
@@ -345,6 +471,7 @@ public:
 // Structural
     std::string Get_material_type(void) const;
     double Get_gb_width(void) const;
+    double Get_Burgers_vector(void) const;
 
 // Thermodynamic
     double Get_mass_density(void) const;
@@ -377,9 +504,9 @@ public:
 // # V # The class of a CELLS_ENERGIES :: list of the energy_vectors corresponding to different dimensions 'k' of the k-cells in a PCC
 class CellEnergies {
 private:
-    double von_Mises_elastic_stress = 0.0;
+    std::vector<double> von_Mises_elastic_stress;
     double homogeneous_elastic_energy = 0.0;
-    double ambient_temperature = 0.0;
+    std::vector<double> ambient_temperature;
 
     /// Energies for each cell in a PCC
     std::vector<double> p_elastic_energies, f_elastic_energies, e_elastic_energies, n_elastic_energies; // elastic energies of k-cells defined at their barycentres
@@ -389,10 +516,11 @@ private:
 public:
     /// Set of variables
     CellEnergies() {}; // constructor
-    void Set_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress); // [Pa]
-    void Get_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress); // [Pa]
-    void Set_ambient_temperature(double &new_ambient_temperature); // [K]
-    double Get_ambient_temperature(void); // [K]
+    void Set_external_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress);
+    void Set_von_Mises_stress(std::vector<double> &equivalent_stress);
+    std::vector<double> Get_von_Mises_stress(void) const; // [Pa]
+    void Set_ambient_temperature(std::vector<double> &new_ambient_temperature); // [K]
+    std::vector<double> Get_ambient_temperature(void) const; // [K]
     void Set_homogeneous_elastic_energy(std::tuple<double, double, double> &sample_dimensions, double &von_Mises_elastic_stress, Material &matrix_material); // [J]
     void Set_p_elastic_energies(std::vector<double> p_el_energies); // in [J]
     void Set_f_elastic_energies(std::vector<double> f_el_energies); // in [J]
@@ -406,7 +534,6 @@ public:
 
 
     // Get values
-    double Get_von_Mises_stress(void); // [Pa]
     double Get_homogeneous_elastic_energy(void); // [J]
 
     std::vector<double> Get_p_elastic_energies(void) const;

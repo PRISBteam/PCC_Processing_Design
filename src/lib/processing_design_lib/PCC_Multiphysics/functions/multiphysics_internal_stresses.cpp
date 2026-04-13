@@ -48,7 +48,7 @@ template <typename TP> inline constexpr
 int sign(TP u) {
     return sign(u, std::is_signed<TP>()); }
 
-std::vector<double> Multiphysics_crack_stress_field(Macrocrack &new_crack, Material &matrix_material, Eigen::MatrixXd &external_stress, std::tuple<double, double, double> &sample_dimensions) {
+std::vector<double> Multiphysics_crack_stress_field(Macrocrack &new_crack, Material &matrix_material, Eigen::MatrixXd &external_stress, std::vector<double> &equivalent_stress_faces, std::tuple<double, double, double> &sample_dimensions) {
 
     std::ofstream Cracked_pcc_out;
     Cracked_pcc_out.open(output_dir + "Macrocrack_stress_field.txt"s, ios::trunc); // this Processing_Design.log stream will be closed at the end of the main function
@@ -66,16 +66,14 @@ std::vector<double> Multiphysics_crack_stress_field(Macrocrack &new_crack, Mater
     double material_strenght = matrix_material.Get_Strength();
 
     double Len = new_crack.Get_crack_length(); //new crack length;
-    Len = 0.4;  ///////////// ////////////////// !!!!!!
+//    Len = 0.4;  ///////////// ////////////////// !!!!!!
     Len *= 2.0; // doubled crack length
     if (new_crack.Get_crack_plane().at(0) > 0.0)
         Len *= std::get<0>(sample_dimensions);
     else
         Len *= std::get<1>(sample_dimensions);
 
-
     double Sigm = std::sqrt(0.5 * (std::pow((external_stress(0,0) - external_stress(1,1)), 2.0) + std::pow((external_stress(0,0) - external_stress(2,2)), 2.0) + std::pow((external_stress(1,1) - external_stress(2,2)), 2.0) ) + 3.0 * ( std::pow(external_stress(0,1), 2.0) + std::pow(external_stress(1,2), 2.0) + std::pow(external_stress(2,0), 2.0) )); //vonMises_stress
-
     double Sxx_crack = 0.0, Syy_crack = 0.0, Szz_crack = 0.0, Sxy_crack = 0.0;
 
    //for(auto fcv : face_coordinates_vector)
@@ -135,10 +133,12 @@ std::vector<double> Multiphysics_crack_stress_field(Macrocrack &new_crack, Mater
 ///        local_el_energy_density = std::sqrt( 0.5*( pow((Sxx_crack - Syy_crack),2.0) + pow((Sxx_crack - Szz_crack),2.0) + pow((Syy_crack - Szz_crack),2.0) + 6.0*pow(Sxy_crack,2.0) ) );
         local_el_energy_density = std::pow((2.0*Young_mod),(-1.0))*(std::pow(Sxx_crack,2.0) + std::pow(Syy_crack,2.0) - 2.0*nu*Sxx_crack*Syy_crack );/// + pow((2.0*Shear_mod),(-1.0))*pow(Sxy_crack,2.0);
         f_el_energy_densities.push_back(local_el_energy_density);
-
+        equivalent_stress_faces.push_back(std::sqrt(0.5 * (pow((Sxx_crack - Syy_crack),2.0) + pow((Sxx_crack - Szz_crack),2.0) + pow((Syy_crack - Szz_crack),2.0) + 6 * pow(Sxy_crack,2.0))));
 /// (1.0 + nu) * (Sxx_crack + Syy_crack + Szz_crack) / 3.0
         double Vl = std::get<0>(sample_dimensions)*std::get<1>(sample_dimensions)*std::get<2>(sample_dimensions);
-        Cracked_pcc_out << (std::pow(Sxx_crack,2) + std::pow(Syy_crack,2) - 2.0*nu*Sxx_crack*Syy_crack) / (2.0*Young_mod)  << "\t" << x*std::pow(10,6) << "\t" << y*std::pow(10,6) << "\t" << z*std::pow(10,6) << endl;
+// TEST     Cracked_pcc_out << std::pow(Sxx_crack,2) << "\t" << std::pow(Syy_crack,2) << "\t" << Young_mod << endl;
+      //  Cracked_pcc_out << (std::pow(Sxx_crack,2) + std::pow(Syy_crack,2) - 2.0*nu*Sxx_crack*Syy_crack) / (2.0*Young_mod)  << "\t" << x*std::pow(10,6) << "\t" << y*std::pow(10,6) << "\t" << z*std::pow(10,6) << endl;
+       Cracked_pcc_out << std::sqrt(0.5 * (std::pow((Sxx_crack - Syy_crack), 2.0) + std::pow((Sxx_crack - Szz_crack), 2.0) + std::pow((Syy_crack - Szz_crack), 2.0) ) + 3.0 * std::pow(Sxy_crack, 2.0) ) << "\t" << x*std::pow(10,6) << "\t" << y*std::pow(10,6) << "\t" << z*std::pow(10,6) << endl;
 
     } // for (unsigned int itr = 0; itr < face_coordinates.size(); ++itr)
     cout << "Fracture criterion:\t\t" <<  std::pow((2.0*Young_mod),(-1.0))*std::pow(material_strenght,2.0);
@@ -211,6 +211,7 @@ std::vector<double> Multiphysics_crack_stress_field(Macrocrack &new_crack, Mater
 
     } // end of for( itr )
 **/
+
     Cracked_pcc_out << endl << endl;
     Cracked_pcc_out.close();
     cout << "\t p_crit = \t" << std::pow(200.0,2.0)*std::pow(10.0,12.0)/(2.0*Young_mod) << endl;

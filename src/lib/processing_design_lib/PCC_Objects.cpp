@@ -5,6 +5,8 @@
 #include <vector>
 #include <set>
 #include <cmath>
+#include <algorithm>
+//#include <numeric>
 
 #include "../external/Eigen/Core"
 #include "../external/Eigen/SparseCore"
@@ -17,8 +19,7 @@ extern std::vector<unsigned int> CellNumbs; // number of cells in a PCC defined 
 extern std::string source_path;
 extern std::string output_dir;
 extern std::vector<std::string> paths_to_PCC_matrices;
-
-std::ofstream Out_local_logstream;
+extern std::ofstream main_logfile_stream;
 
 typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which declares a column-major sparse matrix type of doubles with the nickname 'SpMat'
 
@@ -63,21 +64,50 @@ void Config::Set_pcc_standard_id(std::string &pcc_standard_id){
 
 
 // subcomplex
-void Config::Set_cut_length(double &new_cut_lenth){
+void Config::Set_subcomplex_mode(std::string &subcomplex_mode){
+    subcomplex_config.sctype = subcomplex_mode;
+}
+std::string Config::Get_subcomplex_mode(void) const{
+    return subcomplex_config.sctype;
+}
+void Config::Set_subcomplex_plane(std::vector<double> &new_plane_orientation){
+    subcomplex_config.plane_orientation = new_plane_orientation;
+}
+std::vector<double> Config::Get_subcomplex_plane(void) const{
+    return subcomplex_config.plane_orientation;
+}
+void Config::Set_subcomplex_cut_length(double &new_cut_lenth){
     subcomplex_config.cut_length = new_cut_lenth;
 }
-void Config::Set_grain_neighbour_orders(unsigned int &new_grain_neighbour_orders){
+double Config::Get_subcomplex_cut_length(void) const{
+    return subcomplex_config.cut_length;
+}
+void Config::Set_subcomplex_grain_neighbour_orders(unsigned int &new_grain_neighbour_orders){
     subcomplex_config.grain_neighbour_orders = new_grain_neighbour_orders;
 }
+unsigned int Config::Get_subcomplex_grain_neighbour_orders(void) const{
+    return subcomplex_config.grain_neighbour_orders;
+}
+
 void Config::Set_is_subcomplex_log_file(bool new_is_log_file){
     subcomplex_config.is_subcomplex_log_file = new_is_log_file;
 }
-// multiphysics
-void Config::Set_Mid_matrix(std::string &new_Mid_matrix){
-    multiphysics_config.Mid_matrix = new_Mid_matrix;
+bool Config::Get_is_subcomplex_log_file(void) const{
+    return subcomplex_config.is_subcomplex_log_file;
 }
-void Config::Set_Mid_inclusion(std::string &new_Mid_inclusion){
-    multiphysics_config.Mid_inclusion = new_Mid_inclusion;
+
+// multiphysics
+void Config::Set_multiphysics_matrixMaterial_id(std::string &matrix_id){
+    multiphysics_config.Mid_matrix = matrix_id;
+}
+std::string Config::Get_multiphysics_matrixMaterial_id(void) const{
+    return multiphysics_config.Mid_matrix;
+}
+void Config::Set_multiphysics_inclusionMaterial_id(std::string &inclusion_id){
+    multiphysics_config.Mid_inclusion = inclusion_id;
+}
+std::string Config::Get_multiphysics_inclusionMaterial_id(void) const{
+    return multiphysics_config.Mid_inclusion;
 }
 void Config::Set_multiphysics_sample_dimensions(std::tuple<double, double, double> &new_sample_dimensions){
     multiphysics_config.sample_dimensions = new_sample_dimensions;
@@ -85,9 +115,11 @@ void Config::Set_multiphysics_sample_dimensions(std::tuple<double, double, doubl
 std::tuple<double, double, double> Config::Get_multiphysics_sample_dimensions(void){
     return multiphysics_config.sample_dimensions;
 }
-
-void Config::Set_multiphysics_time_scale(double &new_tau){
-    multiphysics_config.multiphysics_time_scale = new_tau;
+void Config::Set_multiphysics_time_scale(double &multiphysics_time_scale){
+    multiphysics_config.multiphysics_time_scale = multiphysics_time_scale;
+}
+double Config::Get_multiphysics_time_scale(void) const{
+    return multiphysics_config.multiphysics_time_scale;
 }
 void Config::Set_multiphysics_external_stress_tensor(Eigen::MatrixXd &new_external_stress_tensor){
     multiphysics_config.external_stress_tensor = new_external_stress_tensor;
@@ -95,21 +127,144 @@ void Config::Set_multiphysics_external_stress_tensor(Eigen::MatrixXd &new_extern
 Eigen::MatrixXd Config::Get_multiphysics_external_stress_tensor(void){
     return multiphysics_config.external_stress_tensor;
 }
+double Config::Get_multiphysics_vonMises_stress_in_MPa(Eigen::MatrixXd external_stress_tensor) {
 
-void Config::Set_macrocrack_ini(std::vector<double> &new_macrocrack_ini){
-    multiphysics_config.macrocrack_ini = new_macrocrack_ini;
+    double sxx = 0.0, sxy = 0.0, sxz = 0.0, syx = 0.0, syy = 0.0, syz = 0.0, szx = 0.0, szy = 0.0, szz = 0.0;
+    if (sxx < 1000000.0 || syy < 1000000.0 || szz < 1000000.0 || sxy < 1000000.0 || sxz < 1000000.0 || syx < 1000000.0 || syz < 1000000.0) {
+        sxx = external_stress_tensor(0, 0) * std::pow(10, 6);
+        sxy = external_stress_tensor(0, 1) * std::pow(10, 6);
+        sxz = external_stress_tensor(0, 2) * std::pow(10, 6);
+        syx = external_stress_tensor(1, 0) * std::pow(10, 6);
+        syy = external_stress_tensor(1, 1) * std::pow(10, 6);
+        syz = external_stress_tensor(1, 2) * std::pow(10, 6);
+        szx = external_stress_tensor(2, 0) * std::pow(10, 6);
+        szy = external_stress_tensor(2, 1) * std::pow(10, 6);
+        szz = external_stress_tensor(2, 2) * std::pow(10, 6);
+    } else    {
+        cout << endl
+             << "WARNING: Highly likely stress values in the '../config/multiphysics.ini' file are not in [MPa] as requested !!!"
+             << endl << endl;
+        main_logfile_stream << endl
+                            << "WARNING: Highly likely stress values in the '../config/multiphysics.ini' file are not in [MPa] as requested !!!"
+                            << endl << endl;
+
+        sxx = external_stress_tensor(0,0);
+        sxy = external_stress_tensor(0,1);
+        sxz = external_stress_tensor(0,2);
+        syx = external_stress_tensor(1,0);
+        syy = external_stress_tensor(1,1);
+        syz = external_stress_tensor(1,2);
+        szx = external_stress_tensor(2,0);
+        szy = external_stress_tensor(2,1);
+        szz = external_stress_tensor(2,2);
+    }
+
+    multiphysics_config.equivalent_stress = std::sqrt(0.5 * (std::pow((sxx - syy), 2.0) + std::pow((sxx - szz), 2.0) + std::pow((syy - szz), 2.0) ) + 3.0 * ( std::pow(sxy, 2.0) + std::pow(syz, 2.0) + std::pow(szx, 2.0) ) );
+
+    return multiphysics_config.equivalent_stress;
 }
-void Config::Set_is_multiphysics_log_file(bool new_is_log_file){
-    multiphysics_config.is_multiphysics_log_file = new_is_log_file;
+double Config::Get_multiphysics_pressure_in_MPa(Eigen::MatrixXd external_stress_tensor) {
+
+    double sxx = 0.0, sxy = 0.0, sxz = 0.0, syx = 0.0, syy = 0.0, syz = 0.0, szx = 0.0, szy = 0.0, szz = 0.0;
+
+    if (sxx < 1000000.0 || syy < 1000000.0 || szz < 1000000.0 || sxy < 1000000.0 || sxz < 1000000.0 || syx < 1000000.0 || syz < 1000000.0) {
+        sxx = external_stress_tensor(0, 0) * std::pow(10, 6);
+        sxy = external_stress_tensor(0, 1) * std::pow(10, 6);
+        sxz = external_stress_tensor(0, 2) * std::pow(10, 6);
+        syx = external_stress_tensor(1, 0) * std::pow(10, 6);
+        syy = external_stress_tensor(1, 1) * std::pow(10, 6);
+        syz = external_stress_tensor(1, 2) * std::pow(10, 6);
+        szx = external_stress_tensor(2, 0) * std::pow(10, 6);
+        szy = external_stress_tensor(2, 1) * std::pow(10, 6);
+        szz = external_stress_tensor(2, 2) * std::pow(10, 6);
+    } else {
+        cout << endl
+             << "WARNING: Highly likely stress values in the '../config/multiphysics.ini' file are not in [MPa] as requested !!!"
+             << endl << endl;
+        main_logfile_stream << endl
+                            << "WARNING: Highly likely stress values in the '../config/multiphysics.ini' file are not in [MPa] as requested !!!"
+                            << endl << endl;
+
+        sxx = external_stress_tensor(0,0);
+        sxy = external_stress_tensor(0,1);
+        sxz = external_stress_tensor(0,2);
+        syx = external_stress_tensor(1,0);
+        syy = external_stress_tensor(1,1);
+        syz = external_stress_tensor(1,2);
+        szx = external_stress_tensor(2,0);
+        szy = external_stress_tensor(2,1);
+        szz = external_stress_tensor(2,2);
+    }
+
+    multiphysics_config.pressure = (sxx + syy + szz) / 3.0;
+
+    return multiphysics_config.pressure;
 }
 
 void Config::Set_multiphysics_temperature(double &new_temperature){
     multiphysics_config.ambient_temperature = new_temperature;
-
 }
 double Config::Get_multiphysics_temperature(void) const{
     return multiphysics_config.ambient_temperature;
 }
+void Config::Set_multiphysics_inclusion_stress_intensity_factor(double &inclusion_stress_intensity){
+    multiphysics_config.inclusion_stress_intensity = inclusion_stress_intensity;
+}
+double Config::Get_multiphysics_inclusion_stress_intensity_factor(void) const{
+    return multiphysics_config.inclusion_stress_intensity;
+}
+void Config::Set_multiphysics_crack_stress_intensity_factor(double &crack_stress_intensity){
+    multiphysics_config.crack_stress_intensity = crack_stress_intensity;
+}
+double Config::Get_multiphysics_crack_stress_intensity_factor(void) const{
+    return multiphysics_config.crack_stress_intensity;
+}
+void Config::Set_multiphysics_crack_stress_mode(double &stress_mode){
+    multiphysics_config.stress_mode = stress_mode;
+}
+double Config::Get_multiphysics_crack_stress_mode(void) const{
+    return multiphysics_config.stress_mode;
+}
+void Config::Set_multiphysics_crack_grow_direction(int &cut_direction_id){
+    multiphysics_config.cut_direction_id = cut_direction_id;
+}
+int Config::Get_multiphysics_crack_grow_direction(void) const{
+    return multiphysics_config.cut_direction_id;
+}
+void Config::Set_multiphysics_min_crack_lenghts(double &min_crack_lenghts){
+    multiphysics_config.min_crack_lenghts = min_crack_lenghts;
+}
+double Config::Get_multiphysics_min_crack_lenghts(void) const{
+    return multiphysics_config.min_crack_lenghts;
+}
+void Config::Set_multiphysics_max_crack_lenghts(double &max_crack_lenghts){
+    multiphysics_config.max_crack_lenghts = max_crack_lenghts;
+}
+double Config::Get_multiphysics_max_crack_lenghts(void) const{
+    return multiphysics_config.max_crack_lenghts;
+}
+void Config::Set_multiphysics_number_of_cracks(int &number_of_cracks){
+    multiphysics_config.number_of_cracks = number_of_cracks;
+}
+int Config::Get_multiphysics_number_of_cracks(void) const{
+    return multiphysics_config.number_of_cracks;
+}
+void Config::Set_multiphysics_number_of_crack_sizes(int &number_of_crack_sizes){
+    multiphysics_config.number_of_crack_sizes = number_of_crack_sizes;
+}
+int Config::Get_multiphysics_number_of_crack_sizes(void) const{
+    return multiphysics_config.number_of_crack_sizes;
+}
+void Config::Set_is_multiphysics_log_file(bool new_is_log_file) {
+    multiphysics_config.is_multiphysics_log_file = new_is_log_file;
+}
+bool Config::Get_is_multiphysics_log_file(void) const{
+    return multiphysics_config.is_multiphysics_log_file;
+}
+//void Config::Set_macrocrack_ini(std::vector<double> &new_macrocrack_ini){
+//    multiphysics_config.macrocrack_ini = new_macrocrack_ini;
+//}
+
 
 //processing
 void Config::Set_processing_pp_mode(std::string &new_pp_mode){
@@ -306,6 +461,7 @@ Config::processing_configuration Config::Get_processing_config() const {
 }
 
 /// kinetics
+// general
 void Config::Set_kinetics_nk_mode(std::string &new_nk_mode){
     kinetics_config.nk_mode = new_nk_mode;
 }
@@ -331,14 +487,13 @@ std::string Config::Get_kinetics_pk_mode(void){
     return kinetics_config.pk_mode;
 
 }
-
 void Config::Set_kinetics_material_id(std::string &new_mat_id){
     kinetics_config.material_id = new_mat_id;
 }
 std::string Config::Get_kinetics_material_id(void){
     return kinetics_config.material_id;
 }
-
+// kinetics output
 void Config::Set_is_kinetics_log_file(bool new_is_kinetics_log_file){
     kinetics_config.is_kinetics_log_file = new_is_kinetics_log_file;
 }
@@ -351,6 +506,128 @@ void Config::Set_kinetics_time_scale(double &new_time_parameter){
 }
 double Config::Get_kinetics_time_scale(void) const{
     return kinetics_config.kinetics_time_scale;
+}
+// kinetics corrosion
+void Config::Set_kinetics_corrosion_rate_scale(double &new_corrosion_rate_parameter){
+    kinetics_config.kinetics_corrosion_rate_scale = new_corrosion_rate_parameter;
+}
+double Config::Get_kinetics_corrosion_rate_scale(void) const{
+    return kinetics_config.kinetics_corrosion_rate_scale;
+}
+void Config::Set_kinetics_corrosion_activation_volume(double &corrosion_activation_volume){
+    kinetics_config.corrosion_activation_volume = corrosion_activation_volume;
+}
+double Config::Get_kinetics_corrosion_activation_volume(void) const{
+    return kinetics_config.corrosion_activation_volume;
+}
+
+// kinetics irradiation
+void Config::Set_kinetics_beam_direction(std::tuple<double,double,double> &new_beam_direction){
+    kinetics_config.beam_direction = new_beam_direction;
+}
+std::tuple<double,double,double> Config::Get_kinetics_beam_direction(void) const{
+    return kinetics_config.beam_direction;
+}
+void Config::Set_kinetics_irradiation_damage_rate(double &new_irradiation_damage_rate){
+    kinetics_config.irradiation_damage_rate = new_irradiation_damage_rate;
+}
+double Config::Get_kinetics_irradiation_damage_rate(void) const{
+    return kinetics_config.irradiation_damage_rate;
+}
+void Config::Set_kinetics_beam_energy_flux(double &beam_energy_flux){
+    kinetics_config.beam_energy_flux = beam_energy_flux;
+}
+double Config::Get_kinetics_beam_energy_flux(void) const{
+    return kinetics_config.beam_energy_flux;
+}
+void Config::Set_kinetics_beam_current(double &beam_current){
+    kinetics_config.beam_current = beam_current;
+}
+double Config::Get_kinetics_beam_current(void) const{
+    return kinetics_config.beam_current;
+}
+void Config::Set_kinetics_energy_dissipation_rate(double &energy_dissipation_rate){
+    kinetics_config.energy_dissipation_rate = energy_dissipation_rate;
+}
+double Config::Get_kinetics_energy_dissipation_rate(void) const{
+    return kinetics_config.energy_dissipation_rate;
+}
+void Config::Set_kinetics_observation_time(double &new_observation_time){
+    kinetics_config.observation_time = new_observation_time;
+}
+double Config::Get_kinetics_observation_time(void) const{
+    return kinetics_config.observation_time;
+}
+
+
+
+/// Design module
+void Config::Set_design_goal_function_id(std::string &new_goal_function_id) {
+    design_config.goal_function_id = new_goal_function_id;
+}
+std::string Config::Get_design_goal_function_id(void) const {
+    return design_config.goal_function_id;
+}
+void Config::Set_design_cell_type(int &new_design_cell_type){
+    design_config.design_cell_type = new_design_cell_type;
+}
+int Config::Get_design_cell_type(void) const{
+    return design_config.design_cell_type;
+}
+void Config::Set_design_mode(std::string &PCCDesign_type){
+    design_config.design_mode = PCCDesign_type;
+}
+std::string Config::Get_design_mode(void) const{
+    return design_config.design_mode;
+}
+void Config::Set_design_goal(std::string &min_max_goal){
+    design_config.design_goal = min_max_goal;
+}
+std::string Config::Get_design_goal(void) const{
+    return design_config.design_goal;
+}
+
+void Config::Set_design_genes_diversity(int &genes_diversity){
+    design_config.design_genes_diversity = genes_diversity;
+}
+int Config::Get_design_genes_diversity(void) const{
+    return design_config.design_genes_diversity;
+}
+void Config::Set_design_population_size(unsigned int &population_size){
+    design_config.population_size = population_size;
+}
+unsigned int Config::Get_design_population_size(void) const{
+    return design_config.population_size;
+}
+void Config::Set_design_mutation_rate(double &mutation_rate){
+    design_config.mutation_rate = mutation_rate;
+}
+double Config::Get_design_mutation_rate(void) const{
+    return design_config.mutation_rate;
+}
+void Config::Set_design_crossover_rate(double &crossover_rate){
+    design_config.crossover_rate = crossover_rate;
+}
+double Config::Get_design_crossover_rate(void) const{
+    return design_config.crossover_rate;
+}
+void Config::Set_design_survival_rate(double &survival_rate){
+    design_config.survival_rate = survival_rate;
+}
+double Config::Get_design_survival_rate(void) const{
+    return design_config.survival_rate;
+}
+void Config::Set_design_max_generation_number(int &max_generation_number){
+    design_config.max_generation_number = max_generation_number;
+}
+int Config::Get_design_max_generation_number(void) const{
+    return design_config.max_generation_number;
+}
+void Config::Set_is_design_log_file(bool is_design_log){
+    design_config.is_design_log = is_design_log;
+}
+bool Config::Get_is_design_log_file(void) const{
+    return design_config.is_design_log;
 }
 
 int Config::Get_dim() const {
@@ -393,14 +670,15 @@ int Config::Get_dim() const {
         return Configuration_cState;
     }; //!@return Configuration_sState
 
-     void Config::Read_config(Config &main_configuration){
+     void Config::Read_config(Config &main_configuration) {
          config_ConfVector = config_reader_main(main_configuration);
+         main_logfile_stream.open(output_dir + "cpd_main.log"s, ios::app); // the main_logfile_stream.log stream will be closed at the end of the main function
 
         config_dim = config_ConfVector.at(0); // [0] space dimension of the problem (dim = 1, 2 or 3);
         if (config_dim != 1 && config_dim != 2 && config_dim != 3) {
             cout << "Wrong dimension ERROR! Please change 'dim' parameter in ../config/mail.ini file to 1, 2, or 3"
                  << endl;
-            Out_local_logstream << "Wrong dimension ERROR! Please change 'dim' parameter in ../config/mail.ini file to 1, 2, or 3"
+            main_logfile_stream << "Wrong dimension ERROR! Please change 'dim' parameter in ../config/mail.ini file to 1, 2, or 3"
                     << endl;
             exit(1);
         }
@@ -446,7 +724,7 @@ int Config::Get_dim() const {
             cout
                     << "INPUT DATA ERROR (!) dim > 3 or < 1 as it specified in the ../config/main.ini file. Please, make it equal to 1, 2 or 3."
                     << endl;
-            Out_local_logstream
+            main_logfile_stream
                     << "INPUT DATA ERROR (!) dim > 3 or < 1 in the ../config/main.ini file. Please, make it equal to 1, 2 or 3."
                     << endl;
             exit(1);
@@ -514,15 +792,15 @@ int Config::Get_dim() const {
                   << " does not exists (!)" << endl;
 
 /// CellNumbs output
-        Out_local_logstream.open(main_configuration.Get_main_config().output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
+//        Out_local_logstream.open(main_configuration.Get_main_config().output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
             cout << "=====================================================================================" << endl;
-            Out_local_logstream
+             main_logfile_stream
                     << "=========================================================================================================================================================================="
                     << endl;
             unsigned int t_length = 0;
             for (int cell_numb: CellNumbs) {
                 cout << t_length << "-cells #\t" << cell_numb << endl;
-                Out_local_logstream << t_length++ << "-cells #\t" << cell_numb << endl;
+                main_logfile_stream << t_length++ << "-cells #\t" << cell_numb << endl;
             } // end for (int cell_numb : CellNumbs)
 
         Configuration_sState = {State_p_vector, State_f_vector, State_e_vector, State_n_vector },
@@ -567,13 +845,13 @@ int Config::Get_dim() const {
 /// Output PCCpaths.vector to console and logfile out
         int npath = 0;
         cout << "_____________________________________________________________________________________" << endl;
-        Out_local_logstream
+        main_logfile_stream
                 << "_____________________________________________________________________________________" << endl;
         for (auto path: config_PCCpaths) {
             cout << "[" << npath << "]" << " PCCpaths:\t" << path << endl;
-            Out_local_logstream << "[" << npath++ << "]" << " PCCpaths:\t" << path << endl;
+            main_logfile_stream << "[" << npath++ << "]" << " PCCpaths:\t" << path << endl;
         }
-        cout << endl; Out_local_logstream << endl;
+        cout << endl; main_logfile_stream << endl;
 //        cout << "Size of Configuration_sState:\t" << Configuration_sState.size() << endl; Out_local_logstream << "Size of Configuration_sState:\t" << Configuration_sState.size() << endl;
 //        cout << "Size of Configuration_cState:\t" << Configuration_cState.size() << endl; Out_local_logstream << "Size of Configuration_cState:\t" << Configuration_cState.size() << endl;
   } // end of  if (pcc_standard == "pcc1s")
@@ -581,7 +859,8 @@ int Config::Get_dim() const {
       cout << "ERROR in the reading PCC: please specify the correct 'pcc_standard' perameter in the config/main.ini file corresponding to the version of the PCC you use (please see technical documentation for more details, the first PCC standard has an ID 'pcc1s'" << endl;
       exit(1);
   }
-        Out_local_logstream.close();
+
+  main_logfile_stream.close();
     }; // Read the 'initial configuration' of the problem set in all the relevant '_.ini' files containing in the '\config' project directory using the functions from the 'ini_readers.cpp' project library (and only from there)
 
     /// --------------------------------------- *** END of void Config::Read_config() method *** ------------------------------------------------ ///
@@ -621,18 +900,31 @@ void CellDesign::Set_special_sequences(std::vector<unsigned int> psequence, std:
     void CellDesign::Set_special_sequence(std::vector<unsigned int> special_x_sequence, int cell_type){
         switch (cell_type) {
             case 3:
-                p_special_sequence = special_x_sequence;
+                if (special_x_sequence.size() > 0) {
+                    p_special_sequence = special_x_sequence;
+                    is_set_p_special_sequence = true;
+                }
                 break;
             case 2:
-                f_special_sequence = special_x_sequence;
+                if (special_x_sequence.size() > 0) {
+                    f_special_sequence = special_x_sequence;
+                    is_set_f_special_sequence = true;
+                }
                 break;
             case 1:
-                e_special_sequence = special_x_sequence;
+                if (special_x_sequence.size() > 0) {
+                    e_special_sequence = special_x_sequence;
+                    is_set_e_special_sequence = true;
+                }
                 break;
             case 0:
-                n_special_sequence = special_x_sequence;
+                if (special_x_sequence.size() > 0) {
+                    n_special_sequence = special_x_sequence;
+                    is_set_n_special_sequence = true;
+                }
                 break;
         } // end switch(cell_type)
+
     } // End of Set_special_sequence()
 
 void CellDesign::Set_agglomeration_sequence(std::vector<Agglomeration> &agglomeration_x_sequence, int cell_type) {
@@ -656,16 +948,28 @@ void CellDesign::Set_agglomeration_sequence(std::vector<Agglomeration> &agglomer
 void CellDesign::Set_induced_sequence(std::vector<unsigned int> induced_x_sequence, int cell_type){
         switch (cell_type) {
             case 3:
-                p_induced_sequence = induced_x_sequence;
+                if(induced_x_sequence.size() > 0) {
+                         p_induced_sequence = induced_x_sequence;
+                         is_set_p_induced_sequence = true;
+                     }
                 break;
             case 2:
-                f_induced_sequence = induced_x_sequence;
+                if(induced_x_sequence.size() > 0) {
+                    f_induced_sequence = induced_x_sequence;
+                    is_set_f_induced_sequence = true;
+                }
                 break;
             case 1:
-                e_induced_sequence = induced_x_sequence;
+                if(induced_x_sequence.size() > 0) {
+                    e_induced_sequence = induced_x_sequence;
+                    is_set_e_induced_sequence = true;
+                }
                 break;
             case 0:
-                n_induced_sequence = induced_x_sequence;
+                if(induced_x_sequence.size() > 0) {
+                    n_induced_sequence = induced_x_sequence;
+                    is_set_n_induced_sequence = true;
+                }
                 break;
         } // end switch(cell_type)
     } // End of Set_induced_sequence()
@@ -673,19 +977,54 @@ void CellDesign::Set_induced_sequence(std::vector<unsigned int> induced_x_sequen
     void CellDesign::Set_special_configuration(std::vector<unsigned int> special_x_configuration, int cell_type){
         switch (cell_type) {
             case 3:
-                p_special_design = special_x_configuration;
+                    // if(std::any_of(p_special_design.begin(),p_special_design.back(), 1)
+                    // std::count(p_special_design.begin(),p_special_design.back(), [](unsigned int i) { return i != 0;}); {
+                if(special_x_configuration.size() > 0) {
+                    p_special_design = special_x_configuration;
+                    is_set_p_special_design = true;
+                }
                 break;
             case 2:
-                f_special_design = special_x_configuration;
+                if(special_x_configuration.size() > 0) {
+                    f_special_design = special_x_configuration;
+                    is_set_f_special_design = true;
+                }
                 break;
             case 1:
-                e_special_design = special_x_configuration;
+                if(special_x_configuration.size() > 0) {
+                    e_special_design = special_x_configuration;
+                    is_set_e_special_design = true;
+                }
                 break;
             case 0:
-                n_special_design = special_x_configuration;
+                if(special_x_configuration.size() > 0) {
+                    n_special_design = special_x_configuration;
+                    is_set_n_special_design = true;
+                }
                 break;
         } // end switch(cell_type)
     } // End Set_special_configuration()
+
+void CellDesign::Set_induced_design(std::vector<unsigned int> induced_x_design, int cell_type){
+    switch (cell_type) {
+        case 3:
+            p_induced_design = induced_x_design;
+            is_set_p_induced_design = true;
+            break;
+        case 2:
+            f_induced_design = induced_x_design;
+            is_set_f_induced_design = true;
+            break;
+        case 1:
+            e_induced_design = induced_x_design;
+            is_set_e_induced_design = true;
+            break;
+        case 0:
+            n_induced_design = induced_x_design;
+            is_set_n_induced_design = true;
+            break;
+    } // end switch(cell_type)
+} // End Set_induced_design()
 
     void CellDesign::Set_special_series(std::vector<std::vector<unsigned int>> special_x_series, int cell_type){
         switch (cell_type) {
@@ -702,24 +1041,7 @@ void CellDesign::Set_induced_sequence(std::vector<unsigned int> induced_x_sequen
                 n_special_series = special_x_series;
                 break;
         } // end switch(cell_type)
-    } // End Set_special_series()
-
-    void CellDesign::Set_induced_design(std::vector<unsigned int> induced_x_design, int cell_type){
-        switch (cell_type) {
-            case 3:
-                p_induced_design = induced_x_design;
-                break;
-            case 2:
-                f_induced_design = induced_x_design;
-                break;
-            case 1:
-                e_induced_design = induced_x_design;
-                break;
-            case 0:
-                n_induced_design = induced_x_design;
-                break;
-        } // end switch(cell_type)
-    } // End Set_induced_design()
+ } // End Set_special_series()
 
 void CellDesign::Set_induced_series(std::vector<std::vector<unsigned int>> induced_x_series, int cell_type){
     switch (cell_type) {
@@ -856,6 +1178,11 @@ std::vector<unsigned int> CellDesign::Get_p_induced_sequence(void) const {
         }
         else return n_induced_sequence;
     }
+
+ void CellDesign::Set_p_design(std::vector<unsigned int> &p_special_vector) {
+     p_special_design = p_special_vector;
+}
+
     std::vector<unsigned int> CellDesign::Get_p_design(void) const {
         if (p_special_design.size() == 0) {
             cout << "WARNING: p_special_design did not set!" << endl;
@@ -882,6 +1209,59 @@ std::vector<unsigned int> CellDesign::Get_p_induced_sequence(void) const {
         }
         else return n_special_design;
     }
+
+/// Check bool functions
+bool CellDesign::Check_special_sequence(int cell_type){
+    if (cell_type == 0 && is_set_n_special_sequence)
+        return 1;
+    else if (cell_type == 1 && is_set_e_special_sequence)
+        return 1;
+    else if (cell_type == 2 && is_set_f_special_sequence)
+        return 1;
+    else if (cell_type == 3 && is_set_p_special_sequence)
+        return 1;
+    else
+        return 0;
+}
+
+bool CellDesign::Check_induced_sequence(int cell_type){
+    if (cell_type == 0 && is_set_n_induced_sequence)
+        return 1;
+    else if (cell_type == 1 && is_set_e_induced_sequence)
+        return 1;
+    else if (cell_type == 2 && is_set_f_induced_sequence)
+        return 1;
+    else if (cell_type == 3 && is_set_p_induced_sequence)
+        return 1;
+    else
+        return 0;
+}
+
+bool CellDesign::Check_special_design(int cell_type){
+    if (cell_type == 0 && is_set_n_special_design)
+        return 1;
+    else if (cell_type == 1 && is_set_e_special_design)
+        return 1;
+    else if (cell_type == 2 && is_set_f_special_design)
+        return 1;
+    else if (cell_type == 3 && is_set_p_special_design)
+        return 1;
+    else
+        return 0;
+}
+
+bool CellDesign::Check_induced_design(int cell_type){
+    if (cell_type == 0 && is_set_n_induced_design)
+        return 1;
+    else if (cell_type == 1 && is_set_e_induced_design)
+        return 1;
+    else if (cell_type == 2 && is_set_f_induced_design)
+        return 1;
+    else if (cell_type == 3 && is_set_p_induced_design)
+        return 1;
+    else
+        return 0;
+}
 // ========== END of the class CELLS_DESIGN functions description
 
 /// --------------------------------------------------------------------------------------------------- ///
@@ -934,13 +1314,14 @@ std::vector<unsigned int> CellDesign::Get_p_induced_sequence(void) const {
 void Subcomplex::Set_sub_sfaces_set(std::set <unsigned int> &new_sfaces_set){
     sub_sfaces_set = new_sfaces_set; }
 std::set <unsigned int> Subcomplex::Get_sub_sfaces_set(void) const {
-    return sub_sfaces_set; }
-
+    return sub_sfaces_set;
+    }
 void Subcomplex::Set_internal_sub_sfaces_set(std::set <unsigned int> &new_internal_sfaces_set){
-    internal_sub_sfaces_set = new_internal_sfaces_set; }
+    internal_sub_sfaces_set = new_internal_sfaces_set;
+    }
 std::set <unsigned int> Subcomplex::Get_internal_sub_sfaces_set(void) const {
-    return internal_sub_sfaces_set; }
-
+    return internal_sub_sfaces_set;
+    }
 void Subcomplex::Set_sub_sfaces_sequence(std::vector <unsigned int> const &special_faces_sequence) {
         sub_sfaces_sequence = special_faces_sequence;
     }
@@ -1361,7 +1742,7 @@ void Macrocrack::Set_sfaces_sequence(std::vector <unsigned int> const &special_f
 
 /// # V # The class of a CELLS_ENERGIES :: list of the energy_vectors corresponding to different dimensions 'k' of the k-cells in a PCC
 // Set
-void CellEnergies::Set_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress) { // [Pa]
+void CellEnergies::Set_external_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress) { // [Pa]
     double sxx = 0.0, sxy = 0.0, sxz = 0.0, syx = 0.0, syy = 0.0, syz = 0.0, szx = 0.0, szy = 0.0, szz = 0.0; // external stress tensor components [homogeneous stress state]
     std::get<0>(external_stress) = sxx;
     std::get<1>(external_stress) = sxy;
@@ -1373,13 +1754,19 @@ void CellEnergies::Set_von_Mises_stress(std::tuple<double, double, double, doubl
     std::get<7>(external_stress) = szy;
     std::get<8>(external_stress) = szz;
 
-    von_Mises_elastic_stress =  std::sqrt(0.5 * (std::pow((sxx - syy), 2.0) + std::pow((sxx - szz), 2.0) + std::pow((syy - szz), 2.0) + 6 * std::pow(sxy, 2.0)));
+///    von_Mises_elastic_stress =  std::sqrt(0.5 * (std::pow((sxx - syy), 2.0) + std::pow((sxx - szz), 2.0) + std::pow((syy - szz), 2.0) + 6 * std::pow(sxy, 2.0)));
     }
 
-void CellEnergies::Set_ambient_temperature(double &new_ambient_temperature){
+void CellEnergies::Set_von_Mises_stress(std::vector<double> &equivalent_stress) { // [Pa]
+ von_Mises_elastic_stress = equivalent_stress;
+}
+std::vector<double> CellEnergies::Get_von_Mises_stress(void) const{ // [Pa]
+    return von_Mises_elastic_stress;
+}
+void CellEnergies::Set_ambient_temperature(std::vector<double> &new_ambient_temperature){
         ambient_temperature = new_ambient_temperature;
     }
-double CellEnergies::Get_ambient_temperature(void){
+std::vector<double> CellEnergies::Get_ambient_temperature(void) const{
         return ambient_temperature;
     }
 
@@ -1406,9 +1793,7 @@ void CellEnergies::Set_n_self_energies(std::vector<double> n_self_energies) {
     f_elastic_energies = n_self_energies; }
 
 // Get
-double CellEnergies::Get_von_Mises_stress(void) { // [Pa]
-    return von_Mises_elastic_stress; }
-double CellEnergies::Get_homogeneous_elastic_energy(void) { // [J]
+    double CellEnergies::Get_homogeneous_elastic_energy(void) { // [J]
     return homogeneous_elastic_energy; }
 
 std::vector<double> CellEnergies::Get_p_elastic_energies(void) const {
@@ -1438,11 +1823,11 @@ std::vector<double> CellEnergies::Get_n_self_energies(void) const {
  *
 */
 // Constructor
-Material::Material(std::string Mid) {
-    material_database_reader(Mid, material_type, mass_density, melting_point, gb_cohesion_energy, Young_modulus, Poisson_ratio, yield_strength, strength, fracture_toughness, gb_width, gb_inclusion1_adh_energy, lagbs_corrosion_current, hagbs_corrosion_current, sigma3_corrosion_current);
+Material::Material(std::string Mid) { // material_id
+    material_database_reader(Mid, material_type, mass_density, melting_point, gb_cohesion_energy, Young_modulus, Poisson_ratio, yield_strength, strength, fracture_toughness, Burgers_vector, gb_width, gb_inclusion1_adh_energy, lagbs_corrosion_current, hagbs_corrosion_current, sigma3_corrosion_current);
 }
 
-Material::Material(std::string Mid, std::string Iid) {
+Material::Material(std::string Mid, std::string Iid) { // material_id and inclusion_id
     material_database_reader(Mid, material_type, mass_density, melting_point, gb_cohesion_energy, Young_modulus, Poisson_ratio, yield_strength, strength, fracture_toughness, gb_width, gb_inclusion1_adh_energy, Iid, inclusion_type, sface_energy_agglomeration, inclusion_mass_density);
 }
 
@@ -1453,6 +1838,11 @@ std::string Material::Get_material_type(void) const {
 double Material::Get_gb_width(void) const {
     return gb_width;
 }
+double Material::Get_Burgers_vector(void) const {
+    return Burgers_vector;
+
+}
+
 
 // Thermodynamic
 double Material::Get_mass_density(void) const {
@@ -1517,9 +1907,9 @@ void PCC::Set_edge_barycentre_coordinates(void){
     if (cell_barycentre_coordinates.size() == 0)
         cell_barycentre_coordinates.resize(4);
 
-    for (unsigned int en = 0; en < CellNumbs.at(2); ++en) {
-        cell_barycentre_coordinates.at(2).push_back(find_anEdgeSeed(en, paths_to_PCC_matrices, CellNumbs, node_coordinates_vector));
-        if (en % 500 == 1) cout << "Edge number\t\t" << en << "\tout of\t\t" << CellNumbs.at(2) << endl;
+    for (unsigned int en = 0; en < CellNumbs.at(1); ++en) {
+        cell_barycentre_coordinates.at(1).push_back(find_anEdgeSeed(en));
+        if (en % 500 == 1) cout << "Edge number\t\t" << en << "\tout of\t\t" << CellNumbs.at(1) << endl;
         }
     return;
 }
@@ -1527,32 +1917,44 @@ void PCC::Set_face_barycentre_coordinates(void) {
     if (node_coordinates_vector.size() == 0)
         node_coordinates_vector = Tuple3Reader(paths_to_PCC_matrices.at(10)); // node barycentres
 
-    if (cell_barycentre_coordinates.size() == 0) {
+    if (cell_barycentre_coordinates.size() == 0)
         cell_barycentre_coordinates.resize(4);
-        if (cell_barycentre_coordinates.at(2).size() == 0) {
-            cout << "Finding face barycentre coordinates:\t\t" << endl;
-            Out_local_logstream << "Finding face barycentre coordinates:\t\t" << endl;
+
+//        if (cell_barycentre_coordinates.at(2).size() == 0) {
+//            cout << "Finding face barycentre coordinates:\t\t" << endl;
+//            Out_local_logstream << "Finding face barycentre coordinates:\t\t" << endl;
             for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn) {
-                cell_barycentre_coordinates.at(2).push_back(
-                        find_aGBseed(fn, paths_to_PCC_matrices, CellNumbs, node_coordinates_vector));
+                cell_barycentre_coordinates.at(2).push_back(find_aGBseed(fn));
                 if (fn % 500 == 1) {
                     cout << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
-                    Out_local_logstream << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
+                    main_logfile_stream << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
                 }
-            }
         }
 
-    }
 return;
 }
 
 std::vector<std::tuple<double, double, double>> PCC::Get_edge_barycentre_coordinates(void) {
-    return cell_barycentre_coordinates.at(1);
+    if (cell_barycentre_coordinates.size() == 0)
+        cell_barycentre_coordinates.resize(4);
+
+    if (cell_barycentre_coordinates.at(1).size() > 0.0)
+        return cell_barycentre_coordinates.at(1);
+    else Set_edge_barycentre_coordinates();
+
+        return cell_barycentre_coordinates.at(1);
+   //     throw std::invalid_argument("Error: SET 'edge_barycentre_coordinates' (!)");
 }
 std::vector<std::tuple<double, double, double>> PCC::Get_face_barycentre_coordinates(void) {
+    if (cell_barycentre_coordinates.size() == 0)
+        cell_barycentre_coordinates.resize(4);
+
     if (cell_barycentre_coordinates.at(2).size() > 0.0)
         return cell_barycentre_coordinates.at(2);
-    else throw std::invalid_argument("Error: SET 'cell_barycentre_coordinates' (!)");
+    else Set_face_barycentre_coordinates();
+
+    return cell_barycentre_coordinates.at(2);
+    //throw std::invalid_argument("Error: SET 'face_barycentre_coordinates' (!)");
 }
 /// ========== END of class PCC functions description
 

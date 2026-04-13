@@ -17,10 +17,13 @@
 
 // local libraries
 #include "../ini/ini_readers.h"
+#include "../ini/ini_materials_reader.h"
+
 #include "../../PCC_Objects.h"
 #include "../../PCC_Measures.h"
 #include "../../PCC_Support_Functions.h"
 #include "../../PCC_Processing/functions/processing_assigned_labelling.h"
+#include "../../PCC_Processing/functions/processing_indexing.h"
 
 using namespace std; // standard namespace
 
@@ -31,6 +34,7 @@ extern std::vector<std::string> paths_to_PCC_matrices; // PCCpaths to PCC files
 extern int PCC_dimension; // PCC dimension: dim = 1 for graphs, dim = 2 for 2D plane polytopial complexes and dim = 3 for 3D bulk polyhedron complexes, as it is specified in the main.ini file.
 extern std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, polytope_coordinates_vector; // coordinate vectors defined globally
 extern std::string output_dir;
+extern ofstream irradiation_damaged_output, irradiation_damaged_fractions_output;
 
 #include "irradiation_lab.h"
 
@@ -44,7 +48,7 @@ extern std::string output_dir;
  * according to the damage rate depending on interface properties, thermodynamic parameters and local combinatorics of affected cells
  * @param p_cells_history
  */
-std::vector<std::vector<double>>  interface_irradiation_damage(Config &config, Material &material, CellDesign &processing_cells_design){
+std::vector<std::vector<double>> interface_irradiation_damage(Config &config, CellDesign &processing_cells_design, std::vector<CellEnergies> &gb_energies){
 // change p_cells_history.at(2) -- times when faces (2-cells) change their generated types to 'fractured' due to irradiation damage process
     std::vector<std::vector<double>> p_cells_history;
 
@@ -59,18 +63,17 @@ std::vector<std::vector<double>>  interface_irradiation_damage(Config &config, M
     // Corrosion current in grain boundaries
 /// creation_state_f_vector
 // from PCC_Support_Functions.cpp
-    std::vector<int> face_state_vector; // contains only {0,1,2..} ID values
-    face_state_vector = state_vector_by_sequence(processing_cells_design.Get_f_special_sequence(), face_cell_type);
+    std::vector<unsigned int> polyhedra_state_vector, face_state_vector; // contains only {0,1,2..} ID values
+    polyhedra_state_vector = processing_cells_design.Get_p_design();
 
-///    std::vector<double> gb_corrosion_current(gb_number);
-///    for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
-///        if (face_state_vector.at(gbn) == 0) {
-///            gb_corrosion_current.at(gbn) = material.Get_lagbs_corrosion_current();
-///        }        else if (face_state_vector.at(gbn) == 1)
-///            gb_corrosion_current.at(gbn) = material.Get_hagbs_corrosion_current();
-///        else if (face_state_vector.at(gbn) == 2)
-///            gb_corrosion_current.at(gbn) = material.Get_sigma3_corrosion_current();
-//    }
+//    for(auto op : polyhedra_state_vector)  cout << "op\t" << op << "\t";
+
+    /// Indexing of GBs by Grain types
+    face_state_vector = TopDown_cell_indexing(2, polyhedra_state_vector);
+
+///    cout << "T H E R E !\t" << polyhedra_state_vector.size() << endl;
+
+// REPAIR:  for (auto polyhedra : face_state_vector) cout << polyhedra; cout << endl; exit(17);
 
     // SpMat class defined in main.cpp from the Eigen external library
     SpMat FES(CellNumbs.at(1 + (PCC_dimension - 3)), CellNumbs.at(2 + (PCC_dimension - 3))); // adapted for grain boundaries - either faces in 3-PCC or edges in 2-PCC
@@ -99,129 +102,167 @@ std::vector<std::vector<double>>  interface_irradiation_damage(Config &config, M
     std::vector<double> face_areas_vector;
     const char *cfav = paths_to_PCC_matrices.at(7).c_str(); // face areas in 3-PCC
     face_areas_vector = VectorDReader(cfav);
-    //    const char *fncv = paths_to_PCC_matrices.at(13).c_str(); // face barycentres
-    // REPAIR for (auto fav : face_areas_vector)  cout << fav << endl;  exit(0);
+    // REPAIR for (auto fav : face_areas_vector) cout << fav << endl; exit(0);
 
+    /// Projections (scalar multiplication) of areas to the beam direction
+    std::vector<std::tuple<double,double,double>> face_normals;
+    face_normals = Tuple3Reader(paths_to_PCC_matrices.at(11));
+
+
+    std::tuple<double, double, double> beam_direction = config.Get_kinetics_beam_direction();
+
+    std::vector<double> projected_face_areas(gb_number,0);
+    for (unsigned int fn = 0; fn < CellNumbs.at(face_cell_type); ++fn) {
+        projected_face_areas.at(fn) = face_areas_vector.at(fn) *
+                                      abs((std::get<0>(face_normals.at(fn)) * std::get<0>(beam_direction) +
+                                       std::get<1>(face_normals.at(fn)) * std::get<1>(beam_direction) +
+                                       std::get<2>(face_normals.at(fn)) * std::get<2>(beam_direction)));
+    }
     /// read gb sizes, von Mizes (equivalent) stresses and temperatures
     config_reader_multiphysics(config);
 
     std::tuple<double, double, double> sample_dimensions = config.Get_multiphysics_sample_dimensions(); // [m]
 
+    /// Externally applied Stress and Temperature
     std::vector<double> gb_equivalent_stress(CellNumbs.at(face_cell_type)), gb_temperature(CellNumbs.at(face_cell_type));
 
-    std::vector<CellEnergies> gb_energies(gb_number);
     Eigen::MatrixXd est = config.Get_multiphysics_external_stress_tensor(); // external stress tensor
     double ambient_temperature = config.Get_multiphysics_temperature(); // external ambient temperature
     std::tuple<double, double, double, double, double, double, double, double, double>
             external_gb_stress = make_tuple(est(0,0), est(0,1),est(1,2),est(1,0),est(1,1),est(1,1),est(2,0),est(2,1),est(2,2));
 
-    for (unsigned int i = 0; i < CellNumbs.at(face_cell_type); ++i){
-        gb_energies.at(i).Set_von_Mises_stress(external_gb_stress);
-        gb_energies.at(i).Set_ambient_temperature(ambient_temperature);
-    }
+    gb_equivalent_stress = gb_energies.at(0).Get_von_Mises_stress();
+    gb_temperature = gb_energies.at(0).Get_ambient_temperature();
 
-    //assigning for all grain boundaries
+    config_reader_kinetics(config);
+    double irradiation_damage_rate_coeff = config.Get_kinetics_irradiation_damage_rate();
+    double beam_energy_flux = config.Get_kinetics_beam_energy_flux();
+    double beam_current = config.Get_kinetics_beam_current();
+    double energy_dissipation_rate = config.Get_kinetics_energy_dissipation_rate();
+    double observation_output_time = config.Get_kinetics_observation_time();
+
+    std::string Mid_matrix = config.Get_kinetics_material_id();
+    Material material(Mid_matrix);
+
+    /// METRICS assigning for all grain boundaries
+    std::vector<double> gb_volumes(gb_number,0);
+    double gb_width = material.Get_gb_width()*std::pow(10,-9); // in nanometres in the material database
     for (unsigned int i = 0; i < CellNumbs.at(face_cell_type); ++i) {
         face_areas_vector.at(i) = face_areas_vector.at(i) * (get<0>(sample_dimensions) * get<1>(sample_dimensions)); /// WARNING! Works well only for cubic samples!
-        gb_equivalent_stress.at(i) = gb_energies.at(i).Get_von_Mises_stress();
-        gb_temperature.at(i) = gb_energies.at(i).Get_ambient_temperature();
+        gb_volumes.at(i) = face_areas_vector.at(i) * gb_width;
+        projected_face_areas.at(i) = projected_face_areas.at(i) * (get<0>(sample_dimensions) * get<1>(sample_dimensions));
     }
 
-/// corrosion rate
+/// irradiation interfaces DAMAGE RATE
     std::vector<double> interface_irradiation_damage_rate(gb_number);
     double Boltzmann_constant = 1.380649*std::pow(10,-23); // [J/K]
+    double Burgers_vecor_module = material.Get_Burgers_vector();
+    //    double damage_activation_volume = 1.0*std::pow(10,-30);
 
-    ///! coefficient under stress exponent
-///    double damage_activation_volume = 1.0*std::pow(10,-30);
-
+/// ================================================ //
 ///    Irradiation process
-//================================================
-// only surface GBs in the set
-//    std::vector<unsigned int> surface_gb_set;
-//    for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
-//        if (get<2>(face_barycentres_vector.at(gbn)) == 0)
-//            surface_gb_set.push_back(gbn);
-//    }
+/// ================================================ //
 
-/// initial
-//    unsigned int NewCellNumb = 0;
-//    double corr_gb_initial_fraction = 0.2; /// 20% "hardcoded" initial condition on surface of the sample
-//    for (unsigned int gbn = 0; gbn < corr_gb_initial_fraction*surface_gb_set.size(); ++gbn) {
-//        NewCellNumb = NewCellNumb_R(surface_gb_set.size()); /// advanced NewCellNumb_R generator of special cell IDs
-//        special_corr_sequence.push_back(surface_gb_set.at(NewCellNumb)); // defined in the assigned labelling library; "\functions" subfolder
-//    }
+/// Initial
+    std::vector<double> particle_trapping_probability(gb_number,0);
+    std::string material_id = config.Get_kinetics_material_id();
+    double austenite_interface_param = 0, martensite_interface_param = 0, ferrite_interface_param = 0, austenite_martensite_interface_param = 0, austenite_ferrite_interface_param = 0, martensite_ferrite_interface_param = 0;
+    std::vector<double> radiation_damaged_face_area_fractions(1,0);
 
-    double irradiation_time = 0.0;
+    /// material-related parameters
+    material_irradiation_reader(material_id, austenite_interface_param, martensite_interface_param, ferrite_interface_param, austenite_martensite_interface_param, austenite_ferrite_interface_param, martensite_ferrite_interface_param);
+//cout << austenite_interface_param << "\t\t" << martensite_interface_param << "\t\t" << ferrite_interface_param << "\t\t" << austenite_martensite_interface_param << "\t\t" << austenite_ferrite_interface_param << "\t\t" << martensite_ferrite_interface_param << endl;
+// exit(22);
+    // GB types::
+    // 0 - austenite/austenite interface | 1 - martensite/austenite interface | 2 - martensite/martensite interface
+    // 3 - austenite/ferrite | 4 - martensite/ferrite | 6 - ferrite/ferrite
+    //----------------------------------------------------------------------------------------------------------------
+    for (auto  itr = face_state_vector.begin(); itr != face_state_vector.end(); ++itr) {
+            if (*itr == 0)
+                particle_trapping_probability.at(std::distance(face_state_vector.begin(),itr)) = austenite_interface_param;
+            else if (*itr == 1)
+                particle_trapping_probability.at(std::distance(face_state_vector.begin(),itr)) = austenite_martensite_interface_param;
+            else if (*itr == 2)
+                particle_trapping_probability.at(std::distance(face_state_vector.begin(),itr)) = martensite_interface_param;
+            else if (*itr == 3)
+                particle_trapping_probability.at(std::distance(face_state_vector.begin(),itr)) = austenite_ferrite_interface_param;
+            else if (*itr == 4)
+                particle_trapping_probability.at(std::distance(face_state_vector.begin(),itr)) = martensite_ferrite_interface_param;
+            else if (*itr == 6)
+                particle_trapping_probability.at(std::distance(face_state_vector.begin(),itr)) = ferrite_interface_param;
+    }
 
-    std::vector<double> irradiation_interface_damage(gb_number);
-    std::vector<unsigned int> damaged_interface_sequence; // interfaces damaged because of the irradiation process
+    double irradiation_time = 0, time_step_coeff = 0, time_step = 0;
+    std::vector<double> irradiation_time_vector(gb_number,0), irradiation_gb_damage_rate(gb_number,0), irradiation_gb_damage(gb_number,0);
+/// ===================== START OF THE IRRADIATION PROCESS LOOP ============================================ ///
+    double PCC_total_face_area = 0;
+    for (auto it : face_areas_vector)
+        PCC_total_face_area += it;
 
-    double time_step_coeff = 0, time_step = 0;
-    std::vector<double> irradiation_time_vector(gb_number,0);
-/// ===================== START OF THE SURFACE CORROSION LOOP ============================================ ///
-/*
     do {
+        // current computation time
         irradiation_time += time_step;
 
-//! The "BL" grain boundary index counting the weighted amount of their local corrosive GB neighbours
-///////       irradiation_GB_normalised_coefficients = face_edge_normalised_local_indices(damaged_interface_sequence, FES); // function from Measures.h
-
 /// corrosion RATE equation
-        time_step_coeff = config.Get_kinetics_time_scale(); // taken from 'kinetic_time_scale' in the config/Kinetic.ini file
-
+        std::vector<unsigned int> radiation_face_damages(gb_number,0), damaged_face_sequence(gb_number,0);
         for (unsigned int gbn = 0; gbn < gb_number; ++gbn) {
-            gb_corrosion_rate.at(gbn) = time_step_coeff *  gb_corrosion_current.at(gbn) * corrosion_GB_normalised_coefficients.at(gbn); /// add stress&temperature effects *exp(gb_equivalent_stress.at(gbn) * CL_normalised_coefficients.at(gbn) * corrosion_activation_volume / (Boltzmann_constant * gb_temperature.at(gbn)));
-//                cout << "gb_corrosion_rate.at(gbn)" << "\t\t" << gb_corrosion_rate.at(gbn) << endl;
-//                cout << "face_sizes.at(gbn)" << "\t\t" << face_areas_vector.at(gbn) << endl;
+            irradiation_gb_damage_rate.at(gbn) =
+                    irradiation_damage_rate_coeff * (beam_current * projected_face_areas.at(gbn)) * particle_trapping_probability.at(gbn) *
+                    (std::pow(Burgers_vecor_module, 3.0) / gb_volumes.at(gbn)); /// add stress&temperature effects *exp(gb_equivalent_stress.at(gbn) * CL_normalised_coefficients.at(gbn) * corrosion_activation_volume / (Boltzmann_constant * gb_temperature.at(gbn)));
 
-            /// update the number of corrosive GBs in the PCC
-            if (gb_corrosion_rate.at(gbn) > 0 &&
-                std::find(special_corr_sequence.begin(), special_corr_sequence.end(), gbn) == special_corr_sequence.end())
-                special_corr_sequence.push_back(gbn);
+// REPAIR: cout << "(std::pow(Burgers_vecor_module, 3.0) / gb_volumes.at(gbn))" << "\t\t" << (std::pow(Burgers_vecor_module, 3.0) / gb_volumes.at(gbn)) << "\t\tbeam_current" << "\t\t" << beam_current << endl;
         }
 
         /// finding corrosion grain boundary DAMAGE time
         std::vector<double> time_vector(gb_number, 1);
         for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
-            if (gb_corrosion_rate.at(gbn) > 0)
-                time_vector.at(gbn) = face_areas_vector.at(gbn) / gb_corrosion_rate.at(gbn);
+            if (irradiation_gb_damage_rate.at(gbn) > 0)
+                time_vector.at(gbn) = 1.0 /irradiation_gb_damage_rate.at(gbn);
         }
-/// corrosion TIME STEP
-        double tsc = 1000000.0; /// temporary
-        time_step = tsc * (*std::min_element(time_vector.begin(), time_vector.end()));
+// irradiation TIME STEP
+        time_step_coeff = config.Get_kinetics_time_scale(); // taken from 'kinetic_time_scale' in the config/Kinetic.ini file
+        time_step = time_step_coeff * (*std::min_element(time_vector.begin(), time_vector.end()));
 
-/// corrosion GB DAMAGE
+/// irradiation GB DAMAGE
         for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
-            corrosion_gb_damage.at(gbn) =
-                    corrosion_gb_damage.at(gbn) + time_step * gb_corrosion_rate.at(gbn) / face_areas_vector.at(gbn);
-/// updating corrosion damage vector
-            if (corrosion_gb_damage.at(gbn) > 1 && special_g_sequence.at(gbn) == 0) {
-                special_g_sequence.at(gbn) = 5;
-                corrosion_time_vector.at(gbn) = corrosion_time;
+            irradiation_gb_damage.at(gbn) += time_step * irradiation_gb_damage_rate.at(gbn);
+
+// REPAIR:            cout << "\t" << "irradiation_gb_damage.at(gbn):\t" << time_step * irradiation_gb_damage_rate.at(gbn) << "\t" << endl;
+
+            if (irradiation_gb_damage.at(gbn) > 1 && special_g_sequence.at(gbn) == 0) {
+                special_g_sequence.at(gbn) = 8;
+                irradiation_time_vector.at(gbn) = irradiation_time;
+
+                radiation_damaged_face_area_fractions.push_back(radiation_damaged_face_area_fractions.back() + (face_areas_vector.at(gbn)/PCC_total_face_area));
+                cout << radiation_damaged_face_area_fractions.back() << "\t" << irradiation_time << endl;
+
+                //corrosion_output
+                //cout << gbn << "\t" << irradiation_time_vector.at(gbn) << "\t" << get<0>(face_barycentres_vector.at(gbn)) << "\t" << get<1>(face_barycentres_vector.at(gbn)) << "\t" << get<2>(face_barycentres_vector.at(gbn)) << endl;
+                irradiation_damaged_output << gbn << "\t" << irradiation_time_vector.at(gbn) << "\t" << get<0>(face_barycentres_vector.at(gbn)) << "\t" << get<1>(face_barycentres_vector.at(gbn)) << "\t" << get<2>(face_barycentres_vector.at(gbn)) << endl;
+                irradiation_damaged_fractions_output << radiation_damaged_face_area_fractions.back() << "\t" << irradiation_time << endl;
+
             }
-        }
-/// 'cout' check
+
+        } // end of for (unsigned int gbn = 0; gbn < CellNumbs.at(face_cell_type); ++gbn) {
+
+/* /// 'cout' check
         for (auto cs_itr = 0; cs_itr < corrosion_time_vector.size(); ++cs_itr) {
             if (corrosion_time_vector.at(cs_itr) > 0)
                 cout << "corrosion damage time at grain boundary #\t"
                      << std::distance(corrosion_time_vector.begin(), corrosion_time_vector.begin() + cs_itr) << "\tis equal to\t" << corrosion_time_vector.at(cs_itr) << endl;
         }
+*/
+        cout << "\t" << "Full irradiation process Time:\t" << irradiation_time << "\t" << "with the current Time Step:\t" << time_step << endl;
+        cout << "\t" << "Zero elements in the 'irradiation damage time vector':\t" << std::count(irradiation_time_vector.begin(), irradiation_time_vector.end(), 0) << "\t out of\t" << CellNumbs.at(face_cell_type) << endl;
 
-        cout << "\t" << "Full corrosion process Time:\t" << corrosion_time << "\t" << "with the current Time Step:\t" << time_step << endl;
-        cout << "\t" << "Zero elements in the 'corrosion time vector':\t" << std::count(corrosion_time_vector.begin(), corrosion_time_vector.end(), 0) << "\t out of\t" << CellNumbs.at(face_cell_type) << endl;
-
-//Repair        cout << "special_corr_sequence size\t" << special_corr_sequence.size() << "\t" << "BL 0s number \t" << std::count(corrosion_GB_normalised_coefficients.begin(), corrosion_GB_normalised_coefficients.end(), 0) << endl;
-//Repair        cout << "BL size\t" << 1.0 - std::count(corrosion_GB_normalised_coefficients.begin(), corrosion_GB_normalised_coefficients.end(), 0)/ double(gb_number) << endl;
-
-///            } while( corrosion_time < 7.0*pow(10,-12)); // END do while( corrosion_time < 1.0 )
-/// temporary: 0.1*corrosion_time_vector.size()
-    } while( std::count(corrosion_time_vector.begin(), corrosion_time_vector.end(), 0) > 0.1*corrosion_time_vector.size() ); // END do while( corrosion_time < 1.0 )
+    } while( std::count(irradiation_time_vector.begin(), irradiation_time_vector.end(), 0) > 0.8*irradiation_time_vector.size() ); // END do while();
+// } while( irradiation_time < config.Get_kinetics_observation_time()); // END do while();
 
 /// result
     for (unsigned int gbn = 0; gbn < gb_number; ++gbn) {
         p_cells_history.push_back(
-                {double(gbn), corrosion_time_vector.at(gbn), get<2>(face_barycentres_vector.at(gbn))});
+                {double(gbn), irradiation_time_vector.at(gbn), radiation_damaged_face_area_fractions.back()});
     }
-*/
+
     return p_cells_history;
 } // END of bulk_irradiation()

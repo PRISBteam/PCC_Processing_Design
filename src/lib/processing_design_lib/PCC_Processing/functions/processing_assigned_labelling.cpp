@@ -29,7 +29,7 @@ typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which decla
 
 extern int PCC_dimension;
 extern std::vector<unsigned int> CellNumbs;
-extern ofstream Out_logfile_stream;
+extern ofstream processing_logfile_stream;
 extern std::string source_path;
 extern std::string output_dir;
 extern std::vector<std::string> paths_to_PCC_matrices;
@@ -62,83 +62,6 @@ unsigned int NewCellNumb_R_fast(unsigned int OCellsNumb){ // Random generation m
     return rand() % (OCellsNumb - 1); // Fast standard generator instead of the mt19937 Mersenne Twister 19937 - about 100-1000 times faster quasi-random generation ! // random generation of the boundary number in the range from 0 to OrdinaryCellNumbs.size()-1
 } // END of NewCellNumb_R_fast(unsigned int OCellsNumb)
 
-/*! ## 2 ##
- * @details Random generation functions for a strips of k-cells (k = cell_type). Use mt19937 Mersenne Twister 19937. This RW choose ANY faces, not necessary only ordinary ones (!)
- * @param cell_type
- * @param iniCellNumber
- * @param strip_length
- * @param Leap_friquency
- * @param Leap_dist
- * @return
- */
-std::vector<unsigned int> NewCellsStrip_RW(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, double Leap_friquency, double Leap_dist) {
-    std::vector<unsigned int> NewStripVector_RW; // function output
-    std::vector<double> neigh_Cells; // vector of doubles for all neighbours of each k-cell (k = cell_type)
-
-    /// Sparse k-Cell Adjacency matrix - reading from the file of the considered PCC
-    SpMat AFS = SMatrixReader(paths_to_PCC_matrices.at(cell_type), CellNumbs.at(cell_type), CellNumbs.at(cell_type)); // reading sparse incidence matrix from file
-    AFS = 0.5 * (AFS + Eigen::SparseMatrix<double>(AFS.transpose())); // (!) Symmetrisation: Full symmetric adjacency matrix instead of its triagonal form
-
-    NewStripVector_RW.push_back(iniCellNumber); /// Adding initial (first in the strip/chain) random cell as the end cell of the strip/chain
-
-    /// Loop over strip_length (in the current basket of the strip lengths distribution)
-    std::random_device rd; // seed for a device generating unsigned random integers
-    std::mt19937 mt(rd()); // advanced random engine based on the Mersenne Twister 19937 algorithm proposed in [M. Matsumoto and T. Nishimura, ACM Transactions on Modeling and Computer Simulation, Vol. 8, No. 1, January 1998, Pages 3–30, https://dl.acm.org/doi/pdf/10.1145/272991.272995]
-
-    for (int strip_length_counter = 0; strip_length_counter < strip_length; strip_length_counter++) {
-        for (int k = 0; k < CellNumbs.at(cell_type); ++k) { // loop over all the k-cells in the PCC: looking for all the k-cell neighbours.
-            if (AFS.coeff(NewStripVector_RW.back(), k) == 1)
-                neigh_Cells.push_back(k); // set of all the k-cell neighbours
-        } // end for()
-
-        /// New random choice between all the k-cell neighbours
-        uniform_int_distribution<size_t> uni_rand (0, neigh_Cells.size() - 1); // uniformly distributed from 0 to OCellsNumb-1 inclusive
-        NewStripVector_RW.push_back((unsigned int) neigh_Cells.at(uni_rand(mt))); // add randomly new element to the NewFacesStrip_RW face vector from the set of the k-cell neighbours
-
-        neigh_Cells.clear(); // clear the vector for the next k-cell neighbours
-    } // end of  for (int strip_length_counter = 0; strip_length_counter < f_length; strip_length_counter++) {
-
-    return NewStripVector_RW;
-} // END of NewCellsStrip_RW(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, int Leap_friquency, double Leap_dist)
-
-/*! ## 2.2 ##
- * @details Random generation functions for a strips of k-cells (k = cell_type). Use standard ('rand()' - simple and fast but not very reliable) generator of random numbers. This RW choose ANY faces, not necessary only ordinary ones (!)
- * @param cell_type
- * @param iniCellNumber
- * @param strip_length
- * @param Leap_friquency
- * @param Leap_dist
- * @return
- */
-std::vector<unsigned int> NewCellsStrip_RW_fast(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, double Leap_friquency, double Leap_dist) {
-    std::vector<unsigned int> NewStripVector_RW; // function output
-    std::vector<double> neigh_Cells; // vector of doubles for all neighbours of each k-cell (k = cell_type)
-
-    /// Sparse k-Cell Adjacency matrix - reading from the file of the considered PCC
-    SpMat AFS = SMatrixReader(paths_to_PCC_matrices.at(cell_type), CellNumbs.at(cell_type), CellNumbs.at(cell_type)); // reading sparse incidence matrix from file
-    AFS = 0.5 * (AFS + Eigen::SparseMatrix<double>(AFS.transpose())); // (!) Symmetrisation: Full symmetric adjacency matrix instead of its triagonal form
-
-    NewStripVector_RW.push_back(iniCellNumber); /// Adding initial (first in the strip/chain) random cell as the end cell of the strip/chain
-
-    /// Loop over strip_length (in the current basket of the strip lengths distribution)
-    for (int strip_length_counter = 0; strip_length_counter < strip_length; strip_length_counter++) {
-        for (int k = 0; k < CellNumbs.at(cell_type); ++k) { // loop over all the k-cells in the PCC: looking for all the k-cell neighbours.
-            if (AFS.coeff(NewStripVector_RW.back(), k) == 1)
-                neigh_Cells.push_back(k); // set of all the k-cell neighbours
-        } // end for()
-
-        /// New random choice between all the k-cell neighbours
-        NewStripVector_RW.push_back((unsigned int) neigh_Cells.at( rand() % (neigh_Cells.size() - 1) )); // add randomly new element to the NewFacesStrip_RW face vector from the set of the k-cell neighbours
-
-        neigh_Cells.clear(); // clear the vector for the next k-cell neighbours
-    } // end of  for (int strip_length_counter = 0; strip_length_counter < f_length; strip_length_counter++) {
-
-    return NewStripVector_RW;
-} // END of NewCellsStrip_RW_fast(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, int Leap_friquency, double Leap_dist)
-
-///--------------------------------------------------------------------------------
-/// Several more complex generation function (generation of k-cell sequences)
-///--------------------------------------------------------------------------------
 
 /*! ## 3 ##
  * @details The Random generation process function. S_Vector with its non-zero elements set any pre-define structure of special element feeding to the function Processing_Random.
@@ -161,10 +84,10 @@ std::vector<std::vector<unsigned int>> Processing_Random(int const cell_type, st
     if ( total_max_sCell_fraction == 0.0) {
         return special_cell_series; /// Early exit:: END of the function execution
     } // end if()
-    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
 
     if (total_max_sCell_fraction > 1.0) { // throw exception here (!)
-        cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl; Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+        cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+        processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
     } // end if()
 
 /// =====> Initial initialisation with the previous calculation step (if any) based on the "special_faces_sequence" file read to the 'Configuration_State' vector
@@ -193,7 +116,8 @@ std::vector<std::vector<unsigned int>> Processing_Random(int const cell_type, st
     double special_cells_fraction = 1.0 - ordinary_cells_fraction; // special k-cell fraction definition based on the ordinary k-cell vector [k = cell_type]
 
     if (special_cells_fraction >= total_max_sCell_fraction) { // throw exception here (!)
-        cout << "WARNING [Processing module]:" << "The initial special cells fraction is already GREATER than the total max special cell fraction from config/processing.ini file!"s << endl; Out_logfile_stream << "WARNING [Processing module]:" << "The initial special cells fraction is already GREATER than the total max special cell fraction from config/processing.ini file!"s << endl;
+        cout << "WARNING [Processing module]:" << "The initial special cells fraction is already GREATER than the total max special cell fraction from config/processing.ini file!"s << endl;
+        processing_logfile_stream << "WARNING [Processing module]:" << "The initial special cells fraction is already GREATER than the total max special cell fraction from config/processing.ini file!"s << endl;
         return special_cell_series; /// Early exit:: END of the function execution : (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
     } // end if (special_cells_fraction >= total_max_sCell_fraction)
 
@@ -203,7 +127,7 @@ std::vector<std::vector<unsigned int>> Processing_Random(int const cell_type, st
     } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
 
 /// Calculate the number of cell TYPES in the 'max_fractions_vectors'
-    int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type ].end(), [](int c){return c > 0;});
+    int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type ].end(), [](double c){return c > 0;});
 
 /// ================= do{ ... }while loop over all ordinary cells before sCells_fraction = max_sCells_fraction fractions of special cells  =======================>
     do { // do{ ... }while(output_step) loop starting point
@@ -241,10 +165,11 @@ std::vector<std::vector<unsigned int>> Processing_Random(int const cell_type, st
         //REPAIR cout << "special_faces_fraction: \t" << special_faces_fraction << "\t\t" << endl;
 
 /// output calculation progress
-if (CellNumbs.at(cell_type) != 0 && special_cells_fraction != 0)
-    if((int) (special_cells_fraction*CellNumbs.at(cell_type)) % (int) 0.1 * CellNumbs.at(cell_type) == 0) {
+ int double_parameter = (int) std::floor(0.05 * CellNumbs.at(cell_type));
+ if ( double_parameter == 0) double_parameter = 1000;
+ if (CellNumbs.at(cell_type) != 0 && special_cells_fraction != 0 &&  (int) std::floor(special_cells_fraction*CellNumbs.at(cell_type)) % (int) double_parameter == 1) { /// &&(int) (special_cells_fraction*CellNumbs.at(cell_type)) % (int) 0.1 * CellNumbs.at(cell_type) == 0) {
     cout << "special " << cell_type  << "-cells fraction:      " << special_cells_fraction << endl;
-    Out_logfile_stream << "special " << cell_type  << "-cells fraction:      " << special_cells_fraction << endl;
+    processing_logfile_stream << "special " << cell_type  << "-cells fraction:      " << special_cells_fraction << endl;
 }
 
 /// test output (!)
@@ -266,10 +191,91 @@ std::vector<double> j_edge_fractions(4, 0), d_edge_fractions(3, 0);
         Configuration_State[cell_type].push_back(var);
     }
 
-    Out_logfile_stream.close();
-
 return special_cell_series;
 } // END of the Random generation function
+
+/*! ## 2 ##
+ * @details Random generation functions for a strips of k-cells (k = cell_type). Use mt19937 Mersenne Twister 19937. This RW choose ANY faces, not necessary only ordinary ones (!)
+ * @param cell_type
+ * @param iniCellNumber
+ * @param strip_length
+ * @param Leap_friquency
+ * @param Leap_dist
+ * @return
+ */
+
+std::vector<unsigned int> NewCellsStrip_RW(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, double Leap_friquency, double Leap_dist) {
+   std::vector<unsigned int> NewStripVector_RW; // function output
+   std::vector<double> neigh_Cells; // vector of doubles for all neighbours of each k-cell (k = cell_type)
+/**
+
+   /// Sparse k-Cell Adjacency matrix - reading from the file of the considered PCC
+   SpMat AFS = SMatrixReader(paths_to_PCC_matrices.at(cell_type), CellNumbs.at(cell_type), CellNumbs.at(cell_type)); // reading sparse incidence matrix from file
+   AFS = 0.5 * (AFS + Eigen::SparseMatrix<double>(AFS.transpose())); // (!) Symmetrisation: Full symmetric adjacency matrix instead of its triagonal form
+
+   NewStripVector_RW.push_back(iniCellNumber); /// Adding initial (first in the strip/chain) random cell as the end cell of the strip/chain
+
+   /// Loop over strip_length (in the current basket of the strip lengths distribution)
+   std::random_device rd; // seed for a device generating unsigned random integers
+   std::mt19937 mt(rd()); // advanced random engine based on the Mersenne Twister 19937 algorithm proposed in [M. Matsumoto and T. Nishimura, ACM Transactions on Modeling and Computer Simulation, Vol. 8, No. 1, January 1998, Pages 3–30, https://dl.acm.org/doi/pdf/10.1145/272991.272995]
+
+   for (int strip_length_counter = 0; strip_length_counter < strip_length; strip_length_counter++) {
+       for (int k = 0; k < CellNumbs.at(cell_type); ++k) { // loop over all the k-cells in the PCC: looking for all the k-cell neighbours.
+           if (AFS.coeff(NewStripVector_RW.back(), k) == 1)
+               neigh_Cells.push_back(k); // set of all the k-cell neighbours
+       } // end for()
+
+       /// New random choice between all the k-cell neighbours
+       uniform_int_distribution<size_t> uni_rand (0, neigh_Cells.size() - 1); // uniformly distributed from 0 to OCellsNumb-1 inclusive
+       NewStripVector_RW.push_back((unsigned int) neigh_Cells.at(uni_rand(mt))); // add randomly new element to the NewFacesStrip_RW face vector from the set of the k-cell neighbours
+
+       neigh_Cells.clear(); // clear the vector for the next k-cell neighbours
+   } // end of  for (int strip_length_counter = 0; strip_length_counter < f_length; strip_length_counter++) {
+
+ **/
+   return NewStripVector_RW;
+} // END of NewCellsStrip_RW(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, int Leap_friquency, double Leap_dist)
+
+/*! ## 2.2 ##
+* @details Random generation functions for a strips of k-cells (k = cell_type). Use standard ('rand()' - simple and fast but not very reliable) generator of random numbers. This RW choose ANY faces, not necessary only ordinary ones (!)
+* @param cell_type
+* @param iniCellNumber
+* @param strip_length
+* @param Leap_friquency
+* @param Leap_dist
+* @return
+*/
+
+std::vector<unsigned int> NewCellsStrip_RW_fast(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, double Leap_friquency, double Leap_dist) {
+    std::vector<unsigned int> NewStripVector_RW; // function output
+    std::vector<double> neigh_Cells; // vector of doubles for all neighbours of each k-cell (k = cell_type)
+/**
+
+    /// Sparse k-Cell Adjacency matrix - reading from the file of the considered PCC
+    SpMat AFS = SMatrixReader(paths_to_PCC_matrices.at(cell_type), CellNumbs.at(cell_type), CellNumbs.at(cell_type)); // reading sparse incidence matrix from file
+    AFS = 0.5 * (AFS + Eigen::SparseMatrix<double>(AFS.transpose())); // (!) Symmetrisation: Full symmetric adjacency matrix instead of its triagonal form
+
+    NewStripVector_RW.push_back(iniCellNumber); /// Adding initial (first in the strip/chain) random cell as the end cell of the strip/chain
+
+    /// Loop over strip_length (in the current basket of the strip lengths distribution)
+    for (int strip_length_counter = 0; strip_length_counter < strip_length; strip_length_counter++) {
+        for (int k = 0; k < CellNumbs.at(cell_type); ++k) { // loop over all the k-cells in the PCC: looking for all the k-cell neighbours.
+            if (AFS.coeff(NewStripVector_RW.back(), k) == 1)
+                neigh_Cells.push_back(k); // set of all the k-cell neighbours
+        } // end for()
+
+        /// New random choice between all the k-cell neighbours
+        NewStripVector_RW.push_back((unsigned int) neigh_Cells.at( rand() % (neigh_Cells.size() - 1) )); // add randomly new element to the NewFacesStrip_RW face vector from the set of the k-cell neighbours
+
+        neigh_Cells.clear(); // clear the vector for the next k-cell neighbours
+    } // end of  for (int strip_length_counter = 0; strip_length_counter < f_length; strip_length_counter++) {
+**/
+    return NewStripVector_RW;
+} // END of NewCellsStrip_RW_fast(int cell_type, unsigned int iniCellNumber, unsigned int strip_length, int Leap_friquency, double Leap_dist)
+
+///--------------------------------------------------------------------------------
+/// Several more complex generation function (generation of k-cell sequences)
+///--------------------------------------------------------------------------------
 
 /*! ## 4 ##
  * @details
@@ -283,21 +289,22 @@ std::vector<std::vector<unsigned int>> Processing_Random_Strips(int cell_type, s
 ///================================================================= 'L' =======================================================================////
 /// ==============================================>  Random lengthy strips generation process  <===============================================////
 ///===========================================================================================================================================////
-   int NewFaceType = 1; // Random generation of types with IDs < number_of_types
-   std::vector<std::vector<unsigned int>> special_cell_series;
-   std::vector<unsigned int> special_cell_sequence; // output of the function
+  int NewFaceType = 1; // Random generation of types with IDs < number_of_types
+  std::vector<std::vector<unsigned int>> special_cell_series;
+  std::vector<unsigned int> special_cell_sequence; // output of the function
+/**
 
 /// Random Walker (RW) start
-   std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(cell_type), 1); // Vector of the size equal to the total number of faces in PCC initialised with '1's
-  // (!) all the cell Numbers start with 0, not 1 like in Neper, Matlab, Fortran and many other software
-   for(unsigned int lit = 0; lit < OrdinaryCellNumbs.size(); lit++) {
-       OrdinaryCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces
-   }
+  std::vector<unsigned int> OrdinaryCellNumbs(CellNumbs.at(cell_type), 1); // Vector of the size equal to the total number of faces in PCC initialised with '1's
+ // (!) all the cell Numbers start with 0, not 1 like in Neper, Matlab, Fortran and many other software
+  for(unsigned int lit = 0; lit < OrdinaryCellNumbs.size(); lit++) {
+      OrdinaryCellNumbs[lit] = lit; // Then the vector with the sequence of integers 1,2,3,... #Faces
+  }
 
-    std::vector<unsigned int> S_Vector(CellNumbs.at(cell_type), 0); // S_Vector - State Vector for a given type of k-cells // S_Vector with its non-zero elements set any pre-define structure of special element feeding to the function Processing_Random
-   if (Configuration_State.size() > 0 && Configuration_State.at(cell_type).size() > 0) {
-       S_Vector = Configuration_State.at(cell_type); // initial predefined system, if exists
-   }
+   std::vector<unsigned int> S_Vector(CellNumbs.at(cell_type), 0); // S_Vector - State Vector for a given type of k-cells // S_Vector with its non-zero elements set any pre-define structure of special element feeding to the function Processing_Random
+  if (Configuration_State.size() > 0 && Configuration_State.at(cell_type).size() > 0) {
+      S_Vector = Configuration_State.at(cell_type); // initial predefined system, if exists
+  }
 //for(auto css : Configuration_State.at(2)) ////
 //    cout << " css " << css << endl;
 // exit(0);
@@ -307,86 +314,85 @@ std::vector<std::vector<unsigned int>> Processing_Random_Strips(int cell_type, s
 //          cout << " istr = " << *istr << " OrdinaryCellNumbs =  " << OrdinaryCellNumbs.size() << endl;
 //       OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + distance(S_Vector.begin(), istr)); // !!! Delete its element from the vector decreasing its size BUT
 ///           OrdinaryCellNumbs.erase(std::find(OrdinaryCellNumbs.begin(), OrdinaryCellNumbs.end(), distance(S_Vector.begin(), istr))); // !!! Delete its element from the vector decreasing its size BUT
- ///          } // OrdinaryCellNumbs.erase(std::remove(OrdinaryCellNumbs.begin(), OrdinaryCellNumbs.end(), sface),
+///          } // OrdinaryCellNumbs.erase(std::remove(OrdinaryCellNumbs.begin(), OrdinaryCellNumbs.end(), sface),
 ///   }
 
 // calculation of the total max special cell fraction
-   double total_max_sCell_fraction = 0;
-   for (auto j = 0; j < max_fractions_vectors[cell_type].size(); ++j)
-       if(max_fractions_vectors[cell_type][j] > 0)
-           total_max_sCell_fraction += max_fractions_vectors[cell_type][j];
+  double total_max_sCell_fraction = 0;
+  for (auto j = 0; j < max_fractions_vectors[cell_type].size(); ++j)
+      if(max_fractions_vectors[cell_type][j] > 0)
+          total_max_sCell_fraction += max_fractions_vectors[cell_type][j];
 
-    Out_logfile_stream.open(output_dir + "Processing_Design.log"s, ios::app); // this *.log stream will be closed at the end of the main function
+  if (total_max_sCell_fraction > 1.0) {
+      cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+      processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+  }
+  else if (total_max_sCell_fraction == 0.0)
+      return special_cell_series;
 
-   if (total_max_sCell_fraction > 1.0) {
-       cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-       Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-   }
-   else if (total_max_sCell_fraction == 0.0)
-       return special_cell_series;
+   // initial fractions of special cells
+  double ordinary_cells_fraction = (double) OrdinaryCellNumbs.size()/ (double) CellNumbs.at(cell_type);
+  double special_cells_fraction = 1.0 - ordinary_cells_fraction; // special cell vecror definition based on the ordinary face vector
+  if (special_cells_fraction >= total_max_sCell_fraction)
+      return special_cell_series; // if, after the initial set of special cells by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 
-    // initial fractions of special cells
-   double ordinary_cells_fraction = (double) OrdinaryCellNumbs.size()/ (double) CellNumbs.at(cell_type);
-   double special_cells_fraction = 1.0 - ordinary_cells_fraction; // special cell vecror definition based on the ordinary face vector
-   if (special_cells_fraction >= total_max_sCell_fraction)
-       return special_cell_series; // if, after the initial set of special cells by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
-
-  /// (1) Loop over the vector of the strips distribution (several "baskets")
-   int strip_counter = 1;
-    for (auto  itr = cell_strip_distribution.begin(); itr != cell_strip_distribution.end(); ++itr) {
-        /// (2) Inside each basket
-           int strip_length = (int) (distance(cell_strip_distribution.begin(), itr) + 1); // strip lengths, starting with 1
-      // Example: vector<int> strip_scell_distribution = {2 4 5 27 8 6 3 1} means 2 strips of length 1 faces each, 4 strips of length 2 faces each,... , 1 strip of length 8 faces each
+ /// (1) Loop over the vector of the strips distribution (several "baskets")
+  int strip_counter = 1;
+   for (auto  itr = cell_strip_distribution.begin(); itr != cell_strip_distribution.end(); ++itr) {
+       /// (2) Inside each basket
+          int strip_length = (int) (distance(cell_strip_distribution.begin(), itr) + 1); // strip lengths, starting with 1
+     // Example: vector<int> strip_scell_distribution = {2 4 5 27 8 6 3 1} means 2 strips of length 1 faces each, 4 strips of length 2 faces each,... , 1 strip of length 8 faces each
 //        exit(0);
 
-      for (int number_of_lstrips = 0; number_of_lstrips < (*itr); ++number_of_lstrips) { // Number of strips of size *itr > 0
+     for (int number_of_lstrips = 0; number_of_lstrips < (*itr); ++number_of_lstrips) { // Number of strips of size *itr > 0
 
-          unsigned int iniCellNumber; // initial cell number for each strip/chain
-          std::vector<unsigned int> NewStripVector_RW; // vector of k-cell numbers for each strip/chain
+         unsigned int iniCellNumber; // initial cell number for each strip/chain
+         std::vector<unsigned int> NewStripVector_RW; // vector of k-cell numbers for each strip/chain
 
-          /// Random choice from ALL 2-Cells the iniCellNumber - initial cell for Random Walker start
-          iniCellNumber = NewCellNumb_R(CellNumbs.at(cell_type)); // random choice function (!) can choose already special face
+         /// Random choice from ALL 2-Cells the iniCellNumber - initial cell for Random Walker start
+         iniCellNumber = NewCellNumb_R(CellNumbs.at(cell_type)); // random choice function (!) can choose already special face
 
-          /// Random Walker giving the sequence of celld vector<int> NewStripVector_RW of length strip_length as a result
-          if (strip_length > 0)
-              NewStripVector_RW = NewCellsStrip_RW(cell_type, iniCellNumber, strip_length);
+         /// Random Walker giving the sequence of celld vector<int> NewStripVector_RW of length strip_length as a result
+         if (strip_length > 0)
+             NewStripVector_RW = NewCellsStrip_RW(cell_type, iniCellNumber, strip_length);
 
 //REPAIR           cout << "NewStripVector_RW size: " << NewStripVector_RW.size() << endl;
 
-      /// Add a new strip to the vector of scells-strips
-          special_cell_series.push_back(NewStripVector_RW);
+     /// Add a new strip to the vector of scells-strips
+         special_cell_series.push_back(NewStripVector_RW);
 
 //REPAIR           cout << "before NewStripVector_RW size: " << NewStripVector_RW.size() << endl;
 
-          /// Changes in vectors from Main function - first element of the strip
-          for (auto val : NewStripVector_RW) {
+         /// Changes in vectors from Main function - first element of the strip
+         for (auto val : NewStripVector_RW) {
 //REPAIR cout << "OrdinaryCellNumbs size: " << OrdinaryCellNumbs.size() << " S_Vector.size() " << S_Vector.size() << "  VAL " << val << endl;
-              S_Vector.at(val) = 1; // change element of the State Vector
+             S_Vector.at(val) = 1; // change element of the State Vector
 //               special_cell_sequence.push_back(val); // add new element to the s_cells_sequence
 //               OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + val); // !!! Delete its element from the vector decreasing its size BUT
-          }
+         }
 //REPAIR
 // std::cout << "iniCellNumber: " << iniCellNumber << std::endl;
 ///          cout << "special_cells_fraction: " << special_cells_fraction << " # of strip/chain: " << strip_counter++ << " size of strip/chain: " << *itr << endl;
 
-      } // end of for (int number_of_lstrips = 0; number_of_lstrips < *itr; number_of_lstrips++) { // Number of strips of size *itr > 0
+     } // end of for (int number_of_lstrips = 0; number_of_lstrips < *itr; number_of_lstrips++) { // Number of strips of size *itr > 0
 
 //        cout << "S_Vector size " << special_cells_fraction << "  OrdinaryCellNumbs size  " << OrdinaryCellNumbs.size() << endl;
-/*
-      /// OrdinaryCellNumbs update
-      for(auto itr : S_Vector)
-          if(itr != 0) {
-              cout << " itr " << distance(OrdinaryCellNumbs.begin(),(OrdinaryCellNumbs.begin() + itr)) << "  OrdinaryCellNumbs size  " << OrdinaryCellNumbs.size() << endl;
-              OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
-          }
-*/
+
+     /// OrdinaryCellNumbs update
+//     for(auto itr : S_Vector)
+//         if(itr != 0) {
+//             cout << " itr " << distance(OrdinaryCellNumbs.begin(),(OrdinaryCellNumbs.begin() + itr)) << "  OrdinaryCellNumbs size  " << OrdinaryCellNumbs.size() << endl;
+//             OrdinaryCellNumbs.erase(OrdinaryCellNumbs.begin() + itr); // !!! Delete its element from the vector decreasing its size BUT
+//         }
+
        // Special and Ordinary cells fraction calculation
         special_cells_fraction = (double) std::count(S_Vector.begin(),S_Vector.end(),1) / (double) CellNumbs.at(cell_type);
   //     ordinary_cells_fraction = (double) OrdinaryCellNumbs.size() / (double) CellNumbs.at(cell_type);
  //      special_cells_fraction = 1.0 - ordinary_cells_fraction;
         cout << "strip_length\t" << strip_length << "\titr\t" << cell_strip_distribution.size() << endl;
 
-        cout << "special_cells_fraction: " << setprecision(3) << special_cells_fraction << ";  # of strips/chains: " << strip_counter << ";  strip/chain size: " << *itr << endl; Out_logfile_stream << "special_cells_fraction: " << setprecision(3) << special_cells_fraction << ";  # of strips/chains: " << strip_counter++ << ";  strip/chain size: " << *itr << endl;
+        cout << "special_cells_fraction: " << setprecision(3) << special_cells_fraction << ";  # of strips/chains: " << strip_counter << ";  strip/chain size: " << *itr << endl;
+        processing_logfile_stream << "special_cells_fraction: " << setprecision(3) << special_cells_fraction << ";  # of strips/chains: " << strip_counter++ << ";  strip/chain size: " << *itr << endl;
     } // end of    for (auto  itr = cell_strip_distribution.begin(); itr != cell_strip_distribution.end(); ++itr) {
 //REPAIR    for (auto a_vector: S_Vector) cout << a_vector << endl;
 /// Update of the corresponding Configuration State vector
@@ -401,8 +407,7 @@ std::vector<std::vector<unsigned int>> Processing_Random_Strips(int cell_type, s
     for (auto var : S_Vector ) {
         Configuration_State[cell_type].push_back(var);
     }
-    Out_logfile_stream.close();
-
+**/
     return special_cell_series;
 } // end  of Random lengthy inclusions
 
@@ -412,7 +417,7 @@ std::vector<std::vector<unsigned int>> Processing_Random_Strips(int cell_type, s
  * @param s_faces_sequence
  * @return special_x_sequence
  */
- /**
+/**
 std::vector<unsigned int> Processing_maxFunctional(int cell_type, std::vector<std::vector<unsigned int>> &Configuration_sState, std::vector<vector<double>> const &max_fractions_vectors, bool multiplexity, double(*measure)(std::vector<double> const&)) {
 ///=============================================================================================================================================////
 ///==================================================================== 'F' ===================================================================////
@@ -430,7 +435,7 @@ total_max_sCell_fraction += max_fractions_vectors[cell_type][j];
 
 if (total_max_sCell_fraction > 1.0) {
 cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
 }
 else if ( total_max_sCell_fraction == 0.0) return special_cells_sequence;
 
@@ -475,13 +480,13 @@ for (int i = 0; i < max_fractions_vectors[cell_type].size(); ++i) {
 scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type)); // type (i+1) of special x_cells
 if (special_cells_fraction >= total_max_sCell_fraction) {
 cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+processing_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
 return special_cells_sequence;
 }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
 
 // number of cell types
-int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type].end(), [](int c){return c > 0;});
+int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type].end(), [](double c){return c > 0;});
 
 /// Vectors for Edges types and Edges-related configuration entropy
 int sub_cell_type = 0;
@@ -584,8 +589,10 @@ scell_fractions_vector.at(i) = std::count(S_Vector.begin(), S_Vector.end(), (i +
 // REPAIR        if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "  SV: " << S_Vector.size() << "  ctf: " << cases_to_sfaces.size() << "  ms :  " <<  max_set.size() << "  eel: " << EntropyIncreaseList.size() << "  sss :" << special_cells_sequence.size() << " OCN:  " << OrdinaryCellNumbs.size() << endl;
 if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "special " << cell_type << "-cells fraction:  " <<  special_cells_fraction << endl;
 //        cout << "place 9" << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor((special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+ processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor((special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+ processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
 } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 
@@ -596,6 +603,7 @@ Configuration_sState[cell_type].push_back(var);
 
 return special_cells_sequence;
 } // END of 'F' processing mode
+**/
 
 /// (3) Maximum Functional based generation process
 /*!
@@ -618,7 +626,7 @@ total_max_sCell_fraction += max_fractions_vectors[cell_type][j];
 
 if (total_max_sCell_fraction > 1.0) {
 cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
 }
 else if ( total_max_sCell_fraction == 0.0) return special_cells_sequence;
 
@@ -657,13 +665,13 @@ for (int i = 0; i < max_fractions_vectors[cell_type].size(); ++i) {
 scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type)); // type (i+1) of special x_cells
 if (special_cells_fraction >= total_max_sCell_fraction) {
 cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+processing_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
 return special_cells_sequence;
 }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
 
 // number of cell types
-int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type].end(), [](int c){return c > 0;});
+int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type].end(), [](double c){return c > 0;});
 
 /// Vectors for Edges types and Edges-related configuration entropy
 int sub_cell_type = 0;
@@ -761,8 +769,10 @@ scell_fractions_vector.at(i) = std::count(S_Vector.begin(), S_Vector.end(), (i +
 // REPAIR        if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "  SV: " << S_Vector.size() << "  ctf: " << cases_to_sfaces.size() << "  ms :  " <<  max_set.size() << "  eel: " << EntropyIncreaseList.size() << "  sss :" << special_cells_sequence.size() << " OCN:  " << OrdinaryCellNumbs.size() << endl;
 if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "special " << cell_type << "-cells fraction:  " <<  special_cells_fraction << endl;
 //        cout << "place 9" << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+  processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+  processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
 } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 
@@ -795,7 +805,7 @@ total_max_sCell_fraction += max_fractions_vectors[cell_type ][j];
 
 if (total_max_sCell_fraction > 1.0) {
 cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
 }
 else if ( total_max_sCell_fraction == 0.0) return special_cells_sequence;
 
@@ -812,7 +822,7 @@ special_cells_sequence = Processing_Random(cell_type, Configuration_sState, seed
 // REPAIR cout << "s_faces_sequence.size(): " << s_faces_sequence.size() / (double) CellNumbs.at(2) << endl;
 
 // number of cell types
-int number_of_types = std::count_if(max_fractions_vectors[cell_type ].begin(), max_fractions_vectors[cell_type ].end(), [](int c){return c > 0;});
+int number_of_types = std::count_if(max_fractions_vectors[cell_type ].begin(), max_fractions_vectors[cell_type ].end(), [](double c){return c > 0;});
 
 /// Vectors for Edges types and Edges-related configuration entropy
 vector<int> EdgeTypes(CellNumbs.at(1), 0); // vector<int> in the form [ 0 2 3 3 2 1 ...] with the TJs type ID as its values
@@ -933,7 +943,7 @@ for (int i = 0; i < max_fractions_vectors[cell_type ].size(); ++i) {
 scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type)); // type (i+1) of special x_cells
 if (special_cells_fraction >= total_max_sCell_fraction) {
 cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+processing_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
 return special_cells_sequence;
 }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
@@ -1040,8 +1050,10 @@ if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "special " << cell_ty
 
 cout << special_cells_fraction << endl;
 
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+ processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+ processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
 } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 
@@ -1074,7 +1086,7 @@ total_max_sCell_fraction += max_fractions_vectors[cell_type][j];
 
 if (total_max_sCell_fraction > 1.0) {
 cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
 }
 else if ( total_max_sCell_fraction == 0.0) return special_cells_sequence;
 
@@ -1091,7 +1103,7 @@ special_cells_sequence = Processing_Random(cell_type, Configuration_sState, seed
 // REPAIR cout << "s_faces_sequence.size(): " << s_faces_sequence.size() / (double) CellNumbs.at(2) << endl;
 
 // number of cell types
-int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type].end(), [](int c){return c > 0;});
+int number_of_types = std::count_if(max_fractions_vectors[cell_type].begin(), max_fractions_vectors[cell_type].end(), [](double c){return c > 0;});
 
 /// Vectors for Edges types and Edges-related configuration entropy
 vector<int> EdgeTypes(CellNumbs.at(1 ), 0); // vector<int> in the form [ 0 2 3 3 2 1 ...] with the TJs type ID as its values
@@ -1215,7 +1227,7 @@ for (int i = 0; i < max_fractions_vectors[cell_type ].size(); ++i) {
 scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type)); // type (i+1) of special x_cells
 if (special_cells_fraction >= total_max_sCell_fraction) {
 cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+processing_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
 return special_cells_sequence;
 }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
@@ -1330,8 +1342,10 @@ scell_fractions_vector.at(i) = std::count(S_Vector.begin(), S_Vector.end(), (i +
 if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "special " << cell_type << "-cells fraction:  " <<  special_cells_fraction << endl;
 cout << special_cells_fraction << endl;
 
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+  processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+  processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
 } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 
@@ -1364,7 +1378,7 @@ total_max_sCell_fraction += max_fractions_vectors[cell_type ][j];
 
 if (total_max_sCell_fraction > 1.0) {
 cout << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
-Out_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
+processing_logfile_stream << "WARNING! [Processing_Random()]: "s << cell_type <<" total_max_sCell_fraction of " << cell_type << "-cells in the processing.ini file = " << total_max_sCell_fraction << " that is GREATER than 1 (!) Please decrease the fractions accordingly." << endl;
 }
 else if ( total_max_sCell_fraction == 0.0) return special_cells_sequence;
 
@@ -1381,7 +1395,7 @@ special_cells_sequence = Processing_Random(cell_type, Configuration_sState, seed
 // REPAIR cout << "s_faces_sequence.size(): " << s_faces_sequence.size() / (double) CellNumbs.at(2) << endl;
 
 // number of cell types
-int number_of_types = std::count_if(max_fractions_vectors[cell_type ].begin(), max_fractions_vectors[cell_type ].end(), [](int c){return c > 0;});
+int number_of_types = std::count_if(max_fractions_vectors[cell_type ].begin(), max_fractions_vectors[cell_type ].end(), [](double c){return c > 0;});
 
 /// Vectors for Edges types and Edges-related configuration entropy
 vector<int> EdgeTypes(CellNumbs.at(1), 0); // vector<int> in the form [ 0 2 3 3 2 1 ...] with the TJs type ID as its values
@@ -1514,7 +1528,7 @@ for (int i = 0; i < max_fractions_vectors[cell_type ].size(); ++i) {
 scell_fractions_vector.push_back(std::count(S_Vector.begin(), S_Vector.end(), (i + 1)) / (double) CellNumbs.at(cell_type)); // type (i+1) of special x_cells
 if (special_cells_fraction >= total_max_sCell_fraction) {
 cout << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
-Out_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
+processing_logfile_stream << "WARNING [Processing module]:" << "initial special cells fraction is already GREATER than the total max special cell fraction from processing.ini file!"s << endl;
 return special_cells_sequence;
 }     // (!) If after the initial set of special faces by their definition in S_Vector their fraction appeared to be larger than max_sFaces_fraction, so the condition for finishing the Processing module are satisfied
 } // end for (int i = 0; i < max_fractions_vectors.size(); ++i)
@@ -1616,8 +1630,10 @@ if ((int) (10.0*special_cells_fraction) % 40 == 0) cout << "special " << cell_ty
 
 cout << special_cells_fraction << endl;
 
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
-//       if ((int) (special_cells_fraction) % 100000*CellNumbs.at(3) == 0) Out_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+  processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
+//       if ((int) std::floor(special_cells_fraction*CellNumbs.at(3)) % (int) std::floor(100000*CellNumbs.at(3)) == 0)
+  processing_logfile_stream << "special " << cell_type << "-cells fraction :      " <<  special_cells_fraction << endl;
 } while(special_cells_fraction < total_max_sCell_fraction); /// End of the Random generation process
 //REPAIR    cout << "in_new:" <<endl; for (auto itd : s_faces_sequence) cout << itd << endl;
 
