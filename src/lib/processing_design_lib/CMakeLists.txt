@@ -1,5 +1,9 @@
 project(Processing_Design)
 
+include_directories(../external/Eigen-5/src/Core)
+include_directories(../external/Eigen-5.0/src/SparseCore)
+include_directories(../external/Spectra-1.2.0)
+
 set(HEADER_FILES
         ../ini/ini_readers.h
         ../ini/ini_materials_reader.h
