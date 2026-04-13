@@ -7,7 +7,7 @@
 #ifndef SPECTRA_SIMPLE_RANDOM_H
 #define SPECTRA_SIMPLE_RANDOM_H
 
-#include <Eigen/Core>
+#include "../../Eigen-5.0/Core"
 #include <complex>
 
 /// \cond

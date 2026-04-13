@@ -7,7 +7,7 @@
 #ifndef SPECTRA_GEN_EIGS_BASE_H
 #define SPECTRA_GEN_EIGS_BASE_H
 
-#include <Eigen/Core>
+#include "../Eigen-5.0/Core"
 #include <vector>     // std::vector
 #include <cmath>      // std::abs, std::pow, std::sqrt
 #include <algorithm>  // std::min, std::copy

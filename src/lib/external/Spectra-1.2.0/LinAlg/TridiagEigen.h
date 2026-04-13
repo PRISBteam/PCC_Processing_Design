@@ -11,8 +11,8 @@
 #ifndef SPECTRA_TRIDIAG_EIGEN_H
 #define SPECTRA_TRIDIAG_EIGEN_H
 
-#include <Eigen/Core>
-#include <Eigen/Jacobi>
+#include "../../Eigen-5.0/Core"
+#include "../../Eigen-5.0/Jacobi"
 #include <cmath>      // std::abs
 #include <algorithm>  // std::max
 #include <stdexcept>  // std::invalid_argument, std::logic_error, std::runtime_error

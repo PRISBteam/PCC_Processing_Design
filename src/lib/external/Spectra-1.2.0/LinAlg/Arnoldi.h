@@ -7,7 +7,7 @@
 #ifndef SPECTRA_ARNOLDI_H
 #define SPECTRA_ARNOLDI_H
 
-#include <Eigen/Core>
+#include "../../Eigen-5.0/Core"
 #include <cmath>      // std::sqrt, std::abs
 #include <utility>    // std::move
 #include <string>     // std::string

@@ -14,8 +14,8 @@
 #include <random> // Require C++ 11 and above
 
 // external libraries
-#include "../../../external/Eigen/Core"
-#include "../../../external/Eigen/SparseCore"
+#include "../../../external/Eigen-5.0/Core"
+#include "../../../external/Eigen-5.0/SparseCore"
 
 // local libraries
 #include "../../../ini/ini_materials_reader.h" // material and inclusion parameters readers by their IDs

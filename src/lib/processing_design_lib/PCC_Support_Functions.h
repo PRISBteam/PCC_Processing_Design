@@ -1,7 +1,7 @@
 #ifndef PCC_PROCESSING_DESIGN_PCC_SUPPORT_FUNCTIONS_H
 #define PCC_PROCESSING_DESIGN_PCC_SUPPORT_FUNCTIONS_H
 
-#include "../external/Eigen/SparseCore"
+#include "../external/Eigen-5.0/SparseCore"
 #include <set>
 
 typedef Eigen::SparseMatrix<double> SpMat; // <Eigen> library class, which declares a column-major sparse matrix type of doubles with the nickname 'SpMat'

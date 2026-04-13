@@ -12,8 +12,8 @@
 #ifndef SPECTRA_UPPER_HESSENBERG_EIGEN_H
 #define SPECTRA_UPPER_HESSENBERG_EIGEN_H
 
-#include <Eigen/Core>
-#include <Eigen/Eigenvalues>
+#include "../../Eigen-5.0/Core"
+#include "../../Eigen-5.0/Eigenvalues"
 #include <cmath>      // std::sqrt, std::abs
 #include <complex>    // std::complex
 #include <algorithm>  // std::max, std::swap

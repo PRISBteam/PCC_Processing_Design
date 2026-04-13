@@ -37,17 +37,17 @@
 ///* ------------------------------------------------------------------------------- *
 
 /// Eigen source: https://eigen.tuxfamily.org/ (2024)
-/* Alternative way - the libraries must be preliminary copied in the local STL directory (!)
+/* Alternative way - the libraries must be preliminarily copied in the local STL directory (!)
 /* #include <Eigen/Core> #include <Eigen/Dense> #include <Eigen/SparseCore> */
-#include "../src/lib/external/Eigen/Core"
-#include "../src/lib/external/Eigen/Dense"
-#include "../src/lib/external/Eigen/SparseCore"
+#include "../src/lib/external/Eigen-5.0/Core"
+#include "../src/lib/external/Eigen-5.0/Dense"
+#include "../src/lib/external/Eigen-5.0/SparseCore"
 
 /// Spectra source: https://spectralib.org/ (2024)
 /* Alternative way - the libraries must be preliminarily copied in the local STL directory (!)
 /* #include <Spectra/GenEigsSolver.h> #include <Spectra/SymEigsSolver.h> */
-#include "../src/lib/external/Spectra/GenEigsSolver.h"
-#include "../src/lib/external/Spectra/SymEigsSolver.h"
+#include "../src/lib/external/Spectra-1.2.0/GenEigsSolver.h"
+#include "../src/lib/external/Spectra-1.2.0/SymEigsSolver.h"
 
 /// Open MP library https://www.openmp.org/resources/openmp-compilers-tools/
 // Included only in the parallelized version of the code.

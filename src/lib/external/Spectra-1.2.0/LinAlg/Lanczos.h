@@ -7,7 +7,7 @@
 #ifndef SPECTRA_LANCZOS_H
 #define SPECTRA_LANCZOS_H
 
-#include <Eigen/Core>
+#include "../../Eigen-5.0/Core"
 #include <cmath>      // std::sqrt, std::abs
 #include <utility>    // std::forward
 #include <string>     // std::string

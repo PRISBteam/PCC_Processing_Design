@@ -7,7 +7,7 @@
 #ifndef SPECTRA_HERM_EIGS_BASE_H
 #define SPECTRA_HERM_EIGS_BASE_H
 
-#include <Eigen/Core>
+#include "../Eigen-5.0/Core"
 #include <vector>     // std::vector
 #include <cmath>      // std::abs, std::pow
 #include <algorithm>  // std::min

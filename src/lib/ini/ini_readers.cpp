@@ -11,8 +11,8 @@
 ///* Attached user-defined C++ libraries (must be copied in the directory for STL):
 ///* ------------------------------------------------------------------------------- *
 /// Eigen source: https://eigen.tuxfamily.org/ (2024)
-#include "../../../src/lib/external/Eigen/Dense"
-#include "../../../src/lib/external/Eigen/SparseCore"
+#include "../../../src/lib/external/Eigen-5.0/Dense"
+#include "../../../src/lib/external/Eigen-5.0/SparseCore"
 
 #include "../../../src/lib/processing_design_lib/PCC_Objects.h"
 

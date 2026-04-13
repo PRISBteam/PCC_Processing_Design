@@ -7,7 +7,7 @@
 #ifndef SPECTRA_DENSE_GEN_MAT_PROD_H
 #define SPECTRA_DENSE_GEN_MAT_PROD_H
 
-#include <Eigen/Core>
+#include "../../Eigen-5.0/Core"
 
 namespace Spectra {
 

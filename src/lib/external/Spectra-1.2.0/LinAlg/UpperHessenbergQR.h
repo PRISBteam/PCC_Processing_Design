@@ -7,7 +7,7 @@
 #ifndef SPECTRA_UPPER_HESSENBERG_QR_H
 #define SPECTRA_UPPER_HESSENBERG_QR_H
 
-#include <Eigen/Core>
+#include "../../Eigen-5.0/Core"
 #include <cmath>      // std::abs
 #include <complex>    // std::complex
 #include <algorithm>  // std::fill

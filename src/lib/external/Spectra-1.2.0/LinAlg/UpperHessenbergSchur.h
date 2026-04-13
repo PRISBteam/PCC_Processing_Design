@@ -11,9 +11,9 @@
 #ifndef SPECTRA_UPPER_HESSENBERG_SCHUR_H
 #define SPECTRA_UPPER_HESSENBERG_SCHUR_H
 
-#include <Eigen/Core>
-#include <Eigen/Jacobi>
-#include <Eigen/Householder>
+#include "../../Eigen-5.0/Core"
+#include "../../Eigen-5.0/Jacobi"
+#include "../../Eigen-5.0/Householder"
 #include <cmath>      // std::sqrt, std::abs
 #include <algorithm>  // std::min
 #include <stdexcept>  // std::invalid_argument, std::logic_error, std::runtime_error

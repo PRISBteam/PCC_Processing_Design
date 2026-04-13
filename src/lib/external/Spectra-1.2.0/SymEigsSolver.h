@@ -7,7 +7,7 @@
 #ifndef SPECTRA_SYM_EIGS_SOLVER_H
 #define SPECTRA_SYM_EIGS_SOLVER_H
 
-#include <Eigen/Core>
+#include "../Eigen-5.0/Core"
 
 #include "HermEigsBase.h"
 #include "Util/SelectionRule.h"

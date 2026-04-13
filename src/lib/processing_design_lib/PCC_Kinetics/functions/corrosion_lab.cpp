@@ -13,8 +13,8 @@
 #include <algorithm>
 
 // external libraries
-#include "../../../external/Eigen/Core"
-#include "../../../external/Eigen/SparseCore"
+#include "../../../external/Eigen-5.0/Core"
+#include "../../../external/Eigen-5.0/SparseCore"
 
 // local libraries
 #include "../ini/ini_readers.h"

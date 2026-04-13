@@ -14,7 +14,7 @@
 #include <utility>    // std::pair
 #include <stdexcept>  // std::invalid_argument
 
-#include <Eigen/Core>
+#include "../../Eigen-5.0/Core"
 #include "TypeTraits.h"
 
 namespace Spectra {

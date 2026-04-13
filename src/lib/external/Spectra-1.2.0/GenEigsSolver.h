@@ -7,7 +7,7 @@
 #ifndef SPECTRA_GEN_EIGS_SOLVER_H
 #define SPECTRA_GEN_EIGS_SOLVER_H
 
-#include <Eigen/Core>
+#include "../Eigen-5.0/Core"
 
 #include "GenEigsBase.h"
 #include "Util/SelectionRule.h"

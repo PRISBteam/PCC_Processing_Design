@@ -7,7 +7,7 @@
 #ifndef SPECTRA_TYPE_TRAITS_H
 #define SPECTRA_TYPE_TRAITS_H
 
-#include <Eigen/Core>
+#include "../../Eigen-5.0/Core"
 #include <limits>
 
 /// \cond

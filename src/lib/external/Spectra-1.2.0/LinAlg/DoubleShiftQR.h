@@ -7,7 +7,7 @@
 #ifndef SPECTRA_DOUBLE_SHIFT_QR_H
 #define SPECTRA_DOUBLE_SHIFT_QR_H
 
-#include <Eigen/Core>
+#include "../../Eigen-5.0/Core"
 #include <cmath>      // std::abs, std::sqrt, std::pow
 #include <vector>     // std::vector
 #include <algorithm>  // std::min, std::fill, std::copy, std::swap

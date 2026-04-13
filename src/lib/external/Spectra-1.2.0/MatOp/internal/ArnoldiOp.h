@@ -7,7 +7,7 @@
 #ifndef SPECTRA_ARNOLDI_OP_H
 #define SPECTRA_ARNOLDI_OP_H
 
-#include <Eigen/Core>
+#include "../../../Eigen-5.0/Core"
 #include <cmath>    // std::sqrt
 #include <complex>  // std::real
 

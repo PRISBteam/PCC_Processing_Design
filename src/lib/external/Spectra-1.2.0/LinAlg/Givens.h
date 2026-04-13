@@ -7,7 +7,7 @@
 #ifndef SPECTRA_GIVENS_H
 #define SPECTRA_GIVENS_H
 
-#include <Eigen/Core>
+#include "../../Eigen-5.0/Core"
 #include <cmath>    // std::sqrt, std::pow, std::hypot
 #include <complex>  // std::complex
 

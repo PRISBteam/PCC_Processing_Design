@@ -8,7 +8,7 @@
 #include <numeric>
 #include <cmath>
 
-#include "../external/Eigen/SparseCore"
+#include "../external/Eigen-5.0/SparseCore"
 
 using namespace std; // standard namespace
 using namespace Eigen; // standard namespace

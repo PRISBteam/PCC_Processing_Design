@@ -15,7 +15,7 @@
 
 /// Attached user-defined C++ libraries:
 // External
-#include "../../../src/lib/external/Eigen/SparseCore"
+#include "../../../src/lib/external/Eigen-5.0/SparseCore"
 
 // Internal
 #include "../PCC_Support_Functions.h" // It must be here - first in this list (!)

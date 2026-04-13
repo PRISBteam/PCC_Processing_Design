@@ -8,7 +8,7 @@
 #include <vector>
 
 /// Attached user defined C++ libraries:
-#include "../../../src/lib/external/Eigen/SparseCore"
+#include "../../../src/lib/external/Eigen-5.0/SparseCore"
 
 ///-------------------------------------
 #include "../PCC_Support_Functions.h" // It must be here - first in this list (!)
