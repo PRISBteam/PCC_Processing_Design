@@ -662,13 +662,18 @@ int Config::Get_dim() const {
         return config_sim_task;
     }; //!@return output_dir
 
-  std::vector<std::vector<unsigned int>> Config::Get_Configuration_sState() const {
-      return Configuration_sState;
-    }; //!@return Configuration_sState
+    std::vector<std::vector<unsigned int>> Config::Get_Configuration_aState() const {
+      return Configuration_aState;
+    }; //!@return Configuration_aState
+
+    std::vector<std::vector<unsigned int>> Config::Get_Configuration_gState() const {
+        return Configuration_gState;
+    }; //!@return Configuration_gState
 
     std::vector<std::vector<unsigned int>> Config::Get_Configuration_iState() const {
-        return Configuration_cState;
-    }; //!@return Configuration_sState
+    return Configuration_iState;
+    }; //!@return Configuration_iState
+
 
      void Config::Read_config(Config &main_configuration) {
          config_ConfVector = config_reader_main(main_configuration);
@@ -803,8 +808,8 @@ int Config::Get_dim() const {
                 main_logfile_stream << t_length++ << "-cells #\t" << cell_numb << endl;
             } // end for (int cell_numb : CellNumbs)
 
-        Configuration_sState = {State_p_vector, State_f_vector, State_e_vector, State_n_vector },
-        Configuration_cState = {State_pfracture_vector, State_ffracture_vector, State_efracture_vector, State_nfracture_vector }; //  is the list of all mentioned below State_<*>_vectors and State_<*>fracture_vectors as the output of the Processing module // is the list of 'state vectors' analogous to the Configuration_sState but for 'cracked' (or induced) network of k-cells
+        Configuration_aState = {State_p_vector, State_f_vector, State_e_vector, State_n_vector },
+        Configuration_gState = {State_pfracture_vector, State_ffracture_vector, State_efracture_vector, State_nfracture_vector }; //  is the list of all mentioned below State_<*>_vectors and State_<*>fracture_vectors as the output of the Processing module // is the list of 'state vectors' analogous to the Configuration_aState but for 'cracked' (or induced) network of k-cells
 /// Initial state::
         if (config_dim < 3) { // Does not exist in 2D: CellNumbs.at(3)
             State_p_vector.resize(0, 0);
@@ -824,23 +829,23 @@ int Config::Get_dim() const {
         State_nfracture_vector.resize(CellNumbs.at(0), 0);
 
         if (config_dim == 1) { // 1D case
-            Configuration_sState.resize(2);
-            Configuration_sState = {State_n_vector, State_e_vector};
-            Configuration_cState.resize(2);
-            Configuration_cState = {State_nfracture_vector, State_efracture_vector};
+            Configuration_aState.resize(2);
+            Configuration_aState = {State_n_vector, State_e_vector};
+            Configuration_gState.resize(2);
+            Configuration_gState = {State_nfracture_vector, State_efracture_vector};
         }
         if (config_dim == 2) { // 2D case
-            Configuration_sState.resize(3);
-            Configuration_sState = {State_n_vector, State_e_vector, State_f_vector};
-            Configuration_cState.resize(3);
-            Configuration_cState = {State_nfracture_vector, State_efracture_vector, State_ffracture_vector};
+            Configuration_aState.resize(3);
+            Configuration_aState = {State_n_vector, State_e_vector, State_f_vector};
+            Configuration_gState.resize(3);
+            Configuration_gState = {State_nfracture_vector, State_efracture_vector, State_ffracture_vector};
         } else { // 3D case
-            Configuration_sState.resize(4);
-            Configuration_sState = {State_n_vector, State_e_vector, State_f_vector, State_p_vector};
-            Configuration_cState.resize(4);
-            Configuration_cState = {State_nfracture_vector, State_efracture_vector, State_ffracture_vector,
+            Configuration_aState.resize(4);
+            Configuration_aState = {State_n_vector, State_e_vector, State_f_vector, State_p_vector};
+            Configuration_gState.resize(4);
+            Configuration_gState = {State_nfracture_vector, State_efracture_vector, State_ffracture_vector,
                                     State_pfracture_vector};
-        } // Configuration_sState in 3D: [0] -> nodes, [1] -> edges, [2] -> faces, [3] -> polyhedrons
+        } // Configuration_aState in 3D: [0] -> nodes, [1] -> edges, [2] -> faces, [3] -> polyhedrons
 
 /// Output PCCpaths.vector to console and logfile out
         int npath = 0;
@@ -852,8 +857,8 @@ int Config::Get_dim() const {
             main_logfile_stream << "[" << npath++ << "]" << " PCCpaths:\t" << path << endl;
         }
         cout << endl; main_logfile_stream << endl;
-//        cout << "Size of Configuration_sState:\t" << Configuration_sState.size() << endl; Out_local_logstream << "Size of Configuration_sState:\t" << Configuration_sState.size() << endl;
-//        cout << "Size of Configuration_cState:\t" << Configuration_cState.size() << endl; Out_local_logstream << "Size of Configuration_cState:\t" << Configuration_cState.size() << endl;
+//        cout << "Size of Configuration_aState:\t" << Configuration_aState.size() << endl; Out_local_logstream << "Size of Configuration_aState:\t" << Configuration_aState.size() << endl;
+//        cout << "Size of Configuration_gState:\t" << Configuration_gState.size() << endl; Out_local_logstream << "Size of Configuration_gState:\t" << Configuration_gState.size() << endl;
   } // end of  if (pcc_standard == "pcc1s")
   else {
       cout << "ERROR in the reading PCC: please specify the correct 'pcc_standard' perameter in the config/main.ini file corresponding to the version of the PCC you use (please see technical documentation for more details, the first PCC standard has an ID 'pcc1s'" << endl;
@@ -865,7 +870,7 @@ int Config::Get_dim() const {
 
     /// --------------------------------------- *** END of void Config::Read_config() method *** ------------------------------------------------ ///
 
-    void Config::Set_config(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_cState){
+    void Config::Set_config(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<vector<int>> Configuration_State, std::vector<vector<int>> Configuration_gState){
 
     }; // manual setting of the configuration
 

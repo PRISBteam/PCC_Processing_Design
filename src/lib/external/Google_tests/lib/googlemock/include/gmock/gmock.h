@@ -53,16 +53,16 @@
 //
 // where all clauses are optional and WillOnce() can be repeated.
 
-#include "gmock-actions.h"
+#include "gmock/gmock-actions.h"  // IWYU pragma: export
 #include "gmock/gmock-cardinalities.h"  // IWYU pragma: export
-#include "gmock-function-mocker.h"
-#include "gmock-matchers.h"
-#include "gmock-more-actions.h"
-#include "gmock-more-matchers.h"
-#include "gmock-nice-strict.h"
-#include "gmock-spec-builders.h"
+#include "gmock/gmock-function-mocker.h"  // IWYU pragma: export
+#include "gmock/gmock-matchers.h"  // IWYU pragma: export
+#include "gmock/gmock-more-actions.h"  // IWYU pragma: export
+#include "gmock/gmock-more-matchers.h"  // IWYU pragma: export
+#include "gmock/gmock-nice-strict.h"  // IWYU pragma: export
+#include "gmock/gmock-spec-builders.h"  // IWYU pragma: export
 #include "gmock/internal/gmock-internal-utils.h"
-#include "internal/gmock-port.h"
+#include "gmock/internal/gmock-port.h"
 
 // Declares Google Mock flags that we want a user to use programmatically.
 GMOCK_DECLARE_bool_(catch_leaked_mocks);

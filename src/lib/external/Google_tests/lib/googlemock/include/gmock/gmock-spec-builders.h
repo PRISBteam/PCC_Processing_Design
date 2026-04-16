@@ -73,11 +73,11 @@
 #include <utility>
 #include <vector>
 
-#include "gmock-actions.h"
-#include "gmock-cardinalities.h"
-#include "gmock-matchers.h"
+#include "gmock/gmock-actions.h"
+#include "gmock/gmock-cardinalities.h"
+#include "gmock/gmock-matchers.h"
 #include "gmock/internal/gmock-internal-utils.h"
-#include "internal/gmock-port.h"
+#include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
 
 #if GTEST_HAS_EXCEPTIONS

@@ -32,7 +32,7 @@
 // This file implements the spec builder syntax (ON_CALL and
 // EXPECT_CALL).
 
-#include "../include/gmock/gmock-spec-builders.h"
+#include "gmock/gmock-spec-builders.h"
 
 #include <stdlib.h>
 
@@ -45,7 +45,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../include/gmock/gmock.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-port.h"
 

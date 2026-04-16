@@ -11,8 +11,10 @@
 #define PCC_PROCESSING_DESIGN_PCC_PROCESSING_H
 
 /*!
- * @brief Processing module :: creates design vectors for all k-cells in a PCC and save them into CellDesign object.
- * @param configuration
+ * @brief Processing module :: creates design vectors for all k-cells in a PCC and saves them into a CellDesign object.
+ * @param configuration // Object contained initial configuration
+ * @param pcc_subcomplexes // vector of Subcomplexes
+ * @param new_cells_energies // Cell Energies object
  * @return CellDesign object
  */
 CellDesign PCC_Processing(Config &configuration, std::vector<Subcomplex> &pcc_subcomplexes, std::vector<CellEnergies> &new_cells_energies);

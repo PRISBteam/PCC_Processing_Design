@@ -178,9 +178,9 @@ TEST_P(DerivedTest, DoesBlah) {
 #include <iterator>
 #include <utility>
 
-#include "internal/gtest-internal.h"
-#include "internal/gtest-param-util.h"
-#include "internal/gtest-port.h"
+#include "gtest/internal/gtest-internal.h"
+#include "gtest/internal/gtest-param-util.h"  // IWYU pragma: export
+#include "gtest/internal/gtest-port.h"
 
 namespace testing {
 

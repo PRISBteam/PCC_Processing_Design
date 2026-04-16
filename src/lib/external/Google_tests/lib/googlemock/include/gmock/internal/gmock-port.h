@@ -54,7 +54,7 @@
 // here, as Google Mock depends on Google Test.  Only add a utility
 // here if it's truly specific to Google Mock.
 
-#include "custom/gmock-port.h"
+#include "gmock/internal/custom/gmock-port.h"
 #include "gtest/internal/gtest-port.h"
 
 #if defined(GTEST_HAS_ABSL) && !defined(GTEST_NO_ABSL_FLAGS)

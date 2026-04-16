@@ -1,3 +1,6 @@
+# Note: CMake support is community-based. The maintainers do not use CMake
+# internally.
+
 cmake_minimum_required(VERSION 3.16)
 
 project(googletest-distribution)
@@ -27,7 +30,7 @@ if(GTEST_HAS_ABSL)
 endif()
 
 if(BUILD_GMOCK)
-  add_subdirectory(googlemock)
+  add_subdirectory( googlemock )
 else()
-  add_subdirectory(googletest)
+  add_subdirectory( googletest )
 endif()

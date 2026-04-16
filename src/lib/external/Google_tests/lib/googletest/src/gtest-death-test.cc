@@ -41,8 +41,8 @@
 #include <utility>
 #include <vector>
 
-#include "../include/gtest/internal/custom/gtest.h"
-#include "../include/gtest/internal/gtest-port.h"
+#include "gtest/internal/custom/gtest.h"
+#include "gtest/internal/gtest-port.h"
 
 #ifdef GTEST_HAS_DEATH_TEST
 
@@ -87,9 +87,9 @@
 
 #endif  // GTEST_HAS_DEATH_TEST
 
-#include "../include/gtest/gtest-message.h"
+#include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-string.h"
-#include "gtest-internal-inl.h"
+#include "src/gtest-internal-inl.h"
 
 namespace testing {
 

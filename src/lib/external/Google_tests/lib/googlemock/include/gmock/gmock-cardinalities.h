@@ -44,7 +44,7 @@
 #include <memory>
 #include <ostream>  // NOLINT
 
-#include "internal/gmock-port.h"
+#include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \

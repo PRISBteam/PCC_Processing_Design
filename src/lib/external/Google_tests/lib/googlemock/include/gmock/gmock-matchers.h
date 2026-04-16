@@ -272,9 +272,9 @@
 #include <utility>
 #include <vector>
 
-#include "internal/gmock-internal-utils.h"
+#include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
-#include "internal/gmock-pp.h"
+#include "gmock/internal/gmock-pp.h"
 #include "gtest/gtest.h"
 
 // MSVC warning C5046 is new as of VS2017 version 15.8.

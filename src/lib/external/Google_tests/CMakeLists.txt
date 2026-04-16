@@ -1,12 +1,11 @@
+# 'Google_test' is the subproject name
 project(Google_tests)
 
+# 'lib' is the folder with Google Test sources
 add_subdirectory(lib)
-
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
+# 'Google_Tests_run' is the target name
+add_executable(Google_Tests_run ../../../main.cpp ../../processing_design_lib/PCC_Processing/PCC_Processing.cpp)
 
-add_executable(Google_Tests_run processing_unit_tests.cpp)
-
-target_link_libraries(Google_Tests_run processing_design_lib)
-
-target_link_libraries(Google_Tests_run gtest gtest_main pthread)
+target_link_libraries(Google_Tests_run gtest gtest_main)

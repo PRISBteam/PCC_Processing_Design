@@ -27,15 +27,15 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "../include/gtest/internal/gtest-filepath.h"
+#include "gtest/internal/gtest-filepath.h"
 
 #include <stdlib.h>
 
 #include <iterator>
 #include <string>
 
-#include "../include/gtest/gtest-message.h"
-#include "../include/gtest/internal/gtest-port.h"
+#include "gtest/gtest-message.h"
+#include "gtest/internal/gtest-port.h"
 
 #ifdef GTEST_OS_WINDOWS_MOBILE
 #include <windows.h>

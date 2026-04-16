@@ -323,8 +323,8 @@
 #include <TargetConditionals.h>
 #endif
 
-#include "custom/gtest-port.h"
-#include "gtest-port-arch.h"
+#include "gtest/internal/custom/gtest-port.h"
+#include "gtest/internal/gtest-port-arch.h"
 
 #ifndef GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
 #define GTEST_HAS_MUTEX_AND_THREAD_LOCAL_ 0

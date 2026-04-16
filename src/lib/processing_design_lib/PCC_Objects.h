@@ -4,46 +4,13 @@
 #include "../external/Eigen-5.0/SparseCore"
 #include <set>
 
-/// ==== # 4 # =============== Agglomeration class  ========================= ///
-
-/*!
-* @brief This class combine PCCpaths to directories and initial variables set in the config/_.ini files with the methods of their reading like
- */
-class Agglomeration {
-
-    double adhesion_energy = 0;
-    double surface_energy = 0;
-
-private:
-    std::string atype; // like "rgo"
-    unsigned int aface_number = 0;
-    unsigned int apower = 0;
-    unsigned int a_average_strip_length = 0;
-
-public:
-    Agglomeration(unsigned int AFace); // constructor 1
-    Agglomeration(unsigned int AFace, unsigned int AglPower); // constructor 2 complex
-
-    void Set_new_agglomeration(unsigned int AFace);
-    void Set_agglomeration_type(std::string type);
-    void Set_agglomeration_power(std::vector<std::vector<unsigned int>> const &RW_series_vector);
-    void SetAvLength(std::vector<std::vector<unsigned int>> const &RW_series_vector); // Average length of strips related to this agglomeration
-
-    unsigned int Get_agglomeration_kcell_number() const;
-    int Get_agglomeration_power() const;
-    int Get_agglomeration_power(std::vector<std::vector<unsigned int>> const &RW_series_vector); /// overloaded /// BAD
-    int GetAvLength() const; /// BAD
-    int GetAvLength(std::vector<std::vector<unsigned int>> const &RW_series_vector); /// overloaded /// BAD
-
-}; // end of class agglomeration
-
-/// ==== # 0 # =============== Structure for the initial configuration  ========================= ///
+/// ==== # I # =============== Structure for the initial configuration  ========================= ///
 
 /*!
  * @brief This class combine PCCpaths to directories and initial variables set in the config/_.ini files with the methods of their reading like
  * @public Get_config(), Set_config()
  * @param dim, source_dir, paths, ConfigVector
- * @return Configuration_sState, Configuration_cState
+ * @return Configuration_aState, Configuration_gState
  */
 class Config {
 
@@ -145,15 +112,16 @@ private:
     std::string config_sim_task; // path to the corresponding *.cpp file containing a 'simulation task' (for 'TASK' execution mode only, not 'LIST') as it is written in the 'config/main.ini' file
     bool is_log_file; // key for various config outputs
 
-    /// The list of all mentioned below State_<*>_vectors and State_<*>fracture_vectors as the output of the Processing module // is the list of 'state vectors' analogous to the Configuration_sState but for 'cracked' (or induced) network of k-cells
+    /// The list of all mentioned below State_<*>_vectors and State_<*>fracture_vectors as the output of the Processing module // is the list of 'state vectors' analogous to the Configuration_aState but for 'cracked' (or induced) network of k-cells
     /* where 'n' :: "nodes", 'e' :: "edges", 'f' :: "faces", and 'p' :: "polyhedrons" */
 // State_Vector in the form : [Element index] - > [Element type], like [0, 0, 2, 1, 1, 0, 2, 4, 3, 3, 2, 0,... ...,2] containing all CellNumb.at(*) element types
     std::vector<unsigned int> State_p_vector, State_f_vector, State_e_vector, State_n_vector; // Normally the State_<*>_vector of special cells can be calculated based on the corresonding special_cell_sequences
     std::vector<unsigned int> State_pfracture_vector, State_ffracture_vector, State_efracture_vector, State_nfracture_vector; // separate vectors containing the other 'fractured' labels different from the 'special' ones. To be calculated based on the corresonding fractured_cell_sequences
 
-/// Configuration_sState = { State_p_vector, State_f_vector, State_e_vector, State_n_vector } is a list of all 'state vectors': from (1) State_p_vector (on top, id = 0) to (4) State_n_vector (bottom, id = 3)
-    std::vector<std::vector<unsigned int>> Configuration_sState;
-    std::vector<std::vector<unsigned int>> Configuration_cState;
+/// Configuration_aState = { State_p_vector, State_f_vector, State_e_vector, State_n_vector } is a list of all 'state vectors': from (1) State_p_vector (on top, id = 0) to (4) State_n_vector (bottom, id = 3)
+    std::vector<std::vector<unsigned int>> Configuration_aState;
+    std::vector<std::vector<unsigned int>> Configuration_gState;
+    std::vector<std::vector<unsigned int>> Configuration_iState;
 
 public:
     /// main
@@ -278,7 +246,7 @@ public:
     bool Get_is_processing_log_file(void);
 
     void Read_config(Config &main_configuration); // Read the 'initial configuration' of the problem set in all the relevant '*.ini' files containing in the '\config' project directory using the functions from the 'ini_readers.cpp' project library (and only from there)
-    void Set_config(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<std::vector<int>> Configuration_State, std::vector<std::vector<int>> Configuration_cState); // manual setting of the configuration
+    void Set_config(const std::vector<int> &ConfigVector, const std::string &source_dir, int &dim, std::vector<char*> paths, std::vector<std::vector<int>> Configuration_State, std::vector<std::vector<int>> Configuration_gState); // manual setting of the configuration
 
     main_configuration Get_main_config() const;
     subcomplex_configuration Get_subcomplex_config() const;
@@ -294,7 +262,8 @@ public:
     std::string Get_main_type() const; //!@return main_type
     std::string Get_sim_task() const; //!@return sim_task path to the corresponding *.cpp file containing the task code
 
-    std::vector<std::vector<unsigned int>> Get_Configuration_sState() const; //!@return Configuration_sState
+    std::vector<std::vector<unsigned int>> Get_Configuration_aState() const; //!@return Configuration_aState
+    std::vector<std::vector<unsigned int>> Get_Configuration_gState() const; //!@return Configuration_gState
     std::vector<std::vector<unsigned int>> Get_Configuration_iState() const; //!@return Configuration_iState
 
     ///kinetics
@@ -359,10 +328,361 @@ public:
     void Set_is_design_log_file(bool is_design_log);
     bool Get_is_design_log_file(void) const;
 
-};
-// ConfigVector (../config/main.ini) contains ALL the control variables needed for the program execution
+}; // ConfigVector (../config/main.ini) contains ALL the control variables needed for the program execution
 
-/// ==== # 1 # =============== CellDesign class  ========================= ///
+/// ==== # I # =============== END  ========================= ///
+
+/// ==== # II # =============== Fundamental classes representing concepts of discrete combinatorial space ========================= ///
+
+/// ==== # II.1 # =============== PCC (polytopal cell complex) class  ========================= ///
+class PCC {
+    std::set<bool> internal_grains_state_vector, internal_faces_state_vector, internal_edges_state_vector, internal_nodes_state_vector; // state vectors like [0 1 1 0 0 1 ...] where '1' signifies INTERNAL element (all its (k-1)-cells on the 1-boundary have adjacent neighbours) and '0' if not
+
+protected:
+    // list of polytopes
+    std::vector<unsigned int> polytope_ids;
+
+    /// Combinatorics
+    // list of polytope k-boundaries and k-co-boundaries
+    // For instance, for a FACE incident EDGES and NODES are its 1-boundary and 2-boundary, while incident GRAINS are on its co-boundary, etc.
+    // A polytope, by definition, is on its own 0-boundary, 0-co-boundary and 0-neighbours
+    // 'Neighbours' here MUST have at least one common 1-boundary cell
+    std::vector<std::vector<unsigned int>> polytope_k_boundaries_list; // list of lists for each k-polytope in a PCC
+    std::vector<std::vector<unsigned int>> polytope_k_coboundaries_list; // list of lists for each k-polytope in a PCC
+    std::vector<std::vector<unsigned int>> polytope_k_neighbours_list; // list of lists for each k-polytope in a PCC
+
+    ///Geometry
+    // list of the lists of triplets of node coordinates: [0] - nodes, [1] - edges, [2] - faces, [3] - grains, [4] - 4-cells, etc
+    std::vector<std::vector<std::tuple<double, double, double>>> cell_barycentre_coordinates;
+
+    /// Measures
+    // list of lists of geometric measures ('volumes' for 3-cells, 'areas' for 2-cells, 'lengths' for 1-cells, 'size' for 0-cells)
+    std::vector<std::vector<std::tuple<double, double, double>>> cell_measures_vector;
+
+public:
+    void Set_edge_barycentre_coordinates(void);
+    void Set_face_barycentre_coordinates(void);
+    std::vector<std::tuple<double, double, double>> Get_edge_barycentre_coordinates(void);
+    std::vector<std::tuple<double, double, double>> Get_face_barycentre_coordinates(void);
+
+
+}; // end of class PCC
+
+/// ==== # II.2 # =============== Skeleton class  ========================= ///
+class Skeleton {
+private:
+
+public:
+
+};
+/// ========== END of class Skeleton functions description
+
+/// ==== # II.3 # =============== Polytope class  ========================= ///
+
+class Polytope {
+
+    std::vector<std::tuple<double, double, double>> minmax_node_coordinates; // a vector containing two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}
+
+private:
+    // list of nodes
+    std::vector<unsigned int> node_ids;
+    // list of faces
+    std::vector<unsigned int> faces_list;
+    // list of neighbours (other polytopes)
+    std::vector<unsigned int> neighbours_list;
+
+    // list of triplets of node coordinates
+    std::vector<std::tuple<double, double, double>> node_coordinates;
+
+public:
+    unsigned int grain_id;
+
+    Polytope(unsigned int grain_new_id); // constructor 1
+
+    void Set_node_ids(Eigen::SparseMatrix<double> const &GFS, Eigen::SparseMatrix<double> const &FES, Eigen::SparseMatrix<double> const &ENS);
+
+    void Set_faces_list(Eigen::SparseMatrix<double> const &GFS);
+
+    std::vector<unsigned int> Get_faces_list(void) const;
+
+    /// return - vector of all node (vertices) coordinates of a polytope
+    void Set_node_coordinates(std::vector<std::tuple<double,double,double>> &vertex_coordinates_vector);
+
+    std::vector<unsigned int> Get_node_ids(void) const;
+
+    std::vector<std::tuple<double, double, double>> Get_node_coordinates(void) const;
+
+    /// return - vector with two tuples : { x_min, y_min, z_min; x_max, y_max, z_max} of a polytope with number grain_id
+    std::vector<std::tuple<double, double, double>> Get_minmax_node_coordinates(void) const;
+
+}; // end of class Polytope
+/// ========== END of class Polytope functions description
+
+/// ==== # II # =============== END ========================= ///
+
+/// ==== # III # =============== Classes contained descriptions of the objects obtained as output of the project Modules  ========================= ///
+
+/// ==== # III.1 # =============== Subcomplex class  ========================= ///
+/*! @breif create a PCC subcomplex of the same dimension (maximum dimension k of its k-cells) as the parent PCC
+ * @protected  sub_grains_set, sub_faces_set, sub_nodes_set, internal_faces_set // sets of k_max-cells and (k_max-1)-cells of a PCC
+ * @protected sub_sfaces_set, internal_sfaces_set, sub_sfaces_sequence, internal_sub_sfaces_set // sets of special 'assigned' k_max-cells and (k_max-1)-cells of a PCC
+ * sub_cfaces_sequence // sets of special 'generated' k_max-cells and (k_max-1)-cells of a PCC
+ * @public subcomplex_id, sub_length, a_n, b_n, c_n, D_plane //
+ * @public std::vector<double> crack_plane = {a_n, b_n, c_n, D_plane} //
+ * @function
+ */
+class Subcomplex {
+
+protected:
+    /// 1. Combinatorics
+    std::set <unsigned int> sub_grains_set;
+    std::set <unsigned int> sub_faces_set;
+    std::set <unsigned int> sub_nodes_set;
+    std::set <unsigned int> internal_faces_set;
+    std::set <unsigned int> sub_sfaces_set;
+    std::set <unsigned int> internal_sfaces_set;
+    std::vector <unsigned int> sub_sfaces_sequence;
+    std::set <unsigned int> internal_sub_sfaces_set;
+    std::vector <unsigned int> sub_cfaces_sequence;
+
+    /// 2. Geometry
+    std::vector<std::tuple<double, double, double>> sub_face_coordinates;
+    std::vector<std::tuple<double, double, double>> internal_sub_face_coordinates;
+    std::vector <std::tuple<double, double, double>> sub_sfaces_coord;
+    std::vector <std::tuple<double, double, double>> sub_cfaces_coord;
+
+    std::vector<std::tuple<double, double, double>> sub_grain_coordinates;
+
+public:
+    unsigned int subcomplex_id;
+    double sub_length;
+    double a_n, b_n, c_n, D_plane;
+    std::vector<double> crack_plane = {a_n, b_n, c_n, D_plane};
+
+    Subcomplex() {} // constructor 1
+    Subcomplex(std::set <unsigned int> &new_sub_grains_set); // constructor 2
+
+    std::vector <unsigned int> Get_sub_sfaces_sequence(void) const;
+    std::vector <unsigned int> Get_sub_cfaces_sequence(void) const;
+    std::vector <std::tuple<double, double, double>> Get_sub_sfaces_coord(void) const;
+    std::vector <std::tuple<double, double, double>> Get_sub_cfaces_coord(void) const;
+
+    void Set_sub_sfaces_sequence(std::vector <unsigned int> const &ssub_faces_sequence);
+    void Set_sub_cfaces_sequence(std::vector <unsigned int> const &csub_faces_sequence);
+    void Set_sub_sfaces_coord(std::vector<std::tuple<double, double, double>> const &sfaces_coord);
+    void Set_sub_cfaces_coord(std::vector<std::tuple<double, double, double>> const &cfaces_coord);
+
+    /// Polytope
+    // sequence
+    void Set_sub_polytope_set(std::set <unsigned int> &new_sub_grains_set);
+    std::set <unsigned int> Get_sub_polytope_set(void) const;
+    // geometry
+    void Set_sub_polytope_coordinates(std::vector<std::tuple<double, double, double>> &new_sub_grain_coordinates);
+    std::vector<std::tuple<double, double, double>> Get_sub_polytope_coordinates(void) const;
+
+    /// Faces
+    // sequence
+    void Set_sub_faces_set(std::set <unsigned int> &new_sub_faces_set);
+    std::set <unsigned int> Get_sub_faces_set(void) const;
+    void Set_internal_sub_faces_set(std::set <unsigned int> &new_internal_faces_set);
+    std::set <unsigned int> Get_internal_sub_faces_set(void) const;
+    void Set_sub_sfaces_set(std::set <unsigned int> &new_sfaces_set);
+    std::set <unsigned int> Get_sub_sfaces_set(void) const;
+
+    void Set_internal_sub_sfaces_set(std::set <unsigned int> &new_internal_sfaces_set);
+    std::set <unsigned int> Get_internal_sub_sfaces_set(void) const;
+
+    // special and induced [c]('cracked') fqce sequences
+//    void Set_sfaces_sequence(std::vector <unsigned int> const &ssub_faces_sequence);
+//    std::vector <unsigned int> Get_sfaces_sequence(void) const;
+//    void Set_cfaces_sequence(std::vector <unsigned int> &sub_cfaces_sequence);
+//    std::vector <unsigned int> Get_cfaces_sequence(void) const;
+
+    /// Geometry
+    void Set_sub_face_coordinates(std::vector<std::tuple<double, double, double>> &new_sub_face_coordinates);
+    std::vector<std::tuple<double, double, double>> Get_sub_face_coordinates(void) const;
+
+    void Set_sub_internal_face_coordinates(std::vector<std::tuple<double, double, double>> &new_internal_face_coordinates);
+    std::vector<std::tuple<double, double, double>> Get_sub_internal_face_coordinates(void) const;
+
+    /// Edges
+    // sequence
+    void Set_sub_edges_set(std::set <unsigned int> &new_sub_faces_set);
+    std::set <unsigned int> Get_sub_edges_set(void) const;
+    // geometry
+
+    /// Nodes
+    // sequence
+    void Set_sub_nodes_set(std::set <unsigned int> &new_sub_nodes_set);
+    std::set <unsigned int> Get_sub_nodes_set(void) const;
+    // geometry
+
+}; // end of class Subcomplex
+
+/// ==== # III.1.1 # =============== PCC Section service class -- used for creation Subcomplex plains be sectioning 3D cubes ========================= ///
+/*! @breif create a geometric section of a 3D cube by a plane set by 4 real coefficients saved in this object
+ * @private id // a section ID
+ * @public a_coef, b_coeff, c_coeff, D_coeff   // coefficients of the plane equation in a 3D space:  a_coef*X + b_coeff*Y + c_coeff*Z + D_coeff = 0
+ */
+class PCCSection {
+private:
+    double id;
+public:
+    double a_coef;
+    double b_coeff;
+    double c_coeff;
+    double D_coeff;
+};
+
+/// ==== # III.2 # =============== CellEnergies class  ========================= ///
+///
+/// ==== # III.2.1 # =============== Material service class -- used for creation Cell Energies with tabulated material characteristics ========================= ///
+/*!
+ * @brief List various tabulated physical and mechanical characteristics needed for defining physical energies.
+ *          The list of material IDs can be taken from 'config/CPD_material_database'
+ */
+class Material {
+private:
+    std::string material_type = "material", inclusion_type = "inclusion";
+    double mass_density = 0.0;
+    double melting_point = 0.0;
+    double gb_cohesion_energy = 0.0;
+    double gb_width;
+    double Burgers_vector;
+    double Young_modulus = 0.0;
+    double Poisson_ratio = 0.0;
+    double yield_strength = 0.0;
+    double strength = 0.0;
+    double fracture_toughness = 0.0;
+
+    double gb_inclusion1_adh_energy;
+    double sface_energy_agglomeration;
+    double inclusion_mass_density;
+
+    double lagbs_corrosion_current;
+    double hagbs_corrosion_current;
+    double sigma3_corrosion_current;
+
+public:
+    Material(std::string Mid); // constructor 1
+    Material(std::string Mid, std::string Iid); // constructor 2
+
+    // Structural
+    std::string Get_material_type(void) const;
+    double Get_gb_width(void) const;
+    double Get_Burgers_vector(void) const;
+
+    // Thermodynamic
+    double Get_mass_density(void) const;
+    double Get_melting_point(void) const;
+    double Get_gb_cohesion_energy(void) const;
+
+    // Mechanical
+    double Get_Young_modulus(void) const;
+    double Get_Poisson_ratio(void) const;
+    double Get_Yield_strength(void) const;
+    double Get_Strength(void) const;
+    double Get_Fracture_toughness(void) const;
+
+    // Inclusions
+    double Get_gb_inclusion1_adh_energy(void) const;
+    std::string Get_inclusion_type(void) const;
+    double Get_inclusion_agglomeration_energy(void) const;
+    double Get_inclusion_mass_density(void) const;
+
+    // Corrosion
+    double Get_lagbs_corrosion_current(void) const;
+    double Get_hagbs_corrosion_current(void) const;
+    double Get_sigma3_corrosion_current(void) const;
+
+};
+
+/*! @breif create a list of the energy_vectors corresponding to different dimensions 'k' of the k-cells in a PCC
+ * @private homogeneous_elastic_energy  // double average value for an entire PCC
+ * @private von_Mises_elastic_stress, ambient_temperature k_elastic_energies, k_thermal_energies, k_self_energies // vector<double> for each k-cell in a PCC
+ */
+class CellEnergies {
+private:
+    std::vector<double> von_Mises_elastic_stress;
+    double homogeneous_elastic_energy = 0.0;
+    std::vector<double> ambient_temperature;
+
+    /// Energies for each cell in a PCC
+    std::vector<double> p_elastic_energies, f_elastic_energies, e_elastic_energies, n_elastic_energies; // elastic energies of k-cells defined at their barycentres
+    std::vector<double> p_thermal_energies, f_thermal_energies, e_thermal_energies, n_thermal_energies; // thermal energies of k-cells defined at their barycentres
+    std::vector<double> p_self_energies, f_self_energies, e_self_energies, n_self_energies; // any associated self-energy including the cohesion energy of grain boundaries for 'f_self_energies'
+
+public:
+    /// Set of variables
+    CellEnergies() {}; // constructor
+    void Set_external_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress);
+    void Set_von_Mises_stress(std::vector<double> &equivalent_stress);
+    std::vector<double> Get_von_Mises_stress(void) const; // [Pa]
+    void Set_ambient_temperature(std::vector<double> &new_ambient_temperature); // [K]
+    std::vector<double> Get_ambient_temperature(void) const; // [K]
+    void Set_homogeneous_elastic_energy(std::tuple<double, double, double> &sample_dimensions, double &von_Mises_elastic_stress, Material &matrix_material); // [J]
+    void Set_p_elastic_energies(std::vector<double> p_el_energies); // in [J]
+    void Set_f_elastic_energies(std::vector<double> f_el_energies); // in [J]
+    void Set_e_elastic_energies(std::vector<double> e_el_energies); // in [J]
+    void Set_n_elastic_energies(std::vector<double> n_el_energies); // in [J]
+
+    void Set_p_self_energies(std::vector<double> p_el_energies); // in [J]
+    void Set_f_self_energies(std::vector<double> f_el_energies); // in [J]
+    void Set_e_self_energies(std::vector<double> e_el_energies); // in [J]
+    void Set_n_self_energies(std::vector<double> n_el_energies); // in [J]
+
+    // Get values
+    double Get_homogeneous_elastic_energy(void); // [J]
+
+    std::vector<double> Get_p_elastic_energies(void) const;
+    std::vector<double> Get_f_elastic_energies(void) const;
+    std::vector<double> Get_e_elastic_energies(void) const;
+    std::vector<double> Get_n_elastic_energies(void) const;
+
+    std::vector<double> Get_p_self_energies(void) const;
+    std::vector<double> Get_f_self_energies(void) const;
+    std::vector<double> Get_e_self_energies(void) const;
+    std::vector<double> Get_n_self_energies(void) const;
+
+}; // END of class CellEnergies
+
+/// ==== # III.3 # =============== CellDesign class  ========================= ///
+///
+/// ==== # III.3.1 # =============== Agglomeration service class -- used for creating a collection of labels at each PCC's k-cell  ========================= ///
+
+/*!
+* @brief Objects of this class store collections of labels at each PCC's k-cell
+* @private (string)atype, (unsigned int)aface_number, apower, a_average_strip_length
+ */
+class Agglomeration {
+    double adhesion_energy = 0;
+    double surface_energy = 0;
+private:
+    std::string atype; // like "rgo"
+    unsigned int aface_number = 0;
+    unsigned int apower = 0;
+    unsigned int a_average_strip_length = 0;
+public:
+    Agglomeration(unsigned int AFace); // constructor 1
+    Agglomeration(unsigned int AFace, unsigned int AglPower); // constructor 2 complex
+
+    void Set_new_agglomeration(unsigned int AFace);
+    void Set_agglomeration_type(std::string type);
+    void Set_agglomeration_power(std::vector<std::vector<unsigned int>> const &RW_series_vector);
+    void SetAvLength(std::vector<std::vector<unsigned int>> const &RW_series_vector); // Average length of strips related to this agglomeration
+
+    unsigned int Get_agglomeration_kcell_number() const;
+    int Get_agglomeration_power() const;
+    int Get_agglomeration_power(std::vector<std::vector<unsigned int>> const &RW_series_vector); /// overloaded /// BAD
+    int GetAvLength() const; /// BAD
+    int GetAvLength(std::vector<std::vector<unsigned int>> const &RW_series_vector); /// overloaded /// BAD
+
+}; // end of class agglomeration
+
+/*!
+ * @brief A CellDesign object contains 'state' or 'design' vectors contained particular configuration of labels on various PCC skeletons;
+ * Moreover, it contains 'sequences' of special assigned, induced and generated cell numbers in 'historical' order of their appearance.
+ */
 class CellDesign {
 private:
     bool is_set_p_special_sequence = false, is_set_f_special_sequence = false, is_set_e_special_sequence = false, is_set_n_special_sequence = false;
@@ -438,301 +758,13 @@ public:
 
 }; // END of class CellDesign
 
-/// # 7 # The class of a MATERIAL
+/// ==== # III.4 # =============== Processed Complex class  ========================= ///
+///
+/// ==== # III.4.1 # =============== Macrocrack service class -- used in Processed Complex stored a series of macrocracks ========================= ///
+
 /*!
- *
+ * @brief
  */
-class Material {
-private:
-    std::string material_type = "material", inclusion_type = "inclusion";
-    double mass_density = 0.0;
-    double melting_point = 0.0;
-    double gb_cohesion_energy = 0.0;
-    double gb_width;
-    double Burgers_vector;
-    double Young_modulus = 0.0;
-    double Poisson_ratio = 0.0;
-    double yield_strength = 0.0;
-    double strength = 0.0;
-    double fracture_toughness = 0.0;
-
-    double gb_inclusion1_adh_energy;
-    double sface_energy_agglomeration;
-    double inclusion_mass_density;
-
-    double lagbs_corrosion_current;
-    double hagbs_corrosion_current;
-    double sigma3_corrosion_current;
-
-public:
-    Material(std::string Mid); // constructor 1
-    Material(std::string Mid, std::string Iid); // constructor 2
-
-// Structural
-    std::string Get_material_type(void) const;
-    double Get_gb_width(void) const;
-    double Get_Burgers_vector(void) const;
-
-// Thermodynamic
-    double Get_mass_density(void) const;
-    double Get_melting_point(void) const;
-    double Get_gb_cohesion_energy(void) const;
-
-// Mechanical
-    double Get_Young_modulus(void) const;
-    double Get_Poisson_ratio(void) const;
-    double Get_Yield_strength(void) const;
-    double Get_Strength(void) const;
-    double Get_Fracture_toughness(void) const;
-
-// Inclusions
-    double Get_gb_inclusion1_adh_energy(void) const;
-    std::string Get_inclusion_type(void) const;
-    double Get_inclusion_agglomeration_energy(void) const;
-    double Get_inclusion_mass_density(void) const;
-
-// Corrosion
-    double Get_lagbs_corrosion_current(void) const;
-    double Get_hagbs_corrosion_current(void) const;
-    double Get_sigma3_corrosion_current(void) const;
-
-};
-
-/// ========== END of class Materials functions description
-
-/// ==== # 1.2 # =============== CellEnergies class  ========================= ///
-// # V # The class of a CELLS_ENERGIES :: list of the energy_vectors corresponding to different dimensions 'k' of the k-cells in a PCC
-class CellEnergies {
-private:
-    std::vector<double> von_Mises_elastic_stress;
-    double homogeneous_elastic_energy = 0.0;
-    std::vector<double> ambient_temperature;
-
-    /// Energies for each cell in a PCC
-    std::vector<double> p_elastic_energies, f_elastic_energies, e_elastic_energies, n_elastic_energies; // elastic energies of k-cells defined at their barycentres
-    std::vector<double> p_thermal_energies, f_thermal_energies, e_thermal_energies, n_thermal_energies; // thermal energies of k-cells defined at their barycentres
-    std::vector<double> p_self_energies, f_self_energies, e_self_energies, n_self_energies; // any associated self-energy including the cohesion energy of grain boundaries for 'f_self_energies'
-
-public:
-    /// Set of variables
-    CellEnergies() {}; // constructor
-    void Set_external_von_Mises_stress(std::tuple<double, double, double, double, double, double, double, double, double> &external_stress);
-    void Set_von_Mises_stress(std::vector<double> &equivalent_stress);
-    std::vector<double> Get_von_Mises_stress(void) const; // [Pa]
-    void Set_ambient_temperature(std::vector<double> &new_ambient_temperature); // [K]
-    std::vector<double> Get_ambient_temperature(void) const; // [K]
-    void Set_homogeneous_elastic_energy(std::tuple<double, double, double> &sample_dimensions, double &von_Mises_elastic_stress, Material &matrix_material); // [J]
-    void Set_p_elastic_energies(std::vector<double> p_el_energies); // in [J]
-    void Set_f_elastic_energies(std::vector<double> f_el_energies); // in [J]
-    void Set_e_elastic_energies(std::vector<double> e_el_energies); // in [J]
-    void Set_n_elastic_energies(std::vector<double> n_el_energies); // in [J]
-
-    void Set_p_self_energies(std::vector<double> p_el_energies); // in [J]
-    void Set_f_self_energies(std::vector<double> f_el_energies); // in [J]
-    void Set_e_self_energies(std::vector<double> e_el_energies); // in [J]
-    void Set_n_self_energies(std::vector<double> n_el_energies); // in [J]
-
-
-    // Get values
-    double Get_homogeneous_elastic_energy(void); // [J]
-
-    std::vector<double> Get_p_elastic_energies(void) const;
-    std::vector<double> Get_f_elastic_energies(void) const;
-    std::vector<double> Get_e_elastic_energies(void) const;
-    std::vector<double> Get_n_elastic_energies(void) const;
-
-    std::vector<double> Get_p_self_energies(void) const;
-    std::vector<double> Get_f_self_energies(void) const;
-    std::vector<double> Get_e_self_energies(void) const;
-    std::vector<double> Get_n_self_energies(void) const;
-
-}; // END of class CellEnergies
-
-/// ==== # 3 # =============== Subcomplex class  ========================= ///
-
-class Subcomplex {
-
-protected:
-    /// 1. Combinatorics
-    std::set <unsigned int> sub_grains_set;
-    std::set <unsigned int> sub_faces_set;
-    std::set <unsigned int> sub_nodes_set;
-    std::set <unsigned int> internal_faces_set;
-    std::set <unsigned int> sub_sfaces_set;
-    std::set <unsigned int> internal_sfaces_set;
-    std::vector <unsigned int> sub_sfaces_sequence;
-    std::set <unsigned int> internal_sub_sfaces_set;
-    std::vector <unsigned int> sub_cfaces_sequence;
-
-    /// 2. Geometry
-    std::vector<std::tuple<double, double, double>> sub_face_coordinates;
-    std::vector<std::tuple<double, double, double>> internal_sub_face_coordinates;
-    std::vector <std::tuple<double, double, double>> sub_sfaces_coord;
-    std::vector <std::tuple<double, double, double>> sub_cfaces_coord;
-
-    std::vector<std::tuple<double, double, double>> sub_grain_coordinates;
-
-public:
-    unsigned int subcomplex_id;
-    double sub_length;
-    double a_n; double b_n; double c_n; double D_plane;
-    std::vector<double> crack_plane = {a_n, b_n, c_n, D_plane};
-
-    Subcomplex() {} // constructor 1
-    Subcomplex(std::set <unsigned int> &new_sub_grains_set); // constructor 2
-
-    std::vector <unsigned int> Get_sub_sfaces_sequence(void) const;
-    std::vector <unsigned int> Get_sub_cfaces_sequence(void) const;
-    std::vector <std::tuple<double, double, double>> Get_sub_sfaces_coord(void) const;
-    std::vector <std::tuple<double, double, double>> Get_sub_cfaces_coord(void) const;
-
-    void Set_sub_sfaces_sequence(std::vector <unsigned int> const &ssub_faces_sequence);
-    void Set_sub_cfaces_sequence(std::vector <unsigned int> const &csub_faces_sequence);
-    void Set_sub_sfaces_coord(std::vector<std::tuple<double, double, double>> const &sfaces_coord);
-    void Set_sub_cfaces_coord(std::vector<std::tuple<double, double, double>> const &cfaces_coord);
-
-    /// Polytope
-    // sequence
-    void Set_sub_polytope_set(std::set <unsigned int> &new_sub_grains_set);
-    std::set <unsigned int> Get_sub_polytope_set(void) const;
-    // geometry
-    void Set_sub_polytope_coordinates(std::vector<std::tuple<double, double, double>> &new_sub_grain_coordinates);
-    std::vector<std::tuple<double, double, double>> Get_sub_polytope_coordinates(void) const;
-
-    /// Faces
-    // sequence
-    void Set_sub_faces_set(std::set <unsigned int> &new_sub_faces_set);
-    std::set <unsigned int> Get_sub_faces_set(void) const;
-    void Set_internal_sub_faces_set(std::set <unsigned int> &new_internal_faces_set);
-    std::set <unsigned int> Get_internal_sub_faces_set(void) const;
-    void Set_sub_sfaces_set(std::set <unsigned int> &new_sfaces_set);
-    std::set <unsigned int> Get_sub_sfaces_set(void) const;
-
-    void Set_internal_sub_sfaces_set(std::set <unsigned int> &new_internal_sfaces_set);
-    std::set <unsigned int> Get_internal_sub_sfaces_set(void) const;
-
-    // special and induced [c]('cracked') fqce sequences
-///    void Set_sfaces_sequence(std::vector <unsigned int> const &ssub_faces_sequence);
-///    std::vector <unsigned int> Get_sfaces_sequence(void) const;
-///    void Set_cfaces_sequence(std::vector <unsigned int> &sub_cfaces_sequence);
-///    std::vector <unsigned int> Get_cfaces_sequence(void) const;
-
-    /// Geometry
-    void Set_sub_face_coordinates(std::vector<std::tuple<double, double, double>> &new_sub_face_coordinates);
-    std::vector<std::tuple<double, double, double>> Get_sub_face_coordinates(void) const;
-
-    void Set_sub_internal_face_coordinates(std::vector<std::tuple<double, double, double>> &new_internal_face_coordinates);
-    std::vector<std::tuple<double, double, double>> Get_sub_internal_face_coordinates(void) const;
-
-    /// Edges
-    // sequence
-    void Set_sub_edges_set(std::set <unsigned int> &new_sub_faces_set);
-    std::set <unsigned int> Get_sub_edges_set(void) const;
-    // geometry
-
-    /// Nodes
-    // sequence
-    void Set_sub_nodes_set(std::set <unsigned int> &new_sub_nodes_set);
-    std::set <unsigned int> Get_sub_nodes_set(void) const;
-    // geometry
-
-}; // end of class Subcomplex
-
-
-/// ==== # x # =============== PCC Section class  ========================= ///
-
-class PCCSection {
-
-private:
-    double id;
-
-public:
-    double a_coef;
-    double b_coeff;
-    double c_coeff;
-    double D_coeff;
-
-};
-
-
-/// ==== # 5 # =============== PCC class  ========================= ///
-class PCC {
-    std::set<bool> internal_grains_state_vector, internal_faces_state_vector, internal_edges_state_vector, internal_nodes_state_vector; // state vectors like [0 1 1 0 0 1 ...] where '1' signifies INTERNAL element (all its (k-1)-cells on the 1-boundary have adjacent neighbours) and '0' if not
-
-protected:
-    // list of polytopes
-    std::vector<unsigned int> polytope_ids;
-
-    /// Combinatorics
-    // list of polytope k-boundaries and k-co-boundaries
-    // For instance, for a FACE incident EDGES and NODES are its 1-boundary and 2-boundary, while incident GRAINS are on its co-boundary, etc.
-    // A polytope, by definition, is on its own 0-boundary, 0-co-boundary and 0-neighbours
-    // 'Neighbours' here MUST have at least one common 1-boundary cell
-    std::vector<std::vector<unsigned int>> polytope_k_boundaries_list; // list of lists for each k-polytope in a PCC
-    std::vector<std::vector<unsigned int>> polytope_k_coboundaries_list; // list of lists for each k-polytope in a PCC
-    std::vector<std::vector<unsigned int>> polytope_k_neighbours_list; // list of lists for each k-polytope in a PCC
-
-    ///Geometry
-    // list of the lists of triplets of node coordinates: [0] - nodes, [1] - edges, [2] - faces, [3] - grains, [4] - 4-cells, etc
-    std::vector<std::vector<std::tuple<double, double, double>>> cell_barycentre_coordinates;
-
-    /// Measures
-    // list of lists of geometric measures ('volumes' for 3-cells, 'areas' for 2-cells, 'lengths' for 1-cells, 'size' for 0-cells)
-    std::vector<std::vector<std::tuple<double, double, double>>> cell_measures_vector;
-
-public:
-    void Set_edge_barycentre_coordinates(void);
-    void Set_face_barycentre_coordinates(void);
-    std::vector<std::tuple<double, double, double>> Get_edge_barycentre_coordinates(void);
-    std::vector<std::tuple<double, double, double>> Get_face_barycentre_coordinates(void);
-
-
-}; // end of class PCC
-
-/// ==== # X # =============== Polytope class  ========================= ///
-
-
-class Polytope {
-
-    std::vector<std::tuple<double, double, double>> minmax_node_coordinates; // a vector containing two tuples: gmincoord{xmin,ymin,zmin},gmaxcoord{xmax,ymax,zmax}
-
-private:
-    // list of nodes
-    std::vector<unsigned int> node_ids;
-    // list of faces
-    std::vector<unsigned int> faces_list;
-    // list of neighbours (other polytopes)
-    std::vector<unsigned int> neighbours_list;
-
-    // list of triplets of node coordinates
-    std::vector<std::tuple<double, double, double>> node_coordinates;
-
-public:
-    unsigned int grain_id;
-
-    Polytope(unsigned int grain_new_id); // constructor 1
-
-    void Set_node_ids(Eigen::SparseMatrix<double> const &GFS, Eigen::SparseMatrix<double> const &FES, Eigen::SparseMatrix<double> const &ENS);
-
-    void Set_faces_list(Eigen::SparseMatrix<double> const &GFS);
-
-    std::vector<unsigned int> Get_faces_list(void) const;
-
-    /// return - vector of all node (vertices) coordinates of a polytope
-    void Set_node_coordinates(std::vector<std::tuple<double,double,double>> &vertex_coordinates_vector);
-
-    std::vector<unsigned int> Get_node_ids(void) const;
-
-    std::vector<std::tuple<double, double, double>> Get_node_coordinates(void) const;
-
-    /// return - vector with two tuples : { x_min, y_min, z_min; x_max, y_max, z_max} of a polytope with number grain_id
-    std::vector<std::tuple<double, double, double>> Get_minmax_node_coordinates(void) const;
-
-}; // end of class Polytope
-
-/// ========== END of class Polytope functions description
-
-/// # 6 # The class of a MACROCRACK
 class Macrocrack {
     double total_fracture_energy = 0;
     //Subcomplex half_plane_subcomplex; // geometry part
@@ -800,11 +832,11 @@ public:
     std::vector <std::tuple<double,double,double>> Get_common_faces_coordinates(unsigned int  crack_id) const;
 
 }; // end of class MACROCRACK
-
 /// ========== END of class Macrocrack functions description
 
-/// ==== # 2 # =============== Processed Complex class  ========================= ///
-
+/*!
+ * @brief
+ */
 class ProcessedComplex { // Essential for Characterisation module
 // PCC processed with all its characteristics and design sequences
 

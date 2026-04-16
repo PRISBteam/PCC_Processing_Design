@@ -43,7 +43,7 @@
 #include <ostream>
 #include <string>
 
-#include "gmock-matchers.h"
+#include "gmock/gmock-matchers.h"
 
 namespace testing {
 

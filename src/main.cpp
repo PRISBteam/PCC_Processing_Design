@@ -42,7 +42,6 @@
 #include "../src/lib/external/Eigen-5.0/Core"
 #include "../src/lib/external/Eigen-5.0/Dense"
 #include "../src/lib/external/Eigen-5.0/SparseCore"
-
 /// Spectra source: https://spectralib.org/ (2024)
 /* Alternative way - the libraries must be preliminarily copied in the local STL directory (!)
 /* #include <Spectra/GenEigsSolver.h> #include <Spectra/SymEigsSolver.h> */
@@ -51,6 +50,9 @@
 
 /// Open MP library https://www.openmp.org/resources/openmp-compilers-tools/
 // Included only in the parallelized version of the code.
+
+// Google tests
+#include "gtest/gtest.h"
 
 ///------------------------------------------
 using namespace std; // standard/STL namespace
@@ -304,8 +306,8 @@ int main() {
 /// ========================================================================================================================================== ///
 /// ================================================= LIST MODE STARTS HERE ================================================================== ///
 /// ========================================================================================================================================== ///
-    else if ( main_type == "LIST"s ) { // In the LIST mode all the functions are calling one after another without additional loops and intermediate data output
-    /// For all the more complicated simulation cases the TASK mode should be used - see it following next after the 'LIST' module.
+    else if ( main_type == "LIST"s ) { // In the LIST mode, all the functions call one after another without additional loops and intermediate data output
+    /// For all more complicated simulation cases, the TASK mode has to be used -- see it following next after the 'LIST' module.
         cout << "==================================================================================================================================================" << endl;
         main_logfile_stream << "=======================================================================================================================================================================================================================================" << endl;
         cout << "\t\t\t\t\t\t\t\t\t\t[\tStart of the PCC Processing Design code in the LIST execution mode \t]\t\t\t\t\t\t\t\t\t\t" << endl << "--------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
@@ -324,6 +326,8 @@ int main() {
             main_logfile_stream << " START of the PCC Subcomplex module " << endl;
 
             pcc_subcomplexes = PCC_Subcomplex(configuration);
+            // * the module returns 'Subcomplex' class object described in the PCC_Objects.cpp library
+            // * as a collection of vectors of k-cells (clusters) belonging to a PCC
 
             cout << " pcc_subcomplexes vector size =  " << pcc_subcomplexes.size() << endl << endl;
             main_logfile_stream << " pcc_subcomplexes vector size =  " << pcc_subcomplexes.size() << endl << endl;
@@ -341,7 +345,7 @@ int main() {
 
         /// ====================== II. PCC Multiphysics module ======================
         std::vector<CellEnergies> new_cells_energies; // a class described in PCC_Objects.h contained (1) all the k-cell elastic energies and (2) all the k-cell thermal energies in the PCC
-        // Example: vector<CellEnergies> for several crack lengths in a PCC
+        // * Example: vector<CellEnergies> for several crack lengths in a PCC
 
         if (ConfigVector.at(2) == 1) { // if the 'PCC_Multiphysics' parameter is switched 'ON' in the config/main.ini file
             cout << "-------------------------------------------------------------------------" << endl;
@@ -349,10 +353,12 @@ int main() {
             cout << "START of the PCC Multiphysics module " << endl << endl;
             main_logfile_stream << "START of the PCC Multiphysics module " << endl << endl;
 
-            /// Defects
+            /// Various Structural Defects
             std::vector<Macrocrack> crack_growth_series; // series of objects of the class Macrocrack with different lengths simulating a crack growth
 
             new_cells_energies = PCC_Multiphysics(configuration, pcc_subcomplexes, crack_growth_series);
+            // * the module returns 'CellEnergies' class object described in the PCC_Objects.cpp library
+            // * as a collection of vectors of elastic, thermal and self energies for each k-cell in a PCC and an entire PCC
 
             // ================ Elapsing time for the Processing module ================
             unsigned int Multiphysics_time = clock();
@@ -371,6 +377,9 @@ int main() {
             main_logfile_stream << "START of the PCC Processing module " << endl;
 
             new_cells_design = PCC_Processing(configuration, pcc_subcomplexes, new_cells_energies);
+            // * the module returns 'CellDesign' class object described in the PCC_Objects.cpp library
+            // * as a collection of vectors containing (1) 'state' or 'design' vectors containing a particular configuration of labels on various PCC skeletons;
+            // * moreover, it contains 'sequences' of special assigned, induced and generated cell numbers in 'historical' order of their appearance.
 
         // ================ Elapsing time for the Processing module ================
             unsigned int Processing_time = clock();

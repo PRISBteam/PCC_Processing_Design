@@ -49,7 +49,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../include/gtest/internal/gtest-port.h"
+#include "gtest/internal/gtest-port.h"
 
 #if GTEST_CAN_STREAM_RESULTS_
 #include <arpa/inet.h>  // NOLINT
@@ -60,8 +60,8 @@
 #include <windows.h>  // NOLINT
 #endif                // GTEST_OS_WINDOWS
 
-#include "../include/gtest/gtest-spi.h"
-#include "../include/gtest/gtest.h"
+#include "gtest/gtest-spi.h"
+#include "gtest/gtest.h"
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 /* class A needs to have dll-interface to be used by clients of class B */)

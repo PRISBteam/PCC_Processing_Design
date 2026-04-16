@@ -52,10 +52,10 @@
 #include <utility>
 #include <vector>
 
-#include "../gtest-printers.h"
+#include "gtest/gtest-printers.h"
 #include "gtest/gtest-test-part.h"
-#include "gtest-internal.h"
-#include "gtest-port.h"
+#include "gtest/internal/gtest-internal.h"
+#include "gtest/internal/gtest-port.h"
 
 namespace testing {
 // Input to a parameterized test name generator, describing a test parameter.
