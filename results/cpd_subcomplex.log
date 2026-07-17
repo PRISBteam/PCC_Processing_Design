@@ -1,0 +1,20 @@
+ Execution year - 2026; Month - 7; Day - 17; Time - 13:8.
+
+
+==============================================================================================================================================================
+The Subcomplex module type and initial parameters:		
+
+Subcomplex type:	H
+Half-plane length:	0.2
+
+Plane orientation:	a_coeff*X + b_coeff*Y + c_coeff*Z = D
+Plane normal vector:	 a: 0 b: 0 c: 1	Plane position	 D: 0.01
+
+Subcomplex	H	mode in operation
+--------------------------------
+Subcomplex polytope set size	=	95
+Subcomplex unique faces set size:		=	876
+Internal Subcomplex unique faces sequence size:	=	314
+
+
+Subcomplex time is equal to  15.9319  seconds
