@@ -1281,7 +1281,7 @@ bool CellDesign::Check_induced_design(int cell_type){
         Set_sub_polytope_set(new_sub_grains_set);
     };
 
-    /// Polytopes
+    /// SubPolytopes
     void Subcomplex::Set_sub_polytope_set(std::set <unsigned int> &new_sub_grains_set){
         sub_grains_set = new_sub_grains_set;
     }
@@ -1292,10 +1292,77 @@ bool CellDesign::Check_induced_design(int cell_type){
         else return {0};
     }
 
-    ///Geometry
-    void Subcomplex::Set_sub_polytope_coordinates(std::vector<tuple<double, double, double>> &new_sub_grain_coordinates){
-        sub_grain_coordinates = new_sub_grain_coordinates;
+/// SubFaces
+std::set <unsigned int> Subcomplex::Get_unique_subfaces_set(std::set <unsigned int>  &sub_polytope_set, Eigen::SparseMatrix<double> &GFS, std::vector <unsigned int> &doubled_sub_faces_sequence) {
+        if (sub_polytope_set.size() > 0) {
+            for (auto grain_id : sub_polytope_set) { // for each grain in a subcomplex
+                for (unsigned int l = 0; l < CellNumbs.at(2); ++l) { // for each face
+                    if (GFS.coeff(l, grain_id) != 0)
+                        doubled_sub_faces_sequence.push_back(l);
+                } // end for (auto grain_id : sub_polytope_set)
+            } // end of for (unsigned int l = 0; l < CellNumbs.at(2); l++)
+
+            /// Unique subcomplex faces set
+            for (auto unique_sub_faces: doubled_sub_faces_sequence)
+                sub_faces_set.insert(unique_sub_faces); // set automatically remove all repetitions
+
+            return sub_faces_set;
+        } // end  if (sub_polytope_set.size() > 0)
+    } // END of Get_unique_subfaces_set()
+
+// std::set <unsigned int> Get_unique_subedges_set(void) const {}
+
+// std::set <unsigned int> Get_internal_subpolytopes_set(void) const {}
+
+std::set <unsigned int> Subcomplex::Get_internal_subfaces_set(void) {
+        if (internal_sub_faces_set.size() > 0) return internal_sub_faces_set;
+        else cout << "WARNING:: internal_sub_faces_set = 0 (!)" <<  endl << endl;
     }
+
+        std::set <unsigned int> Subcomplex::Get_internal_subfaces_set(std::vector <unsigned int> &doubled_sub_faces_sequence) {
+            for (auto face_id: doubled_sub_faces_sequence) {
+                // TEST        cout << count(doubled_sub_faces_sequence.begin(), doubled_sub_faces_sequence.end(), face_id) << endl;
+                if (count(doubled_sub_faces_sequence.begin(), doubled_sub_faces_sequence.end(), face_id) > 1) {
+                    internal_sub_faces_set.insert(face_id);
+                }
+            }
+            return internal_sub_faces_set;
+        }
+std::set <unsigned int> Subcomplex::Get_internal_subedges_set(Eigen::SparseMatrix<double> &FES) {
+
+        for (auto face_id : internal_sub_faces_set) { // for each grain in a subcomplex
+            for (unsigned int e = 0; e < CellNumbs.at(1); ++e) { // for each edge
+                if (FES.coeff(e, face_id) != 0) {
+                    for (auto other_face_id : internal_sub_faces_set)
+                        if (FES.coeff(e, other_face_id) != 0 && other_face_id != face_id)
+                            sub_edges_set.insert(e);
+                    } // end if (FES.coeff(e, face_id) != 0)
+            }
+        } // end of for (unsigned int e = 0; e < CellNumbs.at(1); e++)
+
+        return internal_sub_edges_set;
+    }
+
+std::set <unsigned int> Subcomplex::Get_unique_subedges_set(Eigen::SparseMatrix<double> &FES) {
+
+        for (auto face_id : sub_faces_set) { // for each grain in a subcomplex
+            for (unsigned int e = 0; e < CellNumbs.at(1); ++e) { // for each edge
+                if (FES.coeff(e, face_id) != 0) {
+                    for (auto other_face_id : sub_faces_set)
+                        if (FES.coeff(e, other_face_id) != 0 && other_face_id != face_id)
+                            sub_edges_set.insert(e);
+                } // end if (FES.coeff(e, face_id) != 0)
+            }
+        } // end of for (unsigned int e = 0; e < CellNumbs.at(1); e++)
+
+        return sub_edges_set;
+    }
+
+    ///Geometry
+    void Subcomplex::Set_sub_polytope_coordinates(std::vector<std::tuple<double, double, double>> &new_subgrain_coordinates) {
+        sub_grain_coordinates = new_subgrain_coordinates;
+    }
+
     std::vector<std::tuple<double, double, double>> Subcomplex::Get_sub_polytope_coordinates(void) const {
         return sub_grain_coordinates;
     }
@@ -1311,10 +1378,8 @@ bool CellDesign::Check_induced_design(int cell_type){
         else return {0};
     }
 
-    void Subcomplex::Set_internal_sub_faces_set(std::set <unsigned int> &new_internal_faces_set){
-        internal_faces_set = new_internal_faces_set; }
-    std::set <unsigned int> Subcomplex::Get_internal_sub_faces_set(void) const {
-        return internal_faces_set; }
+    void Subcomplex::Set_internal_sub_faces_set(std::set <unsigned int> &new_internal_sub_faces_set){
+        internal_sub_faces_set = new_internal_sub_faces_set; }
 
 void Subcomplex::Set_sub_sfaces_set(std::set <unsigned int> &new_sfaces_set){
     sub_sfaces_set = new_sfaces_set; }
@@ -1676,7 +1741,9 @@ double Macrocrack::Get_multiple_cracking_energy() const {
         return bridging_energy;
     }
     std::set <unsigned int> Macrocrack::Get_crack_faces_set() const {
-        return plane_subcomplex.Get_internal_sub_faces_set(); }
+            std::vector<unsigned int> sub_cfaces_sequence = plane_subcomplex.Get_sub_cfaces_sequence();
+        return convertToSet(sub_cfaces_sequence);
+    }
 
 void Macrocrack::Set_sfaces_sequence(std::vector <unsigned int> const &special_faces_sequence) {
     plane_subcomplex.Set_sub_sfaces_sequence(special_faces_sequence);

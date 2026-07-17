@@ -390,7 +390,7 @@ std::vector<std::vector<double>>  macrocrack_interface_corrosion(Config &config,
 ///    Corrosion process
 //================================================
 /// only Subcomplex internal GBs set
-    std::set<unsigned int> subcomplex_internal_gbs = plane_crack_subs.at(0).Get_internal_sub_faces_set();
+    std::set<unsigned int> subcomplex_internal_gbs = plane_crack_subs.at(0).Get_internal_subfaces_set();
 
 /// initial
 //    unsigned int NewCellNumb = 0;

@@ -106,7 +106,7 @@ std::vector<CellEnergies> PCC_Multiphysics(Config &multiphysics_configuration, s
             /// Half-plane individual sub-complex for each of the Macrocrack lengths
             half_plane_crack_pcc = Get_half_plane(pcc_subcomplexes.at(subn), current_crack_length, macrocrack_grow_direction);
 
-            cout << " half_plane_crack_pcc.Get_internal_sub_faces_set().size() " << half_plane_crack_pcc.Get_internal_sub_faces_set().size() << endl;
+            cout << " half_plane_crack_pcc.Get_internal_subfaces_set().size() " << half_plane_crack_pcc.Get_internal_subfaces_set().size() << endl;
             cout << " half_plane_crack_pcc.Get_sub_internal_face_coordinates().size() " << half_plane_crack_pcc.Get_sub_internal_face_coordinates().size() << endl;
 
             /// Creation of the series of macrocracks - each with the corresponding length parameter and a subcomplex as the element of the Macrocrack object

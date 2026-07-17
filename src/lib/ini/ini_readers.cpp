@@ -1498,9 +1498,10 @@ void config_reader_writer(std::vector<int> &writer_specifications, bool &is_log_
 /// writer_specifications vector ::
     int    isSequencesOutput = 0;      // - >     [0]
     int    isDesignvectorsOutput = 0;  // - >     [1]
-    int    isEnergiesOutput = 0;       // - >     [2]
+    int    isEnergiesOutput = 0;       // - >     [8]
+    int    isSubPCCOutput = 0;        // - >     [9]
     int isEdgeConfEntropy = 0, isEdgeFractions = 0, isDegreeEdgeFractions = 0, isEdgeAnFractions = 0, isEdgeAnConfEntropies = 0; // [2], [3], [4], [5], [6]
-    int isBetti = 0; // Laplacians lab
+    int isBetti = 0; // Laplacians lab  // - >     [7]
     std::string log_file_output;
 
 // ini files reader - external (MIT license) library
@@ -1586,7 +1587,15 @@ void config_reader_writer(std::vector<int> &writer_specifications, bool &is_log_
         } }
     writer_specifications.push_back(isEnergiesOutput); // [8]
 
-     // module output
+    if (writer_ini.has("sequences")) {
+        auto& collection = writer_ini["sequences"];
+        if (collection.has("isSubcompexesOutput"))
+        {
+            isSubPCCOutput = stoi(writer_ini.get("sequences").get("isSubcompexesOutput"));
+        } }
+    writer_specifications.push_back(isSubPCCOutput); // [9]
+
+    // module output
      if (writer_ini.has("module_output")) {
          auto& collection = writer_ini["module_output"];
          if (collection.has("module_log_file"))
@@ -1600,14 +1609,15 @@ void config_reader_writer(std::vector<int> &writer_specifications, bool &is_log_
         cout << "The Writer module specifications:\t\t" << endl;
         cout << "Sequences output \t\t\t\t\t"s << writer_specifications.at(0) << endl;
         cout << "Design vectors output \t\t\t\t"s << writer_specifications.at(1) << endl;
-        cout << "Configuration Edges entropy \t\t"s << writer_specifications.at(2) << endl;
-        cout << "Special Edge fractions \t\t\t\t"s << writer_specifications.at(3) << endl;
-        cout << "Special Edge degree fractions \t\t"s << writer_specifications.at(4) << endl;
-        cout << "Analytical Edge fractions \t\t\t"s << writer_specifications.at(5) << endl;
-        cout << "Analytical Edge degree fractions \t"s << writer_specifications.at(5) << endl;
-        cout << "Analytical Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
+//        cout << "Configuration Edges entropy \t\t"s << writer_specifications.at(2) << endl;
+//        cout << "Special Edge fractions \t\t\t\t"s << writer_specifications.at(3) << endl;
+//        cout << "Special Edge degree fractions \t\t"s << writer_specifications.at(4) << endl;
+//        cout << "Analytical Edge fractions \t\t\t"s << writer_specifications.at(5) << endl;
+//        cout << "Analytical Edge degree fractions \t"s << writer_specifications.at(5) << endl;
+//        cout << "Analytical Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
         cout << "Laplacians and Betti numbers \t\t"s << writer_specifications.at(7) << endl;
-        cout << "Cell Energies \t\t\t\t\t\t"s << writer_specifications.at(8) << endl << endl;
+        cout << "Cell Energies \t\t\t\t\t\t"s << writer_specifications.at(8) << endl;
+        cout << "Subcomplexes \t\t\t\t\t\t"s << writer_specifications.at(9) << endl << endl;
         cout << "Writer module cpdlog_writer.log file output:\t"s << log_file_output << endl;
 
 /// Output into .log file
@@ -1615,14 +1625,15 @@ void config_reader_writer(std::vector<int> &writer_specifications, bool &is_log_
             writer_logfile_stream << "The Writer module specifications:\t\t" << endl;
             writer_logfile_stream << "Sequences output \t\t\t\t\t"s << writer_specifications.at(0) << endl;
             writer_logfile_stream << "Design vectors output \t\t\t\t"s << writer_specifications.at(1) << endl;
-            writer_logfile_stream << "Configuration Edges entropy \t\t\t"s << writer_specifications.at(2) << endl;
-            writer_logfile_stream << "Special Edge fractions \t\t\t\t"s << writer_specifications.at(3) << endl;
-            writer_logfile_stream << "Special Edge fractions \t\t\t\t"s << writer_specifications.at(4) << endl;
-            writer_logfile_stream << "Analytical Edge fractions \t\t\t"s << writer_specifications.at(5) << endl;
-            writer_logfile_stream << "Analytical Edge degree fractions \t"s << writer_specifications.at(5) << endl;
-            writer_logfile_stream << "Analytical Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
+//            writer_logfile_stream << "Configuration Edges entropy \t\t\t"s << writer_specifications.at(2) << endl;
+//            writer_logfile_stream << "Special Edge fractions \t\t\t\t"s << writer_specifications.at(3) << endl;
+//            writer_logfile_stream << "Special Edge fractions \t\t\t\t"s << writer_specifications.at(4) << endl;
+//            writer_logfile_stream << "Analytical Edge fractions \t\t\t"s << writer_specifications.at(5) << endl;
+//            writer_logfile_stream << "Analytical Edge degree fractions \t"s << writer_specifications.at(5) << endl;
+//            writer_logfile_stream << "Analytical Edges entropy \t\t\t"s << writer_specifications.at(6) << endl;
             writer_logfile_stream << "Laplacians and Betti numbers \t\t"s << writer_specifications.at(7) << endl;
-            writer_logfile_stream << "Cell Energies \t\t\t\t\t\t"s << writer_specifications.at(8) << endl << endl;
+            writer_logfile_stream << "Cell Energies \t\t\t\t\t\t"s << writer_specifications.at(8) << endl;
+            writer_logfile_stream << "Subcomplexes \t\t\t\t\t\t"s << writer_specifications.at(9) << endl << endl;
         }
 
 ///        configuration.writer_reader_switch = false;

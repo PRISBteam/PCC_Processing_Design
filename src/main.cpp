@@ -52,7 +52,7 @@
 // Included only in the parallelized version of the code.
 
 // Google tests
-#include "gtest/gtest.h"
+// #include "gtest/gtest.h"
 
 ///------------------------------------------
 using namespace std; // standard/STL namespace
@@ -187,6 +187,11 @@ void tutorial(Config &initial_configuration);
  * @param initial_configuration
  */
 void performance_test(Config &initial_configuration);
+
+/// Testing
+//TEST(Processing_tests, SimpleAssert){
+//    ASSERT_TRUE(true);
+//}
 
 ///* ........................................................................................    Main    ................................................................ *///
 //* (.h files) * @brief, @param and @return
@@ -473,8 +478,9 @@ int main() {
             cout << "=========================================================================" << endl;
             main_logfile_stream << "==============================================================================================================================================================" << endl;
 
-// alternative:           PCC_Writer(new_cells_energies, new_cells_design, pcc_processed);
-///            PCC_Writer(new_cells_design);
+            // alternative: PCC_Writer(new_cells_design);
+
+            PCC_Writer(pcc_subcomplexes, new_cells_energies, new_cells_design, pcc_processed);
 
         // ================ Elapsing time for the Writer module ================
             unsigned int Writer_time = clock();

@@ -5,7 +5,7 @@
 #define PCC_PROCESSING_DESIGN_PCC_SUBCOMPLEX_H
 
 /*!
- * @brief Create a vector of PCC complexes with their special and induced labels taken from the initial PCC
+ * @brief Create a vector of PCC complexes as a collection of cells of maximal dimension with their special and induced labels taken from the initial PCC
  * @param configuration
  * @return std::vector<Subcomplex>
  */

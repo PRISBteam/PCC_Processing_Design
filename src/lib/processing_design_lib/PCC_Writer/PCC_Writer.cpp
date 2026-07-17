@@ -14,23 +14,27 @@
 #include "../PCC_Support_Functions.h" // It must be here - first in this list (!)
 #include "../PCC_Objects.h"
 #include "../ini/ini_readers.h"
-
-#include "functions/Writer_functions.h"
 ///-------------------------------------
 
 using namespace std; // standard namespace
 
-extern std::ofstream Out_logfile_stream;
+extern std::ofstream writer_logfile_stream;
 extern std::string output_dir, source_path;
 
 #include "PCC_Writer.h"
+#include "functions/writer_pcc_cells.h"
+#include "functions/writer_subcomplexes.h"
 /// ---------------------------------------------------------------------------
 
-/// # 1 # sequences only
+/// # 1 # Output of the 'design' sequences only
+/*!
+ * @details Read PCC_Writer specifications from the writer.ini file and output of the requested cells_design sequences to the 'results' directory.
+ * @param new_cells_design
+*/
 void PCC_Writer(CellDesign &new_cells_design) {
-// Read PCC Writer specifications from the writer.ini file and output of the current configuration to the screen and .log file
     std::vector<int> writer_specifications; // vector<int> containing writer specifications and formats
-    config_reader_writer(source_path, writer_specifications); // Read and output the initial configuration from the writer.ini file
+    bool is_writer_log = 0;
+    config_reader_writer(writer_specifications, is_writer_log); // Read and output the initial configuration from the writer.ini file
 
     int output_counter = 0; // special counter for output numeration
     
@@ -40,11 +44,18 @@ void PCC_Writer(CellDesign &new_cells_design) {
     return;
 } /// END of PCC Writer module
 
-/// # 2 # overloaded
-void PCC_Writer(std::vector<CellEnergies> &new_cells_energies, CellDesign &new_cells_design, ProcessedComplex &pcc_processed) {
+/// # 2 # overloaded PCC_Writer function
+/*!
+* @details Read PCC Writer specifications from the writer.ini file and output of the requested cells_design sequences to the 'results' directory.
+* @param new_cells_energies
+* @param new_cells_design
+* @param pcc_processed
+*/
+void PCC_Writer(std::vector<Subcomplex> &pcc_subcomplexes, std::vector<CellEnergies> &new_cells_energies, CellDesign &new_cells_design, ProcessedComplex &pcc_processed) {
 // Read PCC Writer specifications from the writer.ini file and output of the current configuration to the screen and .log file
     std::vector<int> writer_specifications; // vector<int> containing writer specifications and formats
-    config_reader_writer(source_path, writer_specifications); // Read and output the initial configuration from the writer.ini file
+    bool is_writer_log = 0;
+    config_reader_writer(writer_specifications, is_writer_log); // Read and output the initial configuration from the writer.ini file
 
     int output_counter = 0; // special counter for output numeration
 
@@ -53,7 +64,11 @@ void PCC_Writer(std::vector<CellEnergies> &new_cells_energies, CellDesign &new_c
 
     output_counter = 0;
     if (writer_specifications.at(8) == 1)
-        PCC_CellEnergies_Writer(new_cells_energies,output_counter);
+        PCC_CellEnergies_Writer(new_cells_energies, output_counter);
+
+    output_counter = 0;
+    if (writer_specifications.at(9) == 1)
+        PCC_Subcomplex_Writer(pcc_subcomplexes, output_counter);
 
     return;
 } // END of PCC Writer module

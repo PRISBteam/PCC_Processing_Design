@@ -202,37 +202,3 @@ Subcomplex Get_half_plane(Subcomplex &plane_subcomplex, double crack_length, int
 
 } // end of Get_half_plane() function
 
-/// ======# 2 #================= Subcomplex PCC_Subcomplex_k_order_grain_neighbours() function ==============================================================///
-std::set<unsigned int> PCC_Subcomplex_k_order_grain_neighbours(unsigned int grain_id, int k_neighbours_order){
-    std::set<unsigned int> k_order_grain_neighbours_set; // function output
-
-    unsigned int grain_number; // 'gb' is for Grain Boundary or interfaces
-    if (PCC_dimension == 3)
-        grain_number = CellNumbs.at(3);
-    else if (PCC_dimension == 2)
-        grain_number = CellNumbs.at(2);
-
-    //    Eigen::SparseMatrix<double> adjacency grain matrix
-    Eigen::SparseMatrix<double> AGS = SMatrixReader(paths_to_PCC_matrices.at(3 + (PCC_dimension - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Volumes
-    AGS = 0.5 * (AGS + Eigen::SparseMatrix<double>(AGS.transpose())); // Full symmetric AGS matrix instead of triagonal
-
-std::set<unsigned int> higher_order_grain_neighbours_set, new_grain_neighbours_set;
-// k = 0 - grain itself is its own 0-eighbour
-    higher_order_grain_neighbours_set.insert(grain_id);
-// neighbours k > 0
-for (int k_order = 1; k_order <= k_neighbours_order; ++k_order) {    // looking for neighbours for each grain in the PCC
-    new_grain_neighbours_set.clear();
-
-        for (unsigned int gnn: higher_order_grain_neighbours_set) {
-            for (int i = 1; i < grain_number; ++i) {
-                if (AGS.coeff(gnn, i) != 0)
-                    new_grain_neighbours_set.insert(i);
-            } // i
-        } // gnn
-    higher_order_grain_neighbours_set = new_grain_neighbours_set;
-} // for (int k_order = 1; k_order < k_neighbours_order; ++k_order)
-
-    k_order_grain_neighbours_set = higher_order_grain_neighbours_set;
-
-    return k_order_grain_neighbours_set;
-}

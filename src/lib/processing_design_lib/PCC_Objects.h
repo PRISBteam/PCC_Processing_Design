@@ -420,11 +420,12 @@ public:
 
 /// ==== # II # =============== END ========================= ///
 
+
 /// ==== # III # =============== Classes contained descriptions of the objects obtained as output of the project Modules  ========================= ///
 
-/// ==== # III.1 # =============== Subcomplex class  ========================= ///
-/*! @breif create a PCC subcomplex of the same dimension (maximum dimension k of its k-cells) as the parent PCC
- * @protected  sub_grains_set, sub_faces_set, sub_nodes_set, internal_faces_set // sets of k_max-cells and (k_max-1)-cells of a PCC
+/// ==== # III.1 # =============== SUBCOMPLEX class  ========================= ///
+/*! @breif It creates a PCC subcomplex of the same dimension (maximum dimension k of its k-cells) as the parent PCC
+ * @protected  sub_grains_set, sub_faces_set, sub_nodes_set, internal_sub_faces_set // sets of k_max-cells and (k_max-1)-cells of a PCC
  * @protected sub_sfaces_set, internal_sfaces_set, sub_sfaces_sequence, internal_sub_sfaces_set // sets of special 'assigned' k_max-cells and (k_max-1)-cells of a PCC
  * sub_cfaces_sequence // sets of special 'generated' k_max-cells and (k_max-1)-cells of a PCC
  * @public subcomplex_id, sub_length, a_n, b_n, c_n, D_plane //
@@ -435,10 +436,16 @@ class Subcomplex {
 
 protected:
     /// 1. Combinatorics
+    // PCC
     std::set <unsigned int> sub_grains_set;
     std::set <unsigned int> sub_faces_set;
+    std::set <unsigned int> sub_edges_set;
     std::set <unsigned int> sub_nodes_set;
-    std::set <unsigned int> internal_faces_set;
+    std::set <unsigned int> internal_sub_faces_set;
+    std::set <unsigned int> internal_sub_edges_set;
+
+
+    // special cells
     std::set <unsigned int> sub_sfaces_set;
     std::set <unsigned int> internal_sfaces_set;
     std::vector <unsigned int> sub_sfaces_sequence;
@@ -446,8 +453,11 @@ protected:
     std::vector <unsigned int> sub_cfaces_sequence;
 
     /// 2. Geometry
+    // PCC
     std::vector<std::tuple<double, double, double>> sub_face_coordinates;
     std::vector<std::tuple<double, double, double>> internal_sub_face_coordinates;
+
+    // special cells
     std::vector <std::tuple<double, double, double>> sub_sfaces_coord;
     std::vector <std::tuple<double, double, double>> sub_cfaces_coord;
 
@@ -462,11 +472,6 @@ public:
     Subcomplex() {} // constructor 1
     Subcomplex(std::set <unsigned int> &new_sub_grains_set); // constructor 2
 
-    std::vector <unsigned int> Get_sub_sfaces_sequence(void) const;
-    std::vector <unsigned int> Get_sub_cfaces_sequence(void) const;
-    std::vector <std::tuple<double, double, double>> Get_sub_sfaces_coord(void) const;
-    std::vector <std::tuple<double, double, double>> Get_sub_cfaces_coord(void) const;
-
     void Set_sub_sfaces_sequence(std::vector <unsigned int> const &ssub_faces_sequence);
     void Set_sub_cfaces_sequence(std::vector <unsigned int> const &csub_faces_sequence);
     void Set_sub_sfaces_coord(std::vector<std::tuple<double, double, double>> const &sfaces_coord);
@@ -476,7 +481,9 @@ public:
     // sequence
     void Set_sub_polytope_set(std::set <unsigned int> &new_sub_grains_set);
     std::set <unsigned int> Get_sub_polytope_set(void) const;
+
     // geometry
+
     void Set_sub_polytope_coordinates(std::vector<std::tuple<double, double, double>> &new_sub_grain_coordinates);
     std::vector<std::tuple<double, double, double>> Get_sub_polytope_coordinates(void) const;
 
@@ -484,31 +491,35 @@ public:
     // sequence
     void Set_sub_faces_set(std::set <unsigned int> &new_sub_faces_set);
     std::set <unsigned int> Get_sub_faces_set(void) const;
-    void Set_internal_sub_faces_set(std::set <unsigned int> &new_internal_faces_set);
-    std::set <unsigned int> Get_internal_sub_faces_set(void) const;
+    void Set_internal_sub_faces_set(std::set <unsigned int> &new_internal_sub_faces_set);
+    std::set <unsigned int> Get_unique_subfaces_set(std::set <unsigned int>  &sub_polytope_set, Eigen::SparseMatrix<double> &GFS, std::vector <unsigned int> &doubled_sub_faces_sequence);
+    std::set <unsigned int> Get_internal_subfaces_set(void); // overloaded method
+    std::set <unsigned int> Get_internal_subfaces_set(std::vector <unsigned int> &doubled_sub_faces_sequence);
+
+    /// special [s] and generated [c]('cracked') FACE sequences
     void Set_sub_sfaces_set(std::set <unsigned int> &new_sfaces_set);
     std::set <unsigned int> Get_sub_sfaces_set(void) const;
-
     void Set_internal_sub_sfaces_set(std::set <unsigned int> &new_internal_sfaces_set);
     std::set <unsigned int> Get_internal_sub_sfaces_set(void) const;
 
-    // special and induced [c]('cracked') fqce sequences
-//    void Set_sfaces_sequence(std::vector <unsigned int> const &ssub_faces_sequence);
-//    std::vector <unsigned int> Get_sfaces_sequence(void) const;
-//    void Set_cfaces_sequence(std::vector <unsigned int> &sub_cfaces_sequence);
-//    std::vector <unsigned int> Get_cfaces_sequence(void) const;
+    std::vector <unsigned int> Get_sub_sfaces_sequence(void) const;
+    std::vector <unsigned int> Get_sub_cfaces_sequence(void) const;
 
     /// Geometry
     void Set_sub_face_coordinates(std::vector<std::tuple<double, double, double>> &new_sub_face_coordinates);
     std::vector<std::tuple<double, double, double>> Get_sub_face_coordinates(void) const;
-
     void Set_sub_internal_face_coordinates(std::vector<std::tuple<double, double, double>> &new_internal_face_coordinates);
     std::vector<std::tuple<double, double, double>> Get_sub_internal_face_coordinates(void) const;
+
+    std::vector <std::tuple<double, double, double>> Get_sub_sfaces_coord(void) const;
+    std::vector <std::tuple<double, double, double>> Get_sub_cfaces_coord(void) const;
 
     /// Edges
     // sequence
     void Set_sub_edges_set(std::set <unsigned int> &new_sub_faces_set);
-    std::set <unsigned int> Get_sub_edges_set(void) const;
+    std::set <unsigned int> Get_unique_subedges_set(Eigen::SparseMatrix<double> &FES);
+    std::set <unsigned int> Get_internal_subedges_set(Eigen::SparseMatrix<double> &FES);
+
     // geometry
 
     /// Nodes
