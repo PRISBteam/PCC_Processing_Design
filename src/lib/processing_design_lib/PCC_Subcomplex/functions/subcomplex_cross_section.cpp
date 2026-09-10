@@ -130,7 +130,7 @@ std::set<unsigned int> PCC_Subcomplex_plane_cut_grains(double a_coeff, double b_
     return planecut_grains;
 } /// END of the std::vector<unsigned int> PCC_Plane_cut () function
 
-Subcomplex Get_half_plane(Subcomplex &plane_subcomplex, double crack_length, int macrocrack_grow_direction){
+Subcomplex Get_half_plane(Subcomplex &plane_subcomplex, double crack_length) {
     Subcomplex half_plane_cut;
 
     int direction = 0;
@@ -138,28 +138,34 @@ Subcomplex Get_half_plane(Subcomplex &plane_subcomplex, double crack_length, int
     else if (plane_subcomplex.b_n != 0) { direction = 1; } // y
     else direction = 2; // z
 
-    //        vector<tuple<double, double, double>> grain_coordinates = polytope_coordinates_vector;
+//    cout << "direction " << direction << endl;
+//    exit(15);
+
+//        vector<tuple<double, double, double>> grain_coordinates = polytope_coordinates_vector;
 //REPAIR        cout << " polytope_coordinates_vector " << grain_coordinates.size() << endl;
     //cout << "Xmin " << get<0>(minmax_tuple.at(0)) << " Ymin " <<get<1>(minmax_tuple.at(0)) << " Zmin " << get<2>(minmax_tuple.at(0)) << endl;
 //    std::vector<tuple<double, double, double>> all_face_coordinates = face_coordinates_vector;
-//REPAIR        cout << " face_coordinates_vector " << face_coordinates.size() << endl;
+//REPAIR
+cout << " face_coordinates_vector " << face_coordinates_vector.size() << endl;
 
 //        for (auto  itr = grain_coordinates.begin(); itr != grain_coordinates.end(); ++itr)
 //            if (std::find(plane_subcomplex.Get_sfaces_sequence().begin(), plane_subcomplex.Get_sfaces_sequence().end(), distance(plane_subcomplex.Get_sfaces_sequence().begin(),itr)) != plane_subcomplex.Get_sfaces_sequence().end() && get(direction, *itr) < crack_length)
 //                    half_sub_grains_set.push_back(distance(grain_coordinates.begin(),itr));
 //REPAIR cout << "half_sub.Get_grains_sequence(0) " << half_sub.Get_grains_sequence(0).size() << endl;
 
-    std::set<unsigned int> half_sub_grain_set, sub_common_face_set;
-
+    std::set<unsigned int> half_sub_grain_set;
     for (auto half_grains : plane_subcomplex.Get_sub_polytope_set()) {
         if (get_i(direction,polytope_coordinates_vector.at(half_grains)) < crack_length) {
-//REPAIR                cout << " half_grains " << half_grains << " half_grain_coordinates " << get<0>(polytope_coordinates_vector.at(half_grains)) << " crack_length " << crack_length << endl;
+//REPAIR
+cout << " half_grains " << half_grains << " half_grain_coordinates " << get<0>(polytope_coordinates_vector.at(half_grains)) << " crack_length " << crack_length << endl;
             half_sub_grain_set.insert(half_grains);
         }
     }
 
-    std::set<unsigned int> half_internal_faces_set, half_sfaces_set;
+    // Take internal ('common for each 2 GBs') face set
+    std::set<unsigned int> sub_common_face_set = plane_subcomplex.Get_internal_subfaces_set();
 
+    std::set<unsigned int> half_internal_faces_set, half_sfaces_set;
     half_internal_faces_set.clear();
         for (auto  itr2 = face_coordinates_vector.begin(); itr2 != face_coordinates_vector.end(); ++itr2)
             if (std::find(sub_common_face_set.begin(), sub_common_face_set.end(), distance(face_coordinates_vector.begin(),itr2)) != sub_common_face_set.end() && get_i(direction, *itr2) < crack_length)
@@ -167,6 +173,7 @@ Subcomplex Get_half_plane(Subcomplex &plane_subcomplex, double crack_length, int
 
     cout << "\tcrack_length\t\t" << crack_length << "\t" << endl;
     subcomplex_logfile_stream << "\tcrack_length\t\t" << crack_length << "\t" << endl;
+    cout << "\thalf_internal_faces_set\t\t" << half_internal_faces_set.size() << "\t" << endl;
 
     half_sfaces_set.clear();
     std::vector<unsigned int> local_sfaces_sequence = plane_subcomplex.Get_sub_sfaces_sequence();
@@ -191,9 +198,8 @@ Subcomplex Get_half_plane(Subcomplex &plane_subcomplex, double crack_length, int
     subcomplex_logfile_stream << " half_sfaces_seq SIZE " << half_sfaces_seq.size() << endl;
     cout << " half_plane_sfaces_coord SIZE " << half_plane_sfaces_coord.size() << endl;
     subcomplex_logfile_stream << " half_plane_sfaces_coord SIZE " << half_plane_sfaces_coord.size() << endl;
-
+    half_plane_cut.Set_sub_internal_face_coordinates(half_internal_faces_set);
     half_plane_cut.Set_sub_sfaces_coord(half_plane_sfaces_coord);
-    //half_plane_cut.Set_common_faces_coordinates(common_faces_coordinates);
     // half_plane_cut.Set_sub_grain_coordinates(subcomplex_grain_coordinates);
     //half_plane_cut.Set_cfaces_sequence(c_sub_faces_sequence); //cracked (induced) faces
     half_plane_cut.sub_length = crack_length;

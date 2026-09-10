@@ -38,7 +38,7 @@ void PCC_Subcomplex_Writer(std::vector<Subcomplex> &pcc_subcomplexes, int output
             for (auto subcomplex : pcc_subcomplexes) {
                 if (subcomplex.Get_sub_polytope_set().size() > 0) {
                     for (auto grain_id : subcomplex.Get_sub_polytope_set())
-                        Out_subcomplex_max_cells << grain_id + 1 << " "; /// vit + 1 !!! for compatibility with the Neper output
+                        Out_subcomplex_max_cells << grain_id + 1 << ", "; /// vit + 1 !!! for compatibility with the Neper output
                     Out_subcomplex_max_cells << endl;
                 } // enf if (subcomplex.size() > 0)
             } // end for (auto subcomplex : .. )

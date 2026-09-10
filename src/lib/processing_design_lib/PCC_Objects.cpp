@@ -1315,17 +1315,17 @@ std::set <unsigned int> Subcomplex::Get_unique_subfaces_set(std::set <unsigned i
 // std::set <unsigned int> Get_internal_subpolytopes_set(void) const {}
 
 std::set <unsigned int> Subcomplex::Get_internal_subfaces_set(void) {
-        if (internal_sub_faces_set.size() > 0) return internal_sub_faces_set;
+        if (internal_sub_faces_set.size() > 1) return internal_sub_faces_set;
         else cout << "WARNING:: internal_sub_faces_set = 0 (!)" <<  endl << endl;
     }
 
-        std::set <unsigned int> Subcomplex::Get_internal_subfaces_set(std::vector <unsigned int> &doubled_sub_faces_sequence) {
-            for (auto face_id: doubled_sub_faces_sequence) {
+std::set <unsigned int> Subcomplex::Get_internal_subfaces_set(std::vector <unsigned int> &doubled_sub_faces_sequence) {
+        for (auto face_id: doubled_sub_faces_sequence) {
                 // TEST        cout << count(doubled_sub_faces_sequence.begin(), doubled_sub_faces_sequence.end(), face_id) << endl;
-                if (count(doubled_sub_faces_sequence.begin(), doubled_sub_faces_sequence.end(), face_id) > 1) {
-                    internal_sub_faces_set.insert(face_id);
-                }
+            if (count(doubled_sub_faces_sequence.begin(), doubled_sub_faces_sequence.end(), face_id) > 1) {
+                internal_sub_faces_set.insert(face_id);
             }
+        }
             return internal_sub_faces_set;
         }
 std::set <unsigned int> Subcomplex::Get_internal_subedges_set(Eigen::SparseMatrix<double> &FES) {
@@ -1373,7 +1373,7 @@ std::set <unsigned int> Subcomplex::Get_unique_subedges_set(Eigen::SparseMatrix<
     }
     //1
     std::set <unsigned int>  Subcomplex::Get_sub_faces_set(void) const{
-        if(sub_faces_set.size() != 0)
+        if(sub_faces_set.size() > 1)
             return sub_faces_set;
         else return {0};
     }
@@ -1440,9 +1440,20 @@ std::vector <tuple<double, double, double>> Subcomplex::Get_sub_cfaces_coord(voi
 
     void Subcomplex::Set_sub_internal_face_coordinates(std::vector<tuple<double, double, double>> &new_internal_sub_face_coordinates){
         internal_sub_face_coordinates = new_internal_sub_face_coordinates; }
+    void Subcomplex::Set_sub_internal_face_coordinates(std::set<unsigned int> &half_internal_faces_set){
+       internal_sub_face_coordinates = face_sequence_barycentre_coordinates(half_internal_faces_set);}
+
     std::vector<tuple<double, double, double>> Subcomplex::Get_sub_internal_face_coordinates(void) const {
         return internal_sub_face_coordinates; }
 
+    /*
+     * Give sub face coordinates contained in 'internal_sub_face_coordinates' or calculates them using the 'face_sequence_barycentre_coordinates()' function
+     */
+    std::vector<tuple<double, double, double>> Subcomplex::Get_sub_internal_face_coordinates(std::set<unsigned int> &half_internal_faces_set){
+    if (internal_sub_face_coordinates.size() > 1) return internal_sub_face_coordinates;
+    else {
+        return internal_sub_face_coordinates = face_sequence_barycentre_coordinates(half_internal_faces_set);
+    }}
 
 
 // ========== END of class SUBCOMPLEX functions description
@@ -1998,12 +2009,16 @@ void PCC::Set_face_barycentre_coordinates(void) {
             for (unsigned int fn = 0; fn < CellNumbs.at(2); ++fn) {
                 cell_barycentre_coordinates.at(2).push_back(find_aGBseed(fn));
                 if (fn % 500 == 1) {
+                    cout << " >>> Start of the Set_face_barycentre_coordinates procedure:" << endl;
                     cout << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
                     main_logfile_stream << "Face number\t\t" << fn << "\tout of\t\t" << CellNumbs.at(2) << endl;
                 }
         }
 
-return;
+        //* Global assigning *
+        cout << " (!) Reassigning of the global 'face_coordinates_vector' " << endl;
+        face_coordinates_vector = cell_barycentre_coordinates.at(2);
+    return;
 }
 
 std::vector<std::tuple<double, double, double>> PCC::Get_edge_barycentre_coordinates(void) {
@@ -2028,6 +2043,7 @@ std::vector<std::tuple<double, double, double>> PCC::Get_face_barycentre_coordin
     return cell_barycentre_coordinates.at(2);
     //throw std::invalid_argument("Error: SET 'face_barycentre_coordinates' (!)");
 }
+
 /// ========== END of class PCC functions description
 
 

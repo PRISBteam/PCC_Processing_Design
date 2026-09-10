@@ -1,4 +1,4 @@
- Execution year - 2026; Month - 7; Day - 17; Time - 13:8.
+ Execution year - 2026; Month - 9; Day - 9; Time - 23:9.
 
 
 ==============================================================================================================================================================
@@ -8,13 +8,21 @@ Subcomplex type:	H
 Half-plane length:	0.2
 
 Plane orientation:	a_coeff*X + b_coeff*Y + c_coeff*Z = D
-Plane normal vector:	 a: 0 b: 0 c: 1	Plane position	 D: 0.01
+Plane normal vector:	 a: 0 b: 0 c: 1	Plane position	 D: 0.4
 
 Subcomplex	H	mode in operation
 --------------------------------
-Subcomplex polytope set size	=	95
-Subcomplex unique faces set size:		=	876
-Internal Subcomplex unique faces sequence size:	=	314
+Subcomplex polytope set size	=	137
+Subcomplex unique faces set size:		=	1498
+Internal Subcomplex unique faces sequence size:	=	550
 
+	crack_length		0.2	
+ half_sfaces_set SIZE 0
+ half_sfaces_seq SIZE 0
+ half_plane_sfaces_coord SIZE 0
 
-Subcomplex time is equal to  15.9319  seconds
+Subcomplex time is equal to  346.617  seconds
+	crack_length		0.2	
+ half_sfaces_set SIZE 0
+ half_sfaces_seq SIZE 0
+ half_plane_sfaces_coord SIZE 0

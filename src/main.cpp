@@ -141,7 +141,7 @@ std::vector<double> edge_lengths_vector, face_areas_vector, polyhedron_volumes_v
 /* Supplementary project module */
 #include "lib/processing_design_lib/PCC_Subcomplex/PCC_Subcomplex.h"
 
-/*! MULTIPHYSICS module set self, elastic and thermal energies with any energy-related values associated with all k-cells in a PCC taking data from the "CPD_material_database" and config/multiphysics.ini files */
+/*! MULTIPHYSICS module sets self, elastic and thermal energies with any energy-related values associated with all k-cells in a PCC taking data from the "CPD_material_database" and config/multiphysics.ini files */
 /* Supplementary project module */
 #include "lib/processing_design_lib/PCC_Multiphysics/PCC_Multiphysics.h"
 
@@ -238,6 +238,17 @@ int main() {
     main_type = initial_configuration.Get_main_type();
     simulation_tasks_dir = initial_configuration.Get_sim_task();
  /// ============================================================================== ///
+
+ /// ============================= PCC check ===================================
+ ///============================================================================
+///    std::vector<std::tuple<double, double, double>> node_coordinates_vector, edge_coordinates_vector, face_coordinates_vector, polytope_coordinates_vector; // vectors containing barycenter Cartesian coordinates of the corresponding tessellation's elements
+//     std::vector<string> pcc_paths = initial_configuration.Get_paths();
+//    if (pcc_paths.at(12) == 0)
+//        if (pcc_paths.at(13) == '0')
+
+    std::vector<double> edge_lengths_vector, face_areas_vector, polyhedron_volumes_vector; // Global vectors of measures: edge lengths, face areas and polyhedra volumes
+
+
 
 /// ------------------ Technical Data Output to the modules' *.log files ----------------------
     main_logfile_stream.open(output_dir + "cpd_main.log"s, ios::app); // the main_logfile_stream.log stream will be closed at the end of the main function
@@ -365,7 +376,7 @@ int main() {
             // * the module returns 'CellEnergies' class object described in the PCC_Objects.cpp library
             // * as a collection of vectors of elastic, thermal and self energies for each k-cell in a PCC and an entire PCC
 
-            // ================ Elapsing time for the Processing module ================
+            // ================ Elapsed time for the Processing module ================
             unsigned int Multiphysics_time = clock();
             Multiphysics_execution_time = (double) Multiphysics_time - Subcomplex_execution_time - Main_execution_time;
             cout << endl << "Multiphysics time is equal to  " << Multiphysics_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl;
@@ -482,7 +493,7 @@ int main() {
 
             PCC_Writer(pcc_subcomplexes, new_cells_energies, new_cells_design, pcc_processed);
 
-        // ================ Elapsing time for the Writer module ================
+        // ================ Elapsed time for the Writer module ================
             unsigned int Writer_time = clock();
             Writer_execution_time = (double) Writer_time - Main_execution_time - Subcomplex_execution_time - Multiphysics_execution_time - Processing_execution_time - Characterisation_execution_time - Design_execution_time;
             cout << "Writer time is equal to  " << Writer_execution_time / pow(10.0, 6.0) << "  seconds" << endl << endl;
@@ -499,7 +510,6 @@ int main() {
 /*
 #include "tasks/energy_levels.h"
         energy_plasticity();
-exit(0);
 */
     } /// END of the SIMULATION MODE "TASK" as specified in the config/main.ini file
 /// ==========================================================================================================================================

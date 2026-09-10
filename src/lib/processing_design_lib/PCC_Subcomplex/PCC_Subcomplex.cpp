@@ -72,9 +72,9 @@ std::vector<Subcomplex> PCC_Subcomplex(Config &configuration) {
     //TODO: check the terminology -- cfaces or ffaces everywhere
     std::vector<tuple<double, double, double>> subcomplex_polytope_coordinates, subcomplex_face_coordinates, internal_faces_coordinates;
 
-    Eigen::SparseMatrix<double> AGS = SMatrixReader(paths_to_PCC_matrices.at(3 + (PCC_dimension - 3)), (CellNumbs.at(3)), (CellNumbs.at(3))); //all Volumes (grains\3-cells)
+    Eigen::SparseMatrix<double> AGS = SMatrixReader(paths_to_PCC_matrices.at(3 + (PCC_dimension - 3)), (CellNumbs.at(3 + (PCC_dimension - 3))), (CellNumbs.at(3 + (PCC_dimension - 3)))); //all Volumes (grains\3-cells)
     AGS = 0.5 * (AGS + Eigen::SparseMatrix<double>(AGS.transpose()));  //  Full symmetric AGS matrix instead of triagonal
-    Eigen::SparseMatrix<double> GFS = SMatrixReader(paths_to_PCC_matrices.at(6 + (PCC_dimension - 3)), (CellNumbs.at(2)), (CellNumbs.at(3))); //all Faces-Volumes
+    Eigen::SparseMatrix<double> GFS = SMatrixReader(paths_to_PCC_matrices.at(6 + (PCC_dimension - 3)), (CellNumbs.at(2 + (PCC_dimension - 3))), (CellNumbs.at(3 + (PCC_dimension - 3)))); //all Faces-Volumes
     Eigen::SparseMatrix<double> FES = SMatrixReader(paths_to_PCC_matrices.at(5 + (PCC_dimension - 3)), (CellNumbs.at(1 + (PCC_dimension - 3))),(CellNumbs.at(2 + (PCC_dimension - 3)))); //all Edges-Faces
 /// Vertex coordinates reader from file into triplet double vector
     polytope_coordinates_vector = Tuple3Reader(paths_to_PCC_matrices.at(9)); // grain seeds reader
@@ -105,28 +105,45 @@ std::vector<Subcomplex> PCC_Subcomplex(Config &configuration) {
         doubled_sub_faces_sequence.clear();
         internal_sub_faces_set.clear();
 
+
         sub_faces_set = new_plane_subcomplex.Get_unique_subfaces_set(sub_polytope_set, GFS, doubled_sub_faces_sequence);
+        //TEST        cout << "sub_faces_set SIZE " << sub_faces_set.size() << endl; exit(20);
+
 
         cout << "Subcomplex unique faces set size:\t\t=\t" << sub_faces_set.size() << endl;
         subcomplex_logfile_stream << "Subcomplex unique faces set size:\t\t=\t" << sub_faces_set.size() << endl;
 
-
         internal_sub_faces_set = new_plane_subcomplex.Get_internal_subfaces_set(doubled_sub_faces_sequence);
+        cout << "Doubled_sub_faces_sequence size:\t=\t" << doubled_sub_faces_sequence.size() << endl << endl;
+
         cout << "Internal Subcomplex unique faces sequence size:\t=\t" << internal_sub_faces_set.size() << endl << endl;
         subcomplex_logfile_stream << "Internal Subcomplex unique faces sequence size:\t=\t" << internal_sub_faces_set.size() << endl << endl;
 
-
-//        cout << "Internal Subcomplex unique edges sequence size:\t=\t" << new_plane_subcomplex.Get_internal_subedges_set(FES).size() << endl << endl;
+        /// Subface coordinates vector
+        internal_faces_coordinates = face_sequence_barycentre_coordinates(internal_sub_faces_set);
 
 /// Setting all quantities to the subcomplex new_subPCC with id = 0
-        new_plane_subcomplex.Set_internal_sub_faces_set(internal_sub_faces_set);
         new_plane_subcomplex.Set_sub_polytope_set(sub_polytope_set);
+//        cout << "Set_sub_polytope_set SIZE " << new_plane_subcomplex.Get_sub_polytope_set().size()<< endl;
         new_plane_subcomplex.Set_sub_faces_set(sub_faces_set);
-        new_plane_subcomplex.Set_sub_internal_face_coordinates(internal_faces_coordinates);
+//        cout << "sub_faces_set SIZE " << sub_faces_set.size()<< endl;
+//        cout << "Get_sub_faces_set SIZE " << new_plane_subcomplex.Get_sub_faces_set().size()<< endl;
+        new_plane_subcomplex.Set_internal_sub_faces_set(internal_sub_faces_set);
+        cout << "internal_sub_faces_set SIZE " << internal_sub_faces_set.size()<< endl;
+        cout << "Get_internal_subfaces_set SIZE " << new_plane_subcomplex.Get_internal_subfaces_set().size()<< endl;
         new_plane_subcomplex.Set_sub_polytope_coordinates(subcomplex_polytope_coordinates);
+//        cout << "Get_sub_polytope_coordinates SIZE " << new_plane_subcomplex.Get_sub_polytope_coordinates().size()<< endl;
+//        cout << "internal_faces_coordinates SIZE " << internal_faces_coordinates.size()<< endl;
+//        cout << "Get_sub_internal_face_coordinates SIZE " << new_plane_subcomplex.Get_sub_internal_face_coordinates().size()<< endl;
+
+/// Part of the plane corresponding to a Macrocrack object (!)
+/// CRACK = HALF-PLANE
+        new_plane_subcomplex = Get_half_plane(new_plane_subcomplex, configuration.Get_subcomplex_cut_length());
+/// TEST cout << "Get_subcomplex_cut_length " << configuration.Get_subcomplex_cut_length() << endl;
+/// TEST cout << "new_plane_subcomplex SIZE " << new_plane_subcomplex.Get_sub_polytope_set().size() << endl;  exit(22);
+        cout << "Get_internal_subfaces_set SIZE " << new_plane_subcomplex.Get_internal_subfaces_set().size() << endl;
 
         subcomplexes_vector.push_back(new_plane_subcomplex);
-
     } // end of the 'H' mode
 
     // -------------------------------------------------------- // --------------------------------------------------------------------- //
@@ -137,7 +154,7 @@ std::vector<Subcomplex> PCC_Subcomplex(Config &configuration) {
         bool subtype_reading = false;
 
         std::ifstream subcomplex_instream;
-        std::string file_path_name = configuration.Get_source_dir() + "subcomplexes/grain_neighbours_"s + std::to_string(grain_neighbour_orders) + "_orders.txt"s;
+        std::string file_path_name = configuration.Get_source_dir() + "subcomplexes/grain_neighbour_"s + std::to_string(grain_neighbour_orders) + "_orders.txt"s;
         subcomplex_instream.open(file_path_name);
 
         std::vector<std::vector<int>> vector_of_sub_polytope_vectors;
@@ -168,6 +185,7 @@ std::vector<Subcomplex> PCC_Subcomplex(Config &configuration) {
             else
                 sub_polytope_set = PCC_Subcomplex_k_order_grain_neighbours(grain_id, grain_neighbour_orders);
         //REPAIR for (auto u : sub_polytope_set) cout << "sub_polytope_set_grains: " << u << endl; //    cout << "polytope_coordinates_vector.size(): " << polytope_coordinates_vector.size() << endl; // REPAIR   sub_polytope_set.clear(); for (unsigned int k = 0; k < CellNumbs.at(3); ++k) sub_polytope_set.insert(k);
+//            cout << " ___ HERE 1 ___" << endl;
 
 /// Common grain coordinates for 'internal' faces
 ///-------------------------------------------------
@@ -176,8 +194,8 @@ std::vector<Subcomplex> PCC_Subcomplex(Config &configuration) {
                 subcomplex_polytope_coordinates.push_back(polytope_coordinates_vector.at(subgc));
         }
         else {
-            cout << "Caution! sub_polytope_set.size() = 0 in DCC_Subcomplex.h" << endl;
-            subcomplex_logfile_stream << "Caution! sub_polytope_set.size() = 0 in DCC_Subcomplex.h" << endl;
+            cout << "Caution! sub_polytope_set.size() = 0 in PCC_Subcomplex.cpp" << endl;
+            subcomplex_logfile_stream << "Caution! sub_polytope_set.size() = 0 in PCC_Subcomplex.cpp" << endl;
         }
 
 /// All subcomplex faces (doubled_sub_faces_sequence)

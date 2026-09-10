@@ -6,9 +6,9 @@ PCC source directory:	../PCC_sources/Voronoi_1k/
 PCC standard ID:		pcc1s
 
 ON    | PCC_Subcomplex
-OFF    | PCC_Multiphysics
-OFF    | PCC_Processing
-OFF    | PCC_Kinetics
+ON    | PCC_Multiphysics
+ON    | PCC_Processing
+ON    | PCC_Kinetics
 OFF    | PCC_Characterisation
 OFF    | PCC_Design
 ON    | PCC_Writer
@@ -34,25 +34,111 @@ ________________________________________________________________________________
 [12] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/edge_seeds.txt
 [13] PCCpaths:	../PCC_sources/Voronoi_1k/coordinates/face_seeds.txt
 
- Execution year - 2026; Month - 7; Day - 17; Time - 13:8.
+ Execution year - 2026; Month - 9; Day - 9; Time - 23:9.
 
-Main execution time before modules is equal to  0.012964  seconds
+Main execution time before modules is equal to  0.010580  seconds
 
 =======================================================================================================================================================================================================================================
 					[	Start of the PCC Processing Design code in the LIST execution mode	]					
 --------------------------------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------
  START of the PCC Subcomplex module 
+Face number		1	out of		7231
+Face number		501	out of		7231
+Face number		1001	out of		7231
+Face number		1501	out of		7231
+Face number		2001	out of		7231
+Face number		2501	out of		7231
+Face number		3001	out of		7231
+Face number		3501	out of		7231
+Face number		4001	out of		7231
+Face number		4501	out of		7231
+Face number		5001	out of		7231
+Face number		5501	out of		7231
+Face number		6001	out of		7231
+Face number		6501	out of		7231
+Face number		7001	out of		7231
+Face number		1	out of		7231
+Face number		501	out of		7231
+Face number		1001	out of		7231
+Face number		1501	out of		7231
+Face number		2001	out of		7231
+Face number		2501	out of		7231
+Face number		3001	out of		7231
+Face number		3501	out of		7231
+Face number		4001	out of		7231
+Face number		4501	out of		7231
+Face number		5001	out of		7231
+Face number		5501	out of		7231
+Face number		6001	out of		7231
+Face number		6501	out of		7231
+Face number		7001	out of		7231
  pcc_subcomplexes vector size =  1
 
 
-Subcomplex time is equal to  15.9319  seconds
+Subcomplex time is equal to  346.617  seconds
 -------------------------------------------------------
 -------------------------------------------------------------------------
-START of the PCC Writer module
-==============================================================================================================================================================
---------------------------------------------------------------------------------
-										[	The end of the PCC Processing Design	]										
-================================================================================
-Total 3D runtime of the CPD code is equal to  15.9458  seconds
---------------------------------------------------------------------------------
+START of the PCC Multiphysics module 
+
+
+.............................*  NEW MATERIAL  *.................................. 
+
+Material source: ../config/CPD_material_database/nickel.ini
+Material ID:.................... nickel
+Material type:.................. metal
+GB width [nm] ................. 1
+Young modulus [GPa] .................... 210
+Poisson ratio  .................... 0.31
+Yield strength [MPa]  .................... 110
+Strength [MPa] .................... 400
+Fracture toughness [MPa*sqrt(metre)] .................... 130
+LAGBs corrosion current [ ] .................... 0.1
+HAGBs corrosion current [ ] .................... 30
+Sigma3 corrosion current [ ] .................... 0.05
+
+.............................*  NEW MATERIAL  *.................................. 
+
+Material source: ../config/CPD_material_database/rGO.ini
+Material ID:.................... rGO
+Material type:.................. graphene
+Density [kg/m^3] .................... 2266
+Face number		1	out of		7231
+Face number		501	out of		7231
+Face number		1001	out of		7231
+Face number		1501	out of		7231
+Face number		2001	out of		7231
+Face number		2501	out of		7231
+Face number		3001	out of		7231
+Face number		3501	out of		7231
+Face number		4001	out of		7231
+Face number		4501	out of		7231
+Face number		5001	out of		7231
+Face number		5501	out of		7231
+Face number		6001	out of		7231
+Face number		6501	out of		7231
+Face number		7001	out of		7231
+
+Multiphysics time is equal to  165.831  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Processing module 
+Processing time is equal to  0.526393  seconds
+
+-------------------------------------------------------------------------
+START of the PCC Kinetics module 
+
+.............................*  NEW MATERIAL  *.................................. 
+
+Material source: ../config/CPD_material_database/nickel.ini
+Material ID:.................... nickel
+Material type:.................. metal
+GB width [nm] ................. 1
+Young modulus [GPa] .................... 210
+Poisson ratio  .................... 0.31
+Yield strength [MPa]  .................... 110
+Strength [MPa] .................... 400
+Fracture toughness [MPa*sqrt(metre)] .................... 130
+LAGBs corrosion current [ ] .................... 0.1
+HAGBs corrosion current [ ] .................... 30
+Sigma3 corrosion current [ ] .................... 0.05

@@ -1282,8 +1282,6 @@ std::vector<std::tuple<double, double, double>>  face_sequence_barycentre_coordi
         current_PCC.Set_face_barycentre_coordinates();
 
     std::vector<std::tuple<double, double, double>> all_face_coordinates = current_PCC.Get_face_barycentre_coordinates();
-//    cout << " H E R E " << endl;
-//    cout << " T H E R E " << endl;
     for(unsigned int fn = 0; fn < CellNumbs.at(2); ++fn)
         if (std::find(face_sequence.begin(), face_sequence.end(), fn) != face_sequence.end())
             face_sequence_barycentre_coordinates.push_back(all_face_coordinates.at(fn));

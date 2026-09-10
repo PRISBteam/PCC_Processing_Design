@@ -364,8 +364,6 @@ public:
     void Set_face_barycentre_coordinates(void);
     std::vector<std::tuple<double, double, double>> Get_edge_barycentre_coordinates(void);
     std::vector<std::tuple<double, double, double>> Get_face_barycentre_coordinates(void);
-
-
 }; // end of class PCC
 
 /// ==== # II.2 # =============== Skeleton class  ========================= ///
@@ -508,7 +506,10 @@ public:
     /// Geometry
     void Set_sub_face_coordinates(std::vector<std::tuple<double, double, double>> &new_sub_face_coordinates);
     std::vector<std::tuple<double, double, double>> Get_sub_face_coordinates(void) const;
+    std::vector<std::tuple<double, double, double>> Get_sub_internal_face_coordinates(std::set<unsigned int> &half_internal_faces_set);
+
     void Set_sub_internal_face_coordinates(std::vector<std::tuple<double, double, double>> &new_internal_face_coordinates);
+    void Set_sub_internal_face_coordinates(std::set<unsigned int> &half_internal_faces_set);
     std::vector<std::tuple<double, double, double>> Get_sub_internal_face_coordinates(void) const;
 
     std::vector <std::tuple<double, double, double>> Get_sub_sfaces_coord(void) const;
